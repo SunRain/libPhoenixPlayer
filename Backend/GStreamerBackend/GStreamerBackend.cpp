@@ -120,7 +120,9 @@ void GStreamerBackend::set_cur_position(quint32 pos_sec)
 //       _last_track->filepath = _meta_data.filepath;
 //       _last_track->pos_sec = pos_sec;
 
-       //       emit timeChangedSignal(_seconds_now);
+       qDebug()<<"positionChanged  "<<_seconds_now;
+
+       emit positionChanged(_seconds_now);
 }
 
 void GStreamerBackend::set_track_finished()
@@ -205,6 +207,8 @@ void GStreamerBackend::set_buffer(GstBuffer *buffer)
             channel = (channel + 1) % _caps.channels;
         }
     }
+    qDebug()<<" inv_arr_channel_elements " << inv_arr_channel_elements
+           <<" scale "<<scale;
 
     emit_buffer(inv_arr_channel_elements, scale);
 
@@ -274,6 +278,8 @@ void GStreamerBackend::setVolume(int vol)
     float vol_val = (float) (vol * 1.0f / 100.0f);
 
     g_object_set(G_OBJECT(_pipeline), "volume", vol_val, NULL);
+
+    emit volumeChanged(_vol);
 }
 
 void GStreamerBackend::setPosition(quint64 posMs)
@@ -307,6 +313,7 @@ void GStreamerBackend::setPosition(quint64 posMs)
                                  newTimeNs)) {
         qDebug() << "seeking failed ";
     }
+    emit positionChanged(posMs);
 }
 
 void GStreamerBackend::changeMedia(Core::BaseMediaObject *obj,
@@ -340,6 +347,7 @@ void GStreamerBackend::changeMedia(Core::BaseMediaObject *obj,
         ///TODO: 添加信号
         //        emit total_time_changed_signal(_meta_data.length_ms);
         //        emit timeChangedSignal(startSec);
+        emit positionChanged(startMs);
     } else {
         //        _meta_data = _md_gapless;
         _gapless_track_available = false;
@@ -356,7 +364,6 @@ void GStreamerBackend::changeMedia(Core::BaseMediaObject *obj,
     _scrobbled = false;
     _track_finished = false;
 
-
     if (startMs > 0) {
         __start_pos_beginning = startMs;
         __start_at_beginning = false;
@@ -365,6 +372,8 @@ void GStreamerBackend::changeMedia(Core::BaseMediaObject *obj,
     else {
         __start_at_beginning = true;
     }
+
+    qDebug()<<" __start_at_beginning "<<__start_at_beginning;
 
     if (startPlay) {
         play(startMs);

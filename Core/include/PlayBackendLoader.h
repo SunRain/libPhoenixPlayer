@@ -13,7 +13,7 @@ class PlayBackendLoader : public QObject
 {
     Q_OBJECT
 public:
-    PlayBackendLoader *getInstance();
+    static PlayBackendLoader *getInstance();
     explicit PlayBackendLoader(QObject *parent = 0);
     void setBackendPluginPath(const QString &path);
     PlayBackend::IPlayBackend *getCurrentBackend();

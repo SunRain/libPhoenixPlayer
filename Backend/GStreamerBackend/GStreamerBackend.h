@@ -85,13 +85,13 @@ public:
     void init();
 
 
-    void		state_changed();
+    void state_changed();
     void set_cur_position(quint32 pos_sec = 0);
-    void		set_track_finished();
-      void        set_about_to_finish();
-      void 		set_buffer(GstBuffer *buffer = 0);
-      void        emit_buffer(float inv_arr_channel_elements, float scale);
-      virtual int		getState();
+    void set_track_finished();
+    void set_about_to_finish();
+    void set_buffer(GstBuffer *buffer = 0);
+    void emit_buffer(float inv_arr_channel_elements, float scale);
+    virtual int		getState();
 
 public slots:
     // IPlayBackend interface

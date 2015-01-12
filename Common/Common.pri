@@ -4,5 +4,8 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
    $$PWD/Common.h \
-   $$PWD/SongMetaDate.h \
+    $$PWD/SongMetaData.h
+
+SOURCES += \
+    $$PWD/SongMetaData.cpp
 
