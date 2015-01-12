@@ -2,13 +2,12 @@
 
 HEADERS += \
     $$PWD/Util.h \
-    ../core/include/IPlayBackend.h \
     $$PWD/GStreamerBackend.h \
 
 unix {
     INCLUDEPATH += \
-        $$PWD/../core/include \
-        $$PWD/../backend/ \
+#        $$PWD/../core/include \
+#        $$PWD/../backend/ \
         /usr/include/gstreamer-0.10 \
         /usr/include/glib-2.0 \
         /usr/include/libxml2
@@ -28,6 +27,6 @@ unix {
 
 SOURCES += \
     $$PWD/GStreamerBackend.cpp \
-#    $$PWD/Gstreamer.cpp
 
-
+OTHER_FILES += \
+    $$PWD/GStreamerBackend.json

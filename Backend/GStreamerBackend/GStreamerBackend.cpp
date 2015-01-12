@@ -7,11 +7,15 @@
 #include <glib/gmain.h>
 #include <glib-unix.h>
 
-#include <QtPlugin>
+//#include <QtPlugin>
 
 #include "GStreamerBackend.h"
 #include "Common.h"
 #include "Util.h"
+
+namespace PhoenixPlayer {
+namespace PlayBackend {
+namespace GStreamer {
 
 float f_channel[2];
 
@@ -24,14 +28,14 @@ void _calc_log10_lut(){
     }
 }
 
-PhoenixPlayerCore::GStreamerBackend::GStreamerBackend(QObject *parent)
+GStreamerBackend::GStreamerBackend(QObject *parent)
     :IPlayBackend(parent)
 {
     _caps.is_parsed = false;
     _calc_log10_lut();
 //    _settings = CSettingsStorage::getInstance();
 //    _name = "GStreamer Backend";
-    _state = Common::PlaybackStopped; //STATE_STOP;
+    _state = PhoenixPlayer::Common::PlaybackStopped; //STATE_STOP;
 
     _seconds_started = 0;
     _seconds_now = 0;
@@ -58,7 +62,7 @@ PhoenixPlayerCore::GStreamerBackend::GStreamerBackend(QObject *parent)
 //               SLOT(sr_not_valid()));
 }
 
-PhoenixPlayerCore::GStreamerBackend::~GStreamerBackend()
+GStreamerBackend::~GStreamerBackend()
 {
     qDebug() << "Engine: close engine... ";
 
@@ -72,33 +76,33 @@ PhoenixPlayerCore::GStreamerBackend::~GStreamerBackend()
     gst_obj_ref = 0;
 }
 
-PhoenixPlayerCore::Common::PlaybackState PhoenixPlayerCore::GStreamerBackend::getPlaybackState()
+PhoenixPlayer::Common::PlaybackState GStreamerBackend::getPlaybackState()
 {
 
 }
 
-QString PhoenixPlayerCore::GStreamerBackend::getBackendName()
+QString GStreamerBackend::getBackendName()
 {
     return BACKEND_NAME;
 }
 
-QString PhoenixPlayerCore::GStreamerBackend::getBackendVersion()
+QString GStreamerBackend::getBackendVersion()
 {
     return BACKEND_VERSION;
 }
 
-void PhoenixPlayerCore::GStreamerBackend::init()
+void GStreamerBackend::init()
 {
     gst_init(0, 0);
     init_play_pipeline();
 }
 
-void PhoenixPlayerCore::GStreamerBackend::state_changed()
+void GStreamerBackend::state_changed()
 {
 
 }
 
-void PhoenixPlayerCore::GStreamerBackend::set_cur_position(quint32 pos_sec)
+void GStreamerBackend::set_cur_position(quint32 pos_sec)
 {
     if ((quint32) _seconds_now == pos_sec)
            return;
@@ -119,7 +123,7 @@ void PhoenixPlayerCore::GStreamerBackend::set_cur_position(quint32 pos_sec)
        //       emit timeChangedSignal(_seconds_now);
 }
 
-void PhoenixPlayerCore::GStreamerBackend::set_track_finished()
+void GStreamerBackend::set_track_finished()
 {
 //    if (_sr_active && _playing_stream) {
 //        _stream_recorder->stop(!_sr_wanna_record);
@@ -129,7 +133,7 @@ void PhoenixPlayerCore::GStreamerBackend::set_track_finished()
     _track_finished = true;
 }
 
-void PhoenixPlayerCore::GStreamerBackend::set_about_to_finish()
+void GStreamerBackend::set_about_to_finish()
 {
     qDebug() << "Engine: about to finish " << _gapless_track_available;
 //      if (_gapless_track_available && 0) {
@@ -142,7 +146,7 @@ void PhoenixPlayerCore::GStreamerBackend::set_about_to_finish()
     //      }
 }
 
-void PhoenixPlayerCore::GStreamerBackend::set_buffer(GstBuffer *buffer)
+void GStreamerBackend::set_buffer(GstBuffer *buffer)
 {
     if(!_caps.is_parsed){
 
@@ -207,7 +211,7 @@ void PhoenixPlayerCore::GStreamerBackend::set_buffer(GstBuffer *buffer)
     gst_buffer_unref(buffer);
 }
 
-void PhoenixPlayerCore::GStreamerBackend::emit_buffer(float inv_arr_channel_elements, float scale)
+void GStreamerBackend::emit_buffer(float inv_arr_channel_elements, float scale)
 {
     for(int i=0; i<_caps.channels; i++){
         float val = f_channel[i] * inv_arr_channel_elements * scale;
@@ -225,15 +229,15 @@ void PhoenixPlayerCore::GStreamerBackend::emit_buffer(float inv_arr_channel_elem
     f_channel[1] = 0;
 }
 
-int PhoenixPlayerCore::GStreamerBackend::getState()
+int GStreamerBackend::getState()
 {
     return _state;
 }
 
-void PhoenixPlayerCore::GStreamerBackend::play(quint64 startMs)
+void GStreamerBackend::play(quint64 startMs)
 {
     _track_finished = false;
-    _state = Common::PlaybackPlaying;
+    _state = PhoenixPlayer::Common::PlaybackPlaying;
 
     gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PLAYING);
 
@@ -242,9 +246,9 @@ void PhoenixPlayerCore::GStreamerBackend::play(quint64 startMs)
         setPosition(startMs);
 }
 
-void PhoenixPlayerCore::GStreamerBackend::stop()
+void GStreamerBackend::stop()
 {
-    _state = Common::PlaybackStopped;
+    _state = PhoenixPlayer::Common::PlaybackStopped;
 
         // streamripper, wanna record is set when record button is pressed
 //        if (_playing_stream && _sr_active) {
@@ -257,13 +261,13 @@ void PhoenixPlayerCore::GStreamerBackend::stop()
         _track_finished = true;
 }
 
-void PhoenixPlayerCore::GStreamerBackend::pause()
+void GStreamerBackend::pause()
 {
-    _state = Common::PlaybackPaused;
+    _state = PhoenixPlayer::Common::PlaybackPaused;
     gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PAUSED);
 }
 
-void PhoenixPlayerCore::GStreamerBackend::setVolume(int vol)
+void GStreamerBackend::setVolume(int vol)
 {
     _vol = vol;
 
@@ -272,7 +276,7 @@ void PhoenixPlayerCore::GStreamerBackend::setVolume(int vol)
     g_object_set(G_OBJECT(_pipeline), "volume", vol_val, NULL);
 }
 
-void PhoenixPlayerCore::GStreamerBackend::setPosition(quint64 posMs)
+void GStreamerBackend::setPosition(quint64 posMs)
 {
     ///
     /// TODO:由其他代码完成时间转换功能
@@ -305,7 +309,7 @@ void PhoenixPlayerCore::GStreamerBackend::setPosition(quint64 posMs)
     }
 }
 
-void PhoenixPlayerCore::GStreamerBackend::changeMedia(BaseMediaObject *obj,
+void GStreamerBackend::changeMedia(Core::BaseMediaObject *obj,
                                                       quint64 startMs,
                                                       bool startPlay)
 {
@@ -320,7 +324,10 @@ void PhoenixPlayerCore::GStreamerBackend::changeMedia(BaseMediaObject *obj,
         stop();
         //        _meta_data = md;
         // when stream ripper, do not start playing
-        _playing_stream = (obj->mediaType() == Common::TypeStream);/*Helper::is_www(md.filepath);*/
+        _playing_stream = (obj->mediaType() == PhoenixPlayer::Common::TypeStream
+                           || obj->mediaType() == PhoenixPlayer::Common::TypeUrl);/*Helper::is_www(md.filepath);*/
+
+        qDebug()<<"=== _playing_stream " << _playing_stream;
 
         bool success = set_uri(obj, startPlay);
         if (!success)
@@ -367,10 +374,8 @@ void PhoenixPlayerCore::GStreamerBackend::changeMedia(BaseMediaObject *obj,
 
 }
 
-void PhoenixPlayerCore::GStreamerBackend::init_play_pipeline()
+void GStreamerBackend::init_play_pipeline()
 {
-    qDebug()<<" =========== init_play_pipeline";
-
     bool success = false;
     bool with_app_sink = true;
     int i = 0;
@@ -507,30 +512,39 @@ void PhoenixPlayerCore::GStreamerBackend::init_play_pipeline()
     qDebug() << "Engine: constructor finished: " << success;
 }
 
-bool PhoenixPlayerCore::GStreamerBackend::set_uri(BaseMediaObject *obj, bool startPlay)
+bool GStreamerBackend::set_uri(Core::BaseMediaObject *obj, bool startPlay)
 {
     Q_UNUSED(startPlay)
     // Gstreamer needs an URI
     const gchar* uri = NULL;
 
+    QString path;
+    if (!obj->filePath().isEmpty() && !obj->fileName().isEmpty()) {
+         path = QString("%1/%2").arg(obj->filePath()).arg(obj->fileName());
+    } else {
+        path = obj->filePath().isEmpty() ? obj->fileName() : obj->filePath();
+    }
+
     if (_playing_stream) {
-        uri = g_filename_from_utf8(obj->filePath().toUtf8(), obj->filePath().toUtf8().size(), NULL, NULL, NULL);
-        if (!uri)
-            uri = g_filename_from_utf8(obj->fileName().toUtf8(), obj->fileName().toUtf8().size(), NULL, NULL, NULL);
+        uri = g_filename_from_utf8(path.toLocal8Bit(), path.toLocal8Bit().size(), NULL, NULL, NULL);
     }
     // no stream (not quite right because of mms, rtsp or other streams
-    else if (!obj->filePath().contains("://")) {
-        uri = g_filename_to_uri(obj->filePath().toLocal8Bit(), NULL, NULL);
-        if (!uri)
-            uri = g_filename_to_uri(obj->fileName().toLocal8Bit(), NULL, NULL);
+    else if (!path.contains("://")) {
+        uri = g_filename_to_uri(path.toLocal8Bit(), NULL, NULL);
     }
-    // fallback
-    else {
-        QString path = QString("%1/%2").arg(obj->filePath()).arg(obj->fileName());
-        uri = g_filename_from_utf8(path.toUtf8(), path.toUtf8().size(), NULL, NULL, NULL);
-        if (!uri)
-            uri = g_filename_from_utf8(path.toLocal8Bit(), path.toLocal8Bit().size(), NULL, NULL, NULL);
-    }
+//    // fallback
+//    else {
+//        QString path = QString("%1/%2").arg(path).arg(obj->fileName());
+
+//        qDebug()<<"Play path "<<path;
+
+//        uri = g_filename_from_utf8(path.toUtf8(), path.toUtf8().size(), NULL, NULL, NULL);
+//        if (!uri)
+//            uri = g_filename_from_utf8(path.toLocal8Bit(), path.toLocal8Bit().size(), NULL, NULL, NULL);
+//    }
+
+    qDebug()<<"Play uri "<<uri;
+
     if (!uri)
         return NULL;
 
@@ -542,6 +556,6 @@ bool PhoenixPlayerCore::GStreamerBackend::set_uri(BaseMediaObject *obj, bool sta
 
     return true;
 }
-
-//Q_EXPORT_PLUGIN2(GStreamerBackend, PhoenixPlayerCore::GStreamerBackend)
-
+} //GStreamer
+} //PlayBackend
+} //PhoenixPlayer

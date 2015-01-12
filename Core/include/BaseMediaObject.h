@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include "Common.h"
-namespace PhoenixPlayerCore {
+namespace PhoenixPlayer {
+namespace Core {
 class BaseMediaObject : public QObject
 {
     Q_OBJECT
@@ -28,7 +29,8 @@ private:
     Common::MediaType mMediaType;
 
 };
-}
-Q_DECLARE_INTERFACE(PhoenixPlayerCore::BaseMediaObject, "PhoenixPlayerCore.BaseMediaObject/1.0")
+} //Core
+} //PhoenixPlayer
+Q_DECLARE_INTERFACE(PhoenixPlayer::Core::BaseMediaObject, "PhoenixPlayer.Core.BaseMediaObject/1.0")
 
 #endif // BASEMEDIAOBJECT_H

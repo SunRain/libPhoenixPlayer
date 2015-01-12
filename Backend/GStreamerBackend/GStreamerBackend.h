@@ -9,7 +9,9 @@
 #include "IPlayBackend.h"
 #include "BaseMediaObject.h"
 
-namespace PhoenixPlayerCore {
+namespace PhoenixPlayer {
+namespace PlayBackend {
+namespace GStreamer {
 
 #define CAPS_TYPE_INT 0
 #define CAPS_TYPE_FLOAT 1
@@ -70,14 +72,14 @@ class Common;
 class GStreamerBackend : public IPlayBackend
 {
     Q_OBJECT
-    Q_INTERFACES(PhoenixPlayerCore::IPlayBackend)
-
+    Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayBackend.GStreamerBackend" FILE "gstreamerbackend.json")
+    Q_INTERFACES(PhoenixPlayer::PlayBackend::IPlayBackend)
 public:
     GStreamerBackend (QObject *parent = 0);
     virtual ~GStreamerBackend();
 
 // IPlayBackend interface
-    Common::PlaybackState getPlaybackState();
+    PhoenixPlayer::Common::PlaybackState getPlaybackState();
     QString getBackendName();
     QString getBackendVersion();
     void init();
@@ -98,11 +100,11 @@ public slots:
     void pause();
     void setVolume(int vol = 0);
     void setPosition(quint64 posMs = 0);
-    void changeMedia(BaseMediaObject *obj = 0, quint64 startMs = 0, bool startPlay = false);
+    void changeMedia(Core::BaseMediaObject *obj = 0, quint64 startMs = 0, bool startPlay = false);
 
 private:
     void init_play_pipeline();
-    bool set_uri(BaseMediaObject *obj = 0, bool startPlay = false);
+    bool set_uri(Core::BaseMediaObject *obj = 0, bool startPlay = false);
 private:
     GstElement* _pipeline;
     GstElement* _equalizer;
@@ -132,7 +134,7 @@ private:
     MyCaps     _caps;
 
 
-    Common::PlaybackState _state;
+    PhoenixPlayer::Common::PlaybackState _state;
     bool		_is_eq_enabled;
     int			_eq_type;
     bool		_track_finished;
@@ -148,6 +150,7 @@ private:
      bool		_scrobbled;
 
 };
-
-}
+} //GStreamer
+} //PlayBackend
+} //PhoenixPlayer
 #endif // GSTREAMERBACKEND_H

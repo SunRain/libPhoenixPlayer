@@ -21,6 +21,10 @@
 
 #include "GStreamerBackend.h"
 
+namespace PhoenixPlayer {
+namespace PlayBackend {
+namespace GStreamer {
+
 #define CHUNK_SIZE 1024
 #define SAMPLE_RATE 44100 /* Samples per second we are sending */
 #define AUDIO_CAPS "audio/x-raw-int,channels=2,rate=%d,signed=(boolean)true,width=16,depth=16,endianness=BYTE_ORDER"
@@ -30,7 +34,7 @@
 float log_10[20001];
 float lo_128[128];
 
-static PhoenixPlayerCore::GStreamerBackend* gst_obj_ref;
+static GStreamerBackend* gst_obj_ref;
 bool __start_at_beginning = false;
 int __start_pos_beginning = 0;
 
@@ -122,6 +126,8 @@ bool _test_and_error_bool(bool b, QString errorstr){
     return true;
 }
 
-
+} //GStreamer
+} //PlayBackend
+} //PhoenixPlayer
 
 #endif // UTIL_H

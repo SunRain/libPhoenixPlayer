@@ -3,10 +3,14 @@
 
 #include <QObject>
 
+#include "BaseMediaObject.h"
+
 class QStringList;
 
-namespace PhoenixPlayerCore {
+namespace PhoenixPlayer {
+namespace PlayList {
 
+class Core::BaseMediaObject;
 class IPlayList : public QObject
 {
     Q_OBJECT
@@ -35,8 +39,8 @@ public:
 //    QStringList mSongList;
 //    QString mCurrentSong;
 };
-//Q_DECLARE_INTERFACE(BasePlayList, "PhoenixPlayerCore.BasePlayList/1.0")
-}
-Q_DECLARE_INTERFACE(PhoenixPlayerCore::IPlayList, "PhoenixPlayerCore.BasePlayList/1.0")
+} //PlayList
+} //PhoenixPlayer
+Q_DECLARE_INTERFACE(PhoenixPlayer::PlayList::IPlayList, "PhoenixPlayer.PlayList.BasePlayList/1.0")
 
 #endif // BASEPLAYLIST_H

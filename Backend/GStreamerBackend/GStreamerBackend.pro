@@ -1,11 +1,11 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-unix:TARGET = plugin_gstreamer
-win32:TARGET = PluginGStreamer
+TARGET = GStreamerBackend
 
-include(../../core/core.pri)
-include(GStreamer.pri)
+include(../../Core/backendInterface.pri)
+include(../../Common/Common.pri)
+include(GStreamerBackend.pri)
 
 INCLUDEPATH += \
         $$PWD
@@ -47,4 +47,5 @@ win32 {
 #	HEADERS -= tagReaderGstreamer.h
 #	SOURCES -= tagReaderGstreamer.cpp
 #}
+
 

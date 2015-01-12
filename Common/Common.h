@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 #include <QObject>
-namespace PhoenixPlayerCore {
+namespace PhoenixPlayer {
 class Common
 {
     Q_GADGET

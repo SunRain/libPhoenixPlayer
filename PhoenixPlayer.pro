@@ -16,8 +16,7 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += \
-    backend \
-#    core \
+    Backend \
     test
 
 #gstreamer {

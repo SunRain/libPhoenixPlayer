@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
-gstreamer.file = GStreamer/Gstreamer.pro
+gstreamer.file = GStreamerBackend/GStreamerBackend.pro
 SUBDIRS += gstreamer
 
 #phonon.file = phonon/pluginPhonon.pro

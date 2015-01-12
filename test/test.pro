@@ -19,8 +19,8 @@ SOURCES += main.cpp
 
 unix {
     INCLUDEPATH += \
-        $$PWD/../core/include \
-        $$PWD/../backend/GStreamer \
+#        $$PWD/../core/include \
+#        $$PWD/../backend/GStreamerBackend \
         /usr/include/gstreamer-0.10 \
         /usr/include/glib-2.0 \
         /usr/include/libxml2
@@ -32,4 +32,6 @@ unix {
 #    main.cpp \
 
 #include(../backend/backend.pri)
-include(../core/core.pri)
+include(../Core/Core.pri)
+include(../Common/Common.pri)
+include(../PlayList/PlayList.pri)
