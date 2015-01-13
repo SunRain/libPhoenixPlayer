@@ -3,6 +3,9 @@
 
 #include <QObject>
 
+class QStringList;
+class QMimeDatabase;
+
 namespace PhoenixPlayer {
 namespace PlayList {
 class DiskLookup : public QObject
@@ -13,18 +16,22 @@ public:
     static DiskLookup *getInstance();
     virtual ~DiskLookup();
 
-    void lookup();
-    void setDir(const QString &dirName);
+    ///
+    /// \brief lookup 开始搜索目录，当未setDir的时候使用默认系统音乐目录搜索
+    /// \return
+    ///
+    bool lookup();
+    void setDir(const QString &dirName, bool lookupImmediately = false);
 
 protected:
-    void scanDir(const QString &dir);
+    void scanDir(const QString &path);
 signals:
-    void fileFound(QString path, QString file);
+    void fileFound(QString path, QString file, qint64 size);
 
 private:
-
-
-public slots:
+    QStringList mPathList;
+    bool mLookupLock;
+    QMimeDatabase mQMimeDatabase;
 };
 
 } //PlayList
