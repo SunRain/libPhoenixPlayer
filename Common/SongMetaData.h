@@ -2,9 +2,10 @@
 #define SONGMETADATA_H
 
 #include <QObject>
+#include <QStringList>
+#include <QDate>
 #include "Common.h"
 
-class QUrl;
 class QStringList;
 class QDate;
 namespace PhoenixPlayer {

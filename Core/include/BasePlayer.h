@@ -5,7 +5,6 @@
 
 #include "PlayBackendLoader.h"
 #include "IPlayBackend.h"
-#include "IPlayList.h"
 
 //namespace PhoenixPlayerCore {
 
