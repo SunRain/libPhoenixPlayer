@@ -17,6 +17,7 @@ CONFIG += ordered
 
 SUBDIRS += \
     Backend \
+    PlayList \
     test
 
 #gstreamer {

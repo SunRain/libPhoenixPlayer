@@ -5,7 +5,6 @@
 #include <QStringList>
 #include <QMimeDatabase>
 
-
 class QStringList;
 class QMimeDatabase;
 
