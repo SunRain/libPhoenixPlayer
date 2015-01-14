@@ -3,10 +3,12 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QtSql/QSqlQuery>
 
 #include "SongMetaData.h"
 
 class QVariant;
+class QSqlQuery;
 
 namespace PhoenixPlayer {
 namespace PlayList {
@@ -23,7 +25,10 @@ public:
     virtual QString getPluginVersion() = 0;
 
     virtual bool initDataBase() = 0;
-    virtual bool openDataBase() = 0;
+    virtual bool createPlayList(const QString &playListName) = 0;
+    virtual bool deletePlayList(const QString &playListName) = 0;
+
+//    virtual bool openDataBase() = 0;
     ///
     /// \brief beginTransaction 开始事务
     /// \return
@@ -39,11 +44,13 @@ public:
     virtual bool insertMetaData(SongMetaData *metaData = 0) = 0;
     virtual bool updateMetaData(SongMetaData *metaData = 0) = 0;
 //    virtual bool updateMetaData (const QString &hash, SongMetaData *data = 0) = 0;
-//    virtual bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue) = 0;
+    virtual bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue) = 0;
     virtual bool deleteMetaData(SongMetaData *metaData = 0) = 0;
-//    virtual bool deleteMetaData(const QString &hash) = 0;
+    virtual bool deleteMetaData(const QString &hash) = 0;
 
+    virtual bool execSqlQuery(const QSqlQuery &query) = 0;
 //    QVariant query (const QString &columnName, const QVariant &value) = 0;
+    virtual QVariant query(const QString &sql) = 0;
 
 signals:
 

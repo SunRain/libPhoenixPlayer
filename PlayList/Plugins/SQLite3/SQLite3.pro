@@ -1,6 +1,8 @@
 TEMPLATE = lib
 CONFIG += plugin
 
+QT += sql
+
 TARGET = PlayListSQLite3Plugin
 
 #include(../../Core/interface.pri)

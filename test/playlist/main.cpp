@@ -19,5 +19,6 @@ int main(int argc, char *argv[])
     if (!dao) {
         qDebug() <<" no dao found !!";
     }
+    dao->initDataBase ();
     return a.exec();
 }

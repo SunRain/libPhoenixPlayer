@@ -162,7 +162,7 @@ private:
 //    ContributingArtist	The artists contributing to the media.	QStringList
 //    Composer	The composer of the media.	QStringList
 //    Conductor	The conductor of the media.	QString
-//    QString mLyrics;	//he lyrics to the media.	QString
+    QString mLyrics;	//he lyrics to the media.	QString
     QString mMood;  //	The mood of the media.	QString
 //    TrackNumber	The track number of the media.	int
 //    TrackCount	The number of tracks on the album containing the media.	int
