@@ -24,7 +24,13 @@ public:
     /// \return
     ///
     bool startLookup();
-    void setDir(const QString &dirName, bool lookupImmediately = false);
+
+    ///
+    /// \brief stopLookup 停止搜索目录
+    /// \return
+    ///
+    bool stopLookup();
+    void addLookupDir(const QString &dirName, bool lookupImmediately = false);
 
 protected:
     void scanDir(const QString &path);
@@ -36,6 +42,7 @@ signals:
 private:
     QStringList mPathList;
 //    bool mLookupLock;
+    bool mStopLookupFlag;
     QMimeDatabase mQMimeDatabase;
 };
 

@@ -13,6 +13,7 @@ namespace PlayList {
 DiskLookup::DiskLookup(QObject *parent) : QObject(parent)
 {
 //    mLookupLock = false;
+    mStopLookupFlag = false;
 }
 
 DiskLookup *DiskLookup::getInstance()
@@ -32,6 +33,8 @@ bool DiskLookup::startLookup()
 {
     emit pending ();
 
+    mStopLookupFlag = false;
+
     if (mPathList.isEmpty ()) {
         QString tmp = QString("%1/%2").arg (QDir::homePath ())
                 .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
@@ -40,6 +43,10 @@ bool DiskLookup::startLookup()
         scanDir (tmp);
     } else {
         while (!mPathList.isEmpty ()) {
+            if (mStopLookupFlag) {
+                mPathList.clear ();
+                break;
+            }
             scanDir (mPathList.takeFirst ());
         }
     }
@@ -47,7 +54,12 @@ bool DiskLookup::startLookup()
     return true;
 }
 
-void DiskLookup::setDir(const QString &dirName, bool lookupImmediately)
+bool DiskLookup::stopLookup()
+{
+    mStopLookupFlag = true;
+}
+
+void DiskLookup::addLookupDir(const QString &dirName, bool lookupImmediately)
 {
     mPathList.append (dirName);
     if (lookupImmediately) {
@@ -57,6 +69,9 @@ void DiskLookup::setDir(const QString &dirName, bool lookupImmediately)
 
 void DiskLookup::scanDir(const QString &path)
 {
+    if (mStopLookupFlag)
+        return;
+
     QDir dir(path);
     if (!dir.exists ())
         return;

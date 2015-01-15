@@ -6,16 +6,16 @@
 
 QT       += core
 
-QT       -= gui
+#QT       -= gui
 
 TARGET = testplaylist
 CONFIG   += console
-CONFIG   -= app_bundle
+#CONFIG   -= app_bundle
 
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
 
 unix {
     INCLUDEPATH += \
@@ -35,3 +35,4 @@ unix {
 #include(../../Core/Core.pri)
 include(../../Common/Common.pri)
 include(../../MusicLibrary/Core/Core.pri)
+
