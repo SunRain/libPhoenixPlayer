@@ -21,7 +21,7 @@ unix {
 #        /usr/include/gstreamer-0.10 \
 }
 
-DESTDIR = ../../plugins
+DESTDIR = ../../../plugins
 
 #PlayBackend
 win32 {

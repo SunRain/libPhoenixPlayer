@@ -34,4 +34,4 @@ unix {
 #include(../backend/backend.pri)
 #include(../../Core/Core.pri)
 include(../../Common/Common.pri)
-include(../../PlayList/Core/Core.pri)
+include(../../MusicLibrary/Core/Core.pri)
