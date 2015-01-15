@@ -49,7 +49,7 @@ void PlayBackendLoader::setNewBackend(const QString &newBackendName)
 
 PlayBackendLoader::PlayBackendLoader(QObject *parent)
 {
-    mBackendPath = QString("%1/PlayBackend").arg(QCoreApplication::applicationDirPath());
+    mBackendPath = QString("%1/plugins").arg(QCoreApplication::applicationDirPath());
     mCurrentBackendIndex = -1;
     initBackend();
 }

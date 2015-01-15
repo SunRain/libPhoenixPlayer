@@ -20,7 +20,7 @@ unix {
         /usr/include/libxml2
 }
 
-DESTDIR = ../../PlayBackend
+DESTDIR = ../../plugins
 
 #PlayBackend
 win32 {
