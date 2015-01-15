@@ -22,6 +22,39 @@ public:
         TypeUrl,                    //网络文件
         TypeStream                  //媒体文件
     };
+
+    enum MusicLibraryElement {
+        EPlayListName = 0x0,        //播放列表名称
+        EHash,
+        EFilePath,
+        EFileName,
+        EMediaBitrate,
+        EFileSize,
+        EArtistName,
+        EArtistImageUri,
+        EArtistDescription,
+        EAlbumName,
+        EAlbumImageUrl,
+        EAlbumDescription,
+        EAlbumYear,
+        ECoverArtSmall,
+        ECoverArtLarge,
+        ECoverArtMiddle,
+        EMediaType,
+        ESongLength,
+        ESongTitle,
+        ESongDescription,
+        ECategory,
+        EYear,
+        EDate,
+        EUserRating,
+        EKeywords,
+        ELanguage,
+        EPublisher,
+        ECopyright,
+        ELyrics,
+        EMood
+    };
 };
 }
 #endif // COMMON_H
