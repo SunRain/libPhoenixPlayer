@@ -51,12 +51,15 @@ bool SQLite3DAO::initDataBase()
 
     if (!db.open()) {
         qDebug()<<"Can't open db "<<db.lastError ().text ();
+        db.removeDatabase (DATABASE_NAME);
         return false;
     }
     QStringList tables = db.tables();
     if (tables.contains(LIBRARY_TAG, Qt::CaseInsensitive)
             && tables.contains(PLAYLIST_TAG, Qt::CaseInsensitive)) {
-        qDebug()<< QSqlError().text ();
+
+        qDebug()<<"Found tables now!!!";
+        return true;
     }
 
 //    NULL	NULL value.	NULL
@@ -106,6 +109,7 @@ bool SQLite3DAO::initDataBase()
     if (!q.exec (str)) {
         qDebug() << "Create library tab error "
                  << " [ " << q.lastError ().text () << " ] ";
+        db.removeDatabase (DATABASE_NAME);
         return false;
     }
 
@@ -120,11 +124,37 @@ bool SQLite3DAO::initDataBase()
     if (!q.exec (str)) {
         qDebug() << "Create playlist tab error "
                  << " [ " << q.lastError ().text () << " ] ";
+        db.removeDatabase (DATABASE_NAME);
         return false;
     }
 }
 
 bool SQLite3DAO::openDataBase()
+{
+    return initDataBase ();
+}
+
+bool SQLite3DAO::deleteMetaData(SongMetaData *metaData)
+{
+    return true;
+}
+
+bool SQLite3DAO::deleteMetaData(const QString &hash)
+{
+    return true;
+}
+
+bool SQLite3DAO::updateMetaData(SongMetaData *metaData, bool sikpEmptyValue)
+{
+    return true;
+}
+
+QVariant SQLite3DAO::match(Common::MusicLibraryElement e, const QString &condition)
+{
+    return QVariant();
+}
+
+bool SQLite3DAO::update(Common::MusicLibraryElement targetE, Common::MusicLibraryElement indexE, const QString &indexValue, const QVariant &newVaule)
 {
     return true;
 }
@@ -142,46 +172,6 @@ bool SQLite3DAO::commitTransaction()
 bool SQLite3DAO::insertMetaData(SongMetaData *metaData)
 {
     return true;
-}
-
-bool SQLite3DAO::updateMetaData(SongMetaData *metaData)
-{
-    return true;
-}
-
-bool SQLite3DAO::updateMetaData(const QString &hash, const QString &columnName, const QVariant &newValue)
-{
-    return true;
-}
-
-bool SQLite3DAO::deleteMetaData(SongMetaData *metaData)
-{
-    return true;
-}
-
-bool SQLite3DAO::deleteMetaData(const QString &hash)
-{
-    return true;
-}
-
-bool SQLite3DAO::execSqlQuery(const QSqlQuery &query)
-{
-    return true;
-}
-
-QVariant SQLite3DAO::query(const QString &sql)
-{
-    return true;
-}
-
-bool SQLite3DAO::createPlayList(const QString &playListName)
-{
-    return true;
-}
-
-bool SQLite3DAO::deletePlayList(const QString &playListName)
-{
-    return false;
 }
 
 } //SQLite3
