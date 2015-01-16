@@ -90,7 +90,7 @@ void DiskLookup::scanDir(const QString &path)
 
 //            if (type.inherits ("audio/mpeg")) {
             if (type.name ().contains ("audio") || type.name ().contains ("Audio")) {
-                qDebug()<<" file match "<< info.fileName();
+//                qDebug()<<" file match "<< info.fileName();
                 emit fileFound (path, info.fileName (), info.size ());
             }
         }

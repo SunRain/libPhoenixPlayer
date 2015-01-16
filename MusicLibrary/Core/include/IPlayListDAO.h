@@ -14,7 +14,7 @@ class QSqlQuery;
 namespace PhoenixPlayer {
 namespace PlayList {
 
-class SongMetaData;
+class PhoenixPlayer::SongMetaData;
 class IPlayListDAO : public QObject
 {
     Q_OBJECT
@@ -42,11 +42,11 @@ public:
     ///
     virtual bool commitTransaction() = 0;
 
-    virtual bool insertMetaData(SongMetaData *metaData = 0) = 0;
-    virtual bool updateMetaData(SongMetaData *metaData = 0, bool sikpEmptyValue = true) = 0;
+    virtual bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true) = 0;
+    virtual bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true) = 0;
 //    virtual bool updateMetaData (const QString &hash, SongMetaData *data = 0, bool sikpEmptyValue = true) = 0;
 //    virtual bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue) = 0;
-    virtual bool deleteMetaData(SongMetaData *metaData = 0) = 0;
+    virtual bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0) = 0;
     virtual bool deleteMetaData(const QString &hash) = 0;
 
     virtual QVariant match(Common::MusicLibraryElement e, const QString &condition) = 0;

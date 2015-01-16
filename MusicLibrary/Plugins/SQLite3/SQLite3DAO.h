@@ -9,6 +9,8 @@
 
 
 class QSqlDatabase;
+class QStringList;
+class QString;
 
 namespace PhoenixPlayer {
 namespace PlayList {
@@ -46,7 +48,7 @@ public:
 //    bool updateMetaData(SongMetaData *metaData);
 //    bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue);
 
-    bool deleteMetaData(SongMetaData *metaData);
+    bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData);
     bool deleteMetaData(const QString &hash);
 
 //    bool execSqlQuery(const QSqlQuery &query);
@@ -60,7 +62,7 @@ public:
 
     // IPlayListDAO interface
 public:
-    bool updateMetaData(SongMetaData *metaData, bool sikpEmptyValue);
+    bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true);
     QVariant match(Common::MusicLibraryElement e, const QString &condition);
     bool update(Common::MusicLibraryElement targetE, Common::MusicLibraryElement indexE, const QString &indexValue, const QVariant &newVaule);
 
@@ -68,11 +70,15 @@ public:
 public:
     bool beginTransaction();
     bool commitTransaction();
-    bool insertMetaData(SongMetaData *metaData);
+    bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true);
 
 private:
-    QHash<QString, SongMetaData*> mHashList;
+    QString listToString(const QStringList &list);
+    QStringList stringToList(const QString &str);
+private:
+    QHash<QString, PhoenixPlayer::SongMetaData*> mHashList;
     QSqlDatabase mDatabase;
+    QStringList mExistSongHashes;
 };
 
 } //SQLite3

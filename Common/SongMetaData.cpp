@@ -2,7 +2,34 @@
 namespace PhoenixPlayer {
 SongMetaData::SongMetaData(QObject *parent) : QObject(parent)
 {
-
+    mHash = QString();
+    mFilePath = QString();
+    mFileName = QString();
+    mMediaBitrate = 0;
+    mFileSize = 0;
+    mArtistName = QString(); //作者姓名
+    mArtistImageUri = QString();
+    mArtistDescription  = QString();//介绍
+    mAlbumName = QString();
+    mAlbumDescription = QString(); //介绍
+    mAlbumYear = QString(); //唱片发型日期
+    mCoverArtSmall = QString();
+    mCoverArtLarge = QString();
+    mCoverArtMiddle = QString();
+    mMediaType = Common::TypeLocalFile;
+    mSongLength = 0;
+    mSongTitle = QString();
+    mSongDescription = QString();//	A description of the media.	QString
+    mCategory = QStringList();
+    mYear = 0; //The year of release of the media.	int
+    mDate = QDate::currentDate ();//	The date of the media.	QDate.
+    mUserRating =0; //	A user rating of the media.	int [0..100]
+    mKeywords = QStringList();//	A list of keywords describing the media.	QStringList
+    mLanguage = QString();  //The language of media, as an ISO 639-2 code.	QString
+    mPublisher = QString();	//The publisher of the media.	QString
+    mCopyright = QString();	//The media's copyright notice.	QString
+    mLyrics = QString();	//he lyrics to the media.	QString
+    mMood = QString();  //	The mood of the media.	QString
 }
 
 SongMetaData::~SongMetaData()
@@ -258,6 +285,16 @@ void SongMetaData::setMood(const QString &mood)
 {
     mMood = mood;
 }
+QString SongMetaData::lyrics() const
+{
+    return mLyrics;
+}
+
+void SongMetaData::setLyrics(const QString &lyrics)
+{
+    mLyrics = lyrics;
+}
+
 
 
 

@@ -9,6 +9,7 @@
 #include "DiskLookup.h"
 #include "Settings.h"
 #include "Util.h"
+#include "SongMetaData.h"
 
 namespace PhoenixPlayer {
 namespace PlayList {
@@ -91,6 +92,15 @@ void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
 {
     QString hash = Util::calculateHash (path.toLocal8Bit ()+ file.toLocal8Bit ()+ QString::number (size));
     qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
+
+    PhoenixPlayer::SongMetaData data;
+    data.setFileName (file);
+    data.setFilePath (path);
+    data.setFileSize (size);
+    data.setHash (hash);
+
+    mPlayListDAO->insertMetaData (&data);
+
 }
 
 

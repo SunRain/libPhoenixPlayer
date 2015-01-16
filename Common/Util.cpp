@@ -1,4 +1,8 @@
 #include <QCryptographicHash>
+#include <QDebug>
+#include <QByteArray>
+
+#include <iostream>
 
 #include "Util.h"
 
@@ -22,7 +26,7 @@ Util::~Util()
 
 QString Util::calculateHash(const QString &str)
 {
-    return QString (QCryptographicHash::hash (str.toLocal8Bit (), QCryptographicHash::Md5));
+    return QString (QCryptographicHash::hash (str.toLocal8Bit (), QCryptographicHash::Md5).toHex ());
 }
 
 } //PhoenixPlayer

@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QCryptographicHash>
 
 #include <QDebug>
 #include "DiskLookup.h"
@@ -28,5 +29,14 @@ int main(int argc, char *argv[])
     manager->setSettings (settings);
 
     manager->scanLocalMusic ();
+//    QString str = "/home/wangguojian/Music/01 云儿.ape";
+//    qDebug()<<str;
+
+//    QCryptographicHash sha1(QCryptographicHash::Sha1);
+//    QByteArray qba(str.toLatin1 ());
+//    const char *c = qba.data ();
+//    sha1.addData (c);
+//    qDebug()<<sha1.result ().toHex ();
+//    qDebug()<<QCryptographicHash::hash (str.toLocal8Bit (), QCryptographicHash::Sha1);
     return a.exec();
 }

@@ -98,6 +98,9 @@ public:
     QString mood() const;
     void setMood(const QString &mood);
 
+    QString lyrics() const;
+    void setLyrics(const QString &lyrics);
+
 private:
     QString mHash;
     QString mFilePath;
