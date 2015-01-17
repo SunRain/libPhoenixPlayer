@@ -1,4 +1,5 @@
-#include <QCoreApplication>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
 #include <QCryptographicHash>
 
 #include <QDebug>
@@ -11,7 +12,7 @@ using namespace PhoenixPlayer;
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QGuiApplication a(argc, argv);
 
 //    PlayList::DiskLookup *lookup = PlayList::DiskLookup::getInstance ();
 ////    lookup->startLookup ();
@@ -29,14 +30,9 @@ int main(int argc, char *argv[])
     manager->setSettings (settings);
 
     manager->scanLocalMusic ();
-//    QString str = "/home/wangguojian/Music/01 云儿.ape";
-//    qDebug()<<str;
 
-//    QCryptographicHash sha1(QCryptographicHash::Sha1);
-//    QByteArray qba(str.toLatin1 ());
-//    const char *c = qba.data ();
-//    sha1.addData (c);
-//    qDebug()<<sha1.result ().toHex ();
-//    qDebug()<<QCryptographicHash::hash (str.toLocal8Bit (), QCryptographicHash::Sha1);
+    QQmlApplicationEngine engine;
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
     return a.exec();
 }
