@@ -28,9 +28,9 @@ protected:
     bool init();
 
 signals:
-
+    void searching (QString path, QString file, qint64 size);
 public slots:
-    void fileFound(QString path, QString file, qint64 size);
+    void fileFound (QString path, QString file, qint64 size);
 
 private:
     IPlayListDAO *mPlayListDAO;

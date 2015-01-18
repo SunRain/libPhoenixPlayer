@@ -38,11 +38,14 @@ MusicLibraryManager::~MusicLibraryManager()
     mThread->deleteLater ();
 
     qDebug()<<"after delete thread";
-
-    if (mPlayListDAO)
-        mPlayListDAO->deleteLater ();
     if (mDAOLoader)
         mDAOLoader->deleteLater ();
+
+    qDebug()<<"after delete mDAOLoader";
+    if (mPlayListDAO)
+        mPlayListDAO->deleteLater ();
+
+    qDebug()<<">>>>>>>> after "<< __FUNCTION__ <<" <<<<<<<<<<<<<<<<";
 }
 
 MusicLibraryManager *MusicLibraryManager::getInstance()
@@ -96,6 +99,8 @@ void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
 {
     QString hash = Util::calculateHash (path.toLocal8Bit ()+ file.toLocal8Bit ()+ QString::number (size));
     qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
+
+    emit searching (path, file, size);
 
     PhoenixPlayer::SongMetaData data;
     data.setFileName (file);

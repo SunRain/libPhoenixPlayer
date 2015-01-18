@@ -26,15 +26,15 @@ SQLite3DAO *SQLite3DAO::getInstance()
 
 SQLite3DAO::~SQLite3DAO()
 {
-    if (!mHashList.isEmpty ()) {
-        qDeleteAll(mHashList);
-        mHashList.clear ();
-    }
+    qDebug()<<__FUNCTION__;
+
     if (mDatabase.isOpen ()) {
         mDatabase.close ();
     }
     if (!mExistSongHashes.isEmpty ())
         mExistSongHashes.clear ();
+
+    qDebug()<<"after "<<__FUNCTION__;
 }
 
 QString SQLite3DAO::getPluginName()

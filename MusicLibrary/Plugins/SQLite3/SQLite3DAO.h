@@ -89,7 +89,7 @@ private:
 
     bool checkDatabase();
 private:
-    QHash<QString, PhoenixPlayer::SongMetaData*> mHashList;
+//    QHash<QString, PhoenixPlayer::SongMetaData*> mHashList;
     QSqlDatabase mDatabase;
     QStringList mExistSongHashes;    
 };

@@ -31,7 +31,8 @@ unix {
 #SOURCES += \
 #    main.cpp \
 
-RESOURCES += qml.qrc
+RESOURCES += \
+    qml.qrc
 
 
 # Additional import path used to resolve QML modules in Qt Creator's code model

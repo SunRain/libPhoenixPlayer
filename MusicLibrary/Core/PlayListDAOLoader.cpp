@@ -26,9 +26,13 @@ PlayListDAOLoader *PlayListDAOLoader::getInstance()
 
 PlayListDAOLoader::~PlayListDAOLoader()
 {
+    qDebug()<<__FUNCTION__;
+    //删除List里面的指针类型文件
+    qDeleteAll(mPluginList);
     if (!mPluginList.isEmpty ()) {
         mPluginList.clear ();
     }
+     qDebug()<<"after "<<__FUNCTION__;
 }
 
 void PlayListDAOLoader::setPluginPath(const QString &path)
