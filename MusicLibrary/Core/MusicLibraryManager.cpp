@@ -37,6 +37,8 @@ MusicLibraryManager::~MusicLibraryManager()
     }
     mThread->deleteLater ();
 
+    qDebug()<<"after delete thread";
+
     if (mPlayListDAO)
         mPlayListDAO->deleteLater ();
     if (mDAOLoader)
@@ -86,6 +88,8 @@ bool MusicLibraryManager::init()
     }
 
     connect (mDiskLooKup, SIGNAL(fileFound(QString,QString,qint64)), this, SLOT(fileFound(QString,QString,qint64)));
+    connect (mDiskLooKup, &DiskLookup::pending, mPlayListDAO, &IPlayListDAO::beginTransaction);
+    connect (mDiskLooKup, &DiskLookup::finished, mPlayListDAO, &IPlayListDAO::commitTransaction);
 }
 
 void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
@@ -100,7 +104,6 @@ void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
     data.setHash (hash);
 
     mPlayListDAO->insertMetaData (&data);
-
 }
 
 

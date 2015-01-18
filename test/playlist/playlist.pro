@@ -5,12 +5,12 @@
 #-------------------------------------------------
 
 QT       += core qml quick
-
 #QT       -= gui
 
 TARGET = testplaylist
 CONFIG   += console
 #CONFIG   -= app_bundle
+CONFIG += c++11
 
 TEMPLATE = app
 

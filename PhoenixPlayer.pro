@@ -14,6 +14,8 @@
 
 TEMPLATE = subdirs
 CONFIG += ordered
+QMAKE_CXXFLAGS += -std=c++0x
+CONFIG += c++11
 
 SUBDIRS += \
     Backend \

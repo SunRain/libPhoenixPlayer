@@ -30,6 +30,27 @@ public:
 //    virtual bool deletePlayList(const QString &playListName) = 0;
 
 //    virtual bool openDataBase() = 0;
+
+
+    virtual bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true) = 0;
+    virtual bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true) = 0;
+//    virtual bool updateMetaData (const QString &hash, SongMetaData *data = 0, bool sikpEmptyValue = true) = 0;
+//    virtual bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue) = 0;
+    virtual bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0) = 0;
+    virtual bool deleteMetaData(const QString &hash) = 0;
+
+//    virtual QVariant match(Common::MusicLibraryElement e, const QString &condition) = 0;
+//    virtual bool update(Common::MusicLibraryElement targetE, Common::MusicLibraryElement indexE, const QString &indexValue, const QVariant &newVaule) = 0;
+
+    virtual PhoenixPlayer::SongMetaData *query(const QString &hash, const QString &table) = 0;
+
+//    virtual bool execSqlQuery(const QSqlQuery &query) = 0;
+////    QVariant query (const QString &columnName, const QVariant &value) = 0;
+//    virtual QVariant query(const QString &sql) = 0;
+
+signals:
+
+public slots:
     ///
     /// \brief beginTransaction 开始事务
     /// \return
@@ -41,25 +62,6 @@ public:
     /// \return
     ///
     virtual bool commitTransaction() = 0;
-
-    virtual bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true) = 0;
-    virtual bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true) = 0;
-//    virtual bool updateMetaData (const QString &hash, SongMetaData *data = 0, bool sikpEmptyValue = true) = 0;
-//    virtual bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue) = 0;
-    virtual bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0) = 0;
-    virtual bool deleteMetaData(const QString &hash) = 0;
-
-    virtual QVariant match(Common::MusicLibraryElement e, const QString &condition) = 0;
-    virtual bool update(Common::MusicLibraryElement targetE, Common::MusicLibraryElement indexE, const QString &indexValue, const QVariant &newVaule) = 0;
-
-//    virtual bool execSqlQuery(const QSqlQuery &query) = 0;
-////    QVariant query (const QString &columnName, const QVariant &value) = 0;
-//    virtual QVariant query(const QString &sql) = 0;
-
-signals:
-
-public slots:
-
 
 };
 
