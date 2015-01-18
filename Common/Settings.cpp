@@ -9,6 +9,7 @@
 namespace PhoenixPlayer {
 
 const char *KEY_MUSIC_DIR = "MusicDir";
+const char *KEY_LAST_SONG = "LastPlayedSongHash";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
@@ -26,6 +27,7 @@ Settings *Settings::getInstance()
 
 Settings::~Settings()
 {
+    mSettings->sync ();
     mSettings->deleteLater ();
 }
 
@@ -46,11 +48,24 @@ bool Settings::setMusicDir(const QStringList &dirList)
         tmp = QString("%1||").arg (s);
     }
     mSettings->setValue (KEY_MUSIC_DIR, QString("%1%2").arg (tmp).arg (last));
+    mSettings->sync ();
     return true;
 }
 
 QStringList Settings::getMusicDirs()
 {
     return mSettings->value (KEY_MUSIC_DIR, mDefaultMusicDir).toStringList ();
+}
+
+bool Settings::setLastPlayedSong(const QString &songHash)
+{
+    mSettings->setValue (KEY_LAST_SONG, songHash);
+    mSettings->sync ();
+    return true;
+}
+
+QString Settings::getLastPlayedSong()
+{
+    return mSettings->value (KEY_LAST_SONG, QString()).toString ();
 }
 } //PhoenixPlayer

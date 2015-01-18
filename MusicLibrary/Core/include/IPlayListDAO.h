@@ -14,7 +14,6 @@ class QSqlQuery;
 namespace PhoenixPlayer {
 namespace PlayList {
 
-class PhoenixPlayer::SongMetaData;
 class IPlayListDAO : public QObject
 {
     Q_OBJECT
@@ -26,28 +25,26 @@ public:
     virtual QString getPluginVersion() = 0;
 
     virtual bool initDataBase() = 0;
-//    virtual bool createPlayList(const QString &playListName) = 0;
-//    virtual bool deletePlayList(const QString &playListName) = 0;
-
-//    virtual bool openDataBase() = 0;
-
 
     virtual bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true) = 0;
     virtual bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true) = 0;
-//    virtual bool updateMetaData (const QString &hash, SongMetaData *data = 0, bool sikpEmptyValue = true) = 0;
-//    virtual bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue) = 0;
     virtual bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0) = 0;
     virtual bool deleteMetaData(const QString &hash) = 0;
-
-//    virtual QVariant match(Common::MusicLibraryElement e, const QString &condition) = 0;
-//    virtual bool update(Common::MusicLibraryElement targetE, Common::MusicLibraryElement indexE, const QString &indexValue, const QVariant &newVaule) = 0;
-
     virtual PhoenixPlayer::SongMetaData *query(const QString &hash, const QString &table) = 0;
 
-//    virtual bool execSqlQuery(const QSqlQuery &query) = 0;
-////    QVariant query (const QString &columnName, const QVariant &value) = 0;
-//    virtual QVariant query(const QString &sql) = 0;
+    virtual QStringList getSongHashList() = 0;
 
+    ///
+    /// \brief queryColumn 搜索音乐列表中targetColumn中的值,条件为regColumn值=regValue
+    /// \param targetColumn
+    /// \param regColumn
+    /// \param regValue
+    /// \param skipDuplicates 是否跳过重复的值
+    /// \return
+    ///
+    virtual QStringList queryColumn(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+                                Common::MusicLibraryElement regColumn = Common::E_NULLElement,
+                                const QString &regValue = "", bool skipDuplicates = true) = 0;
 signals:
 
 public slots:

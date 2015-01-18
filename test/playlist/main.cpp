@@ -29,11 +29,13 @@ int main(int argc, char *argv[])
 //        qDebug() <<" no dao found !!";
 //    }
 //    dao->initDataBase ();
+    qmlRegisterUncreatableType<PhoenixPlayer::Common>("com.sunrain.playlist", 1, 0, "Common", "");
 
     Settings *settings = Settings::getInstance ();
     PlayList::MusicLibraryManager *manager = PlayList::MusicLibraryManager::getInstance ();
     manager->setSettings (settings);
 
+    Common c;
 //    manager->scanLocalMusic ();
 
 //    QQmlApplicationEngine engine;
@@ -43,6 +45,7 @@ int main(int argc, char *argv[])
     view.setResizeMode (QQuickView::SizeRootObjectToView);
     QQmlContext *ctxt = view.rootContext();
     ctxt->setContextProperty ("musicLibraryManager", manager);
+    ctxt->setContextProperty ("common", &c);
 
     view.setSource (QUrl(QStringLiteral("qrc:/main.qml")));
     view.show ();

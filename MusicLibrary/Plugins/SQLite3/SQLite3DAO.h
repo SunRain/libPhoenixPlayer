@@ -22,6 +22,7 @@ namespace SQLite3 {
 #define PLAYLIST_TABLE_TAG "PLAYLIST"
 
 class PhoenixPlayer::SongMetaData;
+class PhoenixPlayer::Common;
 class SQLite3DAO : public IPlayListDAO
 {
     Q_OBJECT
@@ -38,38 +39,19 @@ public:
     QString getPluginVersion();
     bool initDataBase();
     bool openDataBase();
-//    bool beginTransaction();
-//    bool commitTransaction();
-
-//    bool insertMetaData(SongMetaData *metaData);
-
-//    bool updateMetaData(SongMetaData *metaData);
-//    bool updateMetaData (const QString &hash, const QString &columnName, const QVariant &newValue);
 
     bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0);
     bool deleteMetaData(const QString &hash);
-
-//    bool execSqlQuery(const QSqlQuery &query);
-//    QVariant query(const QString &sql);
-
-
-//    // IPlayListDAO interface
-//public:
-//    bool createPlayList(const QString &playListName);
-//    bool deletePlayList(const QString &playListName);
-
-    // IPlayListDAO interface
-public:
     bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true);
-
-//    QVariant match(Common::MusicLibraryElement e, const QString &condition);
-//    bool update(Common::MusicLibraryElement targetE, Common::MusicLibraryElement indexE, const QString &indexValue, const QVariant &newVaule);
-
-    // IPlayListDAO interface
-public:
     bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true);
     SongMetaData *query(const QString &hash, const QString &table);
+    QStringList getSongHashList();
 
+    QStringList queryColumn(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+                        Common::MusicLibraryElement regColumn = Common::E_NULLElement,
+                        const QString &regValue = "", bool skipDuplicates = true);
+
+    // IPlayListDAO interface
 public slots:
     bool beginTransaction();
     bool commitTransaction();
@@ -89,9 +71,8 @@ private:
 
     bool checkDatabase();
 private:
-//    QHash<QString, PhoenixPlayer::SongMetaData*> mHashList;
     QSqlDatabase mDatabase;
-    QStringList mExistSongHashes;    
+    QStringList mExistSongHashes;
 };
 
 } //SQLite3

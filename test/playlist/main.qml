@@ -1,6 +1,8 @@
 import QtQuick 2.2
 import QtQuick.Window 2.1
 
+import com.sunrain.playlist 1.0
+
 /*Window*/Item {
     visible: true
     width: 360
@@ -11,6 +13,12 @@ import QtQuick.Window 2.1
         //searching (QString path, QString file, qint64 size);
         onSearching: {
             infoText.text = path + "/" + file;
+        }
+        onPlayingSongChanged: {
+            infoText.text = musicLibraryManager.playingSong();
+        }
+        onSearchingFinished: {
+            infoText.text = "搜索完成, 当前音乐 " + musicLibraryManager.playingSong();
         }
     }
 
@@ -44,6 +52,9 @@ import QtQuick.Window 2.1
             Text {
                 text: qsTr("前一首")
             }
+            onClicked: {
+                musicLibraryManager.preSong();
+            }
         }
 
         MouseArea {
@@ -55,6 +66,9 @@ import QtQuick.Window 2.1
             Text {
                 text: qsTr("下一首")
             }
+            onClicked: {
+                musicLibraryManager.nextSong();
+            }
         }
 
         MouseArea {
@@ -65,6 +79,25 @@ import QtQuick.Window 2.1
             height: 56
             Text {
                 text: qsTr("随机")
+            }
+            onClicked: {
+                musicLibraryManager.randomSong();
+            }
+        }
+        MouseArea {
+            id: mouseArea5
+            x: 34
+            y: 146
+            width: 55
+            height: 56
+            Text {
+                text: qsTr("测试query")
+            }
+            onClicked: {
+                //querySongMetaElement(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+                //const QString &hash = "", bool skipDuplicates = true);
+                var method = Common.E_FileName;
+                musicLibraryManager.querySongMetaElement(method, "" , true);
             }
         }
     }

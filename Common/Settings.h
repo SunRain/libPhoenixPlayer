@@ -18,6 +18,9 @@ public:
 
     bool setMusicDir(const QStringList &dirList);
     QStringList getMusicDirs();
+
+    bool setLastPlayedSong(const QString &songHash);
+    QString getLastPlayedSong();
 signals:
 
 public slots:

@@ -21,6 +21,7 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     mDiskLooKup = 0;
     mDAOLoader = 0;
     mPlayListDAO = 0;
+    mCurrentSongHash = QString();
 
     init();
 }
@@ -28,6 +29,8 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 MusicLibraryManager::~MusicLibraryManager()
 {
     qDebug()<<">>>>>>>> "<< __FUNCTION__ <<" <<<<<<<<<<<<<<<<";
+    if (mSettings)
+        mSettings->setLastPlayedSong (mCurrentSongHash);
     if (mDiskLooKup)
         mDiskLooKup->stopLookup ();
 
@@ -72,6 +75,72 @@ bool MusicLibraryManager::scanLocalMusic()
     return mDiskLooKup->startLookup ();
 }
 
+QString MusicLibraryManager::playingSong()
+{
+    if (mCurrentSongHash.isEmpty ()) {
+        if (mSettings) {
+            mCurrentSongHash = mSettings->getLastPlayedSong ();
+        }
+        if (mCurrentSongHash.isEmpty () && !mPlayListDAO->getSongHashList ().isEmpty ())
+            mCurrentSongHash = mPlayListDAO->getSongHashList ().first ();
+    }
+    return mCurrentSongHash;
+}
+
+void MusicLibraryManager::nextSong()
+{
+    QStringList list = mPlayListDAO->getSongHashList ();
+    int index = list.indexOf (mCurrentSongHash) +1;
+    if (index >= list.size ())
+        index = 0;
+    mCurrentSongHash = list.at (index);
+    emit playingSongChanged ();
+}
+
+void MusicLibraryManager::preSong()
+{
+    QStringList list = mPlayListDAO->getSongHashList ();
+    int index = list.indexOf (mCurrentSongHash);
+    if (index == -1) { //no hash found
+        index = 0;
+    } else if (index == 0) { //hash is the first song
+        index = list.size () -1; //jump to last song
+    } else {
+        index --;
+    }
+    mCurrentSongHash = list.at (index);
+    emit playingSongChanged ();
+}
+
+void MusicLibraryManager::randomSong()
+{
+    QTime time = QTime::currentTime ();
+    qsrand(time.second () * 1000 + time.msec ());
+    int n = qrand ();
+    n = n % mPlayListDAO->getSongHashList ().size ();
+    mCurrentSongHash = mPlayListDAO->getSongHashList ().at (n);
+    emit playingSongChanged ();
+}
+
+QStringList MusicLibraryManager::querySongMetaElement(Common::MusicLibraryElement targetColumn, const QString &hash, bool skipDuplicates)
+{
+    qDebug()<<"querySongMetaElement "
+           << targetColumn
+           <<" hash "
+          <<hash
+         << " "
+         <<skipDuplicates;
+
+    QStringList list;
+    if (hash.isEmpty ()) {
+        list = mPlayListDAO->queryColumn (targetColumn, Common::E_NULLElement, QString(), skipDuplicates);
+    } else {
+        list = mPlayListDAO->queryColumn (targetColumn, Common::E_Hash, hash, skipDuplicates);
+    }
+    qDebug()<<" query result "<< list;
+    return list;
+}
+
 bool MusicLibraryManager::init()
 {
     if (!mThread)
@@ -92,6 +161,7 @@ bool MusicLibraryManager::init()
 
     connect (mDiskLooKup, SIGNAL(fileFound(QString,QString,qint64)), this, SLOT(fileFound(QString,QString,qint64)));
     connect (mDiskLooKup, &DiskLookup::pending, mPlayListDAO, &IPlayListDAO::beginTransaction);
+    connect (mDiskLooKup, SIGNAL(finished()), this, SIGNAL(searchingFinished()));
     connect (mDiskLooKup, &DiskLookup::finished, mPlayListDAO, &IPlayListDAO::commitTransaction);
 }
 

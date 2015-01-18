@@ -401,6 +401,52 @@ PhoenixPlayer::SongMetaData *SQLite3DAO::query(const QString &hash, const QStrin
     return &meta;
 }
 
+QStringList SQLite3DAO::getSongHashList()
+{
+    return mExistSongHashes;
+}
+
+QStringList SQLite3DAO::queryColumn(Common::MusicLibraryElement targetColumn, Common::MusicLibraryElement regColumn, const QString &regValue, bool skipDuplicates)
+{
+    if (!checkDatabase ())
+        return QStringList();
+    Common common;
+    bool intFlag = false;
+    if (regColumn == Common::E_MediaBitrate
+            || regColumn == Common::E_FileSize
+            || regColumn == Common::E_SongLength
+            || regColumn == Common::E_Year
+            || regColumn == Common::E_UserRating) {
+        intFlag = true;
+    }
+    QString str = "select ";
+    if (skipDuplicates)
+        str += " DISTINCT ";
+    str += common.enumToStr ("MusicLibraryElement", targetColumn).replace ("E_", "");
+    str += " from ";
+    str += LIBRARY_TABLE_TAG;
+    if (!regValue.isEmpty ()) {
+        str += " where ";
+        str += common.enumToStr ("MusicLibraryElement", regColumn).replace ("E_", "");
+        str += " = ";
+        if (!intFlag) {
+            str += "'";
+            str += regValue;
+            str += "'";
+        } else {
+            str += regValue.toInt ();
+        }
+    }
+    qDebug()<<"try to run sql "<<str;
+    QSqlQuery q(str, mDatabase);
+    QStringList list;
+    while (q.next ()) {
+        list.append (q.value (common.enumToStr ("MusicLibraryElement", targetColumn).replace ("E_", "")).toString ());
+    }
+
+    return list;
+}
+
 QString SQLite3DAO::listToString(const QStringList &list)
 {
     if (list.isEmpty ())
