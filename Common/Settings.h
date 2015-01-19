@@ -2,10 +2,9 @@
 #define SETTINGS_H
 
 #include <QObject>
+#include <QStringList>
 
 class QSettings;
-class QVariant;
-class QStringList;
 
 namespace PhoenixPlayer {
 
@@ -16,11 +15,14 @@ public:
     static Settings *getInstance();
     virtual ~Settings();
 
-    bool setMusicDir(const QStringList &dirList);
-    QStringList getMusicDirs();
+    Q_INVOKABLE bool setMusicDir(const QStringList &dirList);
+    Q_INVOKABLE QStringList getMusicDirs();
 
-    bool setLastPlayedSong(const QString &songHash);
-    QString getLastPlayedSong();
+    Q_INVOKABLE bool setLastPlayedSong(const QString &songHash);
+    Q_INVOKABLE QString getLastPlayedSong();
+
+    Q_INVOKABLE bool setCurrentPlayListHash(const QString &hash);
+    Q_INVOKABLE QString getPlayListHash();
 signals:
 
 public slots:

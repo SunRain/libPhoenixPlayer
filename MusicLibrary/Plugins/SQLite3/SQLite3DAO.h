@@ -44,12 +44,22 @@ public:
     bool deleteMetaData(const QString &hash);
     bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true);
     bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true);
-    SongMetaData *query(const QString &hash, const QString &table);
-    QStringList getSongHashList();
+    SongMetaData *querySongMeta(const QString &hash, const QString &table);
+    QStringList getSongHashList(const QString &playListHash);
 
-    QStringList queryColumn(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+    QStringList queryMusicLibrary(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
                         Common::MusicLibraryElement regColumn = Common::E_NULLElement,
                         const QString &regValue = "", bool skipDuplicates = true);
+
+    QStringList queryPlayList(Common::PlayListElement targetColumn = Common::E_PlayListNullElement,
+                              Common::PlayListElement regColumn = Common::E_PlayListNullElement,
+                              const QString &regValue = "");
+
+    bool updatePlayList(Common::PlayListElement targetColumn = Common::E_PlayListNullElement,
+                        const QString &hash = "", const QString &newValue = "", bool appendNewValues = true);
+
+    bool deletePlayList(const QString &playListHash);
+    bool insertPlayList(const QString &playListName);
 
     // IPlayListDAO interface
 public slots:
@@ -72,7 +82,7 @@ private:
     bool checkDatabase();
 private:
     QSqlDatabase mDatabase;
-    QStringList mExistSongHashes;
+    QStringList mExistSongHashes;   
 };
 
 } //SQLite3

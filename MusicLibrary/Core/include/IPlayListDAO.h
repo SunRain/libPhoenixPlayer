@@ -30,21 +30,48 @@ public:
     virtual bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true) = 0;
     virtual bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0) = 0;
     virtual bool deleteMetaData(const QString &hash) = 0;
-    virtual PhoenixPlayer::SongMetaData *query(const QString &hash, const QString &table) = 0;
+    virtual PhoenixPlayer::SongMetaData *querySongMeta(const QString &hash, const QString &table) = 0;
 
-    virtual QStringList getSongHashList() = 0;
+    virtual QStringList getSongHashList(const QString &playListHash) = 0;
 
     ///
-    /// \brief queryColumn 搜索音乐列表中targetColumn中的值,条件为regColumn值=regValue
+    /// \brief queryMusicLibrary 搜索音乐列表中targetColumn中的值,条件为regColumn值=regValue
     /// \param targetColumn
     /// \param regColumn
     /// \param regValue
     /// \param skipDuplicates 是否跳过重复的值
     /// \return
     ///
-    virtual QStringList queryColumn(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+    virtual QStringList queryMusicLibrary(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
                                 Common::MusicLibraryElement regColumn = Common::E_NULLElement,
                                 const QString &regValue = "", bool skipDuplicates = true) = 0;
+
+    ///
+    /// \brief queryPlayList 播放列表操作类,
+    /// \param targetColum 需要搜索的某一个列
+    /// \param regColumn 条件列
+    /// \param regValue 条件列的值
+    /// \return
+    ///
+    virtual QStringList queryPlayList(Common::PlayListElement targetColum = Common::E_PlayListNullElement,
+                                      Common::PlayListElement regColumn = Common::E_PlayListNullElement,
+                                      const QString &regValue = "") = 0;
+
+    ///
+    /// \brief updatePlayList 更新播放列表数据
+    /// \param targetColumn
+    /// \param hash
+    /// \param newValue
+    /// \param appendNewValues 是否将newValue添加到已有数据后面,否则就从已有数据里面删除newValue,只有当targetColumn = E_PlayListSongHashes才有效
+    /// \return
+    ///
+    //TODO: 怎么const QString后面也需要赋值了,不然编译通不过
+    virtual bool updatePlayList(Common::PlayListElement targetColumn = Common::E_PlayListNullElement,
+                                const QString &hash = "", const QString &newValue = "", bool appendNewValues = true) = 0;
+
+    virtual bool deletePlayList(const QString &playListHash) = 0;
+    virtual bool insertPlayList(const QString &playListName) = 0;
+
 signals:
 
 public slots:

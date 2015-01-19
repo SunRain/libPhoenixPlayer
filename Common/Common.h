@@ -11,6 +11,7 @@ class Common : public QObject
     Q_ENUMS(PlaybackState)
     Q_ENUMS(PlayMode)
     Q_ENUMS(MusicLibraryElement)
+    Q_ENUMS(PlayListElement)
 public:
     enum PlaybackState {
         PlaybackStopped = 0x0,  //播放停止
@@ -29,9 +30,15 @@ public:
         TypeStream                  //媒体文件
     };
 
+    enum PlayListElement {
+        E_PlayListNullElement = 0x0,
+        E_PlayListHash,
+        E_PlayListName,
+        E_PlayListSongHashes
+    };
+
     enum MusicLibraryElement {
         E_NULLElement = 0x0,
-        E_PlayListName,        //播放列表名称
         E_Hash,
         E_FilePath,
         E_FileName,

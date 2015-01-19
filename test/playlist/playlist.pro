@@ -10,7 +10,7 @@ QT       += core qml quick
 TARGET = testplaylist
 CONFIG   += console
 #CONFIG   -= app_bundle
-CONFIG += c++11
+#CONFIG += c++11
 
 TEMPLATE = app
 

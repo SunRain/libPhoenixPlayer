@@ -8,6 +8,7 @@
 
 #include "SQLite3DAO.h"
 #include "SongMetaData.h"
+#include "Util.h"
 
 namespace PhoenixPlayer {
 namespace PlayList {
@@ -140,10 +141,14 @@ bool SQLite3DAO::initDataBase()
         return false;
     }
 
+//    E_PlayListHash,
+//    E_PlayListName,
+//    E_PlayListSongHashes
     str = "create table ";
     str += PLAYLIST_TABLE_TAG;
     str += "(";
     str += "id integer primary key,";
+    str += "Hash TEXT,";
     str += "Name TEXT,";
     str += "SongHashes TEXT";
     str +=")";
@@ -201,7 +206,7 @@ bool SQLite3DAO::updateMetaData(PhoenixPlayer::SongMetaData *metaData, bool skip
         qDebug()<<"Can't update meta data due to metaData is empty or hash is empty";
         return false;
     }
-    SongMetaData *oriMeta = query (metaData->hash (), LIBRARY_TABLE_TAG);
+    SongMetaData *oriMeta = querySongMeta (metaData->hash (), LIBRARY_TABLE_TAG);
     QString str = "update ";
     str += LIBRARY_TABLE_TAG;
     str += "set ";
@@ -238,7 +243,7 @@ bool SQLite3DAO::updateMetaData(PhoenixPlayer::SongMetaData *metaData, bool skip
     if (q.exec ()) {
         return true;
     } else {
-        qDebug()<<"try to update song meta error [ "<<str<<" ]";
+        qDebug()<<"try to update song meta error [ "<<q.lastError ().text ()<<" ]";
         return false;
     }
 }
@@ -353,7 +358,7 @@ bool SQLite3DAO::insertMetaData(SongMetaData *metaData, bool skipDuplicates)
     }
 }
 
-PhoenixPlayer::SongMetaData *SQLite3DAO::query(const QString &hash, const QString &table)
+PhoenixPlayer::SongMetaData *SQLite3DAO::querySongMeta(const QString &hash, const QString &table)
 {
     if (!checkDatabase ())
         return 0;
@@ -401,12 +406,18 @@ PhoenixPlayer::SongMetaData *SQLite3DAO::query(const QString &hash, const QStrin
     return &meta;
 }
 
-QStringList SQLite3DAO::getSongHashList()
+QStringList SQLite3DAO::getSongHashList(const QString &playListHash)
 {
-    return mExistSongHashes;
+    if (playListHash.isEmpty ())
+        return mExistSongHashes;
+
+    QStringList list = queryPlayList (Common::E_PlayListSongHashes, Common::E_PlayListHash, playListHash);
+    if (list.isEmpty ())
+        return mExistSongHashes;
+    return list.first ().split ("||");
 }
 
-QStringList SQLite3DAO::queryColumn(Common::MusicLibraryElement targetColumn, Common::MusicLibraryElement regColumn, const QString &regValue, bool skipDuplicates)
+QStringList SQLite3DAO::queryMusicLibrary(Common::MusicLibraryElement targetColumn, Common::MusicLibraryElement regColumn, const QString &regValue, bool skipDuplicates)
 {
     if (!checkDatabase ())
         return QStringList();
@@ -445,6 +456,167 @@ QStringList SQLite3DAO::queryColumn(Common::MusicLibraryElement targetColumn, Co
     }
 
     return list;
+}
+
+QStringList SQLite3DAO::queryPlayList(Common::PlayListElement targetColumn, Common::PlayListElement regColumn, const QString &regValue)
+{
+    if (!checkDatabase ())
+        return QStringList();
+    Common common;
+
+//    str += "Hash TEXT,";
+//    str += "Name TEXT,";
+//    str += "SongHashes TEXT";
+
+    QString str = "select ";
+    str += common.enumToStr ("PlayListElement", targetColumn).replace ("E_PlayList", "");
+    str += " from ";
+    str += PLAYLIST_TABLE_TAG;
+    if (!regValue.isEmpty ()) {
+        str += " where ";
+        str += common.enumToStr ("PlayListElement", regColumn).replace ("E_PlayList", "");
+        str += QString(" = '%1'").arg (regValue);
+    }
+
+    qDebug()<<"try to run sql "<<str;
+
+    QSqlQuery q(str, mDatabase);
+    QStringList list;
+    while (q.next ()) {
+        list.append (q.value (common.enumToStr ("PlayListElement", targetColumn).replace ("E_PlayList", "")).toString ());
+    }
+    if (targetColumn == Common::E_PlayListSongHashes) {
+        list = list.first ().split ("||");
+    }
+    return list;
+}
+
+bool SQLite3DAO::updatePlayList(Common::PlayListElement targetColumn, const QString &hash, const QString &newValue, bool appendNewValues)
+{
+    if (!checkDatabase ())
+        return false;
+
+    if (targetColumn == Common::E_PlayListNullElement
+            || hash.isEmpty () || newValue.isEmpty ())
+        return true;
+
+    QString targeValue = newValue;
+    //hash1||hash2||hash3
+    if (targetColumn == Common::E_PlayListSongHashes) {
+        if (appendNewValues) {
+            //转换为list
+            QStringList list = queryPlayList (targetColumn, Common::E_PlayListHash, hash); //得到播放数据的list
+            if (!list.isEmpty ()) {
+                targeValue = QString(); //重置空
+                if (list.size () == 1) {
+                    targeValue = QString("%1||%2").arg (list.first ()).arg (newValue);
+                } else {
+                    for (int i=0; i<list.size () -1; ++i) {
+                        targeValue += QString("%1||").arg (list.at (i));
+                    }
+                    targeValue += newValue;
+                }
+            }
+        } else {
+            QStringList list = queryPlayList (targetColumn, Common::E_PlayListHash, hash); //得到播放数据的list
+            if (!list.isEmpty () && list.removeOne (targeValue)) {
+                targeValue = QString(); //重置空
+                if (!list.isEmpty ()) { //因为删除了一个数据,所以再次检测列表是否为空
+                    if (list.size () == 1) {
+                        targeValue = list.first ();
+                    } else {
+                        for (int i=0; i<list.size () -2; ++i) {
+                            targeValue += QString("%1||").arg (list.at (i));
+                        }
+                        targeValue += list.last ();
+                    }
+                }
+            }
+        }
+    }
+
+    Common common;
+    QString str = "update ";
+    str += PLAYLIST_TABLE_TAG;
+    str += "set ";
+    str += common.enumToStr ("PlayListElement", targetColumn).replace ("E_PlayList", "");
+    str += QString(" = '%1' ").arg (targeValue);
+    str += QString("where Hash = '%1'").arg (hash);
+
+    QSqlQuery q(str, mDatabase);
+    if (q.exec ()) {
+        return true;
+    } else {
+        qDebug()<<"try to update song meta error [ "<<q.lastError ().text ()<<" ]";
+        return false;
+    }
+}
+
+bool SQLite3DAO::deletePlayList(const QString &playListHash)
+{
+    if (!checkDatabase ())
+        return false;
+
+    if (playListHash.isEmpty ()) {
+        qDebug()<<"hash is empty";
+        return false;
+    }
+
+    QString str = QString("delete from %1 where Hash = '%2'").arg (PLAYLIST_TABLE_TAG).arg (playListHash);
+    QSqlQuery q(str, mDatabase);
+    if (q.exec ()) {
+        return true;
+    } else {
+        qDebug()<<"delete play list error "<<q.lastError ().text ();
+        return false;
+    }
+}
+
+bool SQLite3DAO::insertPlayList(const QString &playListName)
+{
+    if (!checkDatabase ())
+        return false;
+
+    if (playListName.isEmpty ()) {
+        qDebug()<<"Can't make empty name play list";
+        return false;
+    }
+    QString hash = Util::calculateHash (playListName);
+
+    /*
+     * 获取当前已经存在的播放列表hash
+     */
+    QString str = QString("select Hash from %1").arg (PLAYLIST_TABLE_TAG);
+    QSqlQuery q(str, mDatabase);
+    while (q.next ()) {
+        if (hash == q.value ("Hash").toString ()) {
+            qDebug()<<"PlayList "<<playListName<<" seems exists";
+            return false;
+        }
+    }
+
+//    str += "Hash TEXT,";
+//    str += "Name TEXT,";
+//    str += "SongHashes TEXT";
+    str = "insert into ";
+    str += PLAYLIST_TABLE_TAG;
+    str += "(";
+    str += "Hash, ";
+    str += "Name, ";
+    str += "SongHashes";
+    str += ")";
+    str += " values(";
+    str += QString("'%1', ").arg (hash);
+    str += QString("'%1', ").arg (playListName);
+    str += QString("'%1'").arg (QString());
+    str += ")";
+
+    if (q.exec (str)) {
+        return true;
+    } else {
+        qDebug()<<"try to insert play list error [ "<<q.lastError ().text ()<<" ]";
+        return false;
+    }
 }
 
 QString SQLite3DAO::listToString(const QStringList &list)

@@ -91,13 +91,65 @@ import com.sunrain.playlist 1.0
             width: 55
             height: 56
             Text {
-                text: qsTr("测试query")
+                x: -22
+                y: 8
+                text: qsTr("测试音乐库query")
             }
             onClicked: {
                 //querySongMetaElement(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
                 //const QString &hash = "", bool skipDuplicates = true);
                 var method = Common.E_FileName;
-                musicLibraryManager.querySongMetaElement(method, "" , true);
+                musicLibraryManager.querySongMetaElementByIndex(method, "" , true);
+            }
+        }
+
+        MouseArea {
+            id: mouseArea6
+            x: 137
+            y: 138
+            width: 136
+            height: 25
+            Text {
+                text: qsTr("测试播放列表query")
+            }
+            onClicked: {
+                //querySongMetaElement(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+                //const QString &hash = "", bool skipDuplicates = true);
+                var method = Common.E_PlayListName;
+                console.log("=== method is " + method );
+                musicLibraryManager.queryPlayListElementByIndex(method, "");
+            }
+        }
+
+        MouseArea {
+            id: mouseArea7
+            x: 26
+            y: 223
+            width: 85
+            height: 75
+            Text {
+                text: qsTr("添加播放列表")
+            }
+            onClicked: {
+                //querySongMetaElement(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+                //const QString &hash = "", bool skipDuplicates = true);
+                musicLibraryManager.createPlayList("测试列表");
+            }
+        }
+
+        MouseArea {
+            id: mouseArea8
+            x: 157
+            y: 223
+            width: 116
+            height: 75
+            Text {
+                text: qsTr("删除播放列表")
+            }
+            onClicked: {
+                //querySongMetaElement(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+                //const QString &hash = "", bool skipDuplicates = true);
+//                musicLibraryManager.createPlayList("测试列表");
             }
         }
     }
