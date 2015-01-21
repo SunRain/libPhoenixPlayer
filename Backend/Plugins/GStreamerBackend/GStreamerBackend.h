@@ -100,11 +100,11 @@ public slots:
     void pause();
     void setVolume(int vol = 0);
     void setPosition(quint64 posMs = 0);
-    void changeMedia(Core::BaseMediaObject *obj = 0, quint64 startMs = 0, bool startPlay = false);
+    void changeMedia(PlayBackend::BaseMediaObject *obj = 0, quint64 startMs = 0, bool startPlay = false);
 
 private:
     void init_play_pipeline();
-    bool set_uri(Core::BaseMediaObject *obj = 0, bool startPlay = false);
+    bool set_uri(PlayBackend::BaseMediaObject *obj = 0, bool startPlay = false);
 private:
     GstElement* _pipeline;
     GstElement* _equalizer;

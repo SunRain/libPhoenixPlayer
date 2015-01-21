@@ -7,7 +7,7 @@
 #include "PlayBackendLoader.h"
 
 namespace PhoenixPlayer{
-namespace Core {
+namespace PlayBackend {
 
 PlayBackendLoader *PlayBackendLoader::getInstance()
 {

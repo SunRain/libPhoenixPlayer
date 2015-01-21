@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    PhoenixPlayer::Core::BaseMediaObject *obj = new PhoenixPlayer::Core::BaseMediaObject();
+    PhoenixPlayer::PlayBackend::BaseMediaObject *obj = new PhoenixPlayer::PlayBackend::BaseMediaObject();
 //    obj->setFileName("csyy.mp3");
 //    obj->setFilePath("/media/wangguojian/MEDIA/music");
 //    obj->setMediaType(PhoenixPlayerCore::Common::TypeLocalFile);
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     obj->setMediaType(PhoenixPlayer::Common::TypeUrl);
 
 
-    PhoenixPlayer::Core::PlayBackendLoader *loader = new PhoenixPlayer::Core::PlayBackendLoader();
+    PhoenixPlayer::PlayBackend::PlayBackendLoader *loader = new PhoenixPlayer::PlayBackend::PlayBackendLoader();
     PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getCurrentBackend();
     if (!backend) {
         qDebug() << "backend  is null";

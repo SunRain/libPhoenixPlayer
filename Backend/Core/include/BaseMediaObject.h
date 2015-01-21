@@ -4,7 +4,7 @@
 #include <QObject>
 #include "Common.h"
 namespace PhoenixPlayer {
-namespace Core {
+namespace PlayBackend {
 class BaseMediaObject : public QObject
 {
     Q_OBJECT
@@ -31,6 +31,6 @@ private:
 };
 } //Core
 } //PhoenixPlayer
-Q_DECLARE_INTERFACE(PhoenixPlayer::Core::BaseMediaObject, "PhoenixPlayer.Core.BaseMediaObject/1.0")
+Q_DECLARE_INTERFACE(PhoenixPlayer::PlayBackend::BaseMediaObject, "PhoenixPlayer.PlayBackend.BaseMediaObject/1.0")
 
 #endif // BASEMEDIAOBJECT_H

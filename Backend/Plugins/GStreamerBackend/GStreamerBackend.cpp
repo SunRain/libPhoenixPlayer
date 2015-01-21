@@ -316,7 +316,7 @@ void GStreamerBackend::setPosition(quint64 posMs)
     emit positionChanged(posMs);
 }
 
-void GStreamerBackend::changeMedia(Core::BaseMediaObject *obj,
+void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
                                                       quint64 startMs,
                                                       bool startPlay)
 {
@@ -521,7 +521,7 @@ void GStreamerBackend::init_play_pipeline()
     qDebug() << "Engine: constructor finished: " << success;
 }
 
-bool GStreamerBackend::set_uri(Core::BaseMediaObject *obj, bool startPlay)
+bool GStreamerBackend::set_uri(PlayBackend::BaseMediaObject *obj, bool startPlay)
 {
     Q_UNUSED(startPlay)
     // Gstreamer needs an URI

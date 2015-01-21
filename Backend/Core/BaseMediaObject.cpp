@@ -1,6 +1,6 @@
 #include "BaseMediaObject.h"
 namespace PhoenixPlayer {
-namespace Core {
+namespace PlayBackend {
 BaseMediaObject::BaseMediaObject(QObject *parent) : QObject(parent)
 {
 
@@ -50,5 +50,5 @@ void BaseMediaObject::setMediaType(const Common::MediaType &mediaType)
     mMediaType = mediaType;
 }
 
-}//Core
+}//PlayBackend
 } //PhoenixPlayer

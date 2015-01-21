@@ -24,7 +24,7 @@ signals:
     void positionChanged(quint64 posMs = 0);
     void volumeChanged(int vol);
     //     void message(QMessageBox::Icon icon, const QString &title, const QString &msg) = 0;
-    void mediaChanged(Core::BaseMediaObject *obj = 0);
+    void mediaChanged(PlayBackend::BaseMediaObject *obj = 0);
     void finished();
     void failed();
     void stateChanged(Common::PlaybackState state);
@@ -46,7 +46,7 @@ public slots:
     virtual void pause() = 0;
     virtual void setVolume(int vol = 0) = 0;
     virtual void setPosition(quint64 posMs = 0) = 0;
-    virtual void changeMedia(Core::BaseMediaObject *obj = 0,quint64 startMs = 0, bool startPlay = false) = 0;
+    virtual void changeMedia(PlayBackend::BaseMediaObject *obj = 0,quint64 startMs = 0, bool startPlay = false) = 0;
     //    virtual void jump(int where, bool percent = true) = 0;
     //    virtual void changeTrack(const SongMetaDate&, int pos_sec = 0, bool start_play = true) = 0;
     //    virtual void changeTrack(const QString&, int pos_sec = 0, bool start_play = true ) = 0;

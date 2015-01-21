@@ -7,7 +7,7 @@
 #include "IPlayBackend.h"
 
 namespace PhoenixPlayer{
-namespace Core {
+namespace PlayBackend {
 
 class PlayBackendLoader : public QObject
 {
@@ -35,6 +35,6 @@ private:
 };
 } //Core
 } //PhoenixPlayer
-Q_DECLARE_INTERFACE(PhoenixPlayer::Core::PlayBackendLoader, "PhoenixPlayer.Core.PlayBackendLoader/1.0")
+Q_DECLARE_INTERFACE(PhoenixPlayer::PlayBackend::PlayBackendLoader, "PhoenixPlayer.PlayBackend.PlayBackendLoader/1.0")
 
 #endif // BACKENDLOADER_H
