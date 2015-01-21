@@ -23,6 +23,9 @@ public:
 
     Q_INVOKABLE bool setCurrentPlayListHash(const QString &hash);
     Q_INVOKABLE QString getPlayListHash();
+
+    Q_INVOKABLE bool setPlayBackend(const QString &backendName);
+    Q_INVOKABLE QString getCurrentPlayBackend();
 signals:
 
 public slots:

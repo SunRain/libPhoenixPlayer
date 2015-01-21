@@ -11,6 +11,7 @@ namespace PhoenixPlayer {
 const char *KEY_MUSIC_DIR = "MusicDir";
 const char *KEY_LAST_SONG = "LastPlayedSongHash";
 const char *KEY_PLAY_LIST = "CurrentPlayListHash";
+const char *KEY_PLAY_BACKEND = "CurrentPlayBackend";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
@@ -80,5 +81,17 @@ bool Settings::setCurrentPlayListHash(const QString &hash)
 QString Settings::getPlayListHash()
 {
     return mSettings->value (KEY_PLAY_LIST, QString()).toString ();
+}
+
+bool Settings::setPlayBackend(const QString &backendName)
+{
+    mSettings->setValue (KEY_PLAY_BACKEND, backendName);
+    mSettings->sync ();
+    return true;
+}
+
+QString Settings::getCurrentPlayBackend()
+{
+    return mSettings->value (KEY_PLAY_BACKEND, QString()).toString ();
 }
 } //PhoenixPlayer

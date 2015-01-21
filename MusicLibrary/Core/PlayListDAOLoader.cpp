@@ -13,6 +13,7 @@ namespace PlayList {
 
 PlayListDAOLoader::PlayListDAOLoader(QObject *parent) : QObject(parent)
 {
+    //TODO: 根据系统来设置插件的默认路径
     mPluginPath = QString("%1/plugins").arg(QCoreApplication::applicationDirPath ());
     mCurrentPluginIndex = -1;
     initPlugin ();

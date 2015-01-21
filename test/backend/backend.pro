@@ -32,5 +32,5 @@ unix {
 #    main.cpp \
 
 #include(../backend/backend.pri)
-include(../../Backend/Core/Core.pri)
+include(../../Backend/Core/BackendCore.pri)
 include(../../Common/Common.pri)

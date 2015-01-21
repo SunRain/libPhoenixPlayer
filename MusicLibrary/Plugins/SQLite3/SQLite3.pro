@@ -6,7 +6,7 @@ QT += sql
 TARGET = PlayListSQLite3Plugin
 
 #include(../../Core/interface.pri)
-include(../../Core/Core.pri)
+include(../../Core/MusicLibraryCore.pri)
 include(../../../Common/Common.pri)
 include(SQLite3.pri)
 

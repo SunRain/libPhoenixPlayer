@@ -20,6 +20,7 @@ CONFIG += ordered
 SUBDIRS += \
     Backend \
     MusicLibrary \
+    Player \
     test
 
 #gstreamer {

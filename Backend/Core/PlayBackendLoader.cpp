@@ -48,7 +48,9 @@ void PlayBackendLoader::setNewBackend(const QString &newBackendName)
 }
 
 PlayBackendLoader::PlayBackendLoader(QObject *parent)
+    : QObject(parent)
 {
+    //TODO: 根据系统来设置插件的默认路径
     mBackendPath = QString("%1/plugins").arg(QCoreApplication::applicationDirPath());
     mCurrentBackendIndex = -1;
     initBackend();
