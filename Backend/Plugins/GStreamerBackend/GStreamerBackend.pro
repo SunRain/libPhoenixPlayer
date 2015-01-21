@@ -4,7 +4,7 @@ CONFIG += plugin
 TARGET = GStreamerBackend
 
 include(../../Core/backendInterface.pri)
-include(../../Common/Common.pri)
+include(../../../Common/Common.pri)
 include(GStreamerBackend.pri)
 
 INCLUDEPATH += \
@@ -20,7 +20,7 @@ unix {
         /usr/include/libxml2
 }
 
-DESTDIR = ../../plugins
+DESTDIR = ../../../plugins
 
 #PlayBackend
 win32 {

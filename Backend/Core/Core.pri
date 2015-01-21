@@ -11,7 +11,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/BasePlayer.cpp \
-    $$PWD/MetaData.cpp \
+#    $$PWD/MetaData.cpp \
     $$PWD/PlayBackendLoader.cpp \
     $$PWD/BaseMediaObject.cpp
 

@@ -1,14 +1,10 @@
+
 TEMPLATE = subdirs
+CONFIG += ordered
 
-gstreamer.file = GStreamerBackend/GStreamerBackend.pro
-SUBDIRS += gstreamer
+SUBDIRS += \
+##    Core \
+    Plugins
 
-#phonon.file = phonon/pluginPhonon.pro
-#SUBDIRS += phonon
 
-#vlc.file = vlc/pluginVlc.pro
-#SUBDIRS += vlc
-
-#taglib.file = taglib/pluginTaglib.pro
-#SUBDIRS += taglib
 
