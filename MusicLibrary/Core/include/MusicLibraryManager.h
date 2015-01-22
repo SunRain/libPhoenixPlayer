@@ -9,7 +9,7 @@
 
 class QThread;
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 
 class IPlayListDAO;
 class DiskLookup;
@@ -113,7 +113,7 @@ private:
     QString mCurrentPlayListHash;
 };
 
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer
 
 #endif // MUSICLIBRARYMANAGER_H

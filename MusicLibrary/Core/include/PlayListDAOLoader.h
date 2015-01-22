@@ -6,7 +6,7 @@
 #include "IPlayListDAO.h"
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 
 class IPlayListDAO;
 class PlayListDAOLoader : public QObject
@@ -36,8 +36,8 @@ private:
     int mCurrentPluginIndex;
 };
 
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer
-Q_DECLARE_INTERFACE(PhoenixPlayer::PlayList::PlayListDAOLoader, "PhoenixPlayer.PlayList.PlayListDAOLoader/1.0")
+Q_DECLARE_INTERFACE(PhoenixPlayer::MusicLibrary::PlayListDAOLoader, "PhoenixPlayer.MusicLibrary.PlayListDAOLoader/1.0")
 
 #endif // PLAYLISTDAOLOADER_H

@@ -1,6 +1,6 @@
 #include "IPlayListDAO.h"
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 
 IPlayListDAO::IPlayListDAO(QObject *parent) : QObject(parent)
 {

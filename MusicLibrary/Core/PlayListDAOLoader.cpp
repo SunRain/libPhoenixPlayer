@@ -8,7 +8,7 @@
 #include "PlayListDAOLoader.h"
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 
 
 PlayListDAOLoader::PlayListDAOLoader(QObject *parent) : QObject(parent)
@@ -120,5 +120,5 @@ void PlayListDAOLoader::initPlugin()
     }
 }
 
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer

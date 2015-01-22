@@ -11,7 +11,7 @@
 #include "Util.h"
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 namespace SQLite3 {
 
 SQLite3DAO::SQLite3DAO(QObject *parent)
@@ -685,5 +685,5 @@ bool SQLite3DAO::checkDatabase()
 
 
 } //SQLite3
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer

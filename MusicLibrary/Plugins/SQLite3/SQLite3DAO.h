@@ -11,7 +11,7 @@ class QStringList;
 class QString;
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 namespace SQLite3 {
 
 #define DAO_NAME "SQLite3"
@@ -26,8 +26,8 @@ class PhoenixPlayer::Common;
 class SQLite3DAO : public IPlayListDAO
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayList.SQLite3DAO" FILE "playlistsqlite3plugin.json")
-    Q_INTERFACES(PhoenixPlayer::PlayList::IPlayListDAO)
+    Q_PLUGIN_METADATA(IID "PhoenixPlayer.MusicLibrary.SQLite3DAO" FILE "playlistsqlite3plugin.json")
+    Q_INTERFACES(PhoenixPlayer::MusicLibrary::IPlayListDAO)
 public:
     SQLite3DAO(QObject *parent = 0);
     static SQLite3DAO *getInstance();
@@ -86,6 +86,6 @@ private:
 };
 
 } //SQLite3
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer
 #endif // SQLITE3DAO_H

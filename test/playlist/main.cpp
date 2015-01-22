@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<PhoenixPlayer::Common>("com.sunrain.playlist", 1, 0, "Common", "");
 
     Settings *settings = Settings::getInstance ();
-    PlayList::MusicLibraryManager *manager = PlayList::MusicLibraryManager::getInstance ();
+    MusicLibrary::MusicLibraryManager *manager = MusicLibrary::MusicLibraryManager::getInstance ();
     manager->setSettings (settings);
 
     Common c;

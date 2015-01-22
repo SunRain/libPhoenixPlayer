@@ -9,7 +9,7 @@ class QStringList;
 class QMimeDatabase;
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 
 class DiskLookup : public QObject
 {
@@ -46,6 +46,6 @@ private:
     QMimeDatabase mQMimeDatabase;
 };
 
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer
 #endif // DISKLOOKUP_H

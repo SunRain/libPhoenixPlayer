@@ -12,7 +12,7 @@ class QVariant;
 class QSqlQuery;
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 
 class IPlayListDAO : public QObject
 {
@@ -89,10 +89,10 @@ public slots:
 
 };
 
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer
 
-Q_DECLARE_INTERFACE(PhoenixPlayer::PlayList::IPlayListDAO, "PhoenixPlayer.PlayList.IPlayListDAO/1.0")
+Q_DECLARE_INTERFACE(PhoenixPlayer::MusicLibrary::IPlayListDAO, "PhoenixPlayer.MusicLibrary.IPlayListDAO/1.0")
 
 
 #endif // IPLAYLISTDAO_H

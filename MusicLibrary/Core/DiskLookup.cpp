@@ -9,7 +9,7 @@
 #include "DiskLookup.h"
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 DiskLookup::DiskLookup(QObject *parent) : QObject(parent)
 {
 //    mLookupLock = false;
@@ -97,5 +97,5 @@ void DiskLookup::scanDir(const QString &path)
     }
 }
 
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer

@@ -2,12 +2,14 @@
 TEMPLATE = lib
 CONFIG += plugin
 
+QT       += core
+
 TARGET = PhoenixPlayer
 
 include (Player.pri)
 include (../Backend/Core/BackendCore.pri)
 include (../Common/Common.pri)
-include (../MusicLibrary/Core/MusicLibrary.pri)
+include (../MusicLibrary/Core/MusicLibraryCore.pri)
 
 unix {
 #    CONFIG += link_pkgconfig
@@ -17,4 +19,4 @@ unix {
 
 }
 
-DESTDIR = ../../../plugins
+DESTDIR = ../plugins

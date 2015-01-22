@@ -13,7 +13,7 @@
 #include "SongMetaData.h"
 
 namespace PhoenixPlayer {
-namespace PlayList {
+namespace MusicLibrary {
 
 MusicLibraryManager::MusicLibraryManager(QObject *parent)
     : QObject(parent)
@@ -269,6 +269,6 @@ void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
 
 
 
-} //PlayList
+} //MusicLibrary
 } //PhoenixPlayer
 
