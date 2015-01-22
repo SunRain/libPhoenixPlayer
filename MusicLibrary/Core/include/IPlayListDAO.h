@@ -5,13 +5,13 @@
 #include <QVariant>
 #include <QtSql/QSqlQuery>
 
-#include "SongMetaData.h"
 #include "Common.h"
 
 class QVariant;
 class QSqlQuery;
 
 namespace PhoenixPlayer {
+class SongMetaData;
 namespace MusicLibrary {
 
 class IPlayListDAO : public QObject
@@ -26,11 +26,11 @@ public:
 
     virtual bool initDataBase() = 0;
 
-    virtual bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true) = 0;
-    virtual bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true) = 0;
-    virtual bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0) = 0;
+    virtual bool insertMetaData(SongMetaData *metaData = 0, bool skipDuplicates = true) = 0;
+    virtual bool updateMetaData(SongMetaData *metaData = 0, bool skipEmptyValue = true) = 0;
+    virtual bool deleteMetaData(SongMetaData *metaData = 0) = 0;
     virtual bool deleteMetaData(const QString &hash) = 0;
-    virtual PhoenixPlayer::SongMetaData *querySongMeta(const QString &hash, const QString &table) = 0;
+    virtual SongMetaData *querySongMeta(const QString &hash, const QString &table) = 0;
 
     virtual QStringList getSongHashList(const QString &playListHash) = 0;
 

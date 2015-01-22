@@ -11,6 +11,7 @@
 #include "Settings.h"
 #include "Util.h"
 #include "SongMetaData.h"
+#include "Common.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {

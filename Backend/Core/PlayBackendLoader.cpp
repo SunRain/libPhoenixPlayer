@@ -5,6 +5,7 @@
 #include <QPluginLoader>
 
 #include "PlayBackendLoader.h"
+#include "IPlayBackend.h"
 
 namespace PhoenixPlayer{
 namespace PlayBackend {

@@ -5,12 +5,13 @@
 
 #include "IPlayListDAO.h"
 
-
 class QSqlDatabase;
 class QStringList;
 class QString;
 
 namespace PhoenixPlayer {
+class SongMetaData;
+class Common;
 namespace MusicLibrary {
 namespace SQLite3 {
 
@@ -21,8 +22,6 @@ namespace SQLite3 {
 #define LIBRARY_TABLE_TAG "LIBRARY"
 #define PLAYLIST_TABLE_TAG "PLAYLIST"
 
-class PhoenixPlayer::SongMetaData;
-class PhoenixPlayer::Common;
 class SQLite3DAO : public IPlayListDAO
 {
     Q_OBJECT
@@ -40,10 +39,10 @@ public:
     bool initDataBase();
     bool openDataBase();
 
-    bool deleteMetaData(PhoenixPlayer::SongMetaData *metaData = 0);
+    bool deleteMetaData(SongMetaData *metaData = 0);
     bool deleteMetaData(const QString &hash);
-    bool updateMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipEmptyValue = true);
-    bool insertMetaData(PhoenixPlayer::SongMetaData *metaData = 0, bool skipDuplicates = true);
+    bool updateMetaData(SongMetaData *metaData = 0, bool skipEmptyValue = true);
+    bool insertMetaData(SongMetaData *metaData = 0, bool skipDuplicates = true);
     SongMetaData *querySongMeta(const QString &hash, const QString &table);
     QStringList getSongHashList(const QString &playListHash);
 

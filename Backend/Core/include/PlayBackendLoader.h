@@ -16,7 +16,7 @@ public:
     static PlayBackendLoader *getInstance();
     explicit PlayBackendLoader(QObject *parent = 0);
     void setBackendPluginPath(const QString &path);
-    PlayBackend::IPlayBackend *getCurrentBackend();
+    IPlayBackend *getCurrentBackend();
 signals:
     void signalPlayBackendChanged();
 
@@ -27,7 +27,7 @@ private:
     virtual ~PlayBackendLoader();
     void initBackend();
 private:
-    QList <PlayBackend::IPlayBackend*> mBackendList;
+    QList <IPlayBackend*> mBackendList;
     QString mBackendPath;
     QString mCurrentBackendName;
     int mCurrentBackendIndex;

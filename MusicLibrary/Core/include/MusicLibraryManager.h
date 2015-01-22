@@ -4,11 +4,12 @@
 #include <QObject>
 #include <QPointer>
 
-#include "Settings.h"
+//#include "Settings.h"
 #include "Common.h"
 
 class QThread;
 namespace PhoenixPlayer {
+class Settings;
 namespace MusicLibrary {
 
 class IPlayListDAO;

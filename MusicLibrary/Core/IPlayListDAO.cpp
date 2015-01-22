@@ -1,4 +1,6 @@
 #include "IPlayListDAO.h"
+#include "SongMetaData.h"
+#include "Common.h"
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
