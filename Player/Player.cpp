@@ -1,3 +1,6 @@
+
+#include <QDebug>
+
 #include "Player.h"
 
 #include "Common.h"
@@ -36,6 +39,10 @@ void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
     if (manager != 0) {
         mLibraryManager = manager;
     }
+    connect (mLibraryManager.data (), &MusicLibrary::MusicLibraryManager::playingSongChanged, [this] () {
+        QString playingHash = mLibraryManager->playingSongHash ();
+        qDebug()<<"Playing song changed " << playingHash;
+    });
 }
 
 void Player::setSettings(Settings *settings)

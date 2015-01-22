@@ -104,7 +104,7 @@ bool MusicLibraryManager::deletePlayList(const QString &playListHash)
     return mPlayListDAO->deletePlayList (playListHash);
 }
 
-QString MusicLibraryManager::playingSong()
+QString MusicLibraryManager::playingSongHash()
 {
     if (mCurrentSongHash.isEmpty ()) {
         if (!mSettings.isNull ()) {

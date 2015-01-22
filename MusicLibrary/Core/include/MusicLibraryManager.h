@@ -46,7 +46,7 @@ public:
     /// \brief playingSong 返回当前播放的歌曲hash,如果当前未播放,则返回数据库中的第一首歌曲,或者播放器上次播放的歌曲
     /// \return
     ///
-    Q_INVOKABLE QString playingSong();
+    Q_INVOKABLE QString playingSongHash();
 
     Q_INVOKABLE void nextSong();
     Q_INVOKABLE void preSong();
