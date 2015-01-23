@@ -5,6 +5,7 @@ CONFIG += plugin
 QT       += core
 
 TARGET = PhoenixPlayer
+QMAKE_CXXFLAGS += -std=c++0x
 
 include (Player.pri)
 include (../Backend/Core/BackendCore.pri)

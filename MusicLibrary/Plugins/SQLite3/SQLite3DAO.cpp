@@ -1,5 +1,6 @@
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QStringList>
 
 #include <QLatin1String>
 #include <QtAlgorithms>

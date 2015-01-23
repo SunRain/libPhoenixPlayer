@@ -3,11 +3,13 @@
 
 #include <QObject>
 #include <QPointer>
+#include <QStringList>
 
 //#include "Settings.h"
 #include "Common.h"
 
 class QThread;
+
 namespace PhoenixPlayer {
 class Settings;
 namespace MusicLibrary {

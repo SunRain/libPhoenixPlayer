@@ -1,7 +1,9 @@
 TEMPLATE = subdirs
 
+!win32 {
 gstreamer.file = GStreamerBackend/GStreamerBackend.pro
 SUBDIRS += gstreamer
+}
 
 #phonon.file = phonon/pluginPhonon.pro
 #SUBDIRS += phonon

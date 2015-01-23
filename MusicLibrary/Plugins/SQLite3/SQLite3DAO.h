@@ -2,11 +2,11 @@
 #define SQLITE3DAO_H
 
 #include <QObject>
+#include <QStringList>
 
 #include "IPlayListDAO.h"
 
 class QSqlDatabase;
-class QStringList;
 class QString;
 
 namespace PhoenixPlayer {

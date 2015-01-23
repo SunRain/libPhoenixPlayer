@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QDir>
 #include <qobject.h>
+#include <QStringList>
 
 #include "PlayListDAOLoader.h"
 
