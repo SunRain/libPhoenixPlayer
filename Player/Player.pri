@@ -1,11 +1,12 @@
 
 INCLUDEPATH += $$PWD/include
 
-HEADERS += \
-    $$PWD/Player.h
 
 SOURCES += \
     $$PWD/Player.cpp
+
+HEADERS += \
+    $$PWD/include/Player.h
 
 
 

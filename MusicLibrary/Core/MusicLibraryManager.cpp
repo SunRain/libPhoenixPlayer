@@ -114,6 +114,7 @@ QString MusicLibraryManager::playingSongHash()
                 && !mPlayListDAO->getSongHashList (mCurrentPlayListHash).isEmpty ())
             mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).first ();
     }
+    qDebug()<<"playingSongHash is "<<mCurrentSongHash;
     return mCurrentSongHash;
 }
 
@@ -241,6 +242,10 @@ bool MusicLibraryManager::init()
     connect (mDiskLooKup, &DiskLookup::pending, mPlayListDAO, &IPlayListDAO::beginTransaction);
     connect (mDiskLooKup, SIGNAL(finished()), this, SIGNAL(searchingFinished()));
     connect (mDiskLooKup, &DiskLookup::finished, mPlayListDAO, &IPlayListDAO::commitTransaction);
+
+//    //发送一个songhash change的信号,以便于qml界面在初始化后刷新
+//    emit playingSongChanged ();
+//    emit playListChanged ();
 }
 
 void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
@@ -258,17 +263,6 @@ void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
 
     mPlayListDAO->insertMetaData (&data);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 } //MusicLibrary
 } //PhoenixPlayer

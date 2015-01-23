@@ -26,7 +26,7 @@ namespace GStreamer {
 #define EQ_TYPE_KEQ 0
 #define EQ_TYPE_10B 1
 
-#define BACKEND_NAME "GStreamer Backend"
+#define BACKEND_NAME "GStreamerBackend"
 #define BACKEND_VERSION "0.1"
 
 //float f_channel[2];

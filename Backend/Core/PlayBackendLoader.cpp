@@ -26,6 +26,7 @@ PlayBackend::IPlayBackend *PlayBackendLoader::getCurrentBackend()
 {
     if (mCurrentBackendIndex < 0)
         return 0;
+    qDebug()<<"CurrentBackend index "<<mCurrentBackendIndex <<" Name "<<mCurrentBackendName;
     return mBackendList.at(mCurrentBackendIndex);
 }
 
@@ -42,7 +43,7 @@ void PlayBackendLoader::setNewBackend(const QString &newBackendName)
         if (name == newBackendName.toLower()) {
             mCurrentBackendIndex = i;
             mCurrentBackendName = name;
-            emit signalPlayBackendChanged(/*newBackendName*/);
+            emit signalPlayBackendChanged();
             break;
         }
     }

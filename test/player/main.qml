@@ -16,10 +16,10 @@ ApplicationWindow {
             searchText.text = path + "/" + file;
         }
         onPlayingSongChanged: {
-            songtitle.text = musicLibraryManager.playingSong();
+            songtitle.text = musicLibraryManager.querySongMetaElementByIndex(Common.E_FileName, musicLibraryManager.playingSongHash(), true);
         }
         onSearchingFinished: {
-              searchText.text = "搜索完成, 当前音乐 " + musicLibraryManager.playingSong();
+            searchText.text = "搜索完成, 当前音乐 " + musicLibraryManager.playingSong();
         }
     }
     Component.onCompleted: {
@@ -29,6 +29,8 @@ ApplicationWindow {
         for (var i=0; i<result.length; i++) {
             libraryModel.append({"Hash":result[i]});
         }
+
+        songtitle.text = musicLibraryManager.querySongMetaElementByIndex(Common.E_FileName, musicLibraryManager.playingSongHash(), true);
     }
 
     ListModel {id: libraryModel}
@@ -55,6 +57,7 @@ ApplicationWindow {
         x: 112
         y: 117
         text: qsTr("Next")
+        onClicked: {musicLibraryManager.nextSong();}
     }
 
     Button {
@@ -62,6 +65,7 @@ ApplicationWindow {
         x: 237
         y: 78
         text: qsTr("Pre")
+        onClicked: {musicLibraryManager.preSong();}
     }
 
     Button {
@@ -69,6 +73,7 @@ ApplicationWindow {
         x: 242
         y: 117
         text: qsTr("Radom")
+        onClicked: {musicLibraryManager.randomSong();}
     }
 
     Text {
@@ -77,7 +82,6 @@ ApplicationWindow {
         y: 23
         width: 203
         height: 24
-        text: qsTr("SongTitle")
         font.pixelSize: 12
     }
 
@@ -113,7 +117,7 @@ ApplicationWindow {
             }
             Component.onCompleted: {
                 var method = Common.E_FilePath;
-                console.log("==== " + Hash)
+//                console.log("==== " + Hash)
                 var p = musicLibraryManager.querySongMetaElementByIndex(method, Hash, true);
                 method = Common.E_FileName;
                 p = p + "/" +

@@ -8,6 +8,7 @@
 #include "PlayBackendLoader.h"
 #include "IPlayBackend.h"
 #include "MusicLibraryManager.h"
+#include "BaseMediaObject.h"
 
 namespace PhoenixPlayer {
 
@@ -31,7 +32,16 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
     }
     if (mPlayBackend.isNull ()) {
         mPlayBackend = mPlayBackendLoader->getCurrentBackend ();
+        qDebug()<<"user playbackend "<<mPlayBackend->getBackendName ();
+        mPlayBackend->init ();
+        mPlayBackend->stop ();
     }
+    connect (mPlayBackendLoader.data (), &PlayBackend::PlayBackendLoader::signalPlayBackendChanged, [this] {
+        mPlayBackend = mPlayBackendLoader->getCurrentBackend ();
+        qDebug()<<"change playbackend to"<<mPlayBackend->getBackendName ();
+        mPlayBackend->init ();
+        mPlayBackend->stop ();
+    });
 }
 
 void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
@@ -41,7 +51,15 @@ void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
     }
     connect (mLibraryManager.data (), &MusicLibrary::MusicLibraryManager::playingSongChanged, [this] () {
         QString playingHash = mLibraryManager->playingSongHash ();
-        qDebug()<<"Playing song changed " << playingHash;
+        qDebug()<<"****** playingSongChanged **********";
+        if (!mPlayBackend.isNull ()) {
+            PlayBackend::BaseMediaObject obj;
+            obj.setFileName (mLibraryManager->querySongMetaElement (Common::E_FileName, playingHash).first ());
+            obj.setFilePath (mLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash).first ());
+            obj.setMediaType (Common::TypeLocalFile);
+            qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
+            mPlayBackend->changeMedia (&obj, 0, true);
+        }
     });
 }
 

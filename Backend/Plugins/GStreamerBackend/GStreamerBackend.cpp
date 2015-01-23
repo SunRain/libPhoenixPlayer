@@ -31,6 +31,8 @@ void _calc_log10_lut(){
 GStreamerBackend::GStreamerBackend(QObject *parent)
     :IPlayBackend(parent)
 {
+    qDebug()<<"GStreamerBackend >>>>>>>>"<<__FUNCTION__;
+
     _caps.is_parsed = false;
     _calc_log10_lut();
 //    _settings = CSettingsStorage::getInstance();
@@ -320,6 +322,8 @@ void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
                                                       quint64 startMs,
                                                       bool startPlay)
 {
+    qDebug()<<"GStreamerBackend >>>>>>>>"<<__FUNCTION__;
+
     _caps.is_parsed = false;
 
     gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_NULL);
@@ -385,6 +389,8 @@ void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
 
 void GStreamerBackend::init_play_pipeline()
 {
+    qDebug()<<"GStreamerBackend >>>>>>>>"<<__FUNCTION__;
+
     bool success = false;
     bool with_app_sink = true;
     int i = 0;
