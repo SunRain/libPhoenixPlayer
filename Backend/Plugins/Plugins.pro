@@ -4,6 +4,8 @@ TEMPLATE = subdirs
 gstreamer.file = GStreamerBackend/GStreamerBackend.pro
 SUBDIRS += gstreamer
 }
+fake.file = FakeBackend/FakeBackend.pro
+SUBDIRS += fake
 
 #phonon.file = phonon/pluginPhonon.pro
 #SUBDIRS += phonon

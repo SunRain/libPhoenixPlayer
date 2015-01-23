@@ -85,6 +85,7 @@ void PlayBackendLoader::initBackend()
     }
 
     // dynamic plugins
+    qDebug()<<"Search plugin in dir "<<mBackendPath;
     QDir dir(mBackendPath);
     foreach (QString fileName, dir.entryList(QDir::Files)) {
         QPluginLoader loader(dir.absoluteFilePath(fileName));
