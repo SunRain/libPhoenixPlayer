@@ -25,7 +25,13 @@ signals:
     void volumeChanged(int vol);
     //     void message(QMessageBox::Icon icon, const QString &title, const QString &msg) = 0;
     void mediaChanged(PlayBackend::BaseMediaObject *obj = 0);
+    ///
+    /// \brief finished 当前曲目结束
+    ///
     void finished();
+    ///
+    /// \brief failed 当前曲目播放失败
+    ///
     void failed();
     void stateChanged(Common::PlaybackState state);
     void tick(quint64 msec);

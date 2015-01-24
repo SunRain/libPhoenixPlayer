@@ -23,6 +23,9 @@ int main(int argc, char *argv[])
     QGuiApplication a(argc, argv);
     qmlRegisterUncreatableType<PhoenixPlayer::Common>("com.sunrain.playlist", 1, 0, "Common", "");
 
+    a.setOrganizationName ("SunRain");
+    a.setApplicationName ("PhoenixPlayer");
+
     Settings *settings = Settings::getInstance ();
     MusicLibrary::MusicLibraryManager *manager = MusicLibrary::MusicLibraryManager::getInstance ();
     manager->setSettings (settings);

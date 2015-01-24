@@ -91,7 +91,7 @@ public:
     void set_about_to_finish();
     void set_buffer(GstBuffer *buffer = 0);
     void emit_buffer(float inv_arr_channel_elements, float scale);
-    virtual int		getState();
+//    virtual int		getState();
 
 public slots:
     // IPlayBackend interface

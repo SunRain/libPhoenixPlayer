@@ -69,7 +69,9 @@ static gboolean show_position(GstElement* pipeline) {
     GstFormat fmt = GST_FORMAT_TIME;
     gst_element_query_position(pipeline, &fmt, &pos);
 
-    if (gst_obj_ref && gst_obj_ref->getState() == STATE_PLAY) {
+    if (gst_obj_ref
+            && gst_obj_ref->getPlaybackState () == PhoenixPlayer::Common::PlaybackPlaying
+            /*gst_obj_ref->getState() == STATE_PLAY*/) {
         gst_obj_ref->set_cur_position((quint32)(pos / 1000000000)); // ms
     }
     return true;

@@ -49,9 +49,20 @@ public:
     /// \return
     ///
     Q_INVOKABLE QString playingSongHash();
+    QString firstSongHash();
+    QString lastSongHash();
 
+    ///
+    /// \brief nextSong 当前播放列表的下一首歌曲,如果在末尾则返回第一首歌
+    ///
     Q_INVOKABLE void nextSong();
+    ///
+    /// \brief preSong 当前播放列表的上一首歌曲,如果在第一首,则返回最后一首
+    ///
     Q_INVOKABLE void preSong();
+    ///
+    /// \brief randomSong 随机歌曲hash
+    ///
     Q_INVOKABLE void randomSong();
 
     ///

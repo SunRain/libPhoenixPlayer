@@ -80,7 +80,7 @@ GStreamerBackend::~GStreamerBackend()
 
 PhoenixPlayer::Common::PlaybackState GStreamerBackend::getPlaybackState()
 {
-
+    return _state;
 }
 
 QString GStreamerBackend::getBackendName()
@@ -134,6 +134,7 @@ void GStreamerBackend::set_track_finished()
 //    }
 
 //    emit track_finished();
+    emit finished();
     _track_finished = true;
 }
 
@@ -235,10 +236,10 @@ void GStreamerBackend::emit_buffer(float inv_arr_channel_elements, float scale)
     f_channel[1] = 0;
 }
 
-int GStreamerBackend::getState()
-{
-    return _state;
-}
+//int GStreamerBackend::getState()
+//{
+//    return _state;
+//}
 
 void GStreamerBackend::play(quint64 startMs)
 {

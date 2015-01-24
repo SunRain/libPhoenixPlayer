@@ -108,13 +108,28 @@ QString MusicLibraryManager::playingSongHash()
 {
     if (mCurrentSongHash.isEmpty ()) {
         if (!mSettings.isNull ()) {
-            mCurrentSongHash = mSettings->getLastPlayedSong ();
+            qDebug()<<"try playingSongHash from settings";
+            mCurrentSongHash = mSettings.data ()->getLastPlayedSong ();
         }
         if (mCurrentSongHash.isEmpty ()
-                && !mPlayListDAO->getSongHashList (mCurrentPlayListHash).isEmpty ())
+                && !mPlayListDAO->getSongHashList (mCurrentPlayListHash).isEmpty ()) {
+            qDebug()<<"try playingSongHash from first from library";
             mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).first ();
+        }
     }
     qDebug()<<"playingSongHash is "<<mCurrentSongHash;
+    return mCurrentSongHash;
+}
+
+QString MusicLibraryManager::firstSongHash()
+{
+    mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).first ();
+    return mCurrentSongHash;
+}
+
+QString MusicLibraryManager::lastSongHash()
+{
+    mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).last ();
     return mCurrentSongHash;
 }
 

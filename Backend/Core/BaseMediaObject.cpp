@@ -3,7 +3,9 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 BaseMediaObject::BaseMediaObject(QObject *parent) : QObject(parent)
 {
-
+    mFilePath = QString();
+    mFileName = QString();
+    mMediaType = Common::TypeLocalFile;
 }
 
 BaseMediaObject::~BaseMediaObject()

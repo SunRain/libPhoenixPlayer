@@ -6,7 +6,7 @@ import com.sunrain.playlist 1.0
 ApplicationWindow {
     visible: true
     width: 360
-    height: 640
+    height: 960
 
 
     Connections {
@@ -32,6 +32,13 @@ ApplicationWindow {
 
         songtitle.text = musicLibraryManager.querySongMetaElementByIndex(Common.E_FileName, musicLibraryManager.playingSongHash(), true);
     }
+    Connections {
+        target: musicPlayer
+        onPlayModeChanged: {
+            var m = mode;
+            searchText.text = "play mode "+m;
+        }
+    }
 
     ListModel {id: libraryModel}
     ListModel {id: playListModel}
@@ -50,6 +57,9 @@ ApplicationWindow {
         x: 112
         y: 78
         text: qsTr("Play")
+        onClicked: {
+            musicPlayer.togglePlayPause();
+        }
     }
 
     Button {
@@ -178,6 +188,44 @@ ApplicationWindow {
         height: 26
         text: qsTr("Searching ...")
         font.pixelSize: 12
+    }
+    GroupBox {
+        x: 7
+        y: 629
+        title: "PlayMode"
+
+        Column {
+            ExclusiveGroup { id: playModeGroup }
+            RadioButton {
+                text: "ModeOrder"
+                checked: true
+                exclusiveGroup: playModeGroup
+                onClicked: {
+                    musicPlayer.setPlayModeInt(Common.ModeOrder);
+                }
+            }
+            RadioButton {
+                text: "ModeRepeatAll"
+                exclusiveGroup: playModeGroup
+                onClicked: {
+                    musicPlayer.setPlayModeInt(Common.ModeRepeatAll);
+                }
+            }
+            RadioButton {
+                text: "ModeRepeatCurrent"
+                exclusiveGroup: playModeGroup
+                onClicked: {
+                    musicPlayer.setPlayModeInt(Common.ModeRepeatCurrent);
+                }
+            }
+            RadioButton {
+                text: "ModeShuffle"
+                exclusiveGroup: playModeGroup
+                onClicked: {
+                    musicPlayer.setPlayModeInt(Common.ModeShuffle);
+                }
+            }
+        }
     }
 
 }
