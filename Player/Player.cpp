@@ -41,6 +41,7 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
         mPlayBackend->stop ();
     }
     connect (mPlayBackendLoader.data (), &PlayBackend::PlayBackendLoader::signalPlayBackendChanged, [this] {
+        mPlayBackend->stop ();
         mPlayBackend = mPlayBackendLoader->getCurrentBackend ();
         if (!PointerValid (EPointer::PPlaybackend))
             return;
