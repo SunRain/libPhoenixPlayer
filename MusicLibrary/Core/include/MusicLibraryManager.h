@@ -116,11 +116,10 @@ public slots:
 
 private:
     IPlayListDAO *mPlayListDAO;
-    DiskLookup *mDiskLooKup;
     PlayListDAOLoader *mDAOLoader;
 
-    QThread *mThread;
-
+    QPointer<QThread> mThread;
+    QPointer<DiskLookup> mDiskLooKup;
     QPointer<Settings> mSettings;
 
     QString mCurrentSongHash;

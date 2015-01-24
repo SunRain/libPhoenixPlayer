@@ -13,7 +13,8 @@ CONFIG   += console
 #CONFIG += c++11
 
 TEMPLATE = app
-
+#Enable c++11
+CONFIG += c++11
 
 SOURCES += main.cpp \
 

@@ -41,6 +41,7 @@ MusicLibraryManager::~MusicLibraryManager()
 
     if (mThread) {
         qDebug()<<"wait for thread";
+        mThread->quit ();
         mThread->wait (3 * 60 * 1000);
     }
     mThread->deleteLater ();
@@ -75,11 +76,17 @@ bool MusicLibraryManager::scanLocalMusic()
         qDebug()<<__FUNCTION__<<" can't find settings";
         return false;
     }
-
-    foreach (QString s, mSettings->getMusicDirs ()) {
-        mDiskLooKup->addLookupDir (s, false);
+    if (mThread.isNull ()) {
+        mThread = new QThread(this);
     }
-    return mDiskLooKup->startLookup ();
+    if (mDiskLooKup.isNull ()) {
+        mDiskLooKup = new DiskLookup(0);
+        mDiskLooKup.data ()->moveToThread (mThread);
+    }
+    foreach (QString s, mSettings->getMusicDirs ()) {
+        mDiskLooKup.data ()->addLookupDir (s, false);
+    }
+    return mDiskLooKup.data ()->startLookup ();
 }
 
 bool MusicLibraryManager::changePlayList(const QString &playListHash)
@@ -237,12 +244,12 @@ bool MusicLibraryManager::deleteFromPlayList(const QString &playListHash, const 
 
 bool MusicLibraryManager::init()
 {
-    if (!mThread)
+    if (mThread.isNull ())
         mThread = new QThread(this);
 
-    if (!mDiskLooKup)
+    if (mDiskLooKup.isNull ())
         mDiskLooKup = new DiskLookup(0);
-    mDiskLooKup->moveToThread (mThread);
+    mDiskLooKup.data ()->moveToThread (mThread);
 
     if (!mDAOLoader)
         mDAOLoader = new PlayListDAOLoader(this);
@@ -253,10 +260,30 @@ bool MusicLibraryManager::init()
         qDebug()<<"initDataBase error";
     }
 
-    connect (mDiskLooKup, SIGNAL(fileFound(QString,QString,qint64)), this, SLOT(fileFound(QString,QString,qint64)));
-    connect (mDiskLooKup, &DiskLookup::pending, mPlayListDAO, &IPlayListDAO::beginTransaction);
-    connect (mDiskLooKup, SIGNAL(finished()), this, SIGNAL(searchingFinished()));
-    connect (mDiskLooKup, &DiskLookup::finished, mPlayListDAO, &IPlayListDAO::commitTransaction);
+    connect (mThread.data (), &QThread::finished, mDiskLooKup.data (), &DiskLookup::deleteLater);
+    connect (mDiskLooKup.data (), &DiskLookup::pending, mPlayListDAO, &IPlayListDAO::beginTransaction);
+
+    connect (mDiskLooKup.data (), &DiskLookup::finished, [this] {
+         mPlayListDAO->commitTransaction ();
+         emit searchingFinished ();
+    });
+
+    connect (mDiskLooKup.data (), &DiskLookup::fileFound,
+             [this](const QString &path, const QString &file, const qint64 &size) {
+        QString hash = Util::calculateHash (path.toLocal8Bit ()+ file.toLocal8Bit ()+ QString::number (size));
+
+        qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
+
+        emit searching (path, file, size);
+
+        PhoenixPlayer::SongMetaData data;
+        data.setFileName (file);
+        data.setFilePath (path);
+        data.setFileSize (size);
+        data.setHash (hash);
+
+        mPlayListDAO->insertMetaData (&data);
+    });
 
 //    //发送一个songhash change的信号,以便于qml界面在初始化后刷新
 //    emit playingSongChanged ();

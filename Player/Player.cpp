@@ -73,8 +73,15 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
                 case Common::ModeRepeatCurrent: { //单曲播放
                     QString playingHash = mMusicLibraryManager->playingSongHash ();
                     PlayBackend::BaseMediaObject obj;
-                    obj.setFileName (mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash).first ());
-                    obj.setFilePath (mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash).first ());
+
+                    QStringList list = mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
+                    if (!list.isEmpty ())
+                        obj.setFileName (list.first ());
+
+                    list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
+                    if (!list.isEmpty ())
+                        obj.setFilePath (list.first ());
+
                     obj.setMediaType (Common::TypeLocalFile);
                     mPlayBackend.data ()->changeMedia (&obj, 0, true);
                     break;
@@ -108,8 +115,15 @@ void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
         if (PointerValid (EPointer::PPlaybackend)) {
             QString playingHash = mMusicLibraryManager->playingSongHash ();
             PlayBackend::BaseMediaObject obj;
-            obj.setFileName (mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash).first ());
-            obj.setFilePath (mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash).first ());
+
+            QStringList list = mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
+            if (!list.isEmpty ())
+                obj.setFileName (list.first ());
+
+            list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
+            if (!list.isEmpty ())
+                obj.setFilePath (list.first ());
+
             obj.setMediaType (Common::TypeLocalFile);
             qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
             mPlayBackend.data ()->changeMedia (&obj, 0, true);
@@ -160,8 +174,12 @@ void Player::togglePlayPause()
         if (PointerValid (EPointer::PMusicLibraryManager)) {
             QString playingHash = mMusicLibraryManager->playingSongHash ();
             PlayBackend::BaseMediaObject obj;
-            obj.setFileName (mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash).first ());
-            obj.setFilePath (mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash).first ());
+            QStringList list = mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
+            if (!list.isEmpty ())
+                obj.setFileName (list.first ());
+            list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
+            if (!list.isEmpty ())
+                obj.setFilePath (list.first ());
             obj.setMediaType (Common::TypeLocalFile);
             qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
             mPlayBackend.data ()->changeMedia (&obj, 0, true);

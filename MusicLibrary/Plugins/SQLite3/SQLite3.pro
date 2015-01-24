@@ -5,6 +5,9 @@ QT += sql
 
 TARGET = PlayListSQLite3Plugin
 
+#Enable c++11
+CONFIG += c++11
+
 #include(../../Core/interface.pri)
 include(../../Core/MusicLibraryCore.pri)
 include(../../../Common/Common.pri)
