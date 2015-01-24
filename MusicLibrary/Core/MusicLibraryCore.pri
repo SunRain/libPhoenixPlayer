@@ -2,17 +2,20 @@
 
 INCLUDEPATH += $$PWD/include
 
-HEADERS += \
-#    $$PWD/include/IPlayList.h
-    $$PWD/include/DiskLookup.h \
-    $$PWD/include/IPlayListDAO.h \
-    $$PWD/include/PlayListDAOLoader.h \
-    $$PWD/include/MusicLibraryManager.h
 
 SOURCES += \
     $$PWD/DiskLookup.cpp \
     $$PWD/IPlayListDAO.cpp \
     $$PWD/PlayListDAOLoader.cpp \
-    $$PWD/MusicLibraryManager.cpp
+    $$PWD/MusicLibraryManager.cpp \
+    $$PWD/TagParserManager.cpp
+
+HEADERS += \
+    $$PWD/include/IMusicTagParser.h \
+    $$PWD/include/IPlayListDAO.h \
+    $$PWD/include/MusicLibraryManager.h \
+    $$PWD/PlayListDAOLoader.h \
+    $$PWD/DiskLookup.h \
+    $$PWD/TagParserManager.h
 
 

@@ -8,8 +8,6 @@
 #include <QQmlContext>
 
 #include <QDebug>
-#include "DiskLookup.h"
-#include "PlayListDAOLoader.h"
 #include "Settings.h"
 #include "MusicLibraryManager.h"
 #include "PlayBackendLoader.h"

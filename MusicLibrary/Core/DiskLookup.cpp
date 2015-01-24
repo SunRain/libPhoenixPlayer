@@ -77,7 +77,7 @@ void DiskLookup::scanDir(const QString &path)
         return;
 
     qDebug()<<"=== scanDir "<<path;
-    dir.setFilter (QDir::Dirs | QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    dir.setFilter (QDir::Dirs | QDir::Files | /*QDir::NoSymLinks |*/ QDir::NoDotAndDotDot);
     QFileInfoList list = dir.entryInfoList ();
     foreach (QFileInfo info, list) {
         if (info.isDir ()) {

@@ -17,6 +17,7 @@ namespace MusicLibrary {
 class IPlayListDAO;
 class DiskLookup;
 class PlayListDAOLoader;
+class TagParserManager;
 class MusicLibraryManager : public QObject
 {
     Q_OBJECT
@@ -112,16 +113,17 @@ signals:
     void playingSongChanged();
     void playListChanged();
 public slots:
-    void fileFound (QString path, QString file, qint64 size);
+//    void fileFound (QString path, QString file, qint64 size);
 
 private:
-    IPlayListDAO *mPlayListDAO;
+    QPointer<IPlayListDAO> mPlayListDAO;
     PlayListDAOLoader *mDAOLoader;
 
-    QPointer<QThread> mThread;
+    QPointer<QThread> mDiskLooKupThread;
+    QPointer<QThread> mTagParserThread;
     QPointer<DiskLookup> mDiskLooKup;
     QPointer<Settings> mSettings;
-
+    QPointer<TagParserManager> mTagParserManager;
     QString mCurrentSongHash;
     QString mCurrentPlayListHash;
 };

@@ -12,6 +12,7 @@
 #include "Util.h"
 #include "SongMetaData.h"
 #include "Common.h"
+#include "TagParserManager.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
@@ -19,10 +20,12 @@ namespace MusicLibrary {
 MusicLibraryManager::MusicLibraryManager(QObject *parent)
     : QObject(parent)
 {
-    mThread = 0;
+    mDiskLooKupThread = 0;
     mDiskLooKup = 0;
     mDAOLoader = 0;
     mPlayListDAO = 0;
+    mTagParserManager = 0;
+    mTagParserThread = 0;
     mCurrentSongHash = QString();
     mCurrentPlayListHash = QString();
 
@@ -36,23 +39,28 @@ MusicLibraryManager::~MusicLibraryManager()
         mSettings->setLastPlayedSong (mCurrentSongHash);
     }
 
-    if (mDiskLooKup)
-        mDiskLooKup->stopLookup ();
+    if (!mDiskLooKup.isNull ())
+        mDiskLooKup.data ()->stopLookup ();
 
-    if (mThread) {
+    if (!mDiskLooKupThread.isNull ()) {
         qDebug()<<"wait for thread";
-        mThread->quit ();
-        mThread->wait (3 * 60 * 1000);
+        mDiskLooKupThread.data ()->quit ();
+        mDiskLooKupThread.data ()->wait (3 * 60 * 1000);
     }
-    mThread->deleteLater ();
+    mDiskLooKupThread->deleteLater ();
+
+    if (!mTagParserThread.isNull ()) {
+        qDebug()<<"wait for TagParserThread";
+        mDiskLooKupThread.data ()->wait (3 * 60 * 1000);
+    }
 
     qDebug()<<"after delete thread";
     if (mDAOLoader)
         mDAOLoader->deleteLater ();
 
     qDebug()<<"after delete mDAOLoader";
-    if (mPlayListDAO)
-        mPlayListDAO->deleteLater ();
+    if (!mPlayListDAO.isNull ())
+        mPlayListDAO.data ()->deleteLater ();
 
     qDebug()<<">>>>>>>> after "<< __FUNCTION__ <<" <<<<<<<<<<<<<<<<";
 }
@@ -76,12 +84,12 @@ bool MusicLibraryManager::scanLocalMusic()
         qDebug()<<__FUNCTION__<<" can't find settings";
         return false;
     }
-    if (mThread.isNull ()) {
-        mThread = new QThread(this);
+    if (mDiskLooKupThread.isNull ()) {
+        mDiskLooKupThread = new QThread(this);
     }
     if (mDiskLooKup.isNull ()) {
         mDiskLooKup = new DiskLookup(0);
-        mDiskLooKup.data ()->moveToThread (mThread);
+        mDiskLooKup.data ()->moveToThread (mDiskLooKupThread);
     }
     foreach (QString s, mSettings->getMusicDirs ()) {
         mDiskLooKup.data ()->addLookupDir (s, false);
@@ -103,12 +111,12 @@ bool MusicLibraryManager::changePlayList(const QString &playListHash)
 
 bool MusicLibraryManager::createPlayList(const QString &playListName)
 {
-    return mPlayListDAO->insertPlayList (playListName);
+    return mPlayListDAO.data ()->insertPlayList (playListName);
 }
 
 bool MusicLibraryManager::deletePlayList(const QString &playListHash)
 {
-    return mPlayListDAO->deletePlayList (playListHash);
+    return mPlayListDAO.data ()->deletePlayList (playListHash);
 }
 
 QString MusicLibraryManager::playingSongHash()
@@ -119,9 +127,9 @@ QString MusicLibraryManager::playingSongHash()
             mCurrentSongHash = mSettings.data ()->getLastPlayedSong ();
         }
         if (mCurrentSongHash.isEmpty ()
-                && !mPlayListDAO->getSongHashList (mCurrentPlayListHash).isEmpty ()) {
+                && !mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash).isEmpty ()) {
             qDebug()<<"try playingSongHash from first from library";
-            mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).first ();
+            mCurrentSongHash = mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash).first ();
         }
     }
     qDebug()<<"playingSongHash is "<<mCurrentSongHash;
@@ -130,19 +138,19 @@ QString MusicLibraryManager::playingSongHash()
 
 QString MusicLibraryManager::firstSongHash()
 {
-    mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).first ();
+    mCurrentSongHash = mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash).first ();
     return mCurrentSongHash;
 }
 
 QString MusicLibraryManager::lastSongHash()
 {
-    mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).last ();
+    mCurrentSongHash = mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash).last ();
     return mCurrentSongHash;
 }
 
 void MusicLibraryManager::nextSong()
 {
-    QStringList list = mPlayListDAO->getSongHashList (mCurrentPlayListHash);
+    QStringList list = mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash);
     int index = list.indexOf (mCurrentSongHash) +1;
     if (index >= list.size ())
         index = 0;
@@ -152,7 +160,7 @@ void MusicLibraryManager::nextSong()
 
 void MusicLibraryManager::preSong()
 {
-    QStringList list = mPlayListDAO->getSongHashList (mCurrentPlayListHash);
+    QStringList list = mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash);
     int index = list.indexOf (mCurrentSongHash);
     if (index == -1) { //no hash found
         index = 0;
@@ -170,25 +178,18 @@ void MusicLibraryManager::randomSong()
     QTime time = QTime::currentTime ();
     qsrand(time.second () * 1000 + time.msec ());
     int n = qrand ();
-    n = n % mPlayListDAO->getSongHashList (mCurrentPlayListHash).size ();
-    mCurrentSongHash = mPlayListDAO->getSongHashList (mCurrentPlayListHash).at (n);
+    n = n % mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash).size ();
+    mCurrentSongHash = mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash).at (n);
     emit playingSongChanged ();
 }
 
 QStringList MusicLibraryManager::querySongMetaElement(Common::MusicLibraryElement targetColumn, const QString &hash, bool skipDuplicates)
 {
-//    qDebug()<<"querySongMetaElement "
-//           << targetColumn
-//           <<" hash "
-//          <<hash
-//         << " "
-//         <<skipDuplicates;
-
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO->queryMusicLibrary (targetColumn, Common::E_NULLElement, QString(), skipDuplicates);
+        list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::E_NULLElement, QString(), skipDuplicates);
     } else {
-        list = mPlayListDAO->queryMusicLibrary (targetColumn, Common::E_Hash, hash, skipDuplicates);
+        list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::E_Hash, hash, skipDuplicates);
     }
     qDebug()<<" query result "<< list;
     return list;
@@ -201,15 +202,11 @@ QStringList MusicLibraryManager::querySongMetaElementByIndex(int columnIndex, co
 
 QStringList MusicLibraryManager::queryPlayListElement(Common::PlayListElement targetColumn, const QString &hash)
 {
-//    qDebug()<<"queryPlaylist "
-//           << targetColumn
-//           <<" hash "
-//          <<hash;
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO->queryPlayList (targetColumn, Common::E_PlayListNullElement, QString());
+        list = mPlayListDAO.data ()->queryPlayList (targetColumn, Common::E_PlayListNullElement, QString());
     } else {
-        list = mPlayListDAO->queryPlayList (targetColumn, Common::E_PlayListHash, hash);
+        list = mPlayListDAO.data ()->queryPlayList (targetColumn, Common::E_PlayListHash, hash);
     }
 
     qDebug()<<" query result "<< list;
@@ -227,7 +224,7 @@ bool MusicLibraryManager::insertToPlayList(const QString &playListHash, const QS
         qDebug()<<"playListHash or newSongHash is empty";
         return false;
     }
-    return mPlayListDAO->updatePlayList (Common::E_PlayListSongHashes, playListHash, newSongHash, true);
+    return mPlayListDAO.data ()->updatePlayList (Common::E_PlayListSongHashes, playListHash, newSongHash, true);
 }
 
 bool MusicLibraryManager::deleteFromPlayList(const QString &playListHash, const QString &songHash, bool deleteFromStorage)
@@ -239,32 +236,44 @@ bool MusicLibraryManager::deleteFromPlayList(const QString &playListHash, const 
         return false;
     }
     //TODO: 需要添加从本地删除的功能
-    return mPlayListDAO->updatePlayList (Common::E_PlayListSongHashes, playListHash, songHash, false);
+    return mPlayListDAO.data ()->updatePlayList (Common::E_PlayListSongHashes, playListHash, songHash, false);
 }
 
 bool MusicLibraryManager::init()
 {
-    if (mThread.isNull ())
-        mThread = new QThread(this);
+    //本地歌曲扫描线程
+    if (mDiskLooKupThread.isNull ())
+        mDiskLooKupThread = new QThread(this);
 
     if (mDiskLooKup.isNull ())
         mDiskLooKup = new DiskLookup(0);
-    mDiskLooKup.data ()->moveToThread (mThread);
+    mDiskLooKup.data ()->moveToThread (mDiskLooKupThread);
 
+    //曲库数据存储相关
     if (!mDAOLoader)
         mDAOLoader = new PlayListDAOLoader(this);
 
-    if (!mPlayListDAO)
+    if (mPlayListDAO.isNull ())
         mPlayListDAO = mDAOLoader->getPlayListDAO ();
-    if (!mPlayListDAO->initDataBase ()) {
+    if (!mPlayListDAO.data ()->initDataBase ()) {
         qDebug()<<"initDataBase error";
     }
 
-    connect (mThread.data (), &QThread::finished, mDiskLooKup.data (), &DiskLookup::deleteLater);
-    connect (mDiskLooKup.data (), &DiskLookup::pending, mPlayListDAO, &IPlayListDAO::beginTransaction);
+    //歌曲tag读取线程
+    if (mTagParserThread.isNull ())
+        mTagParserThread = new QThread(this);
+    if (mTagParserManager.isNull ())
+        mTagParserManager = new TagParserManager(0);
+    mTagParserManager.data ()->setPlayListDAO (mPlayListDAO);
+    mTagParserManager.data ()->moveToThread (mTagParserThread);
+
+    //signal/slot
+    connect (mDiskLooKupThread.data (), &QThread::finished, mDiskLooKup.data (), &DiskLookup::deleteLater);
+    connect (mDiskLooKup.data (), &DiskLookup::pending, mPlayListDAO.data (), &IPlayListDAO::beginTransaction);
 
     connect (mDiskLooKup.data (), &DiskLookup::finished, [this] {
-         mPlayListDAO->commitTransaction ();
+//         mPlayListDAO.data ()->commitTransaction ();
+        mTagParserManager.data ()->startParserLoop ();
          emit searchingFinished ();
     });
 
@@ -281,8 +290,16 @@ bool MusicLibraryManager::init()
         data.setFilePath (path);
         data.setFileSize (size);
         data.setHash (hash);
+//        mPlayListDAO.data ()->insertMetaData (&data);
+        mTagParserManager.data ()->addItem (&data, false);
+    });
 
-        mPlayListDAO->insertMetaData (&data);
+    connect (mTagParserManager.data (), &TagParserManager::parserPending, [] {
+        qDebug()<<"********************* parserPending";
+    });
+    connect (mTagParserThread.data (), &QThread::finished, mTagParserManager.data (), &TagParserManager::deleteLater);
+    connect (mTagParserManager.data (), &TagParserManager::parserQueueFinished, [this]{
+        mPlayListDAO.data ()->commitTransaction ();
     });
 
 //    //发送一个songhash change的信号,以便于qml界面在初始化后刷新
@@ -290,21 +307,21 @@ bool MusicLibraryManager::init()
 //    emit playListChanged ();
 }
 
-void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
-{
-    QString hash = Util::calculateHash (path.toLocal8Bit ()+ file.toLocal8Bit ()+ QString::number (size));
-    qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
+//void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
+//{
+//    QString hash = Util::calculateHash (path.toLocal8Bit ()+ file.toLocal8Bit ()+ QString::number (size));
+//    qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
 
-    emit searching (path, file, size);
+//    emit searching (path, file, size);
 
-    PhoenixPlayer::SongMetaData data;
-    data.setFileName (file);
-    data.setFilePath (path);
-    data.setFileSize (size);
-    data.setHash (hash);
+//    PhoenixPlayer::SongMetaData data;
+//    data.setFileName (file);
+//    data.setFilePath (path);
+//    data.setFileSize (size);
+//    data.setHash (hash);
 
-    mPlayListDAO->insertMetaData (&data);
-}
+//    mPlayListDAO->insertMetaData (&data);
+//}
 
 } //MusicLibrary
 } //PhoenixPlayer
