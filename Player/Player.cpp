@@ -54,6 +54,7 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
         // 播放状态改变信号
         connect (mPlayBackend.data (), &PlayBackend::IPlayBackend::stateChanged, [this](Common::PlaybackState state) {
             emit playStateChanged (state);
+            emit playStateChanged ((int)state);
         });
 
         //当一首曲目播放结束后
@@ -61,7 +62,6 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
             if (PointerValid (EPointer::PMusicLibraryManager)) {
                 switch (mPlayMode) {
                 case Common::ModeOrder: { //顺序播放
-
                     if (mMusicLibraryManager.data ()->lastSongHash ()
                             == mMusicLibraryManager.data ()->playingSongHash ()) {
                         mPlayBackend.data ()->stop ();
@@ -147,7 +147,7 @@ void Player::togglePlayPause()
     if (!PointerValid (EPointer::PPlaybackend))
         return;
 
-    qDebug()<<__FUNCTION__ <<" current "<<mPlayBackend.data ()->getPlaybackState ();
+//    qDebug()<<__FUNCTION__ <<" current "<<mPlayBackend.data ()->getPlaybackState ();
 
     switch (mPlayBackend.data ()->getPlaybackState ()) {
     case Common::PlaybackPlaying:

@@ -46,6 +46,7 @@ protected:
     };
 signals:
     void playStateChanged(Common::PlaybackState state);
+    void playStateChanged (int state);
     void playModeChanged(Common::PlayMode mode);
     void playModeChanged (int mode);
 

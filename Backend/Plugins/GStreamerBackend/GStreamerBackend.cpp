@@ -245,6 +245,7 @@ void GStreamerBackend::play(quint64 startMs)
 {
     _track_finished = false;
     _state = PhoenixPlayer::Common::PlaybackPlaying;
+    emit stateChanged(_state);
 
     gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PLAYING);
 
@@ -256,6 +257,7 @@ void GStreamerBackend::play(quint64 startMs)
 void GStreamerBackend::stop()
 {
     _state = PhoenixPlayer::Common::PlaybackStopped;
+    emit stateChanged(_state);
 
         // streamripper, wanna record is set when record button is pressed
 //        if (_playing_stream && _sr_active) {
@@ -271,6 +273,7 @@ void GStreamerBackend::stop()
 void GStreamerBackend::pause()
 {
     _state = PhoenixPlayer::Common::PlaybackPaused;
+    emit stateChanged(_state);
     gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PAUSED);
 }
 

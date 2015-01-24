@@ -38,6 +38,9 @@ ApplicationWindow {
             var m = mode;
             searchText.text = "play mode "+m;
         }
+        onPlayStateChanged: {
+            console.log("Play state change to " + state);
+        }
     }
 
     ListModel {id: libraryModel}
