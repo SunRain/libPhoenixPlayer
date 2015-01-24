@@ -37,6 +37,7 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
         mPlayBackend->stop ();
     }
     connect (mPlayBackendLoader.data (), &PlayBackend::PlayBackendLoader::signalPlayBackendChanged, [this] {
+        mPlayBackend->stop ();
         mPlayBackend = mPlayBackendLoader->getCurrentBackend ();
         qDebug()<<"change playbackend to"<<mPlayBackend->getBackendName ();
         mPlayBackend->init ();
