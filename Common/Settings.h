@@ -26,6 +26,9 @@ public:
 
     Q_INVOKABLE bool setPlayBackend(const QString &backendName);
     Q_INVOKABLE QString getCurrentPlayBackend();
+
+    Q_INVOKABLE bool setMusicImageCachePath(const QString &absolutePath);
+    Q_INVOKABLE QString getMusicImageCachePath();
 signals:
 
 public slots:
@@ -37,6 +40,7 @@ private:
     QSettings *mSettings;
 
     QString mDefaultMusicDir;
+    QString mDefualtMusicImageDir;
 };
 } //PhoenixPlayer
 #endif // SETTINGS_H

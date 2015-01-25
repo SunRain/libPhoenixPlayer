@@ -12,11 +12,20 @@ const char *KEY_MUSIC_DIR = "MusicDir";
 const char *KEY_LAST_SONG = "LastPlayedSongHash";
 const char *KEY_PLAY_LIST = "CurrentPlayListHash";
 const char *KEY_PLAY_BACKEND = "CurrentPlayBackend";
+const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
     mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
+
+    mDefualtMusicImageDir = QString("%1/%2")
+            .arg (mDefaultMusicDir)
+            .arg (qApp->applicationName());
+
+    QDir dir(mDefaultMusicDir);
+    if (!dir.exists ())
+        dir.mkpath (mDefualtMusicImageDir);
 
     mSettings = new QSettings(qApp->organizationName(), qApp->applicationName());
 }
@@ -93,5 +102,21 @@ bool Settings::setPlayBackend(const QString &backendName)
 QString Settings::getCurrentPlayBackend()
 {
     return mSettings->value (KEY_PLAY_BACKEND, QString()).toString ();
+}
+
+bool Settings::setMusicImageCachePath(const QString &absolutePath)
+{
+    QDir dir(absolutePath);
+    if (!dir.exists ())
+        dir.mkpath (absolutePath);
+
+    mSettings->setValue (KEY_MUSIC_IMAGE_CACHE, absolutePath);
+    mSettings->sync ();
+    return true;
+}
+
+QString Settings::getMusicImageCachePath()
+{
+    return mSettings->value (KEY_MUSIC_IMAGE_CACHE, mDefualtMusicImageDir).toString ();
 }
 } //PhoenixPlayer

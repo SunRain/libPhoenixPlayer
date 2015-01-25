@@ -6,6 +6,7 @@ namespace MusicLibrary {
 IMusicTagParser::IMusicTagParser(QObject *parent)
     : QObject(parent)
 {
+    //http://baike.baidu.com/link?url=9Cxo9Vr6DKfnZVaZ993mkxSHmOpzgP82KNFyN0H5HTWJmZKjLUn7iinTSYi4StKLHX80ZHeuN4s3AwlHg2PSh_
     mList<<"Blues"
         <<"Classic Rock"
         <<"Country"
