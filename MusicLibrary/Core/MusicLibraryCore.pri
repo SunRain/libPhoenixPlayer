@@ -8,7 +8,8 @@ SOURCES += \
     $$PWD/IPlayListDAO.cpp \
     $$PWD/PlayListDAOLoader.cpp \
     $$PWD/MusicLibraryManager.cpp \
-    $$PWD/TagParserManager.cpp
+    $$PWD/TagParserManager.cpp \
+    $$PWD/IMusicTagParser.cpp
 
 HEADERS += \
     $$PWD/include/IMusicTagParser.h \

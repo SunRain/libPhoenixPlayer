@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+class QTextCodec;
 namespace PhoenixPlayer {
 
 class Util : public QObject
@@ -13,6 +14,8 @@ public:
     virtual ~Util();
 
     static QString calculateHash(const QString &str);
+
+    static QTextCodec *localeDefaultCodec();
 signals:
 
 public slots:

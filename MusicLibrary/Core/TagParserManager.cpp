@@ -58,36 +58,7 @@ void TagParserManager::addItem(SongMetaData *data, bool startImmediately)
 {
     qDebug()<<__FUNCTION__<<" "<<data->filePath () <<"/"<<data->fileName ();
 
-    SongMetaData *d = new SongMetaData(0);
-    d->setAlbumDescription (data->albumDescription ());
-    d->setAlbumName (data->albumName ());
-    d->setAlbumYear (data->albumYear ());
-    d->setArtistDescription (data->albumDescription ());
-    d->setArtistImageUri (data->artistImageUri ());
-    d->setArtistName (data->artistName ());
-    d->setCategory (data->category ());
-    d->setCopyright (data->copyright ());
-    d->setCoverArtLarge (data->coverArtLarge ());
-    d->setCoverArtMiddle (data->coverArtMiddle ());
-    d->setCoverArtSmall (data->coverArtSmall ());
-    d->setDate (data->date ());
-    d->setFileName (data->fileName ());
-    d->setFilePath (data->filePath ());
-    d->setHash (data->hash ());
-    d->setFileSize (data->fileSize ());
-    d->setKeywords (data->keywords ());
-    d->setLanguage (data->language ());
-    d->setLyrics (data->lyrics ());
-    d->setMediaBitrate (data->mediaBitrate ());
-    d->setMediaType (data->mediaType ());
-    d->setMood (data->mood ());
-    d->setPublisher (data->publisher ());
-    d->setSongDescription (data->songDescription ());
-    d->setSongLength (data->songLength ());
-    d->setSongTitle (data->songTitle ());
-    d->setUserRating (data->userRating ());
-    d->setYear (data->year ());
-
+    SongMetaData *d = data ;
     mMetaList.append (d);
     if (startImmediately)
         startParserLoop ();
@@ -144,8 +115,6 @@ void TagParserManager::initPlugin()
 
 void TagParserManager::parserNextItem()
 {
-    qDebug()<<__FUNCTION__;
-
     if (mMetaList.isEmpty ()) {
         emit parserQueueFinished ();
         return;
@@ -156,7 +125,6 @@ void TagParserManager::parserNextItem()
 
 void TagParserManager::parserItem(SongMetaData *data)
 {
-    qDebug()<<__FUNCTION__;
     if (data == 0) {
         return;
     }

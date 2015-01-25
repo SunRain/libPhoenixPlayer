@@ -285,13 +285,18 @@ bool MusicLibraryManager::init()
 
         emit searching (path, file, size);
 
-        PhoenixPlayer::SongMetaData data;
-        data.setFileName (file);
-        data.setFilePath (path);
-        data.setFileSize (size);
-        data.setHash (hash);
-//        mPlayListDAO.data ()->insertMetaData (&data);
-        mTagParserManager.data ()->addItem (&data, false);
+//        PhoenixPlayer::SongMetaData data;
+//        data.setFileName (file);
+//        data.setFilePath (path);
+//        data.setFileSize (size);
+//        data.setHash (hash);
+        PhoenixPlayer::SongMetaData *data = new PhoenixPlayer::SongMetaData(0);
+        data->setFileName (file);
+        data->setFilePath (path);
+        data->setFileSize (size);
+        data->setHash (hash);
+
+        mTagParserManager.data ()->addItem (data, false);
     });
 
     connect (mTagParserManager.data (), &TagParserManager::parserPending, [] {
