@@ -56,8 +56,6 @@ void TagParserManager::setPlayListDAO(IPlayListDAO *dao)
 
 void TagParserManager::addItem(SongMetaData *data, bool startImmediately)
 {
-    qDebug()<<__FUNCTION__<<" "<<data->filePath () <<"/"<<data->fileName ();
-
     SongMetaData *d = data ;
     mMetaList.append (d);
     if (startImmediately)
@@ -66,8 +64,6 @@ void TagParserManager::addItem(SongMetaData *data, bool startImmediately)
 
 bool TagParserManager::startParserLoop()
 {
-    qDebug()<<__FUNCTION__;
-
     emit parserPending ();
 
     if (mMetaList.isEmpty ()) {
@@ -116,6 +112,7 @@ void TagParserManager::initPlugin()
 void TagParserManager::parserNextItem()
 {
     if (mMetaList.isEmpty ()) {
+        qDebug()<<"mMetaList.isEmpty";
         emit parserQueueFinished ();
         return;
     }
@@ -129,25 +126,20 @@ void TagParserManager::parserItem(SongMetaData *data)
         return;
     }
     //如果没有解析插件,则直接将相关的meta信息存储到数据库
-    if (mPluginList.isEmpty ()) {
-        if (!mPlayListDAO.isNull ()) {
-            qDebug()<<" no parser plugin found, write to database immediately";
-            mPlayListDAO.data ()->insertMetaData (data);
-        }
-        data->deleteLater ();
-        parserNextItem ();
-        return;
-    }
-    //开始解析
-    foreach (IMusicTagParser *parser, mPluginList) {
-        if (parser->parserTag (data)) {
-            if (!mPlayListDAO.isNull ()) {
-                mPlayListDAO.data ()->insertMetaData (data);
-                data->deleteLater ();
+    if (!mPluginList.isEmpty ()) {
+        //开始解析
+        foreach (IMusicTagParser *parser, mPluginList) {
+            if (parser->parserTag (data)) {
+                break;
             }
-            break;
         }
     }
+
+    if (!mPlayListDAO.isNull ()) {
+        mPlayListDAO.data ()->insertMetaData (data);
+        data->deleteLater ();
+    }
+
     parserNextItem ();
 }
 

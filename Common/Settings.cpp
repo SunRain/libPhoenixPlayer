@@ -3,6 +3,7 @@
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QStringList>
+#include <QDebug>
 
 #include "Settings.h"
 
@@ -16,6 +17,8 @@ const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
+    mSettings = new QSettings(qApp->organizationName(), qApp->applicationName());
+
     mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 
@@ -23,16 +26,17 @@ Settings::Settings(QObject *parent) : QObject(parent)
             .arg (mDefaultMusicDir)
             .arg (qApp->applicationName());
 
-    QDir dir(mDefaultMusicDir);
-    if (!dir.exists ())
-        dir.mkpath (mDefualtMusicImageDir);
-
-    mSettings = new QSettings(qApp->organizationName(), qApp->applicationName());
+    QDir dir(mDefualtMusicImageDir);
+    if (!dir.exists ()) {
+        if (!dir.mkpath (mDefualtMusicImageDir)) {
+            qDebug()<<"make music image dir fail";
+        }
+    }
 }
 
 Settings *Settings::getInstance()
 {
-    static Settings s;
+    static Settings s(0);
     return &s;
 }
 

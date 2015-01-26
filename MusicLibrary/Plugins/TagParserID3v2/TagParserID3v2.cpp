@@ -25,11 +25,6 @@ TagParserID3v2::TagParserID3v2(QObject *parent)
     m_utf8Codec = QTextCodec::codecForName("UTF-8");
     m_localeCodec = Util::localeDefaultCodec ();
 
-    //    //Initial music global.
-    //    m_musicGlobal=KNMusicGlobal::instance();
-
-    mSettings = Settings::getInstance ();
-
     //Initial unsynchronisation data.
     //Using forced conversation to ignore the ambiguous calling.
     mUnSyncRaw.append((char)0xff);
@@ -70,7 +65,11 @@ TagParserID3v2::TagParserID3v2(QObject *parent)
 
 TagParserID3v2::~TagParserID3v2()
 {
+    if (!mFrameIDIndex.isEmpty ())
+        mFrameIDIndex.clear ();
 
+    if (!mImageData.isEmpty ())
+        mImageData.clear ();
 }
 
 bool TagParserID3v2::parserTag(SongMetaData *targetMetaDate)
@@ -105,14 +104,17 @@ bool TagParserID3v2::parserTag(SongMetaData *targetMetaDate)
         //File is smaller than the tag says, failed to get.
         return false;
     }
+
     //Read the raw tag data.
     char *rawTagData = new char[header.size];
     musicDataStream.readRawData (rawTagData, header.size);
     //Parse these raw data.
     QLinkedList<ID3v2Frame> frames;
     ID3v2MinorProperty property;
+
     generateID3v2Property (header.minor, property);
     parseID3v2RawData (rawTagData, header, property, frames);
+
     //Write the tag to details.
     if (!frames.isEmpty()) {
         writeID3v2ToDetails(frames, property, targetMetaDate);
@@ -120,46 +122,56 @@ bool TagParserID3v2::parserTag(SongMetaData *targetMetaDate)
     //Recover the memory.
     delete[] rawTagData;
     if (parseAlbumArt ()) {
-        QString imagePath = mSettings->getMusicImageCachePath ();
-        QImage image = mID3v2Item.coverImage;
+        Settings *s = Settings::getInstance ();
+
+        QString imagePath = s->getMusicImageCachePath ();
         QString fileName = targetMetaDate->fileName ();
         fileName = fileName.mid (0, fileName.lastIndexOf ("."));
-        fileName = QString("%1/%2_cover").arg (imagePath).arg (fileName);
-        image.save (fileName);
-        targetMetaDate->setCoverArtSmall (fileName);
+        fileName = QString("%1/%2_cover.png").arg (imagePath).arg (fileName);
 
-
-
+        qDebug()<<"Image width is "<<mCoverImage.width ();
+        if (!mCoverImage.save (fileName, "PNG")) {
+            qDebug()<<"++++++++++++ fail to try to save file to "<<fileName;
+        } else {
+            targetMetaDate->setCoverArtSmall (fileName);
+        }
     }
     return true;
 }
 
 bool TagParserID3v2::parseAlbumArt()
 {
-    if (!mID3v2Item.imageData.contains("ID3v2")) {
+    if (!mImageData.contains ("ID3v2")) {
         return false;
     }
+
     //Get the total size of images.
-    QByteArray imageTypes = mID3v2Item.imageData["ID3v2"].takeLast();
+    //QByteArray imageTypes = mImageData["ID3v2"].takeLast ();
+    if (mImageData["ID3v2"].isEmpty ())
+        return false;
+
+    QByteArray imageTypes = mImageData["ID3v2"].takeLast ();
     int imageCount = imageTypes.size();
     QHash<int, ID3v2PictureFrame> imageMap;
     for (int i=0; i<imageCount; ++i) {
         //Check the flag is "APIC" or "PIC"
         if (imageTypes.at(i) == 1) {
-            parseAPICImageData(mID3v2Item.imageData["ID3v2_Images"].takeFirst(),
+            parseAPICImageData(mImageData["ID3v2_Images"].takeFirst(),
                     imageMap);
         } else {
-            parsePICImageData(mID3v2Item.imageData["ID3v2_Images"].takeFirst(),
+            parsePICImageData(mImageData["ID3v2_Images"].takeFirst(),
                     imageMap);
         }
     }
     //If there's a album art image after parse all the album art, set.
     if(imageMap.contains(3)) {
-        mID3v2Item.coverImage = imageMap[3].image;
+        //mID3v2Item.coverImage = imageMap[3].image;
+        mCoverImage = imageMap[3].image;
     } else {
         //Or else use the first image.
         if(!imageMap.isEmpty()) {
-            mID3v2Item.coverImage = imageMap.begin().value().image;
+            //mID3v2Item.coverImage = imageMap.begin().value().image;
+            mCoverImage = imageMap.begin().value().image;
         }
     }
     return true;
@@ -302,16 +314,10 @@ void TagParserID3v2::writeID3v2ToDetails(const QLinkedList<ID3v2Frame> &frames,
                                          const ID3v2MinorProperty &property,
                                          SongMetaData *data)
 {
-    //Get the detail info.
-    //KNMusicDetailInfo &detailInfo = data.detailInfo;
-    mID3v2Item.data = data;
-
     //Prepare the image type list.
     QByteArray imageTypeList;
-//    for (QLinkedList<ID3v2Frame>::const_iterator i = frames.begin();
-//         i != frames.end();
-//         ++i) {
     foreach (ID3v2Frame i, frames) {
+
         //Process the data according to the flag before we use it.
         QByteArray frameData;
         //Check if it contains a data length indicator.
@@ -336,7 +342,8 @@ void TagParserID3v2::writeID3v2ToDetails(const QLinkedList<ID3v2Frame> &frames,
             //add a 0.
             imageTypeList.append ((int)(frameID == "APIC"));
             //data.imageData["ID3v2_Images"].append(frameData);
-            mID3v2Item.imageData["ID3v2_Images"].append(frameData);
+            //mID3v2Item.imageData["ID3v2_Images"].append(frameData);
+            mImageData["ID3v2_Images"].append(frameData);
             continue;
         }
         if (!mFrameIDIndex.contains(i.frameID)) {
@@ -350,39 +357,39 @@ void TagParserID3v2::writeID3v2ToDetails(const QLinkedList<ID3v2Frame> &frames,
 
         switch (frameIndex) {
         case Name:
-            mID3v2Item.data->setSongTitle (frameToText (frameData));
+            data->setSongTitle (frameToText (frameData));
             break;
         case Album:
-            mID3v2Item.data->setAlbumName (frameToText (frameData));
+            data->setAlbumName (frameToText (frameData));
             break;
         case AlbumArtist:
-            mID3v2Item.data->setArtistName (frameToText (frameData));
+            data->setArtistName (frameToText (frameData));
             break;
         case AlbumRating:
             break;
         case Artist:
-            mID3v2Item.data->setArtistName (frameToText (frameData));
+            data->setArtistName (frameToText (frameData));
             break;
         case BeatsPerMinuate:
             break;
         case BitRate:
-            mID3v2Item.data->setMediaBitrate (frameToText (frameData).toInt ());
+            data->setMediaBitrate (frameToText (frameData).toInt ());
             break;
         case Category:
-            mID3v2Item.data->setCategory (QStringList((frameToText (frameData))));
+            data->setCategory (QStringList((frameToText (frameData))));
             break;
         case Description:
-            mID3v2Item.data->setSongDescription (frameToText (frameData));
+            data->setSongDescription (frameToText (frameData));
             break;
         case Size:
             //TODO 是否是指实际的文件大小?
             qDebug()<<"============== size " + (frameToText (frameData));
             break;
         case Time:
-            mID3v2Item.data->setSongLength (frameToText (frameData).toInt ());
+            data->setSongLength (frameToText (frameData).toInt ());
             break;
         case Year:
-            mID3v2Item.data->setYear (QString(frameData.at(0)).toInt ());
+            data->setYear (QString(frameData.at(0)).toInt ());
             break;
         case DiscNumber:
             //TODO: Don't need for our struct
@@ -453,11 +460,11 @@ void TagParserID3v2::writeID3v2ToDetails(const QLinkedList<ID3v2Frame> &frames,
             //I don't know why all the file using this.
             if (QString(frameData.left(29)) == "Windows Media Player 9 Series") {
                 //Translate the last bytes as rating.
-                mID3v2Item.data->setUserRating (ratingStars((quint8)(frameData.at(30))));
+                data->setUserRating (ratingStars((quint8)(frameData.at(30))));
             } else {
                 //Treat the first bytes as rating.
                 if(!frameData.isEmpty()) {
-                    mID3v2Item.data->setUserRating (QString(frameData.at(0)).toInt ());
+                    data->setUserRating (QString(frameData.at(0)).toInt ());
                 }
             }
             break;
@@ -480,9 +487,11 @@ void TagParserID3v2::writeID3v2ToDetails(const QLinkedList<ID3v2Frame> &frames,
             break;
         }
     }
+
     //If there's any data in type list, add it to image data.
     if (!imageTypeList.isEmpty()) {
-        mID3v2Item.imageData["ID3v2"].append(imageTypeList);
+        //mID3v2Item.imageData["ID3v2"].append(imageTypeList);
+        mImageData["ID3v2"].append(imageTypeList);
     }
 }
 

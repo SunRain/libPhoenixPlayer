@@ -304,6 +304,7 @@ bool MusicLibraryManager::init()
     });
     connect (mTagParserThread.data (), &QThread::finished, mTagParserManager.data (), &TagParserManager::deleteLater);
     connect (mTagParserManager.data (), &TagParserManager::parserQueueFinished, [this]{
+        qDebug()<<"********************* parserQueueFinished";
         mPlayListDAO.data ()->commitTransaction ();
     });
 

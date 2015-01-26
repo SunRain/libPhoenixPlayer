@@ -95,11 +95,11 @@ enum MusicDatas
     MusicDataCount
 };
 
-struct ID3v2Item {
-    SongMetaData *data;
-    QImage coverImage;
-    QMap<QString, QList<QByteArray>> imageData;
-};
+//struct ID3v2Item {
+//    SongMetaData *data;
+//    QImage coverImage;
+//    QMap<QString, QList<QByteArray>> imageData;
+//};
 
 class TagParserID3v2 : public IMusicTagParser
 {
@@ -151,7 +151,6 @@ private:
     inline void parsePICImageData(QByteArray imageData,
                                   QHash<int, ID3v2PictureFrame> &imageMap);
     QHash<QString, int> mFrameIDIndex;
-//    KNMusicGlobal *m_musicGlobal;
 
     QByteArray mUnSyncRaw;
     QByteArray mUnSyncTo;
@@ -163,8 +162,11 @@ private:
     QTextCodec *m_localeCodec;
     bool mUsingDefaultCodec = true;
 
-    ID3v2Item mID3v2Item;
-    Settings *mSettings;
+//    ID3v2Item mID3v2Item;
+//    Settings *mSettings;
+
+    QImage mCoverImage;
+    QMap<QString, QList<QByteArray>> mImageData;
 };
 
 } //TagParserID3v2

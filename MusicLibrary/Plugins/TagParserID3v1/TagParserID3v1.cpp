@@ -54,6 +54,7 @@ bool TagParserID3v1::parserTag(SongMetaData *targetMetaDate)
     //Check is the header 'TAG':
     if (rawTagData[0]!='T' || rawTagData[1]!='A' || rawTagData[2]!='G')
         return false;
+
     //Parse the raw data.
     parseRawData(rawTagData, tagData);
     //Write raw data to the detail info.
