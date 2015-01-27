@@ -5,10 +5,9 @@
 
 #include "Common.h"
 #include "Settings.h"
-#include "PlayBackendLoader.h"
-#include "IPlayBackend.h"
+#include "backend/IPlayBackend.h"
 #include "MusicLibraryManager.h"
-#include "BaseMediaObject.h"
+#include "backend/BaseMediaObject.h"
 
 namespace PhoenixPlayer {
 

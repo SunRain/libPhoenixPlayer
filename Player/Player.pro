@@ -1,6 +1,6 @@
 
 TEMPLATE = lib
-CONFIG += plugin
+#CONFIG += plugin
 
 QT       += core
 
@@ -12,20 +12,20 @@ CONFIG += c++11
 include (Player.pri)
 #include (../Backend/Core/BackendCore.pri)
 include (../Common/sdk.pri)
-include (../MusicLibrary/Core/MusicLibraryCore.pri)
+include (../MusicLibrary/Core/MusicLibrarySDK.pri)
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Common \
-                                              -L$$OUT_PWD/../MusicLibraryCore \
-                                              -lCommon \
-                                              -lMusicLibraryCore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Common \
-                                                 -L$$OUT_PWD/../MusicLibraryCore \
-                                                 -lCommon \
-                                                 -lMusicLibraryCore
-else:unix: LIBS += -L$$OUT_PWD/../Common \
-                   -L$$OUT_PWD/../MusicLibraryCore \
-                   -lCommon \
-                   -lMusicLibraryCore
+#win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Common \
+#                                              -L$$OUT_PWD/../MusicLibraryCore \
+#                                              -lCommon \
+#                                              -lMusicLibraryCore
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Common \
+#                                                 -L$$OUT_PWD/../MusicLibraryCore \
+#                                                 -lCommon \
+#                                                 -lMusicLibraryCore
+#else:unix: LIBS += -L$$OUT_PWD/../Common \
+#                   -L$$OUT_PWD/../MusicLibraryCore \
+#                   -lCommon \
+#                   -lMusicLibraryCore
 
 unix {
 #    CONFIG += link_pkgconfig
@@ -36,3 +36,19 @@ unix {
 }
 
 DESTDIR = ../plugins
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Common/release/ \
+                                                                          -L$$OUT_PWD/../MusicLibrary/Core/release/ \
+                                                                          -lCommon \
+                                                                          -lMusicLibraryCore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Common/debug/ \
+                                                                                -L$$OUT_PWD/../MusicLibrary/Core/debug/\
+                                                                                -lCommon \
+                                                                                -lMusicLibraryCore
+else:unix: LIBS += -L$$OUT_PWD/../Common/ \
+                            -L$$OUT_PWD/../MusicLibrary/Core/ \
+                            -lCommon \
+                            -lMusicLibraryCore
+
+
+

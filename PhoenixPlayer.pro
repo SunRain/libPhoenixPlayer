@@ -4,26 +4,19 @@
 #
 #-------------------------------------------------
 
-#QT       += core
-
-#QT       -= gui
-
-#TARGET = PhoenixPlayer
-#CONFIG   += console
-#CONFIG   -= app_bundle
-
 TEMPLATE = subdirs
 CONFIG += ordered
-#QMAKE_CXXFLAGS += -std=c++0x
-#CONFIG += c++11
 
 common.file = Common/Common.pro
 SUBDIRS += common
-#Plugins.depends = common
 
 musiclibrarycore.file = MusicLibrary/Core/MusicLibraryCore.pro
 musiclibrarycore.depends = common
 SUBDIRS += musiclibrarycore
+
+player.file = Player/Player.pro
+player.depends = common musiclibrarycore
+SUBDIRS += player
 
 SUBDIRS += \
     Backend \
