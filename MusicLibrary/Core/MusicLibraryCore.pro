@@ -1,26 +1,18 @@
 TEMPLATE = lib
-#CONFIG += plugin
-
-#QT += sql
-
 TARGET = MusicLibraryCore
 
 #Enable c++11
 CONFIG += c++11
 
-#include(../../Core/interface.pri)
-#include(../../Core/MusicLibraryCore.pri)
-#include(../../../Common/Common.pri)
-#include(SQLite3.pri)
 include (../../Common/sdk.pri)
 include (MusicLibraryCore.pri)
 
 INCLUDEPATH += \
         $$PWD
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Common -lCommon
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Common -lCommon
-else:unix: LIBS += -L$$OUT_PWD/../../Common -lCommon
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Common/release/ -lCommon
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Common/debug/ -lCommon
+else:unix: LIBS += -L$$OUT_PWD/../../Common/ -lCommon
 
 unix {
 #    CONFIG += link_pkgconfig
@@ -30,7 +22,7 @@ unix {
 #        /usr/include/gstreamer-0.10 \
 }
 
-DESTDIR = ../../../plugins
+#DESTDIR = ../../../plugins
 
 #PlayBackend
 win32 {
@@ -57,5 +49,3 @@ win32 {
 #	HEADERS -= tagReaderGstreamer.h
 #	SOURCES -= tagReaderGstreamer.cpp
 #}
-
-

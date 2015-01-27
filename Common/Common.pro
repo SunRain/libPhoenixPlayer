@@ -2,7 +2,7 @@ TEMPLATE = lib
 #CONFIG += plugin
 
 TARGET = Common
-QT += gui
+#QT += gui
 
 #Enable c++11
 CONFIG += c++11

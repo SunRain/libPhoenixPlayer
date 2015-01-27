@@ -1,6 +1,5 @@
 INCLUDEPATH += $$PWD/include
-
-DEPENDPATH += $$PWD
+DEPENDPATH += $$PWD/include
 
 HEADERS += \
     $$PWD/include/Common.h \

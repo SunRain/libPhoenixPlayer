@@ -6,7 +6,7 @@
 #include <QMap>
 #include <QList>
 
-#include "IMusicTagParser.h"
+#include "MusicLibrary/IMusicTagParser.h"
 
 class QTextCodec;
 class QImage;

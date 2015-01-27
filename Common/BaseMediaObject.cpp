@@ -1,4 +1,6 @@
-#include "BaseMediaObject.h"
+
+#include "backend/BaseMediaObject.h"
+
 namespace PhoenixPlayer {
 namespace PlayBackend {
 BaseMediaObject::BaseMediaObject(QObject *parent) : QObject(parent)

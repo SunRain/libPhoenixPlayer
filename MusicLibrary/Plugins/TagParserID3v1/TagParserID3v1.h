@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "IMusicTagParser.h"
+#include "MusicLibrary/IMusicTagParser.h"
 
 class QTextCodec;
 namespace PhoenixPlayer {

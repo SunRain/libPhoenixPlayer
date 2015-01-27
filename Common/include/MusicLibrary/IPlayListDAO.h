@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
-#include <QtSql/QSqlQuery>
+//#include <QtSql/QSqlQuery>
 
 #include "Common.h"
 

@@ -15,18 +15,9 @@ include (TagParserID3v1.pri)
 INCLUDEPATH += \
         $$PWD
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Common \
-                                              -L$$OUT_PWD/../../MusicLibraryCore \
-                                              -lCommon \
-                                              -lMusicLibraryCore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Common \
-                                                 -L$$OUT_PWD/../../MusicLibraryCore \
-                                                 -lCommon \
-                                                 -lMusicLibraryCore
-else:unix: LIBS += -L$$OUT_PWD/../../../Common \
-                   -L$$OUT_PWD/../../MusicLibraryCore \
-                   -lCommon \
-                   -lMusicLibraryCore
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Common/release/ -lCommon
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Common/debug/ -lCommon
+else:unix: LIBS += -L$$OUT_PWD/../../../Common/ -lCommon
 
 unix {
 #    CONFIG += link_pkgconfig
@@ -63,5 +54,4 @@ win32 {
 #	HEADERS -= tagReaderGstreamer.h
 #	SOURCES -= tagReaderGstreamer.cpp
 #}
-
 

@@ -3,12 +3,12 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 
-common.file = ../Common.pro
-#Plugins.depends = common
+#common.file = ../Common.pro
+##Plugins.depends = common
 
-musiclibrarycore.file = Core/MusicLibraryCore.pro
-musiclibrarycore.depends = common
-SUBDIRS += musiclibrarycore
+#musiclibrarycore.file = Core/MusicLibraryCore.pro
+#musiclibrarycore.depends = common
+#SUBDIRS += musiclibrarycore
 
 sqlite3.file = Plugins/SQLite3/SQLite3.pro
 sqlite3.depends = common musiclibrarycore

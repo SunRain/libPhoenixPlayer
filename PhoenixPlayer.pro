@@ -17,11 +17,19 @@ CONFIG += ordered
 #QMAKE_CXXFLAGS += -std=c++0x
 #CONFIG += c++11
 
+common.file = Common/Common.pro
+SUBDIRS += common
+#Plugins.depends = common
+
+musiclibrarycore.file = MusicLibrary/Core/MusicLibraryCore.pro
+musiclibrarycore.depends = common
+SUBDIRS += musiclibrarycore
+
 SUBDIRS += \
     Backend \
     MusicLibrary \
-    Player \
-    Common \
+#    Player \
+#    Common \
     test
 
 #gstreamer {

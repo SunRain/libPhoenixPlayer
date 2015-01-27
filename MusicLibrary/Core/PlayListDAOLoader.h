@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "IPlayListDAO.h"
+#include "MusicLibrary/IPlayListDAO.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {

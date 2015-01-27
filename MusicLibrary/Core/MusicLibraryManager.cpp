@@ -3,9 +3,8 @@
 #include <QDebug>
 #include <QPointer>
 
+#include "MusicLibrary/IPlayListDAO.h"
 #include "MusicLibraryManager.h"
-//#include "IPlayList.h"
-#include "IPlayListDAO.h"
 #include "PlayListDAOLoader.h"
 #include "DiskLookup.h"
 #include "Settings.h"

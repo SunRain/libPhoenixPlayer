@@ -9,11 +9,11 @@
 #include <QDir>
 #include <qobject.h>
 
+#include "MusicLibrary/IMusicTagParser.h"
+#include "MusicLibrary/IPlayListDAO.h"
 
 #include "TagParserManager.h"
-#include "IMusicTagParser.h"
 #include "SongMetaData.h"
-#include "IPlayListDAO.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {

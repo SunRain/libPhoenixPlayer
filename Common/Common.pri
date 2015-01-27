@@ -7,7 +7,9 @@ HEADERS += \
     $$PWD/include/Common.h \
     $$PWD/include/Settings.h \
     $$PWD/include/SongMetaData.h \
-    $$PWD/include/Util.h
+    $$PWD/include/Util.h \
+    $$PWD/include/MusicLibrary/IPlayListDAO.h \
+    $$PWD/include/MusicLibrary/IMusicTagParser.h
 
 SOURCES += \
     $$PWD/BaseMediaObject.cpp \

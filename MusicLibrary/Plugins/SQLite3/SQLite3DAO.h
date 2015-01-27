@@ -3,12 +3,11 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QSqlDatabase>
 
-#include "IPlayListDAO.h"
+#include "MusicLibrary/IPlayListDAO.h"
 
-class QSqlDatabase;
 class QString;
-
 namespace PhoenixPlayer {
 class SongMetaData;
 class Common;
