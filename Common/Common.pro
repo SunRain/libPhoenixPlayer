@@ -1,31 +1,27 @@
 TEMPLATE = lib
-CONFIG += plugin
+#CONFIG += plugin
 
-TARGET = GStreamerBackend
+TARGET = Common
+QT += gui
 
-#include(../../Core/backendInterface.pri)
-#include(../../../Common/Common.pri)
-include (../../../Common/sdk.pri)
-include(GStreamerBackend.pri)
+#Enable c++11
+CONFIG += c++11
+
+
+include (Common.pri)
 
 INCLUDEPATH += \
         $$PWD
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Common -lCommon
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Common -lCommon
-else:unix: LIBS += -L$$OUT_PWD/../../../Common -lCommon
-
 unix {
-    CONFIG += link_pkgconfig
-    PKGCONFIG += gstreamer-0.10
+#    CONFIG += link_pkgconfig
+#    PKGCONFIG += gstreamer-0.10
 
-    INCLUDEPATH += \
-        /usr/include/gstreamer-0.10 \
-        /usr/include/glib-2.0 \
-        /usr/include/libxml2
+#    INCLUDEPATH += \
+#        /usr/include/gstreamer-0.10 \
 }
 
-DESTDIR = ../../../plugins
+#DESTDIR = ../../../plugins
 
 #PlayBackend
 win32 {

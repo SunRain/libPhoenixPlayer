@@ -1,32 +1,26 @@
 TEMPLATE = lib
-CONFIG += plugin
+#CONFIG += plugin
 
-TARGET = TagParserID3v1
+#QT += sql
+
+TARGET = MusicLibraryCore
 
 #Enable c++11
 CONFIG += c++11
 
-
-#include (../../Core/MusicLibraryCore.pri)
-#include (../../../Common/Common.pri)
-include(../../../Common/sdk.pri)
-include (TagParserID3v1.pri)
+#include(../../Core/interface.pri)
+#include(../../Core/MusicLibraryCore.pri)
+#include(../../../Common/Common.pri)
+#include(SQLite3.pri)
+include (../../Common/sdk.pri)
+include (MusicLibraryCore.pri)
 
 INCLUDEPATH += \
         $$PWD
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Common \
-                                              -L$$OUT_PWD/../../MusicLibraryCore \
-                                              -lCommon \
-                                              -lMusicLibraryCore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Common \
-                                                 -L$$OUT_PWD/../../MusicLibraryCore \
-                                                 -lCommon \
-                                                 -lMusicLibraryCore
-else:unix: LIBS += -L$$OUT_PWD/../../../Common \
-                   -L$$OUT_PWD/../../MusicLibraryCore \
-                   -lCommon \
-                   -lMusicLibraryCore
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Common -lCommon
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Common -lCommon
+else:unix: LIBS += -L$$OUT_PWD/../../Common -lCommon
 
 unix {
 #    CONFIG += link_pkgconfig

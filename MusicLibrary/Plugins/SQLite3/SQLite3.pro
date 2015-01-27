@@ -9,12 +9,26 @@ TARGET = PlayListSQLite3Plugin
 CONFIG += c++11
 
 #include(../../Core/interface.pri)
-include(../../Core/MusicLibraryCore.pri)
-include(../../../Common/Common.pri)
+#include(../../Core/MusicLibraryCore.pri)
+include(../../../Common/sdk.pri)
 include(SQLite3.pri)
 
 INCLUDEPATH += \
         $$PWD
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Common \
+                                              -L$$OUT_PWD/../../MusicLibraryCore \
+                                              -lCommon \
+                                              -lMusicLibraryCore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Common \
+                                                 -L$$OUT_PWD/../../MusicLibraryCore \
+                                                 -lCommon \
+                                                 -lMusicLibraryCore
+else:unix: LIBS += -L$$OUT_PWD/../../../Common \
+                   -L$$OUT_PWD/../../MusicLibraryCore \
+                   -lCommon \
+                   -lMusicLibraryCore
+
 
 unix {
 #    CONFIG += link_pkgconfig

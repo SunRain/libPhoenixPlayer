@@ -1,15 +1,22 @@
 
-
-INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD/include
 
 HEADERS += \
-   $$PWD/Common.h \
-    $$PWD/SongMetaData.h \
-    $$PWD/Settings.h \
-    $$PWD/Util.h
+    $$PWD/include/backend/BaseMediaObject.h \
+    $$PWD/include/backend/IPlayBackend.h \
+    $$PWD/include/Common.h \
+    $$PWD/include/Settings.h \
+    $$PWD/include/SongMetaData.h \
+    $$PWD/include/Util.h
 
 SOURCES += \
-    $$PWD/SongMetaData.cpp \
+    $$PWD/BaseMediaObject.cpp \
     $$PWD/Settings.cpp \
-    $$PWD/Util.cpp
+    $$PWD/SongMetaData.cpp \
+    $$PWD/Util.cpp \
+    $$PWD/IPlayListDAO.cpp \
+    $$PWD/IMusicTagParser.cpp
+
+
+
 

@@ -21,6 +21,7 @@ SUBDIRS += \
     Backend \
     MusicLibrary \
     Player \
+    Common \
     test
 
 #gstreamer {

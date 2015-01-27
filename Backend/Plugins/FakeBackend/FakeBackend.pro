@@ -4,12 +4,18 @@ CONFIG += plugin
 
 TARGET = FakeBackend
 
-include(../../Core/backendInterface.pri)
-include(../../../Common/Common.pri)
+#include(../../Core/backendInterface.pri)
+#include(../../../Common/Common.pri)
+include (../../../Common/sdk.pri)
 include(FakeBackend.pri)
 
 INCLUDEPATH += \
         $$PWD
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Common -lCommon
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Common -lCommon
+else:unix: LIBS += -L$$OUT_PWD/../../../Common -lCommon
 
 unix {
 #    CONFIG += link_pkgconfig

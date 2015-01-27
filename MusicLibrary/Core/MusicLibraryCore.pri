@@ -12,8 +12,6 @@ SOURCES += \
     $$PWD/IMusicTagParser.cpp
 
 HEADERS += \
-    $$PWD/include/IMusicTagParser.h \
-    $$PWD/include/IPlayListDAO.h \
     $$PWD/include/MusicLibraryManager.h \
     $$PWD/PlayListDAOLoader.h \
     $$PWD/DiskLookup.h \
