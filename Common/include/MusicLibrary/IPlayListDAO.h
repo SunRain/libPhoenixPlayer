@@ -42,9 +42,9 @@ public:
     /// \param skipDuplicates 是否跳过重复的值
     /// \return
     ///
-    virtual QStringList queryMusicLibrary(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
-                                Common::MusicLibraryElement regColumn = Common::E_NULLElement,
-                                const QString &regValue = "", bool skipDuplicates = true) = 0;
+    virtual QStringList queryMusicLibrary(Common::SongMetaTags targetColumn,
+                                Common::SongMetaTags regColumn,
+                                const QString &regValue, bool skipDuplicates = true) = 0;
 
     ///
     /// \brief queryPlayList 播放列表操作类,
@@ -53,21 +53,22 @@ public:
     /// \param regValue 条件列的值
     /// \return
     ///
-    virtual QStringList queryPlayList(Common::PlayListElement targetColum = Common::E_PlayListNullElement,
-                                      Common::PlayListElement regColumn = Common::E_PlayListNullElement,
-                                      const QString &regValue = "") = 0;
+    virtual QStringList queryPlayList(Common::PlayListElement targetColum,
+                                      Common::PlayListElement regColumn,
+                                      const QString &regValue) = 0;
 
     ///
     /// \brief updatePlayList 更新播放列表数据
     /// \param targetColumn
     /// \param hash
     /// \param newValue
-    /// \param appendNewValues 是否将newValue添加到已有数据后面,否则就从已有数据里面删除newValue,只有当targetColumn = E_PlayListSongHashes才有效
+    /// \param appendNewValues 是否将newValue添加到已有数据后面,
+    /// 否则就从已有数据里面删除newValue,只有当targetColumn = E_PlayListSongHashes才有效
     /// \return
     ///
-    //TODO: 怎么const QString后面也需要赋值了,不然编译通不过
-    virtual bool updatePlayList(Common::PlayListElement targetColumn = Common::E_PlayListNullElement,
-                                const QString &hash = "", const QString &newValue = "", bool appendNewValues = true) = 0;
+    virtual bool updatePlayList(Common::PlayListElement targetColumn,
+                                const QString &hash, const QString &newValue ,
+                                bool appendNewValues = true) = 0;
 
     virtual bool deletePlayList(const QString &playListHash) = 0;
     virtual bool insertPlayList(const QString &playListName) = 0;

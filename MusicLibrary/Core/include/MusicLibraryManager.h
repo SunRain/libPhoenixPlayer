@@ -73,7 +73,7 @@ public:
     /// \param skipDuplicates 是否跳过重复值
     /// \return
     ///
-    QStringList querySongMetaElement(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
+    QStringList querySongMetaElement(Common::SongMetaTags targetColumn = Common::E_FirstFlag,
                                 const QString &hash = "", bool skipDuplicates = true);
     ///
     /// \brief querySongMetaElement 由于qml不支持直接和cpp代码传递enum值,所以用int代替

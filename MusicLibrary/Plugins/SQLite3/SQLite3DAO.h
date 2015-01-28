@@ -45,8 +45,8 @@ public:
     SongMetaData *querySongMeta(const QString &hash, const QString &table);
     QStringList getSongHashList(const QString &playListHash);
 
-    QStringList queryMusicLibrary(Common::MusicLibraryElement targetColumn = Common::E_NULLElement,
-                        Common::MusicLibraryElement regColumn = Common::E_NULLElement,
+    QStringList queryMusicLibrary(Common::SongMetaTags targetColumn = Common::E_FirstFlag,
+                        Common::SongMetaTags regColumn = Common::E_FirstFlag,
                         const QString &regValue = "", bool skipDuplicates = true);
 
     QStringList queryPlayList(Common::PlayListElement targetColumn = Common::E_PlayListNullElement,

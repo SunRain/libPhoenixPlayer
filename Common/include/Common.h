@@ -10,7 +10,7 @@ class Common : public QObject
     Q_OBJECT
     Q_ENUMS(PlaybackState)
     Q_ENUMS(PlayMode)
-    Q_ENUMS(MusicLibraryElement)
+    Q_ENUMS(SongMetaTags)
     Q_ENUMS(PlayListElement)
 public:
     enum PlaybackState {
@@ -37,8 +37,8 @@ public:
         E_PlayListSongHashes
     };
 
-    enum MusicLibraryElement {
-        E_NULLElement = 0x0,
+    enum SongMetaTags {
+        E_FirstFlag = 0x0,
         E_Hash,
         E_FilePath,
         E_FileName,
@@ -67,7 +67,11 @@ public:
         E_Publisher,
         E_Copyright,
         E_Lyrics,
-        E_Mood
+        E_Mood,
+        E_Composer,
+        E_Conductor	,
+        E_Genre,
+        E_LastFlag
     };
 
     QString enumToStr(const QString &enumName, int enumValue)

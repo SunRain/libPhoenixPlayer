@@ -25,6 +25,7 @@ PluginLoader::PluginLoader(QObject *parent)
     //TODO: 根据系统来设置插件的默认路径
     QString path = QString("%1/plugins").arg(QCoreApplication::applicationDirPath());
 
+    //初始化一个空容器
     for (int i = (int)PluginType::TypePlayBackend;
          i <= (int)PluginType::TypePlayListDAO;
          ++i) {

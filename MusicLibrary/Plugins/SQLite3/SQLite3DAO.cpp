@@ -419,7 +419,7 @@ QStringList SQLite3DAO::getSongHashList(const QString &playListHash)
     return list.first ().split ("||");
 }
 
-QStringList SQLite3DAO::queryMusicLibrary(Common::MusicLibraryElement targetColumn, Common::MusicLibraryElement regColumn, const QString &regValue, bool skipDuplicates)
+QStringList SQLite3DAO::queryMusicLibrary(Common::SongMetaTags targetColumn, Common::SongMetaTags regColumn, const QString &regValue, bool skipDuplicates)
 {
     if (!checkDatabase ())
         return QStringList();

@@ -182,11 +182,11 @@ void MusicLibraryManager::randomSong()
     emit playingSongChanged ();
 }
 
-QStringList MusicLibraryManager::querySongMetaElement(Common::MusicLibraryElement targetColumn, const QString &hash, bool skipDuplicates)
+QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targetColumn, const QString &hash, bool skipDuplicates)
 {
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::E_NULLElement, QString(), skipDuplicates);
+        list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::E_FirstFlag, QString(), skipDuplicates);
     } else {
         list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::E_Hash, hash, skipDuplicates);
     }
@@ -196,7 +196,7 @@ QStringList MusicLibraryManager::querySongMetaElement(Common::MusicLibraryElemen
 
 QStringList MusicLibraryManager::querySongMetaElementByIndex(int columnIndex, const QString &hash, bool skipDuplicates)
 {
-    return querySongMetaElement (Common::MusicLibraryElement(columnIndex), hash, skipDuplicates);
+    return querySongMetaElement (Common::SongMetaTags(columnIndex), hash, skipDuplicates);
 }
 
 QStringList MusicLibraryManager::queryPlayListElement(Common::PlayListElement targetColumn, const QString &hash)
