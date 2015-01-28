@@ -45,16 +45,17 @@ public:
     SongMetaData *querySongMeta(const QString &hash, const QString &table);
     QStringList getSongHashList(const QString &playListHash);
 
-    QStringList queryMusicLibrary(Common::SongMetaTags targetColumn = Common::E_FirstFlag,
-                        Common::SongMetaTags regColumn = Common::E_FirstFlag,
-                        const QString &regValue = "", bool skipDuplicates = true);
+    QStringList queryMusicLibrary(Common::SongMetaTags,
+                                  Common::SongMetaTags regColumn,
+                                  const QString &regValue, bool skipDuplicates = true);
 
-    QStringList queryPlayList(Common::PlayListElement targetColumn = Common::E_PlayListNullElement,
-                              Common::PlayListElement regColumn = Common::E_PlayListNullElement,
-                              const QString &regValue = "");
+    QStringList queryPlayList(Common::PlayListElement targetColumn,
+                              Common::PlayListElement regColumn,
+                              const QString &regValue);
 
-    bool updatePlayList(Common::PlayListElement targetColumn = Common::E_PlayListNullElement,
-                        const QString &hash = "", const QString &newValue = "", bool appendNewValues = true);
+    bool updatePlayList(Common::PlayListElement targetColumn,
+                        const QString &hash, const QString &newValue,
+                        bool appendNewValues = true);
 
     bool deletePlayList(const QString &playListHash);
     bool insertPlayList(const QString &playListName);
@@ -74,13 +75,14 @@ private:
     /// \param skipEmptyValue
     /// \return
     ///
-    QString fillValues(const QString &value, const QString &defaultValue, bool skipEmptyValue = true);
+    QString fillValues(const QString &value, const QString &defaultValue,
+                       bool skipEmptyValue = true);
     int fillValues (int value, int defaultVaule = 0, bool skipEmptyValue = true);
 
     bool checkDatabase();
 private:
     QSqlDatabase mDatabase;
-    QStringList mExistSongHashes;   
+    QStringList mExistSongHashes;
 };
 
 } //SQLite3
