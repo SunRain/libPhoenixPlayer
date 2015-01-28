@@ -12,11 +12,12 @@ class QThread;
 
 namespace PhoenixPlayer {
 class Settings;
+class PluginLoader;
 namespace MusicLibrary {
 
 class IPlayListDAO;
 class DiskLookup;
-class PlayListDAOLoader;
+//class PlayListDAOLoader;
 class TagParserManager;
 class MusicLibraryManager : public QObject
 {
@@ -73,8 +74,9 @@ public:
     /// \param skipDuplicates 是否跳过重复值
     /// \return
     ///
-    QStringList querySongMetaElement(Common::SongMetaTags targetColumn = Common::PlayListFirstFlag,
-                                const QString &hash = "", bool skipDuplicates = true);
+    QStringList querySongMetaElement(Common::SongMetaTags targetColumn,
+                                     const QString &hash,
+                                     bool skipDuplicates = true);
     ///
     /// \brief querySongMetaElement 由于qml不支持直接和cpp代码传递enum值,所以用int代替
     /// \param columnIndex
@@ -82,8 +84,8 @@ public:
     /// \param skipDuplicates
     /// \return
     ///
-    Q_INVOKABLE QStringList querySongMetaElementByIndex(int columnIndex = 0,
-                                const QString &hash = "", bool skipDuplicates = true);
+    Q_INVOKABLE QStringList querySongMetaElementByIndex(int columnIndex,
+                                const QString &hash, bool skipDuplicates = true);
 
     ///
     /// \brief queryPlayListElement 搜索播放列表相关内容, 如果hash值为空
@@ -91,7 +93,8 @@ public:
     /// \param hash 条件hash值
     /// \return
     ///
-    QStringList queryPlayListElement(Common::PlayListElement targetColumn = Common::PlayListFirstFlag, const QString &hash = "");
+    QStringList queryPlayListElement(Common::PlayListElement targetColumn,
+                                     const QString &hash);
 
     ///
     /// \brief queryPlayListElement 由于qml不支持直接和cpp代码传递enum值,所以用int代替
@@ -99,10 +102,15 @@ public:
     /// \param hash 条件hash值
     /// \return
     ///
-    Q_INVOKABLE QStringList queryPlayListElementByIndex(int index = 0, const QString &hash = "");
+    Q_INVOKABLE QStringList queryPlayListElementByIndex(int index,
+                                                        const QString &hash );
 
-    Q_INVOKABLE bool insertToPlayList(const QString &playListHash, const QString &newSongHash);
-    Q_INVOKABLE bool deleteFromPlayList(const QString &playListHash, const QString &songHash, bool deleteFromStorage = false);
+    Q_INVOKABLE bool insertToPlayList(const QString &playListHash,
+                                      const QString &newSongHash);
+
+    Q_INVOKABLE bool deleteFromPlayList(const QString &playListHash,
+                                        const QString &songHash,
+                                        bool deleteFromStorage = false);
 
 protected:
     bool init();
@@ -117,7 +125,9 @@ public slots:
 
 private:
     QPointer<IPlayListDAO> mPlayListDAO;
-    PlayListDAOLoader *mDAOLoader;
+//    PlayListDAOLoader *mDAOLoader;
+    PluginLoader *mPluginLoader;
+
 
     QPointer<QThread> mDiskLooKupThread;
     QPointer<QThread> mTagParserThread;

@@ -29,7 +29,7 @@ public:
     /// \brief stopLookup 停止搜索目录
     /// \return
     ///
-    bool stopLookup();
+    void stopLookup();
     void addLookupDir(const QString &dirName, bool lookupImmediately = false);
 
 protected:

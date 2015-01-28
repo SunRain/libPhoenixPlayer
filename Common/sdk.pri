@@ -9,4 +9,5 @@ HEADERS += \
     $$PWD/include/Backend/BaseMediaObject.h \
     $$PWD/include/Backend/IPlayBackend.h \
     $$PWD/include/MusicLibrary/IMusicTagParser.h \
-    $$PWD/include/MusicLibrary/IPlayListDAO.h
+    $$PWD/include/MusicLibrary/IPlayListDAO.h \
+    $$PWD/include/PluginLoader.h

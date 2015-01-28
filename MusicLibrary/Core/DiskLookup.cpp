@@ -54,7 +54,7 @@ bool DiskLookup::startLookup()
     return true;
 }
 
-bool DiskLookup::stopLookup()
+void DiskLookup::stopLookup()
 {
     mStopLookupFlag = true;
 }
