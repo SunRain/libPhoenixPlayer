@@ -73,7 +73,7 @@ public:
     /// \param skipDuplicates 是否跳过重复值
     /// \return
     ///
-    QStringList querySongMetaElement(Common::SongMetaTags targetColumn = Common::E_FirstFlag,
+    QStringList querySongMetaElement(Common::SongMetaTags targetColumn = Common::PlayListFirstFlag,
                                 const QString &hash = "", bool skipDuplicates = true);
     ///
     /// \brief querySongMetaElement 由于qml不支持直接和cpp代码传递enum值,所以用int代替
@@ -91,7 +91,7 @@ public:
     /// \param hash 条件hash值
     /// \return
     ///
-    QStringList queryPlayListElement(Common::PlayListElement targetColumn = Common::E_PlayListNullElement, const QString &hash = "");
+    QStringList queryPlayListElement(Common::PlayListElement targetColumn = Common::PlayListFirstFlag, const QString &hash = "");
 
     ///
     /// \brief queryPlayListElement 由于qml不支持直接和cpp代码传递enum值,所以用int代替

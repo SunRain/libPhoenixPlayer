@@ -17,7 +17,7 @@ Player::Player(QObject *parent) : QObject(parent)
     mPlayBackendLoader = 0;
     mSettings = 0;
     mMusicLibraryManager = 0;
-    mPlayMode = Common::ModeOrder;
+    mPlayMode = Common::PlayModeOrder;
 }
 
 Player::~Player()
@@ -60,7 +60,7 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
         connect (mPlayBackend.data (), &PlayBackend::IPlayBackend::finished, [this] {
             if (PointerValid (EPointer::PMusicLibraryManager)) {
                 switch (mPlayMode) {
-                case Common::ModeOrder: { //顺序播放
+                case Common::PlayModeOrder: { //顺序播放
                     if (mMusicLibraryManager.data ()->lastSongHash ()
                             == mMusicLibraryManager.data ()->playingSongHash ()) {
                         mPlayBackend.data ()->stop ();
@@ -69,7 +69,7 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
                     }
                     break;
                 }
-                case Common::ModeRepeatCurrent: { //单曲播放
+                case Common::PlayModeRepeatCurrent: { //单曲播放
                     QString playingHash = mMusicLibraryManager->playingSongHash ();
                     PlayBackend::BaseMediaObject obj;
 
@@ -81,15 +81,15 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
                     if (!list.isEmpty ())
                         obj.setFilePath (list.first ());
 
-                    obj.setMediaType (Common::TypeLocalFile);
+                    obj.setMediaType (Common::MediaTypeLocalFile);
                     mPlayBackend.data ()->changeMedia (&obj, 0, true);
                     break;
                 }
-                case Common::ModeRepeatAll:  { //循环播放
+                case Common::PlayModeRepeatAll:  { //循环播放
                     mMusicLibraryManager.data ()->nextSong ();
                     break;
                 }
-                case Common::ModeShuffle: { //随机播放
+                case Common::PlayModeShuffle: { //随机播放
                     mMusicLibraryManager.data ()->randomSong ();
                     break;
                 }
@@ -123,7 +123,7 @@ void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
             if (!list.isEmpty ())
                 obj.setFilePath (list.first ());
 
-            obj.setMediaType (Common::TypeLocalFile);
+            obj.setMediaType (Common::MediaTypeLocalFile);
             qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
             mPlayBackend.data ()->changeMedia (&obj, 0, true);
         }
@@ -179,7 +179,7 @@ void Player::togglePlayPause()
             list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
             if (!list.isEmpty ())
                 obj.setFilePath (list.first ());
-            obj.setMediaType (Common::TypeLocalFile);
+            obj.setMediaType (Common::MediaTypeLocalFile);
             qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
             mPlayBackend.data ()->changeMedia (&obj, 0, true);
         }

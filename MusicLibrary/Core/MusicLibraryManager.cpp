@@ -186,7 +186,7 @@ QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targe
 {
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::E_FirstFlag, QString(), skipDuplicates);
+        list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::PlayListFirstFlag, QString(), skipDuplicates);
     } else {
         list = mPlayListDAO.data ()->queryMusicLibrary (targetColumn, Common::E_Hash, hash, skipDuplicates);
     }
@@ -203,9 +203,9 @@ QStringList MusicLibraryManager::queryPlayListElement(Common::PlayListElement ta
 {
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO.data ()->queryPlayList (targetColumn, Common::E_PlayListNullElement, QString());
+        list = mPlayListDAO.data ()->queryPlayList (targetColumn, Common::PlayListFirstFlag, QString());
     } else {
-        list = mPlayListDAO.data ()->queryPlayList (targetColumn, Common::E_PlayListHash, hash);
+        list = mPlayListDAO.data ()->queryPlayList (targetColumn, Common::PlayListHash, hash);
     }
 
     qDebug()<<" query result "<< list;
@@ -223,7 +223,7 @@ bool MusicLibraryManager::insertToPlayList(const QString &playListHash, const QS
         qDebug()<<"playListHash or newSongHash is empty";
         return false;
     }
-    return mPlayListDAO.data ()->updatePlayList (Common::E_PlayListSongHashes, playListHash, newSongHash, true);
+    return mPlayListDAO.data ()->updatePlayList (Common::PlayListSongHashes, playListHash, newSongHash, true);
 }
 
 bool MusicLibraryManager::deleteFromPlayList(const QString &playListHash, const QString &songHash, bool deleteFromStorage)
@@ -235,7 +235,7 @@ bool MusicLibraryManager::deleteFromPlayList(const QString &playListHash, const 
         return false;
     }
     //TODO: 需要添加从本地删除的功能
-    return mPlayListDAO.data ()->updatePlayList (Common::E_PlayListSongHashes, playListHash, songHash, false);
+    return mPlayListDAO.data ()->updatePlayList (Common::PlayListSongHashes, playListHash, songHash, false);
 }
 
 bool MusicLibraryManager::init()

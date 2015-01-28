@@ -3,6 +3,7 @@
 #include "SongMetaData.h"
 
 namespace PhoenixPlayer {
+
 SongMetaData::SongMetaData(QObject *parent) : QObject(parent)
 {
     for (int i = (int)Common::SongMetaTags::E_FirstFlag +1;
@@ -34,28 +35,5 @@ QVariant SongMetaData::getMeta(Common::SongMetaTags tagType)
     }
     return mMetaHash[tagType];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }//PhoenixPlayer

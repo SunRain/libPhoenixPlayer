@@ -12,7 +12,7 @@ public:
     explicit BaseMediaObject(QObject *parent = 0);
     virtual ~BaseMediaObject();
     BaseMediaObject *create(const QString &filePath = "", const QString &fileName = "",
-                            Common::MediaType mediaType = Common::TypeLocalFile,
+                            Common::MediaType mediaType = Common::MediaTypeLocalFile,
                             QObject *parent = 0);
 
     QString filePath() const;

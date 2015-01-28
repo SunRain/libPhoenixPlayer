@@ -7,7 +7,7 @@ BaseMediaObject::BaseMediaObject(QObject *parent) : QObject(parent)
 {
     mFilePath = QString();
     mFileName = QString();
-    mMediaType = Common::TypeLocalFile;
+    mMediaType = Common::MediaTypeLocalFile;
 }
 
 BaseMediaObject::~BaseMediaObject()

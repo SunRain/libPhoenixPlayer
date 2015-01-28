@@ -339,8 +339,8 @@ void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
         stop();
         //        _meta_data = md;
         // when stream ripper, do not start playing
-        _playing_stream = (obj->mediaType() == PhoenixPlayer::Common::TypeStream
-                           || obj->mediaType() == PhoenixPlayer::Common::TypeUrl);/*Helper::is_www(md.filepath);*/
+        _playing_stream = (obj->mediaType() == PhoenixPlayer::Common::MediaTypeStream
+                           || obj->mediaType() == PhoenixPlayer::Common::MediaTypeUrl);/*Helper::is_www(md.filepath);*/
 
         qDebug()<<"=== _playing_stream " << _playing_stream;
 

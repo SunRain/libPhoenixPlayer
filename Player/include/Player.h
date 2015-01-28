@@ -33,7 +33,7 @@ public:
     void setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager = 0);
     void setSettings(Settings *settings);
 
-    void setPlayMode(Common::PlayMode mode = Common::ModeOrder);
+    void setPlayMode(Common::PlayMode mode = Common::PlayModeOrder);
     Q_INVOKABLE void setPlayModeInt (int mode = 0);
     Q_INVOKABLE Common::PlayMode getPlayMode();
 

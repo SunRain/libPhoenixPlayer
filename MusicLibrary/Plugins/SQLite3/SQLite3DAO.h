@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QSqlDatabase>
+#include <QVariant>
 
 #include "MusicLibrary/IPlayListDAO.h"
 
@@ -75,14 +76,15 @@ private:
     /// \param skipEmptyValue
     /// \return
     ///
-    QString fillValues(const QString &value, const QString &defaultValue,
+    QString fillValues(const QVariant &value, const QVariant &defaultValue,
                        bool skipEmptyValue = true);
-    int fillValues (int value, int defaultVaule = 0, bool skipEmptyValue = true);
+//    int fillValues (int value, int defaultVaule = 0, bool skipEmptyValue = true);
 
     bool checkDatabase();
 private:
     QSqlDatabase mDatabase;
     QStringList mExistSongHashes;
+    Common mCommon;
 };
 
 } //SQLite3
