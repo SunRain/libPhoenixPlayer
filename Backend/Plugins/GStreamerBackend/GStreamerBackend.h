@@ -6,8 +6,8 @@
 #include <gst/gst.h>
 #include <gst/gstbuffer.h>
 
-#include "IPlayBackend.h"
-#include "BaseMediaObject.h"
+#include "Backend/IPlayBackend.h"
+#include "Backend/BaseMediaObject.h"
 
 namespace PhoenixPlayer {
 namespace PlayBackend {
