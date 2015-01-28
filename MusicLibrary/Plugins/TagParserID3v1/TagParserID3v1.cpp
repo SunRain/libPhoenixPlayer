@@ -26,8 +26,8 @@ TagParserID3v1::~TagParserID3v1()
 bool TagParserID3v1::parserTag(SongMetaData *targetMetaDate)
 {
     QString f = QString("%1/%2")
-            .arg (targetMetaDate->filePath ())
-            .arg (targetMetaDate->fileName ());
+            .arg (targetMetaDate->getMeta (Common::SongMetaTags::E_FilePath).toString ())
+            .arg (targetMetaDate->getMeta (Common::SongMetaTags::E_FileName).toString ());
     QFile musicFile(f);
     if (!musicFile.open (QIODevice::ReadOnly)) {
         qDebug()<<"Can't open music file "<< f;
@@ -59,13 +59,14 @@ bool TagParserID3v1::parserTag(SongMetaData *targetMetaDate)
     parseRawData(rawTagData, tagData);
     //Write raw data to the detail info.
     //Name
-    targetMetaDate->setSongTitle (tagData.tags[0]);
+    targetMetaDate->setMeta (Common::SongMetaTags::E_SongTitle, tagData.tags[0]);
     //Artist
-    targetMetaDate->setArtistName (tagData.tags[1]);
+    targetMetaDate->setMeta (Common::SongMetaTags::E_ArtistName, tagData.tags[1]);
     //Album
-    targetMetaDate->setAlbumName (tagData.tags[2]);
+    targetMetaDate->setMeta (Common::SongMetaTags::E_AlbumName, tagData.tags[2]);
     //Year
-    targetMetaDate->setYear (tagData.tags[3].toInt ());
+    //targetMetaDate->setYear (tagData.tags[3].toInt ());
+    targetMetaDate->setMeta (Common::SongMetaTags::E_Year, tagData.tags[3]);
     //Comments
     targetMetaDate->setSongDescription (tagData.tags[4]);
     //TODO : need to add Genre
