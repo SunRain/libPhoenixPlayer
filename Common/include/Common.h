@@ -43,7 +43,7 @@ public:
         E_Hash, //查询数据时候的主键,后续数据库查询语句依赖于枚举序列顺序,故必须处于枚举序列的第二位
         E_FilePath,
         E_FileName,
-        E_MediaBitrate,
+        E_Bitrate,
         E_FileSize,
         E_ArtistName,
         E_ArtistImageUri,
@@ -72,6 +72,8 @@ public:
         E_Composer,
         E_Conductor	,
         E_Genre,
+        E_Comment,
+        E_SampleRate,
         E_LastFlag
     };
 

@@ -188,6 +188,27 @@ void PluginLoader::initPlayBackendPlugin()
         mPlayBackendList.clear ();
     }
     int index = 0;
+
+    //system plugins
+    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
+        if (plugin) {
+            //播放后端
+            PlayBackend::IPlayBackend *backend
+                    = qobject_cast<PlayBackend::IPlayBackend*>(plugin);
+            if (backend) {
+                mPlayBackendList.append (backend);
+                //检测当前找到的插件是否是当前使用的插件
+                QString name = backend->getBackendName ().toLower ();
+                if (name == mCurrentPluginName[PluginType::TypePlayBackend]
+                        .toLower ()) {
+                    mCurrentPluginIndex[PluginType::TypePlayBackend] = index;
+                    mCurrentPluginName[PluginType::TypePlayBackend] = name;
+                }
+                index++;
+            }
+        }
+    }
+
     // dynamic plugins
     qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypePlayBackend];
     QDir dir(mPluginPath[PluginType::TypePlayBackend]);

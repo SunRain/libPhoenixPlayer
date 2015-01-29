@@ -11,8 +11,14 @@ CONFIG += ordered
 #SUBDIRS += musiclibrarycore
 
 sqlite3.file = Plugins/SQLite3/SQLite3.pro
-sqlite3.depends = common musiclibrarycore
+sqlite3.depends = common
+# musiclibrarycore
 SUBDIRS += sqlite3
+
+tagParserPro.file = Plugins/TagParserPro/TagParserPro.pro
+tagParserPro.depends = common
+#musiclibrarycore
+SUBDIRS += tagParserPro
 
 #tagParserID3v1.file = Plugins/TagParserID3v1/TagParserID3v1.pro
 #tagParserID3v1.depends = common musiclibrarycore

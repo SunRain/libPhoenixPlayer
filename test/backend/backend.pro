@@ -14,6 +14,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+CONFIG += c++11
 
 SOURCES += main.cpp
 
@@ -31,6 +32,4 @@ unix {
 #SOURCES += \
 #    main.cpp \
 
-#include(../backend/backend.pri)
-include(../../Backend/Core/BackendCore.pri)
 include(../../Common/Common.pri)

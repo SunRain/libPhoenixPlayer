@@ -10,7 +10,7 @@
 #include <QDebug>
 #include "Settings.h"
 #include "MusicLibraryManager.h"
-#include "PlayBackendLoader.h"
+#include "PluginLoader.h"
 #include "Player.h"
 
 
@@ -28,13 +28,16 @@ int main(int argc, char *argv[])
     MusicLibrary::MusicLibraryManager *manager = MusicLibrary::MusicLibraryManager::getInstance ();
     manager->setSettings (settings);
 
-    PlayBackend::PlayBackendLoader *backendLoader = PlayBackend::PlayBackendLoader::getInstance ();
-    backendLoader->setNewBackend ("GStreamerBackend");
+//    PlayBackend::PlayBackendLoader *backendLoader = PlayBackend::PlayBackendLoader::getInstance ();
+//    backendLoader->setNewBackend ("GStreamerBackend");
+    PluginLoader *loader = PluginLoader::getInstance ();
+    loader->setNewPlugin (PluginLoader::TypePlayBackend, "GStreamerBackend");
 
     Player *musicPlayer = new Player();
     musicPlayer->setSettings (settings);
-    musicPlayer->setPlayBackendLoader (backendLoader);
+    //musicPlayer->setPlayBackendLoader (backendLoader);
     musicPlayer->setMusicLibraryManager (manager);
+    musicPlayer->setPluginLoader (loader);
 
     Common c;
     QQmlApplicationEngine engine;

@@ -30,3 +30,6 @@ SOURCES += \
 
 OTHER_FILES += \
     $$PWD/GStreamerBackend.json
+
+DISTFILES += \
+    $$PWD/gstreamerbackend.json

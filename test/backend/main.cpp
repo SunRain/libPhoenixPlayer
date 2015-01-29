@@ -2,8 +2,9 @@
 
 #include <QDebug>
 
-#include "BaseMediaObject.h"
-#include "PlayBackendLoader.h"
+#include "Backend/BaseMediaObject.h"
+#include "Backend/IPlayBackend.h"
+#include "PluginLoader.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,11 +17,13 @@ int main(int argc, char *argv[])
 
     QString url = "http://yinyueshiting.baidu.com/data2/music/127627006/127626827212400128.mp3?xcode=e589eec80fd7f64a9ab657ed87841175c737d0a3875e19c7&song_id=127626827";
     obj->setFilePath(url);
-    obj->setMediaType(PhoenixPlayer::Common::TypeUrl);
+    obj->setMediaType(PhoenixPlayer::Common::MediaTypeUrl);
 
 
-    PhoenixPlayer::PlayBackend::PlayBackendLoader *loader = new PhoenixPlayer::PlayBackend::PlayBackendLoader();
-    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getCurrentBackend();
+//    PhoenixPlayer::PlayBackend::PlayBackendLoader *loader = new PhoenixPlayer::PlayBackend::PlayBackendLoader();
+//    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getCurrentBackend();
+    PhoenixPlayer::PluginLoader *loader = PhoenixPlayer::PluginLoader::getInstance ();
+    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getPlayBackend ();
     if (!backend) {
         qDebug() << "backend  is null";
     } else {
