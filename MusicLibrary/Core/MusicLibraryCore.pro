@@ -1,5 +1,5 @@
 TEMPLATE = lib
-TARGET = MusicLibraryCore
+TARGET = PhoenixPlayerMusicLibraryCore
 
 #Enable c++11
 CONFIG += c++11

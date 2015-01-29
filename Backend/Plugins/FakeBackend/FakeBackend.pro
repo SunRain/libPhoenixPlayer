@@ -4,8 +4,11 @@ CONFIG += plugin
 
 TARGET = FakeBackend
 
-#include(../../Core/backendInterface.pri)
-#include(../../../Common/Common.pri)
+#Enable c++11
+CONFIG += c++11
+
+#TODO 暂时链接库文件
+include(../../../Common/Common.pri)
 include (../../../Common/sdk.pri)
 include(FakeBackend.pri)
 

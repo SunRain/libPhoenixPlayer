@@ -2,8 +2,8 @@
 #define UTIL_H
 
 #include <QObject>
+#include <QTextCodec>
 
-class QTextCodec;
 namespace PhoenixPlayer {
 
 class Util : public QObject

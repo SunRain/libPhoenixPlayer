@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef GSTREAMERBACKEND_UTIL_H
+#define GSTREAMERBACKEND_UTIL_H
 
 
 #include <gst/gst.h>
@@ -132,4 +132,4 @@ bool _test_and_error_bool(bool b, QString errorstr){
 } //PlayBackend
 } //PhoenixPlayer
 
-#endif // UTIL_H
+#endif // GSTREAMERBACKEND_UTIL_H

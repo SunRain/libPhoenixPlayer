@@ -8,6 +8,9 @@ QT += gui
 #Enable c++11
 CONFIG += c++11
 
+#TODO 暂时链接库文件
+include(../../../Common/Common.pri)
+
 include(../../../Common/sdk.pri)
 include (TagParserPro.pri)
 

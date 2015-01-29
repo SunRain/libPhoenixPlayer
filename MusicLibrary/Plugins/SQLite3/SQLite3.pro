@@ -8,8 +8,9 @@ TARGET = PlayListSQLite3Plugin
 #Enable c++11
 CONFIG += c++11
 
-#include(../../Core/interface.pri)
-#include(../../Core/MusicLibraryCore.pri)
+#TODO 暂时链接库文件
+include(../../../Common/Common.pri)
+
 include(../../../Common/sdk.pri)
 include(SQLite3.pri)
 

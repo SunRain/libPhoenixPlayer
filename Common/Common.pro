@@ -1,8 +1,7 @@
-TEMPLATE = lib
-#CONFIG += plugin
 
-TARGET = Common
-#QT += gui
+TEMPLATE = lib
+
+TARGET = PhoenixPlayerCommon
 
 #Enable c++11
 CONFIG += c++11

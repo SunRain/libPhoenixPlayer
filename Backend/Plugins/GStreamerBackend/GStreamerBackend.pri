@@ -1,8 +1,8 @@
 
 
 HEADERS += \
-    $$PWD/Util.h \
     $$PWD/GStreamerBackend.h \
+    $$PWD/GStreamerBackendUtil.h
 
 unix {
     INCLUDEPATH += \

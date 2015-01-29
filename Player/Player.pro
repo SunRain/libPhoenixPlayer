@@ -10,7 +10,6 @@ TARGET = PhoenixPlayer
 CONFIG += c++11
 
 include (Player.pri)
-#include (../Backend/Core/BackendCore.pri)
 include (../Common/sdk.pri)
 include (../MusicLibrary/Core/MusicLibrarySDK.pri)
 
@@ -37,18 +36,21 @@ unix {
 
 DESTDIR = ../plugins
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Common/release/ \
-                                                                          -L$$OUT_PWD/../MusicLibrary/Core/release/ \
-                                                                          -lCommon \
-                                                                          -lMusicLibraryCore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Common/debug/ \
-                                                                                -L$$OUT_PWD/../MusicLibrary/Core/debug/\
-                                                                                -lCommon \
-                                                                                -lMusicLibraryCore
-else:unix: LIBS += -L$$OUT_PWD/../Common/ \
-                            -L$$OUT_PWD/../MusicLibrary/Core/ \
-                            -lCommon \
-                            -lMusicLibraryCore
+win32:CONFIG(release, debug|release): LIBS += \
+        -L$$OUT_PWD/../Common/release/ \
+        -L$$OUT_PWD/../MusicLibrary/Core/release/ \
+        -lCommon \
+        -lMusicLibraryCore
+else:win32:CONFIG(debug, debug|release): LIBS += \
+        -L$$OUT_PWD/../Common/debug/ \
+        -L$$OUT_PWD/../MusicLibrary/Core/debug/\
+        -lCommon \
+        -lMusicLibraryCore
+else:unix: LIBS += \
+        -L$$OUT_PWD/../Common/ \
+        -L$$OUT_PWD/../MusicLibrary/Core/ \
+        -lCommon \
+        -lMusicLibraryCore
 
 
 
