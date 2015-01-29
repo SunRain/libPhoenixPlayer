@@ -13,9 +13,10 @@
 
 namespace PhoenixPlayer {
 class Settings;
+class PluginLoader;
 
 namespace PlayBackend {
-class PlayBackendLoader;
+//class PlayBackendLoader;
 class IPlayBackend;
 class BaseMediaObject;
 }
@@ -29,7 +30,8 @@ public:
     explicit Player(QObject *parent = 0);
     virtual ~Player();
 
-    void setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader = 0);
+//    void setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader = 0);
+    void setPluginLoader(PluginLoader *loader = 0);
     void setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager = 0);
     void setSettings(Settings *settings);
 
@@ -40,7 +42,7 @@ public:
 protected:
     enum EPointer {
         PNULL = 0x0,
-        PPlayBackendLoader,
+        PPluginLoader,
         PPlaybackend,
         PMusicLibraryManager
     };
@@ -74,7 +76,8 @@ private:
     bool PointerValid(EPointer pointer = EPointer::PNULL);
 private:
     QPointer<Settings> mSettings;
-    QPointer<PlayBackend::PlayBackendLoader> mPlayBackendLoader;
+//    QPointer<PlayBackend::PlayBackendLoader> mPlayBackendLoader;
+    QPointer<PluginLoader> mPluginLoader;
     QPointer<PlayBackend::IPlayBackend> mPlayBackend;
     QPointer<MusicLibrary::MusicLibraryManager> mMusicLibraryManager;
     Common::PlayMode mPlayMode;

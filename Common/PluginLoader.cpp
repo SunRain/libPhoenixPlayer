@@ -152,7 +152,7 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &ne
                 mCurrentPluginIndex[PluginType::TypePlayBackend] = i;
                 mCurrentPluginName[PluginType::TypePlayBackend] = name;
                 emit signalPluginChanged (type);
-                emit signalPluginChanged ((int)type);
+//                emit signalPluginChanged ((int)type);
                 break;
             }
         }
@@ -172,7 +172,7 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &ne
                 mCurrentPluginIndex[PluginType::TypePlayListDAO] = i;
                 mCurrentPluginName[PluginType::TypePlayListDAO] = name;
                 emit signalPluginChanged (type);
-                emit signalPluginChanged ((int)type);
+//                emit signalPluginChanged ((int)type);
                 break;
             }
         }

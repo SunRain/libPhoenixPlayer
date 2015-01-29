@@ -39,7 +39,7 @@ protected:
     void initPlugins(PluginType type);
 signals:
     void signalPluginChanged(PluginType type);
-    void signalPluginChanged(int type);
+//    void signalPluginChanged(int type);
 
 public slots:
      void setNewPlugin(PluginType type, const QString &newPluginName);

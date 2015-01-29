@@ -5,16 +5,18 @@
 
 #include "Common.h"
 #include "Settings.h"
-#include "backend/IPlayBackend.h"
 #include "MusicLibraryManager.h"
-#include "backend/BaseMediaObject.h"
+#include "Backend/BaseMediaObject.h"
+#include "Backend/IPlayBackend.h"
+#include "PluginLoader.h"
 
 namespace PhoenixPlayer {
 
 Player::Player(QObject *parent) : QObject(parent)
 {
     mPlayBackend = 0;
-    mPlayBackendLoader = 0;
+    //    mPlayBackendLoader = 0;
+    mPluginLoader = 0;
     mSettings = 0;
     mMusicLibraryManager = 0;
     mPlayMode = Common::PlayModeOrder;
@@ -25,33 +27,39 @@ Player::~Player()
 
 }
 
-void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
+void Player::setPluginLoader(PluginLoader *loader)
 {
     if (loader != 0) {
-        mPlayBackendLoader = loader;
+        mPluginLoader = loader;
     }
 
     if (mPlayBackend.isNull ()) {
-        mPlayBackend = mPlayBackendLoader->getCurrentBackend ();
+        mPlayBackend = mPluginLoader.data ()->getPlayBackend ();
         if (!PointerValid (EPointer::PPlaybackend))
             return;
         qDebug()<<"user playbackend "<<mPlayBackend->getBackendName ();
         mPlayBackend->init ();
         mPlayBackend->stop ();
     }
-    connect (mPlayBackendLoader.data (), &PlayBackend::PlayBackendLoader::signalPlayBackendChanged, [this] {
-        mPlayBackend->stop ();
-        mPlayBackend = mPlayBackendLoader->getCurrentBackend ();
-        if (!PointerValid (EPointer::PPlaybackend))
-            return;
-        qDebug()<<"change playbackend to"<<mPlayBackend->getBackendName ();
-        mPlayBackend->init ();
-        mPlayBackend->stop ();
+    connect (mPluginLoader.data (),
+             &PluginLoader::signalPluginChanged,
+             [this](PluginLoader::PluginType type) {
+        if (type == PluginLoader::TypePlayBackend) {
+            mPlayBackend->stop ();
+            mPlayBackend = mPluginLoader.data ()->getPlayBackend ();
+            if (!PointerValid (EPointer::PPlaybackend))
+                return;
+            qDebug()<<"change playbackend to"<<mPlayBackend->getBackendName ();
+            mPlayBackend->init ();
+            mPlayBackend->stop ();
+        }
     });
 
     if (PointerValid (EPointer::PPlaybackend)) {
         // 播放状态改变信号
-        connect (mPlayBackend.data (), &PlayBackend::IPlayBackend::stateChanged, [this](Common::PlaybackState state) {
+        connect (mPlayBackend.data (),
+                 &PlayBackend::IPlayBackend::stateChanged,
+                 [this](Common::PlaybackState state) {
             emit playStateChanged (state);
             emit playStateChanged ((int)state);
         });
@@ -73,11 +81,13 @@ void Player::setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader)
                     QString playingHash = mMusicLibraryManager->playingSongHash ();
                     PlayBackend::BaseMediaObject obj;
 
-                    QStringList list = mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
+                    QStringList list = mMusicLibraryManager
+                            ->querySongMetaElement (Common::E_FileName, playingHash);
                     if (!list.isEmpty ())
                         obj.setFileName (list.first ());
 
-                    list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
+                    list = mMusicLibraryManager
+                            ->querySongMetaElement (Common::E_FilePath, playingHash);
                     if (!list.isEmpty ())
                         obj.setFilePath (list.first ());
 
@@ -115,11 +125,13 @@ void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
             QString playingHash = mMusicLibraryManager->playingSongHash ();
             PlayBackend::BaseMediaObject obj;
 
-            QStringList list = mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
+            QStringList list = mMusicLibraryManager
+                    ->querySongMetaElement (Common::E_FileName, playingHash);
             if (!list.isEmpty ())
                 obj.setFileName (list.first ());
 
-            list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
+            list = mMusicLibraryManager
+                    ->querySongMetaElement (Common::E_FilePath, playingHash);
             if (!list.isEmpty ())
                 obj.setFilePath (list.first ());
 
@@ -160,7 +172,7 @@ void Player::togglePlayPause()
     if (!PointerValid (EPointer::PPlaybackend))
         return;
 
-//    qDebug()<<__FUNCTION__ <<" current "<<mPlayBackend.data ()->getPlaybackState ();
+    //    qDebug()<<__FUNCTION__ <<" current "<<mPlayBackend.data ()->getPlaybackState ();
 
     switch (mPlayBackend.data ()->getPlaybackState ()) {
     case Common::PlaybackPlaying:
@@ -173,10 +185,12 @@ void Player::togglePlayPause()
         if (PointerValid (EPointer::PMusicLibraryManager)) {
             QString playingHash = mMusicLibraryManager->playingSongHash ();
             PlayBackend::BaseMediaObject obj;
-            QStringList list = mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
+            QStringList list = mMusicLibraryManager
+                    ->querySongMetaElement (Common::E_FileName, playingHash);
             if (!list.isEmpty ())
                 obj.setFileName (list.first ());
-            list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
+            list = mMusicLibraryManager
+                    ->querySongMetaElement (Common::E_FilePath, playingHash);
             if (!list.isEmpty ())
                 obj.setFilePath (list.first ());
             obj.setMediaType (Common::MediaTypeLocalFile);
@@ -235,8 +249,8 @@ bool Player::PointerValid(Player::EPointer pointer)
     case EPointer::PPlaybackend:
         valid = !mPlayBackend.isNull ();
         break;
-    case EPointer::PPlayBackendLoader:
-        valid = !mPlayBackendLoader.isNull ();
+    case EPointer::PPluginLoader:
+        valid =!mPluginLoader.isNull ();
     case EPointer::PMusicLibraryManager:
         valid = !mMusicLibraryManager.isNull ();
     default:
