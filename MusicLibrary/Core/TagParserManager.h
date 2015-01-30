@@ -4,10 +4,12 @@
 #include <QObject>
 #include <QPointer>
 #include <QList>
+#include <QStringList>
 
 namespace PhoenixPlayer {
 
 class SongMetaData;
+class PluginLoader;
 namespace MusicLibrary {
 
 class MusicLibrary;
@@ -20,13 +22,12 @@ public:
     explicit TagParserManager(QObject *parent = 0);
     virtual ~TagParserManager();
 
-    void setPluginPath(const QString &path);
+    void setPluginLoader(PluginLoader *loader);
     void setPlayListDAO(IPlayListDAO *dao = 0);
     void addItem(SongMetaData *data = 0, bool startImmediately = false);
     bool startParserLoop();
 
 protected:
-    void initPlugin();
     void parserNextItem();
     void parserItem(SongMetaData *data);
 signals:
@@ -38,8 +39,11 @@ public slots:
 private:
     QList<SongMetaData*> mMetaList;
     QPointer<IPlayListDAO> mPlayListDAO;
+    QPointer<PluginLoader> mPluginLoader;
     QList<IMusicTagParser *> mPluginList;
     QString mPluginPath;
+    QStringList mPluginNameList;
+    int mCurrentIndex;
 };
 
 } //MusicLibrary

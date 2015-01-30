@@ -17,6 +17,9 @@ public:
         mList.clear ();
     }
 
+    virtual QString getPluginName() = 0;
+    virtual QString getPluginVersion() = 0;
+
     ///
     /// \brief parserTag 解析文件tag
     /// \param targetMetaDate

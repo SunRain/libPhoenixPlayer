@@ -27,7 +27,7 @@ PluginLoader::PluginLoader(QObject *parent)
 
     //初始化一个空容器
     for (int i = (int)PluginType::TypePlayBackend;
-         i <= (int)PluginType::TypePlayListDAO;
+         i < (int)PluginType::TypeLastFlag;
          ++i) {
         mPluginPath.insert (PluginType(i), path);
         mCurrentPluginIndex.insert(PluginType(i), -1);
@@ -39,7 +39,26 @@ PluginLoader::PluginLoader(QObject *parent)
 
 PluginLoader::~PluginLoader()
 {
+    qDeleteAll (mPlayBackendList);
+    if (!mPlayBackendList.isEmpty ())
+        mPlayBackendList.clear ();
 
+    qDeleteAll (mPlayListDAOList);
+    if (!mPlayListDAOList.isEmpty ())
+        mPlayListDAOList.clear ();
+
+    qDeleteAll (mMusicTagParserList);
+    if (!mMusicTagParserList.isEmpty ())
+        mMusicTagParserList.clear ();
+
+    if (!mCurrentPluginIndex.isEmpty ())
+        mCurrentPluginIndex.clear ();
+
+    if (!mCurrentPluginName.isEmpty ())
+        mCurrentPluginName.clear ();
+
+    if (!mPluginPath.isEmpty ())
+        mPluginPath.clear ();
 }
 
 void PluginLoader::setPluginPath(PluginLoader::PluginType type, const QString &path)
@@ -57,7 +76,7 @@ void PluginLoader::setPluginPath(PluginLoader::PluginType type, const QString &p
     initPlugins (type);
 }
 
-PlayBackend::IPlayBackend *PluginLoader::getPlayBackend()
+PlayBackend::IPlayBackend *PluginLoader::getCurrentPlayBackend()
 {
     if (mCurrentPluginIndex[PluginType::TypePlayBackend] < 0) {
         return nullptr;
@@ -71,18 +90,52 @@ PlayBackend::IPlayBackend *PluginLoader::getPlayBackend()
     return mPlayBackendList.at (mCurrentPluginIndex[PluginType::TypePlayBackend]);
 }
 
-MusicLibrary::IPlayListDAO *PluginLoader::getPlayListDAO()
+MusicLibrary::IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
 {
     if (mCurrentPluginIndex[PluginType::TypePlayListDAO] < 0) {
         return nullptr;
     }
 
-    qDebug()<<"IMusicTagParser index "
+    qDebug()<<"IPlayListDAO index "
            <<mCurrentPluginIndex[PluginType::TypePlayListDAO]
           <<" Name "
          <<mCurrentPluginName[PluginType::TypePlayListDAO];
 
     return mPlayListDAOList.at ((int)mCurrentPluginIndex[PluginType::TypePlayListDAO]);
+}
+
+MusicLibrary::IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
+{
+    if (mCurrentPluginIndex[PluginType::TypeMusicTagParser] < 0)
+        return nullptr;
+
+    qDebug()<<"IMusicTagParser index "
+           <<mCurrentPluginIndex[PluginType::TypeMusicTagParser]
+          <<" Name "
+         <<mCurrentPluginName[PluginType::TypeMusicTagParser];
+
+    return mMusicTagParserList.at ((int)mCurrentPluginIndex[PluginType::TypeMusicTagParser]);
+}
+
+QStringList PluginLoader::getPluginNames(PluginLoader::PluginType type)
+{
+    QStringList list;
+    if (type == PluginType::TypeMusicTagParser) {
+        foreach (MusicLibrary::IMusicTagParser *parser, mMusicTagParserList) {
+            list.append (parser->getPluginName ());
+        }
+    } else if (type == PluginType::TypePlayBackend) {
+        foreach (PlayBackend::IPlayBackend *backend, mPlayBackendList) {
+            list.append (backend->getBackendName ());
+        }
+    } else if (type == PluginType::TypePlayListDAO) {
+        foreach (MusicLibrary::IPlayListDAO *dao, mPlayListDAOList) {
+            list.append (dao->getPluginName ());
+        }
+    } else {
+        qDebug()<<"Invalid plugin type.";
+    }
+    return list;
 }
 
 void PluginLoader::initPlugins(PluginType type)
@@ -91,51 +144,17 @@ void PluginLoader::initPlugins(PluginType type)
         initPlayBackendPlugin ();
     } else if (type == PluginType::TypePlayListDAO) {
         initPlayListDaoPlugin ();
+    } else if (type == PluginType::TypeMusicTagParser) {
+        initMusicTagParserPlugin ();
     } else {
         initPlayBackendPlugin ();
         initPlayListDaoPlugin ();
+        initMusicTagParserPlugin ();
     }
-    //TODO:不需要查找系统插件,因为暂时没有系统路径下的插件支持
-//    //system plugins
-//    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
-//        if (plugin) {
-//            //播放后端
-//            PlayBackend::IPlayBackend *backend
-//                    = qobject_cast<PlayBackend::IPlayBackend*>(plugin);
-//            if (backend) {
-//                mPlayBackendList.append (backend);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = backend->getBackendName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypePlayBackend]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypePlayBackend]
-//                            = index[PluginType::TypePlayBackend];
-//                    mCurrentPluginName[PluginType::TypePlayBackend] = name;
-//                }
-//                index[PluginType::TypePlayBackend]
-//                        = index[PluginType::TypePlayBackend]++;
-//            }
-//            //媒体库数据存储后端
-//            MusicLibrary::IPlayListDAO *dao
-//                    = qobject_cast<MusicLibrary::IPlayListDAO*>(plugin);
-//            if (dao) {
-//                mPlayListDAOList.append (dao);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = dao->getPluginName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypePlayListDAO]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypePlayListDAO]
-//                            = index[PluginType::TypePlayListDAO];
-//                    mCurrentPluginName[PluginType::TypePlayListDAO] = name;
-//                }
-//                index[PluginType::TypePlayListDAO]
-//                        = index[PluginType::TypePlayListDAO]++;
-//            }
-//        }
-//    }
 }
 
-void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &newPluginName)
+void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
+                                const QString &newPluginName)
 {
     if (type == PluginType::TypePlayBackend) {
         if (newPluginName.toLower ()
@@ -152,7 +171,6 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &ne
                 mCurrentPluginIndex[PluginType::TypePlayBackend] = i;
                 mCurrentPluginName[PluginType::TypePlayBackend] = name;
                 emit signalPluginChanged (type);
-//                emit signalPluginChanged ((int)type);
                 break;
             }
         }
@@ -163,7 +181,7 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &ne
             return;
         }
 
-        qDebug() << "change backend to " << newPluginName;
+        qDebug() << "change play list dao to " << newPluginName;
 
         for (int i=0; i<mPlayBackendList.size (); ++i) {
             MusicLibrary::IPlayListDAO *interface = mPlayListDAOList.at(i);
@@ -172,7 +190,25 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &ne
                 mCurrentPluginIndex[PluginType::TypePlayListDAO] = i;
                 mCurrentPluginName[PluginType::TypePlayListDAO] = name;
                 emit signalPluginChanged (type);
-//                emit signalPluginChanged ((int)type);
+                break;
+            }
+        }
+    }
+    if (type == PluginType::TypeMusicTagParser) {
+        if (newPluginName.toLower ()
+                == mCurrentPluginName[PluginType::TypeMusicTagParser].toLower ()) {
+            return;
+        }
+
+        qDebug() << "change music tag parser to " << newPluginName;
+
+        for (int i=0; i<mMusicTagParserList.size (); ++i) {
+            MusicLibrary::IMusicTagParser *interface = mMusicTagParserList.at (i);
+            QString name = interface->getPluginName ().toLower ();
+            if (name == newPluginName.toLower ()) {
+                mCurrentPluginIndex[PluginType::TypeMusicTagParser] = i;
+                mCurrentPluginName[PluginType::TypeMusicTagParser] = name;
+                emit signalPluginChanged (type);
                 break;
             }
         }
@@ -289,6 +325,50 @@ void PluginLoader::initPlayListDaoPlugin()
         mCurrentPluginIndex[PluginType::TypePlayListDAO] = 0;
         mCurrentPluginName[PluginType::TypePlayListDAO]
                 = mPlayListDAOList.at (0)->getPluginName ().toLower ();
+    }
+}
+
+void PluginLoader::initMusicTagParserPlugin()
+{
+    if (!mMusicTagParserList.isEmpty ()) {
+        qDeleteAll(mMusicTagParserList);
+        mMusicTagParserList.clear ();
+    }
+    int index = 0;
+    // dynamic plugins
+    qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypeMusicTagParser];
+    QDir dir(mPluginPath[PluginType::TypeMusicTagParser]);
+    foreach (QString fileName, dir.entryList(QDir::Files)) {
+        QPluginLoader loader(dir.absoluteFilePath(fileName));
+        QObject *plugin = loader.instance();
+        if (plugin) {
+            MusicLibrary::IMusicTagParser *parser
+                    = qobject_cast<MusicLibrary::IMusicTagParser*>(plugin);
+            if (parser) {
+                mMusicTagParserList.append (parser);
+                //检测当前找到的插件是否是当前使用的插件
+                QString name = parser->getPluginName ().toLower ();
+                if (name == mCurrentPluginName[PluginType::TypeMusicTagParser]
+                        .toLower ()) {
+                    mCurrentPluginIndex[PluginType::TypeMusicTagParser] = index;
+                    mCurrentPluginName[PluginType::TypeMusicTagParser] = name;
+                }
+                index++;
+            }
+        } else {
+            qDebug()<<"no plugin for "<<dir.absoluteFilePath(fileName);
+        }
+    }
+
+    qDebug()<<"Find MusicTagParser num "<<index;
+
+    if (mMusicTagParserList.isEmpty ()) {
+        mCurrentPluginIndex[PluginType::TypeMusicTagParser] = -1;
+        mCurrentPluginName[PluginType::TypeMusicTagParser] = QString();
+    } else { //得到第一个插件
+        mCurrentPluginIndex[PluginType::TypeMusicTagParser] = 0;
+        mCurrentPluginName[PluginType::TypeMusicTagParser]
+                = mMusicTagParserList.at (0)->getPluginName ().toLower ();
     }
 }
 }

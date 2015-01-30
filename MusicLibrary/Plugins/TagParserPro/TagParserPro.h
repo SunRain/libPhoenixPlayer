@@ -22,6 +22,9 @@ namespace MusicLibrary {
 
 namespace TagParserPro {
 
+#define PLUGIN_NAME "LibTag-TagParser"
+#define PLUGIN_VERSION "0.1"
+
 class TagParserPro : public IMusicTagParser
 {
     Q_OBJECT
@@ -35,6 +38,8 @@ public:
     // IMusicTagParser interface
 public:
     bool parserTag(SongMetaData *targetMetaDate);
+    QString getPluginName();
+    QString getPluginVersion();
 
 protected:
     QImage getImage();

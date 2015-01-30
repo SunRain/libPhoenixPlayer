@@ -161,15 +161,13 @@ bool SQLite3DAO::initDataBase()
     for (int i = (int)(Common::PlayListElement::PlayListFirstFlag) + 1;
          i < (int)(Common::PlayListElement::PlayListLastFlag) -1;
          ++i) {
-        str += QString ("%1 TEXT,").arg (mCommon.enumToStr ("SongMetaTags", i));
+        str += QString ("%1 TEXT,").arg (mCommon.enumToStr ("PlayListElement", i));
     }
     str += QString("%1 TEXT )")
-            .arg (mCommon.enumToStr ("SongMetaTags",
+            .arg (mCommon.enumToStr ("PlayListElement",
                                      (int)Common::PlayListElement::PlayListLastFlag -1));
-//    str += "Hash TEXT,";
-//    str += "Name TEXT,";
-//    str += "SongHashes TEXT";
-//    str +=")";
+
+    qDebug()<<"run sql "<<str;
 
     if (!q.exec (str)) {
         qDebug() << "Create playlist tab error "
@@ -500,15 +498,7 @@ QStringList SQLite3DAO::queryMusicLibrary(Common::SongMetaTags targetColumn,
 {
     if (!checkDatabase ())
         return QStringList();
-//    Common common;
-//    bool intFlag = false;
-//    if (regColumn == Common::E_MediaBitrate
-//            || regColumn == Common::E_FileSize
-//            || regColumn == Common::E_SongLength
-//            || regColumn == Common::E_Year
-//            || regColumn == Common::E_UserRating) {
-//        intFlag = true;
-//    }
+
     QString str = "select ";
     if (skipDuplicates)
         str += " DISTINCT ";
@@ -518,14 +508,9 @@ QStringList SQLite3DAO::queryMusicLibrary(Common::SongMetaTags targetColumn,
     if (!regValue.isEmpty ()) {
         str += " where ";
         str += mCommon.enumToStr ("SongMetaTags", (int)regColumn);
-//        str += " = ";
-//        str += "\"";
-//        str += regValue;
-//        str += "\"";
         str += QString(" = \"%1\" ").arg (regValue);
 
     }
-    qDebug()<<"try to run sql "<<str;
     QSqlQuery q(str, mDatabase);
     QStringList list;
     while (q.next ()) {
@@ -542,19 +527,14 @@ QStringList SQLite3DAO::queryPlayList(Common::PlayListElement targetColumn,
 {
     if (!checkDatabase ())
         return QStringList();
-//    Common common;
-
-//    str += "Hash TEXT,";
-//    str += "Name TEXT,";
-//    str += "SongHashes TEXT";
 
     QString str = "select ";
-    str += mCommon.enumToStr ("SongMetaTags", (int)targetColumn);
+    str += mCommon.enumToStr ("PlayListElement", (int)targetColumn);
     str += " from ";
     str += PLAYLIST_TABLE_TAG;
     if (!regValue.isEmpty ()) {
         str += " where ";
-        str += mCommon.enumToStr ("SongMetaTags", (int)regColumn);
+        str += mCommon.enumToStr ("PlayListElement", (int)regColumn);
         str += QString(" = \"%1\"").arg (regValue);
     }
 
@@ -563,7 +543,7 @@ QStringList SQLite3DAO::queryPlayList(Common::PlayListElement targetColumn,
     QSqlQuery q(str, mDatabase);
     QStringList list;
     while (q.next ()) {
-        list.append (q.value (mCommon.enumToStr ("SongMetaTags", (int)targetColumn))
+        list.append (q.value (mCommon.enumToStr ("PlayListElement", (int)targetColumn))
                      .toString ());
     }
     if (targetColumn == Common::PlayListSongHashes) {
@@ -624,7 +604,6 @@ bool SQLite3DAO::updatePlayList(Common::PlayListElement targetColumn,
         }
     }
 
-//    Common common;
     QString str = "update ";
     str += PLAYLIST_TABLE_TAG;
     str += "set ";
@@ -693,9 +672,6 @@ bool SQLite3DAO::insertPlayList(const QString &playListName)
         }
     }
 
-//    str += "Hash TEXT,";
-//    str += "Name TEXT,";
-//    str += "SongHashes TEXT";
     str = "insert into ";
     str += PLAYLIST_TABLE_TAG;
     str += "(";
@@ -766,14 +742,6 @@ QString SQLite3DAO::fillValues(const QVariant &value,
         return value.toString ();
     }
 }
-
-//int SQLite3DAO::fillValues(int value, int defaultVaule, bool skipEmptyValue)
-//{
-//    if (skipEmptyValue && value <= 0)
-//        return defaultVaule;
-//    else
-//        return value;
-//}
 
 bool SQLite3DAO::checkDatabase()
 {

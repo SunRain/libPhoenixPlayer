@@ -11,6 +11,7 @@
 
 #include "MusicLibrary/IMusicTagParser.h"
 #include "MusicLibrary/IPlayListDAO.h"
+#include "PluginLoader.h"
 
 #include "TagParserManager.h"
 #include "SongMetaData.h"
@@ -20,9 +21,7 @@ namespace MusicLibrary {
 
 TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
 {
-    //TODO: 根据系统来设置插件的默认路径
-    mPluginPath = QString("%1/plugins").arg(QCoreApplication::applicationDirPath ());
-    initPlugin ();
+    mCurrentIndex = -1;
 }
 
 TagParserManager::~TagParserManager()
@@ -30,23 +29,51 @@ TagParserManager::~TagParserManager()
     qDebug()<<__FUNCTION__;
     emit parserQueueFinished ();
 
-    if (!mPluginList.isEmpty ()) {
-        //删除List里面的指针类型文件
-        qDeleteAll(mPluginList);
-        mPluginList.clear ();
-    }
+    if (!mPluginNameList.isEmpty ())
+        mPluginNameList.clear ();
+
     qDeleteAll(mMetaList);
     if (mMetaList.isEmpty ()) {
         mMetaList.clear ();
     }
 }
 
-void TagParserManager::setPluginPath(const QString &path)
+void TagParserManager::setPluginLoader(PluginLoader *loader)
 {
-    if (!path.isEmpty ()) {
-        mPluginPath = path;
-        initPlugin ();
+    mPluginLoader = loader;
+    if (mPluginLoader.isNull ())
+        return;
+
+    mPluginNameList = mPluginLoader.data ()
+            ->getPluginNames (PluginLoader::PluginType::TypeMusicTagParser);
+
+    //因为PluginLoader默认会返回第一个插件,
+    //并且更改插件名字的时候,如果目标插件名和当前使用插件名相同,则不会发送更改的信号
+    //所以先从插件列表里面取出当前使用的插件
+    if (!mPluginNameList.isEmpty ()) {
+        IMusicTagParser *parser = mPluginLoader.data ()->getCurrentMusicTagParser ();
+        if (parser != nullptr) {
+            mPluginList.append (parser);
+            mPluginNameList.removeOne (parser->getPluginName ());
+        }
     }
+    if (!mPluginNameList.isEmpty ()) {
+        foreach (QString str, mPluginNameList) {
+            mPluginLoader.data ()
+                    ->setNewPlugin (PluginLoader::PluginType::TypeMusicTagParser,
+                                    str);
+
+        }
+    }
+    connect (mPluginLoader.data (),
+             &PluginLoader::signalPluginChanged,
+             [this] (PluginLoader::PluginType type) {
+        if (type == PluginLoader::PluginType::TypeMusicTagParser) {
+            IMusicTagParser *parser = mPluginLoader.data ()->getCurrentMusicTagParser ();
+            mPluginList.append (parser);
+        }
+    });
+
 }
 
 void TagParserManager::setPlayListDAO(IPlayListDAO *dao)
@@ -77,42 +104,10 @@ bool TagParserManager::startParserLoop()
     return true;
 }
 
-void TagParserManager::initPlugin()
-{
-    mPluginList.clear ();
-
-    //system plugins
-    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
-        if (plugin) {
-            IMusicTagParser *interface = qobject_cast<IMusicTagParser*>(plugin);
-            if (interface) {
-                mPluginList.append(interface);
-            }
-        }
-    }
-
-    // dynamic plugins
-    QDir dir(mPluginPath);
-    foreach (QString fileName, dir.entryList(QDir::Files)) {
-        QPluginLoader loader(dir.absoluteFilePath(fileName));
-        QObject *plugin = loader.instance();
-        if (plugin) {
-            IMusicTagParser *interface = qobject_cast<IMusicTagParser*>(plugin);
-            if (interface) {
-                mPluginList.append(interface);
-            } else {
-                qDebug()<<"cant qobject_cast for "<<dir.absoluteFilePath(fileName);
-            }
-        } else {
-            qDebug()<<"no plugin for "<<dir.absoluteFilePath(fileName);
-        }
-    }
-}
-
 void TagParserManager::parserNextItem()
 {
     if (mMetaList.isEmpty ()) {
-        qDebug()<<"mMetaList.isEmpty";
+        qDebug()<<"Parser finished or meta list is empty";
         emit parserQueueFinished ();
         return;
     }
@@ -134,7 +129,6 @@ void TagParserManager::parserItem(SongMetaData *data)
             }
         }
     }
-
     if (!mPlayListDAO.isNull ()) {
         mPlayListDAO.data ()->insertMetaData (data);
         data->deleteLater ();

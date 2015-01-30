@@ -44,7 +44,7 @@ MusicLibraryManager::~MusicLibraryManager()
         mDiskLooKup.data ()->stopLookup ();
 
     if (!mDiskLooKupThread.isNull ()) {
-        qDebug()<<"wait for thread";
+        qDebug()<<"wait for DiskLooKupThread";
         mDiskLooKupThread.data ()->quit ();
         mDiskLooKupThread.data ()->wait (3 * 60 * 1000);
     }
@@ -56,10 +56,7 @@ MusicLibraryManager::~MusicLibraryManager()
     }
 
     qDebug()<<"after delete thread";
-//    if (mDAOLoader)
-//        mDAOLoader->deleteLater ();
 
-//    qDebug()<<"after delete mDAOLoader";
     if (!mPlayListDAO.isNull ())
         mPlayListDAO.data ()->deleteLater ();
 
@@ -281,7 +278,7 @@ bool MusicLibraryManager::init()
 //        mDAOLoader = new PlayListDAOLoader(this);
 
     if (mPlayListDAO.isNull ())
-        mPlayListDAO = mPluginLoader->getPlayListDAO ();//mDAOLoader->getPlayListDAO ();
+        mPlayListDAO = mPluginLoader->getCurrentPlayListDAO ();
     if (!mPlayListDAO.data ()->initDataBase ()) {
         qDebug()<<"initDataBase error";
     }
@@ -292,6 +289,7 @@ bool MusicLibraryManager::init()
     if (mTagParserManager.isNull ())
         mTagParserManager = new TagParserManager(0);
     mTagParserManager.data ()->setPlayListDAO (mPlayListDAO);
+    mTagParserManager.data ()->setPluginLoader (mPluginLoader);
     mTagParserManager.data ()->moveToThread (mTagParserThread);
 
     //signal/slot
@@ -317,10 +315,6 @@ bool MusicLibraryManager::init()
         emit searching (path, file, size);
 
         PhoenixPlayer::SongMetaData *data = new PhoenixPlayer::SongMetaData(0);
-//        data->setFileName (file);
-//        data->setFilePath (path);
-//        data->setFileSize (size);
-//        data->setHash (hash);
         data->setMeta (Common::SongMetaTags::E_FileName, file);
         data->setMeta (Common::SongMetaTags::E_FilePath, path);
         data->setMeta (Common::SongMetaTags::E_Hash, hash);
@@ -335,6 +329,7 @@ bool MusicLibraryManager::init()
              mTagParserManager.data (), &TagParserManager::deleteLater);
 
     connect (mTagParserManager.data (), &TagParserManager::parserQueueFinished, [this]{
+        //写入数据库
         qDebug()<<"********************* parserQueueFinished";
         mPlayListDAO.data ()->commitTransaction ();
     });

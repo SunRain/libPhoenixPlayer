@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 //    PhoenixPlayer::PlayBackend::PlayBackendLoader *loader = new PhoenixPlayer::PlayBackend::PlayBackendLoader();
 //    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getCurrentBackend();
     PhoenixPlayer::PluginLoader *loader = PhoenixPlayer::PluginLoader::getInstance ();
-    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getPlayBackend ();
+    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getCurrentPlayBackend ();
     if (!backend) {
         qDebug() << "backend  is null";
     } else {
