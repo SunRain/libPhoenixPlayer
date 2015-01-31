@@ -9,6 +9,10 @@
 #include "Backend/BaseMediaObject.h"
 #include "Backend/IPlayBackend.h"
 #include "PluginLoader.h"
+#include "Lyrics/ILyricsLookup.h"
+#include "LyricsManager.h"
+#include "SongMetaData.h"
+#include "MusicLibrary/IPlayListDAO.h"
 
 namespace PhoenixPlayer {
 
@@ -19,12 +23,14 @@ Player::Player(QObject *parent) : QObject(parent)
     mPluginLoader = 0;
     mSettings = 0;
     mMusicLibraryManager = 0;
+    mLyricsManager = 0;// new Lyrics::LyricsManager(this);
     mPlayMode = Common::PlayModeOrder;
 }
 
 Player::~Player()
 {
-
+    if (!mLyricsManager.isNull ())
+        mLyricsManager.data ()->deleteLater ();
 }
 
 void Player::setPluginLoader(PluginLoader *loader)
@@ -167,6 +173,61 @@ Common::PlayMode Player::getPlayMode()
     return mPlayMode;
 }
 
+void Player::lookupLyric(const QString &songHash)
+{
+    if (!PointerValid (EPointer::PPluginLoader))
+        return;
+
+    if (mLyricsManager.isNull ()) {
+        mLyricsManager = new Lyrics::LyricsManager(this);
+        mLyricsManager.data ()->setPluginLoader (mPluginLoader);
+    }
+
+    connect (mLyricsManager.data (),
+             &Lyrics::LyricsManager::lookupFailed,
+             [this] {
+        qDebug()<<"We can't find lyric for this song";
+        emit lookupLyricFailed ();
+    });
+
+    connect (mLyricsManager.data (),
+             &Lyrics::LyricsManager::lookupSucceed,
+             [this](QString songHash, QString lyricsStr) {
+        qDebug()<<"We had found lyric for this song ";
+
+        //将lyric数据写入数据库中
+        SongMetaData meta;
+        meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
+        meta.setMeta (Common::SongMetaTags::E_Lyrics, lyricsStr);
+
+        //TODO 也许通过MusicLibraryManager来管理会更好
+        if (PointerValid (EPointer::PPluginLoader)) {
+            MusicLibrary::IPlayListDAO *dao =
+                    mPluginLoader.data ()->getCurrentPlayListDAO ();
+            if (dao)
+                dao->updateMetaData (&meta, true);
+        }
+        emit lookupLyricSucceed ();
+    });
+
+    SongMetaData data;
+    QString hash = songHash;
+    if (hash.isEmpty ())
+        hash = mMusicLibraryManager.data ()->playingSongHash ();
+
+    for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
+         i < (int)Common::SongMetaTags::E_LastFlag;
+         ++i) {
+        QStringList list = mMusicLibraryManager.data ()
+                ->querySongMetaElement (Common::SongMetaTags(i), hash, true);
+        if (list.isEmpty ())
+            data.setMeta (Common::SongMetaTags(i), QVariant());
+        else
+            data.setMeta (Common::SongMetaTags(i), list.first ());
+    }
+    mLyricsManager.data ()->lookup (&data);
+}
+
 void Player::togglePlayPause()
 {
     if (!PointerValid (EPointer::PPlaybackend))
@@ -251,8 +312,13 @@ bool Player::PointerValid(Player::EPointer pointer)
         break;
     case EPointer::PPluginLoader:
         valid =!mPluginLoader.isNull ();
+        break;
     case EPointer::PMusicLibraryManager:
         valid = !mMusicLibraryManager.isNull ();
+        break;
+    case EPointer::PPLyricsManager:
+        valid = !mLyricsManager.isNull ();
+        break;
     default:
         break;
     }

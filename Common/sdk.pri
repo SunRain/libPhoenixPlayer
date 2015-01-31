@@ -10,4 +10,6 @@ HEADERS += \
     $$PWD/include/Backend/IPlayBackend.h \
     $$PWD/include/MusicLibrary/IMusicTagParser.h \
     $$PWD/include/MusicLibrary/IPlayListDAO.h \
-    $$PWD/include/PluginLoader.h
+    $$PWD/include/PluginLoader.h \
+    $$PWD/include/Lyrics/ILyricsDownloader.h \
+    $$PWD/include/Lyrics/ILyricsLookup.h

@@ -2,7 +2,7 @@
 TEMPLATE = lib
 #CONFIG += plugin
 
-QT       += core
+QT       += core network
 
 TARGET = PhoenixPlayer
 #QMAKE_CXXFLAGS += -std=c++0x
@@ -12,6 +12,7 @@ CONFIG += c++11
 include (Player.pri)
 include (../Common/sdk.pri)
 include (../MusicLibrary/Core/MusicLibrarySDK.pri)
+include (../Lyrics/Core/LyricsCore.pri)
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Common \
 #                                              -L$$OUT_PWD/../MusicLibraryCore \

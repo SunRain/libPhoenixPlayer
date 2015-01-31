@@ -23,6 +23,11 @@ class BaseMediaObject;
 namespace MusicLibrary {
 class MusicLibraryManager;
 }
+
+namespace Lyrics {
+class LyricsManager;
+}
+
 class Player : public QObject
 {
     Q_OBJECT
@@ -39,11 +44,14 @@ public:
     Q_INVOKABLE void setPlayModeInt (int mode = 0);
     Q_INVOKABLE Common::PlayMode getPlayMode();
 
+    Q_INVOKABLE void lookupLyric(const QString &songHash);
+
 protected:
     enum EPointer {
         PNULL = 0x0,
         PPluginLoader,
         PPlaybackend,
+        PPLyricsManager,
         PMusicLibraryManager
     };
 signals:
@@ -51,6 +59,8 @@ signals:
     void playStateChanged (int state);
     void playModeChanged(Common::PlayMode mode);
     void playModeChanged (int mode);
+    void lookupLyricSucceed();
+    void lookupLyricFailed();
 
     //IPlayBackend的信号
 //    void positionChanged(quint64 posMs = 0);
@@ -80,6 +90,8 @@ private:
     QPointer<PluginLoader> mPluginLoader;
     QPointer<PlayBackend::IPlayBackend> mPlayBackend;
     QPointer<MusicLibrary::MusicLibraryManager> mMusicLibraryManager;
+    QPointer<Lyrics::LyricsManager> mLyricsManager;
+
     Common::PlayMode mPlayMode;
 
 };

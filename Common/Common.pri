@@ -10,7 +10,8 @@ HEADERS += \
     $$PWD/include/Util.h \
     $$PWD/include/MusicLibrary/IPlayListDAO.h \
     $$PWD/include/MusicLibrary/IMusicTagParser.h \
-    $$PWD/include/PluginLoader.h
+    $$PWD/include/PluginLoader.h \
+    $$PWD/include/Lyrics/ILyricsLookup.h
 
 SOURCES += \
     $$PWD/BaseMediaObject.cpp \

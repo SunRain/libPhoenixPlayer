@@ -18,9 +18,14 @@ player.file = Player/Player.pro
 player.depends = common musiclibrarycore
 SUBDIRS += player
 
+lyricscore.file = Lyrics/Core/LyricsCore.pro
+lyricscore.depends = common
+SUBDIRS += lyricscore
+
 SUBDIRS += \
     Backend \
     MusicLibrary \
+    Lyrics \
 #    Player \
 #    Common \
     test

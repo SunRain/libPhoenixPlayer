@@ -1,16 +1,21 @@
-
 TEMPLATE = lib
+TARGET = PhoenixPlayerLyricsCore
 
-TARGET = Common #PhoenixPlayerCommon
+QT += network
 
 #Enable c++11
 CONFIG += c++11
 
+include (../../Common/sdk.pri)
+include (LyricsCore.pri)
 
-include (Common.pri)
 
 INCLUDEPATH += \
         $$PWD
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Common/release/ -lCommon
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Common/debug/ -lCommon
+else:unix: LIBS += -L$$OUT_PWD/../../Common/ -lCommon
 
 unix {
 #    CONFIG += link_pkgconfig
@@ -47,5 +52,3 @@ win32 {
 #	HEADERS -= tagReaderGstreamer.h
 #	SOURCES -= tagReaderGstreamer.cpp
 #}
-
-

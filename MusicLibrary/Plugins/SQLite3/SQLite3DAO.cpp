@@ -232,54 +232,26 @@ bool SQLite3DAO::updateMetaData(PhoenixPlayer::SongMetaData *metaData, bool skip
     int i;
     QString str = "update ";
     str += LIBRARY_TABLE_TAG;
-    str += "set ";
+    str += " set ";
     for (i = (int)(Common::SongMetaTags::E_Hash) + 1;
          i < (int)(Common::SongMetaTags::E_LastFlag) -1;
          ++i) {
-        str += QString ("%1 = \"%1\", ")
+        str += QString ("%1 = \"%2\", ")
                 .arg (mCommon.enumToStr ("SongMetaTags", i))
                 .arg (fillValues (metaData->getMeta (Common::SongMetaTags(i)),
                                   oriMeta->getMeta (Common::SongMetaTags(i)),
                                   skipEmptyValue));
     }
-    str += QString ("%1 = \"%1\" ")
+    str += QString ("%1 = \"%2\" ")
             .arg (mCommon.enumToStr ("SongMetaTags", i))
             .arg (fillValues (metaData->getMeta (Common::SongMetaTags(i)),
                               oriMeta->getMeta (Common::SongMetaTags(i)),
                               skipEmptyValue));
-    str += QString("where Hash = \"%1\"")
+    str += QString("where %1 = \"%2\"")
+            .arg (mCommon.enumToStr ("SongMetaTags", Common::SongMetaTags::E_Hash))
             .arg (metaData->getMeta (Common::E_Hash).toString ());
 
-//    str += QString("FilePath = \"%1\", ").arg (fillValues (metaData->filePath (), oriMeta->filePath (), skipEmptyValue));
-//    str += QString("FileName = \"%1\", ").arg (fillValues (metaData->fileName (), oriMeta->fileName (), skipEmptyValue));
-//    str += QString("MediaBitrate = %1, ").arg (fillValues (metaData->mediaBitrate (), oriMeta->mediaBitrate (), skipEmptyValue));
-//    str += QString("FileSize = %1, ").arg (fillValues (metaData->fileSize (), oriMeta->fileSize (), skipEmptyValue));
-//    str += QString("ArtistName = \"%1\", ").arg (fillValues (metaData->artistName (), oriMeta->artistName (), skipEmptyValue));
-//    str += QString("ArtistImageUri = \"%1\", ").arg (fillValues (metaData->artistImageUri (), oriMeta->artistImageUri (), skipEmptyValue));
-//    str += QString("ArtistDescription = \"%1\", ").arg (fillValues (metaData->artistDescription (), oriMeta->artistDescription (), skipEmptyValue));
-//    str += QString("AlbumName = \"%1\", ").arg (fillValues (metaData->albumName (), oriMeta->albumName (), skipEmptyValue));
-//    str += QString("AlbumDescription = \"%1\", ").arg (fillValues (metaData->albumDescription (), oriMeta->albumDescription (), skipEmptyValue));
-//    str += QString("AlbumYear = \"%1\", ").arg (fillValues (metaData->albumYear (), oriMeta->albumYear (), skipEmptyValue));
-//    str += QString("CoverArtSmall = \"%1\", ").arg (fillValues (metaData->coverArtSmall (), oriMeta->coverArtSmall (), skipEmptyValue));
-//    str += QString("CoverArtLarge = \"%1\", ").arg (fillValues (metaData->coverArtLarge (), oriMeta->coverArtLarge (), skipEmptyValue));
-//    str += QString("CoverArtMiddle = \"%1\", ").arg (fillValues (metaData->coverArtMiddle (), oriMeta->coverArtMiddle (), skipEmptyValue));
-//    str += QString("MediaType = %1, ").arg (fillValues (metaData->mediaType (), oriMeta->mediaType (), skipEmptyValue));
-//    str += QString("SongLength = %1, ").arg (fillValues (metaData->songLength (), oriMeta->songLength (), skipEmptyValue));
-//    str += QString("SongTitle = \"%1\", ").arg (fillValues (metaData->songTitle (), oriMeta->songTitle (), skipEmptyValue));
-//    str += QString("SongDescription = \"%1\", ").arg (fillValues (metaData->songDescription (), oriMeta->songDescription (), skipEmptyValue));
-//    str += QString("Category = \"%1\", ").arg (fillValues (listToString (metaData->category ()), listToString (oriMeta->category ()), skipEmptyValue));
-//    str += QString("Year = %1, ").arg (fillValues (metaData->year (), oriMeta->year (), skipEmptyValue));
-//    str += QString("Date = \"%1\", ").arg (fillValues (metaData->date ().toString (), oriMeta->date ().toString (), skipEmptyValue));
-//    str += QString("UserRating = %1, ").arg (fillValues (metaData->userRating (), oriMeta->userRating (), skipEmptyValue));
-//    str += QString("Keywords = \"%1\", ").arg (fillValues (listToString (metaData->keywords ()), listToString (oriMeta->keywords ()), skipEmptyValue));
-//    str += QString("Language = \"%1\", ").arg (fillValues (metaData->language (), oriMeta->language (), skipEmptyValue));
-//    str += QString("Publisher = \"%1\", ").arg (fillValues (metaData->publisher (), oriMeta->publisher (), skipEmptyValue));
-//    str += QString("Copyright = \"%1\", ").arg (fillValues (metaData->copyright (), oriMeta->copyright (), skipEmptyValue));
-//    str += QString("Lyrics = \"%1\", ").arg (fillValues (metaData->lyrics (), oriMeta->lyrics (), skipEmptyValue));
-//    str += QString("Mood = \"%1\" ").arg (fillValues (metaData->mood (), oriMeta->mood (), skipEmptyValue));
-
-
-//    str += QString("where Hash = \"%1\"").arg (metaData->hash ());
+    qDebug()<<"Run sql "<<str;
 
     QSqlQuery q(str, mDatabase);
     if (q.exec ()) {

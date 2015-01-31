@@ -53,3 +53,5 @@ include(deployment.pri)
 include(../../Common/Common.pri)
 include(../../MusicLibrary/Core/MusicLibraryCore.pri)
 include(../../Player/Player.pri)
+include (../../Lyrics/Core/LyricsCore.pri)
+

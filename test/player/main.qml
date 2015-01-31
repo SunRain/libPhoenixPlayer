@@ -231,4 +231,14 @@ ApplicationWindow {
         }
     }
 
+    Button {
+        id: lyricBtn
+        x: 187
+        y: 637
+        text: qsTr("Button")
+        onClicked: {
+            musicPlayer.lookupLyric("");
+        }
+    }
+
 }
