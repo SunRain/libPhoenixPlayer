@@ -3,6 +3,7 @@ import QtQuick.Controls 1.1
 import QtQuick.Controls.Styles 1.1
 
 import com.sunrain.playlist 1.0
+import com.sunrain.qmlplugin 1.0
 
 ApplicationWindow {
     visible: true
@@ -17,7 +18,16 @@ ApplicationWindow {
             searchText.text = path + "/" + file;
         }
         onPlayingSongChanged: {
-            songtitle.text = musicLibraryManager.querySongMetaElementByIndex(Common.E_FileName, musicLibraryManager.playingSongHash(), true);
+            songtitle.text
+                    = musicLibraryManager
+            .querySongMetaElementByIndex(Common.E_FileName,
+                                         musicLibraryManager.playingSongHash(),
+                                         true);
+            var lyrics = musicLibraryManager
+            .querySongMetaElementByIndex(Common.E_Lyrics,
+                                         musicLibraryManager.playingSongHash(),
+                                         true)[0];
+            lyricsModel.setLyricsStr(lyrics);
         }
         onSearchingFinished: {
             searchText.text = "搜索完成, 当前音乐 " + musicLibraryManager.playingSong();
@@ -45,6 +55,7 @@ ApplicationWindow {
         // playTickActual(quint64 sec);
         onPlayTickActual: {
             console.log("====== onPlayTickActual to " + sec);
+            lyricsModel.findIndex(sec);
         }
         // playTickPercent(int percent);
         onPlayTickPercent: {
@@ -55,6 +66,14 @@ ApplicationWindow {
 
     ListModel {id: libraryModel}
     ListModel {id: playListModel}
+
+    LyricsModel {
+        id: lyricsModel
+        onCurrentIndexChanged: {
+            console.log("=== qml onCurrentIndexChanged " + lyricsModel.currentIndex)
+            lyricsView.currentIndex = lyricsModel.currentIndex;
+        }
+    }
 
     Image {
         id: image
@@ -111,9 +130,9 @@ ApplicationWindow {
     ListView {
         id: libraryList
         x: 17
-        y: 171
+        y: 162
         width: 300
-        height: 186
+        height: 195
         delegate: Item {
             x: 5
             width: parent.width
@@ -156,9 +175,9 @@ ApplicationWindow {
     ListView {
         id: playList
         x: 17
-        y: 383
+        y: 477
         width: 305
-        height: 182
+        height: 88
         delegate: Item {
             x: 5
             width: 80
@@ -281,21 +300,55 @@ ApplicationWindow {
 
         }
 
-//        style: SliderStyle {
-//            groove: Rectangle {
-//                width: control.width
-//                height: 1
-//                color: "#909090"
-//                Rectangle {
-//                    width: styleData.handlePosition
-//                    height: 1
-//                    color: "#e82828"
-//                }
-//            }
-//            handle: Image {
-//                source: "qrc:/resource/handle.png"
-//            }
-//        }
+        //        style: SliderStyle {
+        //            groove: Rectangle {
+        //                width: control.width
+        //                height: 1
+        //                color: "#909090"
+        //                Rectangle {
+        //                    width: styleData.handlePosition
+        //                    height: 1
+        //                    color: "#e82828"
+        //                }
+        //            }
+        //            handle: Image {
+        //                source: "qrc:/resource/handle.png"
+        //            }
+        //        }
+    }
+
+    ListView {
+        id: lyricsView
+        x: 17
+        y: 376
+        width: 300
+        height: 78
+        delegate: Rectangle {
+            width: parent.width
+            height: 15
+            color: Qt.rgba(0,0,0,0)
+            Text {
+                anchors.centerIn: parent
+                horizontalAlignment: Text.AlignHCenter
+                text: lyricsText
+                color: "#4c4c4c"
+                font.pointSize: 10
+                font.bold: parent.ListView.isCurrentItem
+            }
+        }
+        model: lyricsModel
+        clip: true
+        spacing: 3
+        highlightRangeMode: ListView.StrictlyEnforceRange
+        highlight: Rectangle {
+            color: Qt.rgba(0,0,0,0)
+            Behavior on y {
+                SmoothedAnimation {
+                    duration: 300
+                }
+            }
+        }
+
     }
 
 }

@@ -12,6 +12,7 @@
 #include "MusicLibraryManager.h"
 #include "PluginLoader.h"
 #include "Player.h"
+#include "LyricsModel.h"
 
 
 using namespace PhoenixPlayer;
@@ -23,6 +24,8 @@ int main(int argc, char *argv[])
 
     a.setOrganizationName ("SunRain");
     a.setApplicationName ("PhoenixPlayer");
+
+    qmlRegisterType<QmlPlugin::LyricsModel>("com.sunrain.qmlplugin", 1, 0, "LyricsModel");
 
     Settings *settings = Settings::getInstance ();
     MusicLibrary::MusicLibraryManager *manager = MusicLibrary::MusicLibraryManager::getInstance ();

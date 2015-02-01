@@ -84,6 +84,7 @@ bool BaseNetworkLookup::startLookup()
 
             QByteArray qba = reply->readAll ();
             emit succeed (reply->request ().url (), qba);
+            reply->deleteLater ();
 
         });
 
@@ -97,6 +98,7 @@ bool BaseNetworkLookup::startLookup()
              qDebug()<<"===  BaseNetworkLookup  error "<<reply->errorString ();
 
             emit failed (reply->request ().url (), reply->errorString ());
+             reply->deleteLater ();
 
         });
         return true;
