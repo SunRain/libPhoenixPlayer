@@ -62,6 +62,17 @@ signals:
     void lookupLyricSucceed();
     void lookupLyricFailed();
 
+    ///
+    /// \brief playTickActual 播放实际时间
+    /// \param sec 实际时间
+    ///
+    void playTickActual(quint64 sec);
+    ///
+    /// \brief playTickPercent 播放时间百分比,
+    /// \param percent 0~100的播放时间百分比
+    ///
+    void playTickPercent(int percent);
+
     //IPlayBackend的信号
 //    void positionChanged(quint64 posMs = 0);
 //    void volumeChanged(int vol);
@@ -84,6 +95,8 @@ public slots:
 
 private:
     bool PointerValid(EPointer pointer = EPointer::PNULL);
+
+    int getSongLength(const QString &hash);
 private:
     QPointer<Settings> mSettings;
 //    QPointer<PlayBackend::PlayBackendLoader> mPlayBackendLoader;
@@ -93,6 +106,8 @@ private:
     QPointer<Lyrics::LyricsManager> mLyricsManager;
 
     Common::PlayMode mPlayMode;
+    quint64 mCurrentSongLength;
+    quint64 mCurrentPlayPos;
 
 };
 

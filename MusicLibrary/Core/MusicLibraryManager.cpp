@@ -134,6 +134,14 @@ QString MusicLibraryManager::playingSongHash()
     return mCurrentSongHash;
 }
 
+void MusicLibraryManager::setPlayingSongHash(const QString &newHash)
+{
+    if (newHash.isEmpty ())
+        return;
+    mCurrentSongHash = newHash;
+    emit playingSongChanged ();
+}
+
 QString MusicLibraryManager::firstSongHash()
 {
     mCurrentSongHash = mPlayListDAO.data ()->getSongHashList (mCurrentPlayListHash).first ();

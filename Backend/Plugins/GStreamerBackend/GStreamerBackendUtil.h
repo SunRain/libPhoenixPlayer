@@ -72,7 +72,7 @@ static gboolean show_position(GstElement* pipeline) {
     if (gst_obj_ref
             && gst_obj_ref->getPlaybackState () == PhoenixPlayer::Common::PlaybackPlaying
             /*gst_obj_ref->getState() == STATE_PLAY*/) {
-        gst_obj_ref->set_cur_position((quint32)(pos / 1000000000)); // ms
+        gst_obj_ref->set_cur_position((quint32)(pos / 1000000000)); // sec
     }
     return true;
 }

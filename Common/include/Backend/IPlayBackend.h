@@ -21,8 +21,8 @@ public:
     virtual QString getBackendVersion() = 0;
     virtual void	init() = 0;
 signals:
-    void positionChanged(quint64 posMs = 0);
-    void volumeChanged(int vol);
+//    void positionChanged(quint64 posMs = 0);
+    void volumeChanged(int vol = 0);
     //     void message(QMessageBox::Icon icon, const QString &title, const QString &msg) = 0;
     void mediaChanged(PlayBackend::BaseMediaObject *obj = 0);
     ///
@@ -33,8 +33,9 @@ signals:
     /// \brief failed 当前曲目播放失败
     ///
     void failed();
+
     void stateChanged(Common::PlaybackState state);
-    void tick(quint64 msec);
+    void tick(quint64 sec = 0);
 
     //    void totalTimeChanged(qint64);
     //    void timeChangedSignal(quint32);
@@ -47,12 +48,14 @@ signals:
     //    void sig_level(float, float);
 
 public slots:
-    virtual void play(quint64 startMs = 0) = 0;
+    virtual void play(quint64 startSec = 0) = 0;
     virtual void stop() = 0;
     virtual void pause() = 0;
     virtual void setVolume(int vol = 0) = 0;
-    virtual void setPosition(quint64 posMs = 0) = 0;
-    virtual void changeMedia(PlayBackend::BaseMediaObject *obj = 0,quint64 startMs = 0, bool startPlay = false) = 0;
+    virtual void setPosition(quint64 sec = 0) = 0;
+    virtual void changeMedia(PlayBackend::BaseMediaObject *obj = 0,
+                             quint64 startSec = 0,
+                             bool startPlay = false) = 0;
     //    virtual void jump(int where, bool percent = true) = 0;
     //    virtual void changeTrack(const SongMetaDate&, int pos_sec = 0, bool start_play = true) = 0;
     //    virtual void changeTrack(const QString&, int pos_sec = 0, bool start_play = true ) = 0;

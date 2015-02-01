@@ -47,10 +47,19 @@ public:
     Q_INVOKABLE bool deletePlayList(const QString &playListHash);
 
     ///
-    /// \brief playingSong 返回当前播放的歌曲hash,如果当前未播放,则返回数据库中的第一首歌曲,或者播放器上次播放的歌曲
+    /// \brief playingSong 返回当前播放的歌曲hash,
+    /// 如果当前未播放,则返回数据库中的第一首歌曲,或者播放器上次播放的歌曲
     /// \return
     ///
     Q_INVOKABLE QString playingSongHash();
+
+    ///
+    /// \brief setPlayingSongHash 设置需要播放的歌曲在曲库中的hash值
+    /// 当设置的hash值在曲库中时会发送 playingSongChanged 信号
+    /// \param newHash
+    ///
+    Q_INVOKABLE void setPlayingSongHash(const QString &newHash);
+
     QString firstSongHash();
     QString lastSongHash();
 

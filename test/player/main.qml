@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
+import QtQuick.Controls.Styles 1.1
 
 import com.sunrain.playlist 1.0
 
@@ -40,6 +41,15 @@ ApplicationWindow {
         }
         onPlayStateChanged: {
             console.log("Play state change to " + state);
+        }
+        // playTickActual(quint64 sec);
+        onPlayTickActual: {
+            console.log("====== onPlayTickActual to " + sec);
+        }
+        // playTickPercent(int percent);
+        onPlayTickPercent: {
+            console.log("====== onPlayTickPercent to " + percent);
+            playProgress.value = percent;
         }
     }
 
@@ -91,10 +101,10 @@ ApplicationWindow {
 
     Text {
         id: songtitle
-        x: 64
-        y: 23
-        width: 203
-        height: 24
+        x: 36
+        y: 11
+        width: 163
+        height: 32
         font.pixelSize: 12
     }
 
@@ -113,29 +123,31 @@ ApplicationWindow {
                 width: parent.width
                 spacing: 3
                 Text {
-                    id: path
-                    width: parent.width
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                }
-                Text {
-                    text: Hash
-                    font.bold: true
+                    id: text
                     width: parent.width
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
                 Rectangle {
                     width: parent.width
-                    height: 1
+                    height: 5
                 }
             }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    musicLibraryManager.setPlayingSongHash(Hash);
+                }
+            }
+
             Component.onCompleted: {
-                var method = Common.E_FilePath;
+                var method = Common.E_SongTitle;
 //                console.log("==== " + Hash)
                 var p = musicLibraryManager.querySongMetaElementByIndex(method, Hash, true);
-                method = Common.E_FileName;
-                p = p + "/" +
-                        musicLibraryManager.querySongMetaElementByIndex(method, Hash, true);
-                path.text = p;
+                if (p == "" || p == undefined) {
+                    method = Common.E_FileName;
+                    p = musicLibraryManager.querySongMetaElementByIndex(method, Hash, true);
+                }
+                text.text = p;
             }
         }
         model: libraryModel
@@ -239,6 +251,51 @@ ApplicationWindow {
         onClicked: {
             musicPlayer.lookupLyric("");
         }
+    }
+
+    Slider {
+        id: playProgress
+        x: 29
+        y: 55
+        width: 288
+        height: 22
+        maximumValue: 100.0
+        stepSize: 1.0
+
+        property int jumpValue: 0
+        onValueChanged: {
+            console.log("playProgress value to " + value);
+            if (playProgress.pressed)
+                jumpValue = value
+
+        }
+        onPressedChanged: {
+            console.log("playProgress onPressedChanged is pressed "
+                        + playProgress.pressed);
+            if (!playProgress.pressed && jumpValue >0) {
+                console.log("playProgress jump to value " + jumpValue)
+                playProgress.value = jumpValue;
+                musicPlayer.setPosition(jumpValue, true)
+                jumpValue = 0;
+            }
+
+        }
+
+//        style: SliderStyle {
+//            groove: Rectangle {
+//                width: control.width
+//                height: 1
+//                color: "#909090"
+//                Rectangle {
+//                    width: styleData.handlePosition
+//                    height: 1
+//                    color: "#e82828"
+//                }
+//            }
+//            handle: Image {
+//                source: "qrc:/resource/handle.png"
+//            }
+//        }
     }
 
 }

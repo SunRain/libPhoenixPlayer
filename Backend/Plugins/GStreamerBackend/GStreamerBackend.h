@@ -95,12 +95,14 @@ public:
 
 public slots:
     // IPlayBackend interface
-    void play(quint64 startMs = 0);
+    void play(quint64 startSec = 0);
     void stop();
     void pause();
     void setVolume(int vol = 0);
-    void setPosition(quint64 posMs = 0);
-    void changeMedia(PlayBackend::BaseMediaObject *obj = 0, quint64 startMs = 0, bool startPlay = false);
+    void setPosition(quint64 sec = 0);
+    void changeMedia(PlayBackend::BaseMediaObject *obj = 0,
+                     quint64 startSec = 0,
+                     bool startPlay = false);
 
 private:
     void init_play_pipeline();

@@ -122,9 +122,10 @@ void GStreamerBackend::set_cur_position(quint32 pos_sec)
 //       _last_track->filepath = _meta_data.filepath;
 //       _last_track->pos_sec = pos_sec;
 
-       qDebug()<<"positionChanged  "<<_seconds_now;
+//       qDebug()<<"set_cur_position positionChanged to"<<_seconds_now;
 
-       emit positionChanged(_seconds_now);
+       //emit positionChanged(_seconds_now);
+       emit tick (pos_sec);
 }
 
 void GStreamerBackend::set_track_finished()
@@ -241,7 +242,7 @@ void GStreamerBackend::emit_buffer(float inv_arr_channel_elements, float scale)
 //    return _state;
 //}
 
-void GStreamerBackend::play(quint64 startMs)
+void GStreamerBackend::play(quint64 startSec)
 {
     _track_finished = false;
     _state = PhoenixPlayer::Common::PlaybackPlaying;
@@ -250,8 +251,8 @@ void GStreamerBackend::play(quint64 startMs)
     gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PLAYING);
 
     gst_obj_ref = this;
-    if (startMs > 0)
-        setPosition(startMs);
+    if (startSec > 0)
+        setPosition(startSec);
 }
 
 void GStreamerBackend::stop()
@@ -288,42 +289,20 @@ void GStreamerBackend::setVolume(int vol)
     emit volumeChanged(_vol);
 }
 
-void GStreamerBackend::setPosition(quint64 posMs)
+void GStreamerBackend::setPosition(quint64 sec)
 {
-    ///
-    /// TODO:由其他代码完成时间转换功能
-
-//    gint64 newTimeMs, newTimeNs;
-//    if (pos < 0)
-//        pos = 0;
-
-//    if (percent) {
-//        if (pos > 100)
-//            pos = 100;
-//        double p = pos / 100.0;
-//        _seconds_started = (int) (p * _meta_data.length_ms) / 1000;
-//        newTimeMs = (quint64)(p * _meta_data.length_ms); // msecs
-//    }
-
-//    else {
-//        if (pos > _meta_data.length_ms / 1000)
-//            pos = _meta_data.length_ms / 1000;
-//        _seconds_started = pos;
-//        newTimeMs = pos * 1000;
-//    }
-
-    gint64 newTimeNs = posMs * GST_MSECOND;
-
+    //GStreamer used nanosecond
+    gint64 newTimeNs = sec * GST_SECOND;
     if (!gst_element_seek_simple(_pipeline, GST_FORMAT_TIME,
                                  (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SKIP),
                                  newTimeNs)) {
         qDebug() << "seeking failed ";
     }
-    emit positionChanged(posMs);
+    emit tick (sec);
 }
 
 void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
-                                                      quint64 startMs,
+                                                      quint64 startSec,
                                                       bool startPlay)
 {
     qDebug()<<"GStreamerBackend >>>>>>>>"<<__FUNCTION__;
@@ -355,7 +334,8 @@ void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
         ///TODO: 添加信号
         //        emit total_time_changed_signal(_meta_data.length_ms);
         //        emit timeChangedSignal(startSec);
-        emit positionChanged(startMs);
+        //emit positionChanged(startMs);
+        emit tick (startSec);
     } else {
         //        _meta_data = _md_gapless;
         _gapless_track_available = false;
@@ -372,8 +352,8 @@ void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
     _scrobbled = false;
     _track_finished = false;
 
-    if (startMs > 0) {
-        __start_pos_beginning = startMs;
+    if (startSec > 0) {
+        __start_pos_beginning = startSec;
         __start_at_beginning = false;
     }
 
@@ -384,7 +364,7 @@ void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
     qDebug()<<" __start_at_beginning "<<__start_at_beginning;
 
     if (startPlay) {
-        play(startMs);
+        play(startSec);
     } else if (!startPlay /*&& !(_playing_stream && _sr_active)*/) { // pause if streamripper is not active
         pause();
     }

@@ -26,6 +26,7 @@ SUBDIRS += \
     Backend \
     MusicLibrary \
     Lyrics \
+    Plugins \
 #    Player \
 #    Common \
     test

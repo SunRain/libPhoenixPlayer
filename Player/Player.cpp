@@ -62,6 +62,7 @@ void Player::setPluginLoader(PluginLoader *loader)
     });
 
     if (PointerValid (EPointer::PPlaybackend)) {
+
         // 播放状态改变信号
         connect (mPlayBackend.data (),
                  &PlayBackend::IPlayBackend::stateChanged,
@@ -71,7 +72,9 @@ void Player::setPluginLoader(PluginLoader *loader)
         });
 
         //当一首曲目播放结束后
-        connect (mPlayBackend.data (), &PlayBackend::IPlayBackend::finished, [this] {
+        connect (mPlayBackend.data (),
+                 &PlayBackend::IPlayBackend::finished,
+                 [this] {
             if (PointerValid (EPointer::PMusicLibraryManager)) {
                 switch (mPlayMode) {
                 case Common::PlayModeOrder: { //顺序播放
@@ -114,6 +117,27 @@ void Player::setPluginLoader(PluginLoader *loader)
                 }
             }
         });
+
+        //播放失败
+        connect (mPlayBackend.data (),
+                 &PlayBackend::IPlayBackend::failed,
+                 [this]() {
+            if (PointerValid (EPointer::PMusicLibraryManager)) {
+                mMusicLibraryManager.data ()->nextSong ();
+            }
+        });
+
+        //tick
+        connect (mPlayBackend.data (),
+                 &PlayBackend::IPlayBackend::tick,
+                 [this] (quint64 sec) {
+            mCurrentPlayPos = sec;
+            emit playTickActual (sec);
+            if (mCurrentSongLength <= 0)
+                return;
+
+            emit playTickPercent (((qreal)sec/mCurrentSongLength) * 100);
+        });
     }
 
 }
@@ -129,6 +153,11 @@ void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
              &MusicLibrary::MusicLibraryManager::playingSongChanged, [this] () {
         if (PointerValid (EPointer::PPlaybackend)) {
             QString playingHash = mMusicLibraryManager->playingSongHash ();
+
+            mCurrentSongLength = getSongLength (playingHash);
+
+            qDebug()<<"Player playingSongChanged mCurrentSongLength "<<mCurrentSongLength;
+
             PlayBackend::BaseMediaObject obj;
 
             QStringList list = mMusicLibraryManager
@@ -233,18 +262,20 @@ void Player::togglePlayPause()
     if (!PointerValid (EPointer::PPlaybackend))
         return;
 
-    //    qDebug()<<__FUNCTION__ <<" current "<<mPlayBackend.data ()->getPlaybackState ();
-
     switch (mPlayBackend.data ()->getPlaybackState ()) {
     case Common::PlaybackPlaying:
         mPlayBackend.data ()->pause ();
         break;
     case Common::PlaybackPaused:
-        //TODO: 播放中途暂停时候需要设置当前位置开始播放
-        mPlayBackend.data ()->play ();
+        mPlayBackend.data ()->play (mCurrentPlayPos);
+        break;
     case Common::PlaybackStopped: {
         if (PointerValid (EPointer::PMusicLibraryManager)) {
             QString playingHash = mMusicLibraryManager->playingSongHash ();
+
+            mCurrentSongLength = getSongLength (playingHash);
+            mCurrentPlayPos = 0;
+
             PlayBackend::BaseMediaObject obj;
             QStringList list = mMusicLibraryManager
                     ->querySongMetaElement (Common::E_FileName, playingHash);
@@ -258,6 +289,7 @@ void Player::togglePlayPause()
             qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
             mPlayBackend.data ()->changeMedia (&obj, 0, true);
         }
+        break;
     }
     default:
         break;
@@ -296,8 +328,12 @@ void Player::setPosition(qreal pos, bool isPercent)
     if (!PointerValid (EPointer::PPlaybackend))
         return;
 
+    qDebug()<<"Player setPosition to "<<pos<<" isPercent "<<isPercent;
+
     if (isPercent) {
-        //TODO: 百分比跳转情况
+        if (mCurrentSongLength <= 0)
+            return;
+        mPlayBackend.data ()->setPosition (mCurrentSongLength * pos/100);
     } else {
         mPlayBackend.data ()->setPosition (pos);
     }
@@ -323,6 +359,23 @@ bool Player::PointerValid(Player::EPointer pointer)
         break;
     }
     return valid;
+}
+
+int Player::getSongLength(const QString &hash)
+{
+    if (hash.isEmpty ())
+        return 0;
+
+    if (!PointerValid (EPointer::PMusicLibraryManager))
+        return 0;
+
+    QStringList list = mMusicLibraryManager.data ()
+            ->querySongMetaElement (Common::SongMetaTags::E_SongLength,
+                                    hash, true);
+    if (!list.isEmpty ()) {
+       return list.first ().toULongLong ();
+    }
+    return 0;
 }
 
 
