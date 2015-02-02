@@ -337,16 +337,20 @@ int Player::getSongLength(const QString &hash)
 void Player::metadataLookup(const QString &songHash,
                             MetadataLookup::IMetadataLookup::LookupType type)
 {
+    qDebug()<<__FUNCTION__;
+
     if (!PointerValid (EPointer::PPluginLoader))
         return;
 
     if (mMetaLookupManager.isNull ()) {
+        qDebug()<<"new mMetaLookupManager";
+
         mMetaLookupManager = new MetadataLookup::MetadataLookupManager(this);
         mMetaLookupManager.data ()->setPluginLoader (mPluginLoader);
-    } else {
+    } /*else {
         //TODO 代码未测试,是否会在转换查询类型的时候出错
         mMetaLookupManager.data ()->reset ();
-    }
+    }*/
 
     qDebug()<<"We will try to lookup metadata ["<<type<<"] for song "<<songHash;
 

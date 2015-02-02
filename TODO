@@ -1,2 +1,2 @@
-数据库插入时含有 '的文件名无法插入
-ry to insert file error [  "insert into LIBRARY(Hash, FilePath, FileName, MediaBitrate, FileSize, ArtistName, ArtistImageUri, ArtistDescription, AlbumName, AlbumDescription, AlbumYear, CoverArtSmall, CoverArtLarge, CoverArtMiddle, MediaType, SongLength, SongTitle, SongDescription, Category, Year, Date, UserRating, Keywords, Language, Publisher, Copyright, Lyrics, Mood) values('be9e49f3d0438710690c026682596373', '~~~~/Music/music', '未知-活着就是折腾.mp3', 0, 4466461, 'SYT', '', '', 'www.musicstone.net', '', '', '', '', '', 0, 0, '活着就是折腾（Life's A Struggl', 'www.musicstone.net', '', '0', '周日 1月 25 2015', 0, '', '', '', '', '', '')"  ] 
+当一个歌词文件未下载完成的时候,继续下载另外一个会导致crash
+

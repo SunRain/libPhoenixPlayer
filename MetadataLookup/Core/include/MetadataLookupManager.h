@@ -5,12 +5,12 @@
 #include <QStringList>
 #include <QList>
 #include <QPointer>
-
 #include "MetadataLookup/IMetadataLookup.h"
+#include "SongMetaData.h"
 
+class QDebug;
 namespace PhoenixPlayer {
 
-class SongMetaData;
 class PluginLoader;
 namespace MetadataLookup {
 
@@ -35,18 +35,27 @@ signals:
     void lookupFailed();
 public slots:
 
+protected:
+    struct WorkNode {
+        SongMetaData *data;
+        IMetadataLookup::LookupType type;
+    };
+
 private:
     void nextLookupPlugin();
     void initPlugins();
+    void processNext();
 private:
     QPointer<PluginLoader> mPluginLoader;
     //QList<ILyricsLookup *> mPluginList;
     IMetadataLookup *mLookup;
+    IMetadataLookup *mBackupLookup;
     QStringList mPluginNameList;
-    SongMetaData *mSongMeta;
+//    SongMetaData *mSongMeta;
     int mCurrentIndex;
-    IMetadataLookup::LookupType mCurLookupType;
-//    bool mLyricsFound;
+//    IMetadataLookup::LookupType mCurLookupType;
+    QList<WorkNode> mWorkQueue;
+    WorkNode mCurrentNode;
 };
 
 
