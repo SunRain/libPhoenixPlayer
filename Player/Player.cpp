@@ -276,6 +276,10 @@ void Player::togglePlayPause()
             mCurrentSongLength = getSongLength (playingHash);
             mCurrentPlayPos = 0;
 
+            //设置播放歌曲的hash,使得MusicLibraryManager发送playingSongChanged信号
+            //此处是为了使得前端qml界面能够在初始化时候刷新
+            mMusicLibraryManager.data ()->setPlayingSongHash (playingHash);
+
             PlayBackend::BaseMediaObject obj;
             QStringList list = mMusicLibraryManager
                     ->querySongMetaElement (Common::E_FileName, playingHash);
