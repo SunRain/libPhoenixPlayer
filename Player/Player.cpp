@@ -16,6 +16,8 @@
 
 namespace PhoenixPlayer {
 
+using namespace MetadataLookup;
+
 Player::Player(QObject *parent) : QObject(parent)
 {
     mPlayBackend = 0;
@@ -23,14 +25,14 @@ Player::Player(QObject *parent) : QObject(parent)
     mPluginLoader = 0;
     mSettings = 0;
     mMusicLibraryManager = 0;
-    mLyricsManager = 0;// new Lyrics::LyricsManager(this);
+    mMetaLookupManager = 0;// new Lyrics::LyricsManager(this);
     mPlayMode = Common::PlayModeOrder;
 }
 
 Player::~Player()
 {
-    if (!mLyricsManager.isNull ())
-        mLyricsManager.data ()->deleteLater ();
+    if (!mMetaLookupManager.isNull ())
+        mMetaLookupManager.data ()->deleteLater ();
 }
 
 void Player::setPluginLoader(PluginLoader *loader)
@@ -204,57 +206,7 @@ Common::PlayMode Player::getPlayMode()
 
 void Player::lookupLyric(const QString &songHash)
 {
-    if (!PointerValid (EPointer::PPluginLoader))
-        return;
-
-    if (mLyricsManager.isNull ()) {
-        mLyricsManager = new MetadataLookup::MetadataLookupManager(this);
-        mLyricsManager.data ()->setPluginLoader (mPluginLoader);
-    }
-
-    connect (mLyricsManager.data (),
-             &MetadataLookup::MetadataLookupManager::lookupFailed,
-             [this] {
-        qDebug()<<"We can't find lyric for this song";
-        emit lookupLyricFailed ();
-    });
-
-    connect (mLyricsManager.data (),
-             &MetadataLookup::MetadataLookupManager::lookupSucceed,
-             [this](QString songHash, QString lyricsStr) {
-        qDebug()<<"We had found lyric for this song ";
-
-        //将lyric数据写入数据库中
-        SongMetaData meta;
-        meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
-        meta.setMeta (Common::SongMetaTags::E_Lyrics, lyricsStr);
-
-        //TODO 也许通过MusicLibraryManager来管理会更好
-        if (PointerValid (EPointer::PPluginLoader)) {
-            MusicLibrary::IPlayListDAO *dao =
-                    mPluginLoader.data ()->getCurrentPlayListDAO ();
-            if (dao)
-                dao->updateMetaData (&meta, true);
-        }
-        emit lookupLyricSucceed ();
-    });
-
-    SongMetaData data;
-    QString hash = songHash;
-    if (hash.isEmpty ())
-        hash = mMusicLibraryManager.data ()->playingSongHash ();
-
-    for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
-         i < (int)Common::SongMetaTags::E_LastFlag;
-         ++i) {
-        QStringList list = mMusicLibraryManager.data ()
-                ->querySongMetaElement (Common::SongMetaTags(i), hash, true);
-        if (list.isEmpty ())
-            data.setMeta (Common::SongMetaTags(i), QVariant());
-        else
-            data.setMeta (Common::SongMetaTags(i), list.first ());
-    }
-    mLyricsManager.data ()->lookup (&data);
+    metadataLookup (songHash, IMetadataLookup::TypeLyrics);
 }
 
 void Player::togglePlayPause()
@@ -357,7 +309,7 @@ bool Player::PointerValid(Player::EPointer pointer)
         valid = !mMusicLibraryManager.isNull ();
         break;
     case EPointer::PPLyricsManager:
-        valid = !mLyricsManager.isNull ();
+        valid = !mMetaLookupManager.isNull ();
         break;
     default:
         break;
@@ -380,6 +332,91 @@ int Player::getSongLength(const QString &hash)
        return list.first ().toULongLong ();
     }
     return 0;
+}
+
+void Player::metadataLookup(const QString &songHash,
+                            MetadataLookup::IMetadataLookup::LookupType type)
+{
+    if (!PointerValid (EPointer::PPluginLoader))
+        return;
+
+    if (mMetaLookupManager.isNull ()) {
+        mMetaLookupManager = new MetadataLookup::MetadataLookupManager(this);
+        mMetaLookupManager.data ()->setPluginLoader (mPluginLoader);
+    } else {
+        //TODO 代码未测试,是否会在转换查询类型的时候出错
+        mMetaLookupManager.data ()->reset ();
+    }
+
+    qDebug()<<"We will try to lookup metadata ["<<type<<"] for song "<<songHash;
+
+    connect (mMetaLookupManager.data (),
+             &MetadataLookup::MetadataLookupManager::lookupFailed,
+             [this] {
+        qDebug()<<"We can't find metadata for this song";
+
+        emitMetadataLookupResult (MetadataLookup::IMetadataLookup::TypeUndefined, false);
+    });
+
+    connect (mMetaLookupManager.data (),
+             &MetadataLookup::MetadataLookupManager::lookupSucceed,
+             [this]
+             (QString songHash,
+             QByteArray result,
+             MetadataLookup::IMetadataLookup::LookupType type) {
+        qDebug()<<"We had found metadata for this song ";
+
+        if (type == MetadataLookup::IMetadataLookup::TypeLyrics) {
+            //将lyric数据写入数据库中
+            SongMetaData meta;
+            meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
+            meta.setMeta (Common::SongMetaTags::E_Lyrics, result);
+
+            //TODO 也许通过MusicLibraryManager来管理会更好
+            if (PointerValid (EPointer::PPluginLoader)) {
+                MusicLibrary::IPlayListDAO *dao =
+                        mPluginLoader.data ()->getCurrentPlayListDAO ();
+                if (dao)
+                    dao->updateMetaData (&meta, true);
+            }
+        }
+        emitMetadataLookupResult (type, true);
+    });
+
+    SongMetaData data;
+    QString hash = songHash;
+    if (hash.isEmpty ())
+        hash = mMusicLibraryManager.data ()->playingSongHash ();
+
+    for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
+         i < (int)Common::SongMetaTags::E_LastFlag;
+         ++i) {
+        QStringList list = mMusicLibraryManager.data ()
+                ->querySongMetaElement (Common::SongMetaTags(i), hash, true);
+        if (list.isEmpty ())
+            data.setMeta (Common::SongMetaTags(i), QVariant());
+        else
+            data.setMeta (Common::SongMetaTags(i), list.first ());
+    }
+    mMetaLookupManager.data ()->lookup (&data,
+                                        MetadataLookup::IMetadataLookup::TypeLyrics);
+}
+
+void Player::emitMetadataLookupResult(
+        MetadataLookup::IMetadataLookup::LookupType type, bool result)
+{
+    if (!result) {
+        emit metadataLookupFailed ();
+        return;
+    }
+    //TODO 添加其他类型的emit
+    switch (type) {
+    case MetadataLookup::IMetadataLookup::TypeLyrics:
+        lookupLyricSucceed ();
+        break;
+    default:
+        break;
+    }
 }
 
 

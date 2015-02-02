@@ -61,11 +61,11 @@ public:
     MusicLibrary::IMusicTagParser *getCurrentMusicTagParser();
 
     ///
-    /// \brief getCurrentLyricsLookup
+    /// \brief getCurrentMetadataLookup
     /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
     /// \return
     ///
-    MetadataLookup::IMetadataLookup *getCurrentLyricsLookup();
+    MetadataLookup::IMetadataLookup *getCurrentMetadataLookup();
 
     ///
     /// \brief getPluginNames 返回当前所有插件的名称列表
@@ -100,7 +100,7 @@ private:
       QList <PlayBackend::IPlayBackend*> mPlayBackendList;
       QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
       QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;
-      QList <MetadataLookup::IMetadataLookup*> mLyricsList;
+      QList <MetadataLookup::IMetadataLookup*> mMetaLookupList;
 
       QHash<PluginType, int> mCurrentPluginIndex;
       QHash<PluginType, QString> mCurrentPluginName;

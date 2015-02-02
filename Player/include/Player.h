@@ -9,7 +9,7 @@
 //#include "PlayBackendLoader.h"
 //#include "IPlayBackend.h"
 //#include "MusicLibraryManager.h"
-
+#include "MetadataLookup/IMetadataLookup.h"
 
 namespace PhoenixPlayer {
 class Settings;
@@ -44,6 +44,10 @@ public:
     Q_INVOKABLE void setPlayModeInt (int mode = 0);
     Q_INVOKABLE Common::PlayMode getPlayMode();
 
+    ///
+    /// \brief lookupLyric 搜索lyrics歌词
+    /// \param songHash 需要搜索的歌曲hash, 空值为当前播放的歌曲
+    ///
     Q_INVOKABLE void lookupLyric(const QString &songHash);
 
 protected:
@@ -60,7 +64,7 @@ signals:
     void playModeChanged(Common::PlayMode mode);
     void playModeChanged (int mode);
     void lookupLyricSucceed();
-    void lookupLyricFailed();
+    void metadataLookupFailed();
 
     ///
     /// \brief playTickActual 播放实际时间
@@ -97,13 +101,18 @@ private:
     bool PointerValid(EPointer pointer = EPointer::PNULL);
 
     int getSongLength(const QString &hash);
+
+    void metadataLookup(const QString &songHash,
+                        MetadataLookup::IMetadataLookup::LookupType type);
+    void emitMetadataLookupResult(MetadataLookup::IMetadataLookup::LookupType type,
+                                  bool result);
 private:
     QPointer<Settings> mSettings;
 //    QPointer<PlayBackend::PlayBackendLoader> mPlayBackendLoader;
     QPointer<PluginLoader> mPluginLoader;
     QPointer<PlayBackend::IPlayBackend> mPlayBackend;
     QPointer<MusicLibrary::MusicLibraryManager> mMusicLibraryManager;
-    QPointer<MetadataLookup::MetadataLookupManager> mLyricsManager;
+    QPointer<MetadataLookup::MetadataLookupManager> mMetaLookupManager;
 
     Common::PlayMode mPlayMode;
     quint64 mCurrentSongLength;
