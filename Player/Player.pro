@@ -12,7 +12,7 @@ CONFIG += c++11
 include (Player.pri)
 include (../Common/sdk.pri)
 include (../MusicLibrary/Core/MusicLibrarySDK.pri)
-include (../Lyrics/Core/LyricsCore.pri)
+include (../MetadataLookup/Core/MetadataLookupCore.pri)
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Common \
 #                                              -L$$OUT_PWD/../MusicLibraryCore \

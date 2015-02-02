@@ -9,7 +9,7 @@
 #include "BaseNetworkLookup.h"
 
 namespace PhoenixPlayer {
-namespace Lyrics {
+namespace MetadataLookup {
 
 BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
 {

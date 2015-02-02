@@ -24,16 +24,16 @@ void LyricsModel::setLyricsStr(const QString &lyrics)
 {
     if (lyrics.isEmpty ()) {
         qDebug()<<"LyricsModel lyrics is empty";
-        Lyrics::QLyrics qc;
+        MetadataLookup::QLyrics qc;
         qc.time = QTime();
         qc.lyrics = "No lyrics";
         mLyricsList.append (qc);
         return;
     }
 
-    mLyricsList = Lyrics::LyricParser::parserLyrics (lyrics);
+    mLyricsList = MetadataLookup::LyricParser::parserLyrics (lyrics);
     if (mLyricsList.isEmpty ()) {
-        Lyrics::QLyrics qc;
+        MetadataLookup::QLyrics qc;
         qc.time = QTime();
         qc.lyrics = "No lyrics";
         mLyricsList.append (qc);
@@ -113,7 +113,7 @@ QVariant LyricsModel::data(const QModelIndex &index, int role) const
 {
     if (index.row () < 0 || index.row () >= mLyricsList.size ())
         return QVariant();
-    Lyrics::QLyrics lyrics = mLyricsList.at (index.row ());
+    MetadataLookup::QLyrics lyrics = mLyricsList.at (index.row ());
     switch (role) {
     case LyricsRoles::TimeRole:
         return lyrics.time;

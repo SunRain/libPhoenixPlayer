@@ -37,7 +37,7 @@ signals:
     void currentIndexChanged();
 
 private:
-    Lyrics::QLyricsList mLyricsList;
+    MetadataLookup::QLyricsList mLyricsList;
     int mCurrentIndex;
 
 

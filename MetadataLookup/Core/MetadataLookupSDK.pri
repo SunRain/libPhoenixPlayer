@@ -4,7 +4,7 @@ DEPENDPATH += $$PWD/include
 
 HEADERS += \
     $$PWD/include/BaseNetworkLookup.h \
-    $$PWD/include/LyricsManager.h
+    $$PWD/include/MetadataLookupManager.h
 
 
 

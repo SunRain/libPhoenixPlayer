@@ -1,23 +1,23 @@
 
 #include <QDebug>
 
-#include "LyricsManager.h"
+#include "MetadataLookupManager.h"
 #include "Common.h"
-#include "Lyrics/ILyricsLookup.h"
+#include "MetadataLookup/IMetadataLookup.h"
 #include "PluginLoader.h"
 #include "SongMetaData.h"
 
 namespace PhoenixPlayer {
-namespace Lyrics {
+namespace MetadataLookup {
 
-LyricsManager::LyricsManager(QObject *parent) : QObject(parent)
+MetadataLookupManager::MetadataLookupManager(QObject *parent) : QObject(parent)
 {
     mCurrentIndex = -1;
     mLookup = nullptr;
     mSongMeta = nullptr;
 }
 
-LyricsManager::~LyricsManager()
+MetadataLookupManager::~MetadataLookupManager()
 {
     qDebug()<<__FUNCTION__;
 
@@ -28,7 +28,7 @@ LyricsManager::~LyricsManager()
         mSongMeta->deleteLater ();
 }
 
-void LyricsManager::lookup(SongMetaData *data)
+void MetadataLookupManager::lookup(SongMetaData *data)
 {
     if (mSongMeta == nullptr)
         mSongMeta = new SongMetaData(this);
@@ -49,14 +49,14 @@ void LyricsManager::lookup(SongMetaData *data)
     }
 }
 
-void LyricsManager::setPluginLoader(PluginLoader *loader)
+void MetadataLookupManager::setPluginLoader(PluginLoader *loader)
 {
     mPluginLoader = loader;
     if (mPluginLoader.isNull ())
         return;
 
     mPluginNameList = mPluginLoader.data ()
-            ->getPluginNames (PluginLoader::PluginType::TypeLyricsLookup);
+            ->getPluginNames (PluginLoader::PluginType::TypeMetadataLookup);
 
      mLookup = mPluginLoader.data ()->getCurrentLyricsLookup ();
     //因为PluginLoader默认会返回第一个插件,
@@ -77,7 +77,7 @@ void LyricsManager::setPluginLoader(PluginLoader *loader)
     connect (mPluginLoader.data (),
              &PluginLoader::signalPluginChanged,
              [this] (PluginLoader::PluginType type) {
-        if (type == PluginLoader::PluginType::TypeLyricsLookup) {
+        if (type == PluginLoader::PluginType::TypeMetadataLookup) {
             mLookup = mPluginLoader.data ()->getCurrentLyricsLookup ();
             if (mLookup != nullptr) {
                 mLookup->lookup (mSongMeta);
@@ -86,13 +86,13 @@ void LyricsManager::setPluginLoader(PluginLoader *loader)
     });
 
     connect (mLookup,
-             &ILyricsLookup::lookupFailed,
+             &IMetadataLookup::lookupFailed,
              [this]{
         if (mCurrentIndex >= 0) { //如果存在其他插件
             if (!mPluginLoader.isNull ()) {
                 if (mCurrentIndex < mPluginNameList.size ()) { //防止溢出
                     mPluginLoader.data ()
-                            ->setNewPlugin (PluginLoader::PluginType::TypeLyricsLookup,
+                            ->setNewPlugin (PluginLoader::PluginType::TypeMetadataLookup,
                                             mPluginNameList.at (mCurrentIndex));
                     //指向下一个插件
                     mCurrentIndex += 1;
@@ -105,10 +105,10 @@ void LyricsManager::setPluginLoader(PluginLoader *loader)
     });
 
     connect (mLookup,
-             &ILyricsLookup::lookupSucceed,
-             [this](const QString &lyricsString) {
+             &IMetadataLookup::lookupSucceed,
+             [this](const QByteArray &result) {
         QString hash = mSongMeta->getMeta (Common::SongMetaTags::E_Hash).toString ();
-        emit lookupSucceed (hash, lyricsString);
+        emit lookupSucceed (hash, result);
     });
 }
 

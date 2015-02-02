@@ -6,7 +6,7 @@ QT += network
 CONFIG += c++11
 
 include (../../Common/sdk.pri)
-include (../../Lyrics/Core/LyricsCore.pri)
+include (../../MetadataLookup/Core/MetadataLookupCore.pri)
 include (qml.pri)
 
 

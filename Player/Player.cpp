@@ -9,8 +9,8 @@
 #include "Backend/BaseMediaObject.h"
 #include "Backend/IPlayBackend.h"
 #include "PluginLoader.h"
-#include "Lyrics/ILyricsLookup.h"
-#include "LyricsManager.h"
+#include "MetadataLookup/IMetadataLookup.h"
+#include "MetadataLookupManager.h"
 #include "SongMetaData.h"
 #include "MusicLibrary/IPlayListDAO.h"
 
@@ -208,19 +208,19 @@ void Player::lookupLyric(const QString &songHash)
         return;
 
     if (mLyricsManager.isNull ()) {
-        mLyricsManager = new Lyrics::LyricsManager(this);
+        mLyricsManager = new MetadataLookup::MetadataLookupManager(this);
         mLyricsManager.data ()->setPluginLoader (mPluginLoader);
     }
 
     connect (mLyricsManager.data (),
-             &Lyrics::LyricsManager::lookupFailed,
+             &MetadataLookup::MetadataLookupManager::lookupFailed,
              [this] {
         qDebug()<<"We can't find lyric for this song";
         emit lookupLyricFailed ();
     });
 
     connect (mLyricsManager.data (),
-             &Lyrics::LyricsManager::lookupSucceed,
+             &MetadataLookup::MetadataLookupManager::lookupSucceed,
              [this](QString songHash, QString lyricsStr) {
         qDebug()<<"We had found lyric for this song ";
 

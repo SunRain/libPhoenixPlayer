@@ -10,7 +10,7 @@
 #include "Backend/IPlayBackend.h"
 #include "MusicLibrary/IMusicTagParser.h"
 #include "MusicLibrary/IPlayListDAO.h"
-#include "Lyrics/ILyricsLookup.h"
+#include "MetadataLookup/IMetadataLookup.h"
 
 namespace PhoenixPlayer {
 
@@ -123,17 +123,17 @@ MusicLibrary::IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
     return mMusicTagParserList.at ((int)mCurrentPluginIndex[PluginType::TypeMusicTagParser]);
 }
 
-Lyrics::ILyricsLookup *PluginLoader::getCurrentLyricsLookup()
+MetadataLookup::IMetadataLookup *PluginLoader::getCurrentLyricsLookup()
 {
-    if (mCurrentPluginIndex[PluginType::TypeLyricsLookup] < 0)
+    if (mCurrentPluginIndex[PluginType::TypeMetadataLookup] < 0)
         return nullptr;
 
     qDebug()<<"ILyricsLookup index "
-           <<mCurrentPluginIndex[PluginType::TypeLyricsLookup]
+           <<mCurrentPluginIndex[PluginType::TypeMetadataLookup]
           <<" Name "
-         <<mCurrentPluginName[PluginType::TypeLyricsLookup];
+         <<mCurrentPluginName[PluginType::TypeMetadataLookup];
 
-    return mLyricsList.at ((int)mCurrentPluginIndex[PluginType::TypeLyricsLookup]);
+    return mLyricsList.at ((int)mCurrentPluginIndex[PluginType::TypeMetadataLookup]);
 }
 
 QStringList PluginLoader::getPluginNames(PluginLoader::PluginType type)
@@ -163,7 +163,7 @@ void PluginLoader::initPlugins(PluginType type)
     case PluginType::TypePlayBackend:
         initPlayBackendPlugin ();
         break;
-    case PluginType::TypeLyricsLookup:
+    case PluginType::TypeMetadataLookup:
         initLyricsLookupPlugin ();
         break;
     case PluginType::TypeMusicTagParser:
@@ -242,20 +242,20 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
             }
         }
     }
-    if (type == PluginType::TypeLyricsLookup) {
+    if (type == PluginType::TypeMetadataLookup) {
         if (newPluginName.toLower ()
-                == mCurrentPluginName[PluginType::TypeLyricsLookup].toLower ()) {
+                == mCurrentPluginName[PluginType::TypeMetadataLookup].toLower ()) {
             return;
         }
 
         qDebug() << "change lyricsLookup to " << newPluginName;
 
         for (int i=0; i<mLyricsList.size (); ++i) {
-            Lyrics::ILyricsLookup *interface = mLyricsList.at (i);
+            MetadataLookup::IMetadataLookup *interface = mLyricsList.at (i);
             QString name = interface->getPluginName ().toLower ();
             if (name == newPluginName.toLower ()) {
-                mCurrentPluginIndex[PluginType::TypeLyricsLookup] = i;
-                mCurrentPluginName[PluginType::TypeLyricsLookup] = name;
+                mCurrentPluginIndex[PluginType::TypeMetadataLookup] = i;
+                mCurrentPluginName[PluginType::TypeMetadataLookup] = name;
                 emit signalPluginChanged (type);
                 break;
             }
@@ -428,22 +428,22 @@ void PluginLoader::initLyricsLookupPlugin()
     }
     int index = 0;
     // dynamic plugins
-    qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypeLyricsLookup];
-    QDir dir(mPluginPath[PluginType::TypeLyricsLookup]);
+    qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypeMetadataLookup];
+    QDir dir(mPluginPath[PluginType::TypeMetadataLookup]);
     foreach (QString fileName, dir.entryList(QDir::Files)) {
         QPluginLoader loader(dir.absoluteFilePath(fileName));
         QObject *plugin = loader.instance();
         if (plugin) {
-            Lyrics::ILyricsLookup *lookup
-                    = qobject_cast<Lyrics::ILyricsLookup*>(plugin);
+            MetadataLookup::IMetadataLookup *lookup
+                    = qobject_cast<MetadataLookup::IMetadataLookup*>(plugin);
             if (lookup) {
                 mLyricsList.append (lookup);
                 //检测当前找到的插件是否是当前使用的插件
                 QString name = lookup->getPluginName ().toLower ();
-                if (name == mCurrentPluginName[PluginType::TypeLyricsLookup]
+                if (name == mCurrentPluginName[PluginType::TypeMetadataLookup]
                         .toLower ()) {
-                    mCurrentPluginIndex[PluginType::TypeLyricsLookup] = index;
-                    mCurrentPluginName[PluginType::TypeLyricsLookup] = name;
+                    mCurrentPluginIndex[PluginType::TypeMetadataLookup] = index;
+                    mCurrentPluginName[PluginType::TypeMetadataLookup] = name;
                 }
                 index++;
             }
@@ -455,11 +455,11 @@ void PluginLoader::initLyricsLookupPlugin()
     qDebug()<<"Find LyricsLookup num "<<index;
 
     if (mLyricsList.isEmpty ()) {
-        mCurrentPluginIndex[PluginType::TypeLyricsLookup] = -1;
-        mCurrentPluginName[PluginType::TypeLyricsLookup] = QString();
+        mCurrentPluginIndex[PluginType::TypeMetadataLookup] = -1;
+        mCurrentPluginName[PluginType::TypeMetadataLookup] = QString();
     } else { //得到第一个插件
-        mCurrentPluginIndex[PluginType::TypeLyricsLookup] = 0;
-        mCurrentPluginName[PluginType::TypeLyricsLookup]
+        mCurrentPluginIndex[PluginType::TypeMetadataLookup] = 0;
+        mCurrentPluginName[PluginType::TypeMetadataLookup]
                 = mLyricsList.at (0)->getPluginName ().toLower ();
     }
 }

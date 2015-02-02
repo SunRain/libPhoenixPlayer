@@ -3,22 +3,22 @@
 
 #include <QObject>
 
-#include "Lyrics/ILyricsLookup.h"
+#include "MetadataLookup/IMetadataLookup.h"
 
 class QTextCodec;
 namespace PhoenixPlayer{
 class SongMetaData;
-namespace Lyrics {
+namespace MetadataLookup {
 class BaseNetworkLookup;
 namespace BaiduLookup {
 
 #define PLUGIN_NAME "BaiduLyricsLookup"
 #define PLUGIN_VERSION "0.1"
-class BaiduLookup : public ILyricsLookup/*, BaseNetworkLookup*/
+class BaiduLookup : public IMetadataLookup
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PhoenixPlayer.Lyrics.BaiduLookup" FILE "lyricsbaidu.json")
-    Q_INTERFACES(PhoenixPlayer::Lyrics::ILyricsLookup)
+    Q_PLUGIN_METADATA(IID "PhoenixPlayer.MetadataLookup.BaiduLyricsLookup" FILE "lyricsbaidu.json")
+    Q_INTERFACES(PhoenixPlayer::MetadataLookup::IMetadataLookup)
 public:
     BaiduLookup(QObject *parent = 0);
     ~BaiduLookup();
@@ -31,7 +31,7 @@ public:
     QString getPluginName();
     QString getPluginVersion();
     void lookup(SongMetaData *meta);
-
+    bool supportLookup(LookupType type);
 
 private:
     QTextCodec *mGBKCodec;

@@ -4,7 +4,6 @@
 #include <QUrlQuery>
 #include <QDebug>
 
-#include "Lyrics/ILyricsLookup.h"
 #include "BaiduLookup.h"
 #include "SongMetaData.h"
 #include "Common.h"
@@ -12,16 +11,18 @@
 
 namespace PhoenixPlayer{
 class SongMetaData;
-namespace Lyrics {
+namespace MetadataLookup {
 namespace BaiduLookup {
 
 BaiduLookup::BaiduLookup(QObject *parent)
-    : ILyricsLookup(parent)/*, BaseNetworkLookup(parent)*/
+    : IMetadataLookup(parent)/*, BaseNetworkLookup(parent)*/
 {
      mGBKCodec = QTextCodec::codecForName("GBK");
      mMeta = new SongMetaData(this);
      mLrcidDL = new BaseNetworkLookup(this);
      mLyricsDL = new BaseNetworkLookup(this);
+
+     this->setCurrentLookupFlag (IMetadataLookup::LookupType::TypeLyrics);
 
      //搜索lrcid错误
      connect (mLrcidDL,
@@ -58,6 +59,7 @@ BaiduLookup::BaiduLookup(QObject *parent)
          mLyricsDL->startLookup ();
      });
 
+     //下载lyrics失败
      connect (mLyricsDL,
               &BaseNetworkLookup::failed,
               [this](const QUrl &requestedUrl, const QString &error) {
@@ -66,6 +68,7 @@ BaiduLookup::BaiduLookup(QObject *parent)
          emit lookupFailed ();
      });
 
+     //下载lyrics成功
      connect (mLyricsDL,
               &BaseNetworkLookup::succeed,
               [this](const QUrl &requestedUrl, const QByteArray &replyData) {
@@ -75,7 +78,7 @@ BaiduLookup::BaiduLookup(QObject *parent)
              emit lookupFailed ();
              return;
          }
-         emit lookupSucceed (mGBKCodec->toUnicode (replyData));
+         emit lookupSucceed (mGBKCodec->toUnicode (replyData).toUtf8 ());
      });
 }
 
@@ -137,6 +140,18 @@ void BaiduLookup::lookup(SongMetaData *meta)
     mLrcidDL->setUrl (getUrl ());
     mLrcidDL->setRequestType (BaseNetworkLookup::RequestType::RequestGet);
     mLrcidDL->startLookup ();
+}
+
+bool BaiduLookup::supportLookup(IMetadataLookup::LookupType type)
+{
+    switch (type) {
+    case LookupType::TypeUndefined:
+        return true;
+    case LookupType::TypeLyrics:
+        return true;
+    default:
+        return false;
+    }
 }
 
 } //BaiduLookup

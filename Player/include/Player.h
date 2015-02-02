@@ -24,8 +24,8 @@ namespace MusicLibrary {
 class MusicLibraryManager;
 }
 
-namespace Lyrics {
-class LyricsManager;
+namespace MetadataLookup {
+class MetadataLookupManager;
 }
 
 class Player : public QObject
@@ -103,7 +103,7 @@ private:
     QPointer<PluginLoader> mPluginLoader;
     QPointer<PlayBackend::IPlayBackend> mPlayBackend;
     QPointer<MusicLibrary::MusicLibraryManager> mMusicLibraryManager;
-    QPointer<Lyrics::LyricsManager> mLyricsManager;
+    QPointer<MetadataLookup::MetadataLookupManager> mLyricsManager;
 
     Common::PlayMode mPlayMode;
     quint64 mCurrentSongLength;

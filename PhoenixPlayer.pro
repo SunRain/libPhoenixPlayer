@@ -18,14 +18,14 @@ player.file = Player/Player.pro
 player.depends = common musiclibrarycore
 SUBDIRS += player
 
-lyricscore.file = Lyrics/Core/LyricsCore.pro
-lyricscore.depends = common
-SUBDIRS += lyricscore
+metadatalookupcore.file = MetadataLookup/Core/MetadataLookupCore.pro
+metadatalookupcore.depends = common
+SUBDIRS += metadatalookupcore
 
 SUBDIRS += \
     Backend \
     MusicLibrary \
-    Lyrics \
+    MetadataLookup \
     Plugins \
 #    Player \
 #    Common \

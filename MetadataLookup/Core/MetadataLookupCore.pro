@@ -7,7 +7,7 @@ QT += network
 CONFIG += c++11
 
 include (../../Common/sdk.pri)
-include (LyricsCore.pri)
+include (MetadataLookupCore.pri)
 
 
 INCLUDEPATH += \

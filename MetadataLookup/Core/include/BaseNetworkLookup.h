@@ -7,7 +7,7 @@ class QNetworkAccessManager;
 class QByteArray;
 
 namespace PhoenixPlayer {
-namespace Lyrics {
+namespace MetadataLookup {
 
 class BaseNetworkLookup : public QObject
 {

@@ -5,7 +5,7 @@
 #include <QTime>
 
 namespace PhoenixPlayer {
-namespace Lyrics {
+namespace MetadataLookup {
 
 struct QLyrics
 {

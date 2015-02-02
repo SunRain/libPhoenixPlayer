@@ -24,7 +24,7 @@ CONFIG += ordered
 #    Plugins
 
 baidu.file = Plugin/Baidu/Baidu.pro
-baidu.depends = common lyricscore
+baidu.depends = common metadatalookupcore
 SUBDIRS += baidu
 
 

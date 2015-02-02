@@ -6,7 +6,7 @@
 #include "LyricsParser.h"
 
 namespace PhoenixPlayer {
-namespace Lyrics {
+namespace MetadataLookup {
 
 QLyricsList LyricParser::parserLyrics(const QString &lyricsStr)
 {

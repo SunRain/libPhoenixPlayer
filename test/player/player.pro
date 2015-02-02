@@ -53,6 +53,6 @@ include(deployment.pri)
 include(../../Common/Common.pri)
 include(../../MusicLibrary/Core/MusicLibraryCore.pri)
 include(../../Player/Player.pri)
-include (../../Lyrics/Core/LyricsCore.pri)
+include (../../MetadataLookup/Core/MetadataLookupCore.pri)
 include (../../Plugins/QML/qml.pri)
 

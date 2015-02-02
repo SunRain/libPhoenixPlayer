@@ -1,5 +1,5 @@
-#ifndef LYRICSMANAGER_H
-#define LYRICSMANAGER_H
+#ifndef METADATALOOKUPMANAGER_H
+#define METADATALOOKUPMANAGER_H
 
 #include <QObject>
 #include <QStringList>
@@ -10,15 +10,15 @@ namespace PhoenixPlayer {
 
 class SongMetaData;
 class PluginLoader;
-namespace Lyrics {
+namespace MetadataLookup {
 
-class ILyricsLookup;
-class LyricsManager : public QObject
+class IMetadataLookup;
+class MetadataLookupManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit LyricsManager(QObject *parent = 0);
-    virtual ~LyricsManager();
+    explicit MetadataLookupManager(QObject *parent = 0);
+    virtual ~MetadataLookupManager();
 
     void lookup(SongMetaData *data);
     void setPluginLoader(PluginLoader *loader);
@@ -31,7 +31,7 @@ public slots:
 private:
     QPointer<PluginLoader> mPluginLoader;
     //QList<ILyricsLookup *> mPluginList;
-    ILyricsLookup *mLookup;
+    IMetadataLookup *mLookup;
     QStringList mPluginNameList;
     SongMetaData *mSongMeta;
     int mCurrentIndex;
@@ -39,7 +39,7 @@ private:
 };
 
 
-} //Lyrics
+} //MetadataLookup
 } //PhoenixPlayer
 
-#endif // LYRICSMANAGER_H
+#endif // METADATALOOKUPMANAGER_H

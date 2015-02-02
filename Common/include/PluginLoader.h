@@ -17,8 +17,8 @@ class IPlayListDAO;
 class IMusicTagParser;
 }
 
-namespace Lyrics {
-class ILyricsLookup;
+namespace MetadataLookup {
+class IMetadataLookup;
 }
 class PluginLoader : public QObject
 {
@@ -32,7 +32,7 @@ public:
         TypePlayBackend,            //播放后端
         TypePlayListDAO,            //音乐库存储后端
         TypeMusicTagParser,         //音乐Tag解析
-        TypeLyricsLookup,           //Lyrics查询
+        TypeMetadataLookup,           //metadata查询
         TypeLastFlag                //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
     };
     static PluginLoader *getInstance();
@@ -65,7 +65,7 @@ public:
     /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
     /// \return
     ///
-    Lyrics::ILyricsLookup *getCurrentLyricsLookup();
+    MetadataLookup::IMetadataLookup *getCurrentLyricsLookup();
 
     ///
     /// \brief getPluginNames 返回当前所有插件的名称列表
@@ -100,7 +100,7 @@ private:
       QList <PlayBackend::IPlayBackend*> mPlayBackendList;
       QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
       QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;
-      QList <Lyrics::ILyricsLookup*> mLyricsList;
+      QList <MetadataLookup::IMetadataLookup*> mLyricsList;
 
       QHash<PluginType, int> mCurrentPluginIndex;
       QHash<PluginType, QString> mCurrentPluginName;
