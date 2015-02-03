@@ -71,7 +71,7 @@ void PluginLoader::setPluginPath(PluginLoader::PluginType type, const QString &p
 {
     if (type == PluginType::TypeAll) {
         for (int i = (int)PluginType::TypePlayBackend;
-             i <= (int)PluginType::TypePlayListDAO;
+             i < (int)PluginType::TypeLastFlag;
              i++) {
             mPluginPath[type] = path;
         }
