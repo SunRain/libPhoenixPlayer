@@ -35,7 +35,7 @@ PluginLoader::PluginLoader(QObject *parent)
         mCurrentPluginName.insert(PluginType(i), QString());
     }
 
-    initPlugins (PluginType::TypeAll);
+//    initPlugins (PluginType::TypeAll);
 }
 
 PluginLoader::~PluginLoader()
@@ -69,11 +69,15 @@ PluginLoader::~PluginLoader()
 
 void PluginLoader::setPluginPath(PluginLoader::PluginType type, const QString &path)
 {
+    qDebug()<<"PluginLoader setPluginPath "<<path<<" for "<<type;
+
     if (type == PluginType::TypeAll) {
         for (int i = (int)PluginType::TypePlayBackend;
              i < (int)PluginType::TypeLastFlag;
-             i++) {
+             ++i) {
             mPluginPath[type] = path;
+
+            qDebug()<<"PluginLoader setPluginPath "<<path<<" for "<<type;
         }
     } else {
         mPluginPath[type] = path;

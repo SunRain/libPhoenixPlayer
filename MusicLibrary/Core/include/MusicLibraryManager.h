@@ -28,7 +28,8 @@ public:
     static MusicLibraryManager *getInstance();
 
     void setSettings(Settings *settings = 0);
-
+    void setPluginLoader(PluginLoader *loader = 0);
+    bool init();
     ///
     /// \brief scanLocalMusic 搜索本地音乐文件
     /// \return
@@ -121,8 +122,8 @@ public:
                                         const QString &songHash,
                                         bool deleteFromStorage = false);
 
-protected:
-    bool init();
+//protected:
+//    bool init();
 
 signals:
     void searching (QString path, QString file, qint64 size);

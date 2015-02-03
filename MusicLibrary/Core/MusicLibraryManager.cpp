@@ -23,14 +23,19 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     mDiskLooKupThread = 0;
     mDiskLooKup = 0;
     //mDAOLoader = 0;
-    mPluginLoader = PhoenixPlayer::PluginLoader::getInstance ();
+
+    qDebug() <<"xxxxxxxxxxxxxxxxxxx ";
+
+    mPluginLoader = 0;// PhoenixPlayer::PluginLoader::getInstance ();
+
+    qDebug() <<"xwwwwwwwwwwwwwwwwwwwwwwxx ";
     mPlayListDAO = 0;
     mTagParserManager = 0;
     mTagParserThread = 0;
     mCurrentSongHash = QString();
     mCurrentPlayListHash = QString();
 
-    init();
+//    init();
 }
 
 MusicLibraryManager::~MusicLibraryManager()
@@ -71,9 +76,18 @@ MusicLibraryManager *MusicLibraryManager::getInstance()
 
 void MusicLibraryManager::setSettings(Settings *settings)
 {
+    qDebug()<<"MusicLibraryManager::setSettings "<<(settings == nullptr);
     mSettings = settings;
     mCurrentSongHash = mSettings->getLastPlayedSong ();
     mCurrentPlayListHash = mSettings->getPlayListHash ();
+
+    qDebug()<<"MusicLibraryManager::setSettings "<<mCurrentSongHash
+           <<"  "<<mCurrentPlayListHash;
+}
+
+void MusicLibraryManager::setPluginLoader(PluginLoader *loader)
+{
+    mPluginLoader = loader;
 }
 
 bool MusicLibraryManager::scanLocalMusic()
@@ -273,6 +287,8 @@ bool MusicLibraryManager::deleteFromPlayList(
 
 bool MusicLibraryManager::init()
 {
+    qDebug()<<"========= init";
+
     //本地歌曲扫描线程
     if (mDiskLooKupThread.isNull ())
         mDiskLooKupThread = new QThread(this);
@@ -345,6 +361,8 @@ bool MusicLibraryManager::init()
 //    //发送一个songhash change的信号,以便于qml界面在初始化后刷新
 //    emit playingSongChanged ();
 //    emit playListChanged ();
+
+    qDebug()<<"========= after init";
 
     return true;
 }
