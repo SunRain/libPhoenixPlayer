@@ -13,6 +13,7 @@
 #include <taglib/vorbisfile.h>
 #include <taglib/wavpackfile.h>
 
+
 #include "MusicLibrary/IMusicTagParser.h"
 
 class QImage;
