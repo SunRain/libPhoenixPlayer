@@ -21,10 +21,6 @@ public:
     explicit MetadataLookupManager(QObject *parent = 0);
     virtual ~MetadataLookupManager();
 
-//    ///
-//    /// \brief reset 将
-//    ///
-//    void reset();
     void lookup(SongMetaData *data, IMetadataLookup::LookupType type);
     void setPluginLoader(PluginLoader *loader);
 

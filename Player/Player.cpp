@@ -337,8 +337,6 @@ int Player::getSongLength(const QString &hash)
 void Player::metadataLookup(const QString &songHash,
                             MetadataLookup::IMetadataLookup::LookupType type)
 {
-    qDebug()<<__FUNCTION__;
-
     if (!PointerValid (EPointer::PPluginLoader))
         return;
 
@@ -347,46 +345,38 @@ void Player::metadataLookup(const QString &songHash,
 
         mMetaLookupManager = new MetadataLookup::MetadataLookupManager(this);
         mMetaLookupManager.data ()->setPluginLoader (mPluginLoader);
-    } /*else {
-        //TODO 代码未测试,是否会在转换查询类型的时候出错
-        mMetaLookupManager.data ()->reset ();
-    }*/
 
-    qDebug()<<"We will try to lookup metadata ["<<type<<"] for song "<<songHash;
+        connect (mMetaLookupManager.data (),
+                 &MetadataLookup::MetadataLookupManager::lookupFailed,
+                 [this] {
+            emitMetadataLookupResult (MetadataLookup::IMetadataLookup::TypeUndefined, false);
+        });
 
-    connect (mMetaLookupManager.data (),
-             &MetadataLookup::MetadataLookupManager::lookupFailed,
-             [this] {
-        qDebug()<<"We can't find metadata for this song";
+        connect (mMetaLookupManager.data (),
+                 &MetadataLookup::MetadataLookupManager::lookupSucceed,
+                 [this]
+                 (QString songHash,
+                 QByteArray result,
+                 MetadataLookup::IMetadataLookup::LookupType type) {
 
-        emitMetadataLookupResult (MetadataLookup::IMetadataLookup::TypeUndefined, false);
-    });
+            if (type == MetadataLookup::IMetadataLookup::TypeLyrics) {
+                //将lyric数据写入数据库中
+                SongMetaData meta;
+                meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
+                meta.setMeta (Common::SongMetaTags::E_Lyrics, result);
 
-    connect (mMetaLookupManager.data (),
-             &MetadataLookup::MetadataLookupManager::lookupSucceed,
-             [this]
-             (QString songHash,
-             QByteArray result,
-             MetadataLookup::IMetadataLookup::LookupType type) {
-        qDebug()<<"We had found metadata for this song ";
-
-        if (type == MetadataLookup::IMetadataLookup::TypeLyrics) {
-            //将lyric数据写入数据库中
-            SongMetaData meta;
-            meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
-            meta.setMeta (Common::SongMetaTags::E_Lyrics, result);
-
-            //TODO 也许通过MusicLibraryManager来管理会更好
-            if (PointerValid (EPointer::PPluginLoader)) {
-                MusicLibrary::IPlayListDAO *dao =
-                        mPluginLoader.data ()->getCurrentPlayListDAO ();
-                if (dao)
-                    dao->updateMetaData (&meta, true);
+                //TODO 也许通过MusicLibraryManager来管理会更好
+                if (PointerValid (EPointer::PPluginLoader)) {
+                    MusicLibrary::IPlayListDAO *dao =
+                            mPluginLoader.data ()->getCurrentPlayListDAO ();
+                    if (dao)
+                        dao->updateMetaData (&meta, true);
+                }
             }
-        }
-        emitMetadataLookupResult (type, true);
-    });
+            emitMetadataLookupResult (type, true);
+        });
 
+    }
     SongMetaData data;
     QString hash = songHash;
     if (hash.isEmpty ())
