@@ -21,10 +21,10 @@ public:
     explicit MetadataLookupManager(QObject *parent = 0);
     virtual ~MetadataLookupManager();
 
-    ///
-    /// \brief reset 将
-    ///
-    void reset();
+//    ///
+//    /// \brief reset 将
+//    ///
+//    void reset();
     void lookup(SongMetaData *data, IMetadataLookup::LookupType type);
     void setPluginLoader(PluginLoader *loader);
 
@@ -48,7 +48,7 @@ private:
 private:
     QPointer<PluginLoader> mPluginLoader;
     //QList<ILyricsLookup *> mPluginList;
-    IMetadataLookup *mLookup;
+    QPointer<IMetadataLookup> mLookup;
     IMetadataLookup *mBackupLookup;
     QStringList mPluginNameList;
 //    SongMetaData *mSongMeta;

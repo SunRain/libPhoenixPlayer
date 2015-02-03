@@ -130,6 +130,10 @@ QString BaiduLookup::getPluginVersion()
 
 void BaiduLookup::lookup(SongMetaData *meta)
 {
+    if (meta == nullptr) {
+        qDebug()<<"[BaiduLookup] No meta found";
+        return;
+    }
     for (int i = (int)(Common::SongMetaTags::E_FirstFlag) +1;
          i < (int)Common::SongMetaTags::E_LastFlag;
          ++i) {
