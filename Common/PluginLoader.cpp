@@ -27,7 +27,7 @@ PluginLoader::PluginLoader(QObject *parent)
     QString path = QString("%1/plugins").arg(QCoreApplication::applicationDirPath());
 
     //初始化一个空容器
-    for (int i = (int)PluginType::TypePlayBackend;
+    for (int i = (int)PluginType::TypeAll + 1;
          i < (int)PluginType::TypeLastFlag;
          ++i) {
         mPluginPath.insert (PluginType(i), path);

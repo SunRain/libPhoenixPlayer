@@ -1,6 +1,7 @@
 
 #include <QFile>
 #include <QImage>
+#include <QDebug>
 
 #include "TagParserPro.h"
 #include "SongMetaData.h"
