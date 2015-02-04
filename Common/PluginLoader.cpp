@@ -69,15 +69,11 @@ PluginLoader::~PluginLoader()
 
 void PluginLoader::setPluginPath(PluginLoader::PluginType type, const QString &path)
 {
-    qDebug()<<"PluginLoader setPluginPath "<<path<<" for "<<type;
-
     if (type == PluginType::TypeAll) {
-        for (int i = (int)PluginType::TypePlayBackend;
+        for (int i = (int)PluginType::TypeAll + 1;
              i < (int)PluginType::TypeLastFlag;
              ++i) {
-            mPluginPath[type] = path;
-
-            qDebug()<<"PluginLoader setPluginPath "<<path<<" for "<<type;
+            mPluginPath[PluginType(i)] = path;
         }
     } else {
         mPluginPath[type] = path;
