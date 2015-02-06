@@ -23,12 +23,7 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     mDiskLooKupThread = 0;
     mDiskLooKup = 0;
     //mDAOLoader = 0;
-
-    qDebug() <<"xxxxxxxxxxxxxxxxxxx ";
-
-    mPluginLoader = 0;// PhoenixPlayer::PluginLoader::getInstance ();
-
-    qDebug() <<"xwwwwwwwwwwwwwwwwwwwwwwxx ";
+    mPluginLoader = 0;
     mPlayListDAO = 0;
     mTagParserManager = 0;
     mTagParserThread = 0;
@@ -76,13 +71,9 @@ MusicLibraryManager *MusicLibraryManager::getInstance()
 
 void MusicLibraryManager::setSettings(Settings *settings)
 {
-    qDebug()<<"MusicLibraryManager::setSettings "<<(settings == nullptr);
     mSettings = settings;
     mCurrentSongHash = mSettings->getLastPlayedSong ();
     mCurrentPlayListHash = mSettings->getPlayListHash ();
-
-    qDebug()<<"MusicLibraryManager::setSettings "<<mCurrentSongHash
-           <<"  "<<mCurrentPlayListHash;
 }
 
 void MusicLibraryManager::setPluginLoader(PluginLoader *loader)
@@ -287,8 +278,6 @@ bool MusicLibraryManager::deleteFromPlayList(
 
 bool MusicLibraryManager::init()
 {
-    qDebug()<<"========= init";
-
     //本地歌曲扫描线程
     if (mDiskLooKupThread.isNull ())
         mDiskLooKupThread = new QThread(this);
