@@ -38,6 +38,8 @@ inline static void qCallOnce(Function func, QBasicAtomicInt& flag)
     int protectFlag = flag.fetchAndStoreAcquire(flag.load());
 #endif
 
+   qDebug()<<"protectFlag is "<<protectFlag;
+
     if (protectFlag == CO_Finished)
         return;
     if (protectFlag == CO_Request && flag.testAndSetRelaxed(protectFlag,
@@ -80,6 +82,7 @@ public:
     }
     static void init()
     {
+        qDebug()<<"SingletonPointer init";
         tptr.reset(new T);
     }
 

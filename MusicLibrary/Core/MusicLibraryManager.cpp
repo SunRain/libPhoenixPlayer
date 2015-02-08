@@ -28,6 +28,8 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     mTagParserManager = 0;
     mTagParserThread = 0;
 
+    qDebug()<<__FUNCTION__;
+
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
     mSettings = SingletonPointer<Settings>::instance ();
     mCurrentSongHash = QString();
