@@ -12,6 +12,8 @@ HEADERS += \
     $$PWD/include/MusicLibrary/IMusicTagParser.h \
     $$PWD/include/PluginLoader.h \
     $$PWD/include/MetadataLookup/IMetadataLookup.h \
+    $$PWD/include/SingletonPointer_sf.h \
+    $$PWD/include/SingletonPointer_p.h \
     $$PWD/include/SingletonPointer.h
 
 SOURCES += \
