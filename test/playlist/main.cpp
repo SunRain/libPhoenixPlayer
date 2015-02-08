@@ -23,9 +23,12 @@ int main(int argc, char *argv[])
 //    SingletonPointer<Settings> s;
 //    Settings *settings = s.getInstance ();
 
-    SingletonPointer<MusicLibrary::MusicLibraryManager> m;
-    MusicLibrary::MusicLibraryManager *manager = m.getInstance ();
+//    SingletonPointer<MusicLibrary::MusicLibraryManager> m;
+//    MusicLibrary::MusicLibraryManager *manager = m.getInstance ();
 //    manager->initSettings (settings);
+
+    MusicLibrary::MusicLibraryManager *manager
+            = SingletonPointer<MusicLibrary::MusicLibraryManager>::instance ();
 
     Common c;
 

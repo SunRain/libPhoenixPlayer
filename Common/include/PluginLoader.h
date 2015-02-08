@@ -95,7 +95,7 @@ private:
      void initPlayBackendPlugin();
      void initPlayListDaoPlugin();
      void initMusicTagParserPlugin();
-     void initLyricsLookupPlugin();
+     void initMetadataLookupPlugin();
 private:
      bool isInit;
       QList <PlayBackend::IPlayBackend*> mPlayBackendList;

@@ -5,6 +5,7 @@
 
 class QNetworkAccessManager;
 class QByteArray;
+class QNetworkReply;
 
 namespace PhoenixPlayer {
 namespace MetadataLookup {
@@ -19,7 +20,7 @@ public:
     };
 
     explicit BaseNetworkLookup(QObject *parent = 0);
-    ~BaseNetworkLookup();
+    virtual ~BaseNetworkLookup();
 
 //    virtual QString getUrl() = 0;
 //    virtual RequestType getRequestType() = 0;
@@ -35,6 +36,7 @@ private:
     QNetworkAccessManager *mNetwork;
     QString mUrl;
     RequestType mRequestType;
+    QNetworkReply *mReply;
 };
 } //Lyrics
 } //PhoenixPlayer

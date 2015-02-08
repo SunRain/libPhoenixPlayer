@@ -23,6 +23,7 @@ TagParserPro::TagParserPro(QObject *parent)
 
 TagParserPro::~TagParserPro()
 {
+    qDebug()<<__FUNCTION__;
     if (mTagRef != nullptr) {
         delete mTagRef;
         mTagRef = nullptr;
@@ -99,7 +100,8 @@ bool TagParserPro::parserTag(SongMetaData *targetMetaDate)
     //get cover image
     QImage image = getImage ();
     if (!image.isNull ()) {
-        SingletonPointer<Settings> s;
+//        SingletonPointer<Settings> s;
+        Settings *s = SingletonPointer<Settings>::instance ();
         QString imagePath = s->getMusicImageCachePath ();
         QString tmp = name;
         tmp = tmp.mid (0, tmp.lastIndexOf ("."));

@@ -28,12 +28,15 @@ Player::Player(QObject *parent)
 {
     mPlayBackend = 0;
 
-    SingletonPointer<PluginLoader> p;
-    mPluginLoader =  p.getInstance ();
-    SingletonPointer<Settings> s;
-    mSettings = s.getInstance ();
-    SingletonPointer<MusicLibraryManager> m;
-    mMusicLibraryManager = m.getInstance ();
+//    SingletonPointer<PluginLoader> p;
+//    mPluginLoader =  p.getInstance ();
+    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+//    SingletonPointer<Settings> s;
+//    mSettings = s.getInstance ();
+    mSettings = SingletonPointer<Settings>::instance ();
+//    SingletonPointer<MusicLibraryManager> m;
+//    mMusicLibraryManager = m.getInstance ();
+    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
 
     mMetaLookupManager = new MetadataLookupManager(this);
 
@@ -47,7 +50,7 @@ Player::~Player()
 {
     qDebug()<<"[Player]"<<__FUNCTION__;
     if (mMetaLookupManager)
-        mMetaLookupManager->deleteLater ();
+        delete mMetaLookupManager;
     qDebug()<<"[Player] after "<<__FUNCTION__;
 }
 

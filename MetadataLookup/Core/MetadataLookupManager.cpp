@@ -13,8 +13,9 @@ namespace MetadataLookup {
 
 MetadataLookupManager::MetadataLookupManager(QObject *parent) : QObject(parent)
 {
-    SingletonPointer<PluginLoader> s;
-    mPluginLoader = s.getInstance ();
+//    SingletonPointer<PluginLoader> s;
+//    mPluginLoader = s.getInstance ();
+    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
 
     initPlugins ();
 }
@@ -26,25 +27,21 @@ MetadataLookupManager::~MetadataLookupManager()
     if (!mWorkQueue.isEmpty ()) {
         qDebug()<<"Delete work queue";
         foreach (WorkNode node, mWorkQueue) {
-            if (node.data)
-                node.data->deleteLater ();
+            if (node.data) {
+                delete node.data;
+                node.data = nullptr;
+            }
         }
         mWorkQueue.clear ();
     }
-    if (mCurrentNode.data)
-        mCurrentNode.data->deleteLater ();
 
     if (!mPluginNameList.isEmpty ())
         mPluginNameList.clear ();
 
     if (!mLookup.isNull ()) {
-        mLookup.data ()->deleteLater ();
+        delete mLookup.data ();
         mLookup.clear ();
     }
-
-    if (mBackupLookup)
-        mBackupLookup->deleteLater ();
-
     qDebug()<<"after "<<__FUNCTION__;
 }
 

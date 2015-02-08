@@ -14,12 +14,22 @@ namespace MetadataLookup {
 BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
 {
     mNetwork = new QNetworkAccessManager(this);
+    mReply = nullptr;
 }
 
 BaseNetworkLookup::~BaseNetworkLookup()
 {
+    qDebug()<<__FUNCTION__;
+
+    if (mReply) {
+        mReply->abort ();
+        mReply->deleteLater ();
+    }
+
     if (mNetwork != nullptr)
         mNetwork->deleteLater ();
+
+     qDebug()<<"after"<<__FUNCTION__;
 }
 
 void BaseNetworkLookup::setUrl(const QString &url)
@@ -44,13 +54,11 @@ bool BaseNetworkLookup::startLookup()
     if (url.isEmpty ())
         return false;
 
-    QNetworkReply *reply = nullptr;
-
     switch (mRequestType) {
     case RequestType::RequestGet: {
         qDebug()<<"Get "<< url.toString ();
         QNetworkRequest request(url);
-        reply = mNetwork->get (request);
+        mReply = mNetwork->get (request);
         break;
     }
     case RequestType::RequestPut: {
@@ -63,42 +71,42 @@ bool BaseNetworkLookup::startLookup()
         qDebug("post data [%s] to [%s]",
                qba.constData(),
                url.toString().toLocal8Bit().constData());
-        reply = mNetwork->post (request, qba);
+        mReply = mNetwork->post (request, qba);
         break;
     }
     default:
         break;
     }
 
-    if (reply) {
+    if (mReply) {
         //请求成功
-        connect (reply,
+        connect (mReply,
                  &QNetworkReply::finished,
-                 [this, reply]() {
+                 [this]() {
             qDebug()<<"===  BaseNetworkLookup  finished";
-            QNetworkReply::NetworkError error = reply->error ();
+            QNetworkReply::NetworkError error = mReply->error ();
             if (error != QNetworkReply::NetworkError::NoError)
                 return;
 
             qDebug()<<"===  BaseNetworkLookup  succeed";
 
-            QByteArray qba = reply->readAll ();
-            emit succeed (reply->request ().url (), qba);
-            reply->deleteLater ();
+            QByteArray qba = mReply->readAll ();
+            emit succeed (mReply->request ().url (), qba);
+            mReply->deleteLater ();
 
         });
 
         //请求失败
-        connect (reply,
+        connect (mReply,
                  //解决信号和方法函数重载问题
                  static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-                 [this, reply](QNetworkReply::NetworkError error) {
+                 [this](QNetworkReply::NetworkError error) {
             Q_UNUSED(error)
 
-             qDebug()<<"===  BaseNetworkLookup  error "<<reply->errorString ();
+             qDebug()<<"===  BaseNetworkLookup  error "<<mReply->errorString ();
 
-            emit failed (reply->request ().url (), reply->errorString ());
-             reply->deleteLater ();
+            emit failed (mReply->request ().url (), mReply->errorString ());
+             mReply->deleteLater ();
 
         });
         return true;

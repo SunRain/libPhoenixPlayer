@@ -33,13 +33,15 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<QmlPlugin::LyricsModel>("com.sunrain.qmlplugin", 1, 0, "LyricsModel");
 
-    SingletonPointer<PluginLoader> p;
-    PluginLoader *loader = p.getInstance ();
+//    SingletonPointer<PluginLoader> p;
+//    PluginLoader *loader = p.getInstance ();
+    PluginLoader *loader = SingletonPointer<PluginLoader>::instance ();
     loader->setNewPlugin (PluginLoader::TypePlayBackend, "GStreamerBackend");
     loader->setParent (a.data ());
 
-    SingletonPointer<MusicLibraryManager> m;
-    MusicLibraryManager *manager = m.getInstance ();
+//    SingletonPointer<MusicLibraryManager> m;
+//    MusicLibraryManager *manager = m.getInstance ();
+    MusicLibraryManager *manager = SingletonPointer<MusicLibraryManager>::instance ();
     manager->setParent (a.data ());
 
     QScopedPointer<Player> musicPlayer(new Player(a.data ()));

@@ -2,6 +2,7 @@
 #define IMETADATALOOKUP
 
 #include <QObject>
+#include <QDebug>
 class QByteArray;
 
 namespace PhoenixPlayer{
@@ -23,6 +24,10 @@ public:
 
     explicit IMetadataLookup(QObject *parent = 0) : QObject(parent) {
         mType = LookupType::TypeUndefined;
+    }
+
+    virtual ~IMetadataLookup() {
+        qDebug()<<__FUNCTION__;
     }
 
     virtual QString getPluginName() = 0;

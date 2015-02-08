@@ -21,7 +21,7 @@ class BaiduLookup : public IMetadataLookup
     Q_INTERFACES(PhoenixPlayer::MetadataLookup::IMetadataLookup)
 public:
     BaiduLookup(QObject *parent = 0);
-    ~BaiduLookup();
+    virtual ~BaiduLookup();
 
 public:
     QString getUrl();

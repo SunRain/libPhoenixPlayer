@@ -24,8 +24,9 @@ namespace MusicLibrary {
 TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
 {
     mCurrentIndex = -1;
-    SingletonPointer<PluginLoader> s;
-    mPluginLoader = s.getInstance ();
+//    SingletonPointer<PluginLoader> s;
+//    mPluginLoader = s.getInstance ();
+    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
     setPluginLoader ();
 }
 

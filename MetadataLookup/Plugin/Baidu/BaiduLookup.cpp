@@ -84,14 +84,18 @@ BaiduLookup::BaiduLookup(QObject *parent)
 
 BaiduLookup::~BaiduLookup()
 {
-    if (mMeta != nullptr)
-        mMeta->deleteLater ();
+    qDebug()<<__FUNCTION__;
+//    if (mMeta != nullptr)
+//        mMeta->deleteLater ();
 
-    if (mLrcidDL != nullptr)
-        mLrcidDL->deleteLater ();
+//    if (mLrcidDL != nullptr) {
+//        mLrcidDL->deleteLater ();
+//    }
 
-    if (mLyricsDL != nullptr)
-        mLyricsDL->deleteLater ();
+//    if (mLyricsDL != nullptr)
+//        mLyricsDL->deleteLater ();
+
+//    qDebug()<<"after"<<__FUNCTION__;
 }
 
 QString BaiduLookup::getUrl()

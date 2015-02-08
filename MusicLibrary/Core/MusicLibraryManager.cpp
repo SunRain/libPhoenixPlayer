@@ -28,12 +28,8 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     mTagParserManager = 0;
     mTagParserThread = 0;
 
-    //mDAOLoader = 0;
-    SingletonPointer<PluginLoader> p;
-    mPluginLoader =  p.getInstance ();
-//    SingletonPointer<Settings> s;
-//    mSettings = s.getInstance ();
-    mSettings = new Settings(this);
+    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+    mSettings = SingletonPointer<Settings>::instance ();
     mCurrentSongHash = QString();
     mCurrentPlayListHash = QString();
 
@@ -56,14 +52,14 @@ MusicLibraryManager::~MusicLibraryManager()
 
     if (!mDiskLooKupThread.isNull ()) {
         qDebug()<<"wait for DiskLooKupThread";
-        mDiskLooKupThread.data ()->quit ();
+//        mDiskLooKupThread.data ()->quit ();
         mDiskLooKupThread.data ()->wait (3 * 60 * 1000);
     }
     mDiskLooKupThread->deleteLater ();
 
     if (!mTagParserThread.isNull ()) {
         qDebug()<<"wait for TagParserThread";
-        mTagParserThread.data ()->quit ();
+//        mTagParserThread.data ()->quit ();
         mDiskLooKupThread.data ()->wait (3 * 60 * 1000);
     }
 

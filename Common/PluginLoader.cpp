@@ -13,6 +13,7 @@
 #include "MetadataLookup/IMetadataLookup.h"
 
 namespace PhoenixPlayer {
+using namespace MetadataLookup;
 
 PluginLoader::PluginLoader(QObject *parent)
     : QObject(parent)
@@ -50,10 +51,11 @@ PluginLoader::~PluginLoader()
     if (!mMusicTagParserList.isEmpty ())
         mMusicTagParserList.clear ();
 
-    qDeleteAll (mMetaLookupList);
-    if (!mMetaLookupList.isEmpty ())
-        mMetaLookupList.clear ();
-
+    //TODO:why this makes crash?
+//    qDeleteAll (mMetaLookupList);
+//    if (!mMetaLookupList.isEmpty ()) {
+//        mMetaLookupList.clear ();
+//    }
 
     if (!mCurrentPluginIndex.isEmpty ())
         mCurrentPluginIndex.clear ();
@@ -121,7 +123,7 @@ MusicLibrary::IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
     return mMusicTagParserList.at ((int)mCurrentPluginIndex[PluginType::TypeMusicTagParser]);
 }
 
-MetadataLookup::IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
+IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
 {
     if (mCurrentPluginIndex[PluginType::TypeMetadataLookup] < 0)
         return nullptr;
@@ -139,7 +141,7 @@ QStringList PluginLoader::getPluginNames(PluginLoader::PluginType type)
     QStringList list;
     switch (type) {
     case PluginType::TypeMetadataLookup: {
-        foreach (MetadataLookup::IMetadataLookup *lookup, mMetaLookupList) {
+        foreach (IMetadataLookup *lookup, mMetaLookupList) {
             list.append (lookup->getPluginName ());
         }
         break;
@@ -176,7 +178,7 @@ void PluginLoader::initPlugins(PluginType type)
         initPlayBackendPlugin ();
         break;
     case PluginType::TypeMetadataLookup:
-        initLyricsLookupPlugin ();
+        initMetadataLookupPlugin ();
         break;
     case PluginType::TypeMusicTagParser:
         initMusicTagParserPlugin ();
@@ -188,7 +190,7 @@ void PluginLoader::initPlugins(PluginType type)
         initPlayBackendPlugin ();
         initPlayListDaoPlugin ();
         initMusicTagParserPlugin ();
-        initLyricsLookupPlugin ();
+        initMetadataLookupPlugin ();
         break;
     }
     }
@@ -264,7 +266,7 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
         qDebug() << "change lyricsLookup to " << newPluginName;
 
         for (int i=0; i<mMetaLookupList.size (); ++i) {
-            MetadataLookup::IMetadataLookup *interface = mMetaLookupList.at (i);
+            IMetadataLookup *interface = mMetaLookupList.at (i);
             QString name = interface->getPluginName ().toLower ();
             if (name == newPluginName.toLower ()) {
                 mCurrentPluginIndex[PluginType::TypeMetadataLookup] = i;
@@ -433,7 +435,7 @@ void PluginLoader::initMusicTagParserPlugin()
     }
 }
 
-void PluginLoader::initLyricsLookupPlugin()
+void PluginLoader::initMetadataLookupPlugin()
 {
     if (!mMetaLookupList.isEmpty ()) {
         qDeleteAll(mMetaLookupList);
@@ -447,8 +449,7 @@ void PluginLoader::initLyricsLookupPlugin()
         QPluginLoader loader(dir.absoluteFilePath(fileName));
         QObject *plugin = loader.instance();
         if (plugin) {
-            MetadataLookup::IMetadataLookup *lookup
-                    = qobject_cast<MetadataLookup::IMetadataLookup*>(plugin);
+            IMetadataLookup *lookup = qobject_cast<IMetadataLookup*>(plugin);
             if (lookup) {
                 mMetaLookupList.append (lookup);
                 //检测当前找到的插件是否是当前使用的插件
@@ -465,7 +466,7 @@ void PluginLoader::initLyricsLookupPlugin()
         }
     }
 
-    qDebug()<<"Find LyricsLookup num "<<index;
+    qDebug()<<"Find MetadataLookup num "<<index;
 
     if (mMetaLookupList.isEmpty ()) {
         mCurrentPluginIndex[PluginType::TypeMetadataLookup] = -1;
