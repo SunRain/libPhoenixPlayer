@@ -6,17 +6,23 @@
 #include "MetadataLookup/IMetadataLookup.h"
 #include "PluginLoader.h"
 #include "SongMetaData.h"
+#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 namespace MetadataLookup {
 
 MetadataLookupManager::MetadataLookupManager(QObject *parent) : QObject(parent)
 {
+    SingletonPointer<PluginLoader> s;
+    mPluginLoader = s.getInstance ();
+
     initPlugins ();
 }
 
 MetadataLookupManager::~MetadataLookupManager()
 {
+    qDebug()<<__FUNCTION__;
+
     if (!mWorkQueue.isEmpty ()) {
         qDebug()<<"Delete work queue";
         foreach (WorkNode node, mWorkQueue) {
@@ -39,6 +45,7 @@ MetadataLookupManager::~MetadataLookupManager()
     if (mBackupLookup)
         mBackupLookup->deleteLater ();
 
+    qDebug()<<"after "<<__FUNCTION__;
 }
 
 //void MetadataLookupManager::reset()
@@ -69,43 +76,37 @@ void MetadataLookupManager::lookup(SongMetaData *data,
     processNext ();
 }
 
-void MetadataLookupManager::setPluginLoader(PluginLoader *loader)
-{
-    mPluginLoader = loader;
+//void MetadataLookupManager::setPluginLoader(PluginLoader *loader)
+//{
+//    mPluginLoader = loader;
 
-    initPlugins ();
-}
+//    initPlugins ();
+//}
 
 void MetadataLookupManager::nextLookupPlugin()
 {
     qDebug()<<__FUNCTION__;
 
     if (mCurrentIndex >= 0) { //如果存在其他插件
-        if (!mPluginLoader.isNull ()) {
-            if (mCurrentIndex < mPluginNameList.size ()) { //防止溢出
-                mPluginLoader.data ()
-                        ->setNewPlugin (PluginLoader::PluginType::TypeMetadataLookup,
-                                        mPluginNameList.at (mCurrentIndex));
-                //指向下一个插件
-                mCurrentIndex += 1;
-            } else {
-                //所有插件都使用过了
-                emit lookupFailed ();
-            }
+        if (mCurrentIndex < mPluginNameList.size ()) { //防止溢出
+            mPluginLoader->setNewPlugin (PluginLoader::PluginType::TypeMetadataLookup,
+                                    mPluginNameList.at (mCurrentIndex));
+            //指向下一个插件
+            mCurrentIndex += 1;
+        } else {
+            //所有插件都使用过了
+            emit lookupFailed ();
         }
+
     }
 }
 
 void MetadataLookupManager::initPlugins()
 {
-    if (mPluginLoader.isNull ())
-        return;
+    mPluginNameList = mPluginLoader->getPluginNames (PluginLoader::PluginType::TypeMetadataLookup);
 
-    mPluginNameList = mPluginLoader.data ()
-            ->getPluginNames (PluginLoader::PluginType::TypeMetadataLookup);
-
-     mLookup = mPluginLoader.data ()->getCurrentMetadataLookup ();
-     mBackupLookup = mPluginLoader.data ()->getCurrentMetadataLookup ();
+     mLookup = mPluginLoader->getCurrentMetadataLookup ();
+     mBackupLookup = mPluginLoader->getCurrentMetadataLookup ();
     //因为PluginLoader默认会返回第一个插件,
     //并且更改插件名字的时候,如果目标插件名和当前使用插件名相同,则不会发送更改的信号
     //所以先从插件列表里面取出当前使用的插件
@@ -121,11 +122,11 @@ void MetadataLookupManager::initPlugins()
         }
     }
 
-    connect (mPluginLoader.data (),
+    connect (mPluginLoader,
              &PluginLoader::signalPluginChanged,
              [this] (PluginLoader::PluginType type) {
         if (type == PluginLoader::PluginType::TypeMetadataLookup) {
-            mLookup = mPluginLoader.data ()->getCurrentMetadataLookup ();
+            mLookup = mPluginLoader->getCurrentMetadataLookup ();
             if (!mLookup.isNull ()) {
                 if (mLookup.data ()->supportLookup (mCurrentNode.type)) {
 

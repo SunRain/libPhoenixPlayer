@@ -35,7 +35,7 @@ public:
         TypeMetadataLookup,           //metadata查询
         TypeLastFlag                //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
     };
-    static PluginLoader *getInstance();
+//    static PluginLoader *getInstance();
     explicit PluginLoader(QObject *parent = 0);
     virtual ~PluginLoader();
 
@@ -97,6 +97,7 @@ private:
      void initMusicTagParserPlugin();
      void initLyricsLookupPlugin();
 private:
+     bool isInit;
       QList <PlayBackend::IPlayBackend*> mPlayBackendList;
       QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
       QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;

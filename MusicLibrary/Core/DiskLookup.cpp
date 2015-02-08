@@ -16,14 +16,15 @@ DiskLookup::DiskLookup(QObject *parent) : QObject(parent)
     mStopLookupFlag = false;
 }
 
-DiskLookup *DiskLookup::getInstance()
-{
-    static DiskLookup lookup;
-    return &lookup;
-}
+//DiskLookup *DiskLookup::getInstance()
+//{
+//    static DiskLookup lookup;
+//    return &lookup;
+//}
 
 DiskLookup::~DiskLookup()
 {
+    qDebug()<<__FUNCTION__;
     if (!mPathList.isEmpty ()) {
         mPathList.clear ();
     }

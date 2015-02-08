@@ -16,7 +16,7 @@ class DiskLookup : public QObject
     Q_OBJECT
 public:
     explicit DiskLookup(QObject *parent = 0);
-    static DiskLookup *getInstance();
+//    static DiskLookup *getInstance();
     virtual ~DiskLookup();
 
     ///

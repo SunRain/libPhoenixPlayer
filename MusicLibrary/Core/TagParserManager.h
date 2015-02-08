@@ -22,8 +22,6 @@ public:
     explicit TagParserManager(QObject *parent = 0);
     virtual ~TagParserManager();
 
-    void setPluginLoader(PluginLoader *loader);
-    void setPlayListDAO(IPlayListDAO *dao = 0);
     void addItem(SongMetaData *data = 0, bool startImmediately = false);
     bool startParserLoop();
 
@@ -37,9 +35,13 @@ signals:
 public slots:
 
 private:
+    void setPluginLoader();
+    void setPlayListDAO();
+private:
     QList<SongMetaData*> mMetaList;
     QPointer<IPlayListDAO> mPlayListDAO;
-    QPointer<PluginLoader> mPluginLoader;
+//    QPointer<PluginLoader> mPluginLoader;
+    PluginLoader *mPluginLoader;
     QList<IMusicTagParser *> mPluginList;
     QString mPluginPath;
     QStringList mPluginNameList;

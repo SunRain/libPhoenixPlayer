@@ -10,6 +10,7 @@
 #include <QDebug>
 #include "Settings.h"
 #include "MusicLibraryManager.h"
+#include "SingletonPointer.h"
 
 using namespace PhoenixPlayer;
 
@@ -19,9 +20,12 @@ int main(int argc, char *argv[])
 
     qmlRegisterUncreatableType<PhoenixPlayer::Common>("com.sunrain.playlist", 1, 0, "Common", "");
 
-    Settings *settings = Settings::getInstance ();
-    MusicLibrary::MusicLibraryManager *manager = MusicLibrary::MusicLibraryManager::getInstance ();
-    manager->setSettings (settings);
+//    SingletonPointer<Settings> s;
+//    Settings *settings = s.getInstance ();
+
+    SingletonPointer<MusicLibrary::MusicLibraryManager> m;
+    MusicLibrary::MusicLibraryManager *manager = m.getInstance ();
+//    manager->initSettings (settings);
 
     Common c;
 

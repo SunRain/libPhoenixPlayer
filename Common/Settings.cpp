@@ -17,7 +17,8 @@ const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
-    mSettings = new QSettings(qApp->organizationName(), qApp->applicationName());
+    mSettings = new QSettings(qApp->organizationName(), qApp->applicationName(),
+                              parent);
 
     mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
@@ -34,11 +35,11 @@ Settings::Settings(QObject *parent) : QObject(parent)
     }
 }
 
-Settings *Settings::getInstance()
-{
-    static Settings s(0);
-    return &s;
-}
+//Settings *Settings::getInstance()
+//{
+//    static Settings s(0);
+//    return &s;
+//}
 
 Settings::~Settings()
 {

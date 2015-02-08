@@ -25,11 +25,7 @@ class MusicLibraryManager : public QObject
 public:
     explicit MusicLibraryManager(QObject *parent = 0);
     virtual ~MusicLibraryManager();
-    static MusicLibraryManager *getInstance();
 
-    void setSettings(Settings *settings = 0);
-    void setPluginLoader(PluginLoader *loader = 0);
-    bool init();
     ///
     /// \brief scanLocalMusic 搜索本地音乐文件
     /// \return
@@ -134,18 +130,21 @@ public slots:
 //    void fileFound (QString path, QString file, qint64 size);
 
 private:
-    QPointer<IPlayListDAO> mPlayListDAO;
-//    PlayListDAOLoader *mDAOLoader;
-    PluginLoader *mPluginLoader;
+      bool init();
+//    void initSettings(/*Settings *settings = 0*/);
+//    void initPluginLoader(/*PluginLoader *loader = 0*/);
+private:
+      bool isInit;
+      QPointer<IPlayListDAO> mPlayListDAO;
+      PluginLoader *mPluginLoader;
+      Settings *mSettings;
 
-
-    QPointer<QThread> mDiskLooKupThread;
-    QPointer<QThread> mTagParserThread;
-    QPointer<DiskLookup> mDiskLooKup;
-    QPointer<Settings> mSettings;
-    QPointer<TagParserManager> mTagParserManager;
-    QString mCurrentSongHash;
-    QString mCurrentPlayListHash;
+      QPointer<QThread> mDiskLooKupThread;
+      QPointer<QThread> mTagParserThread;
+      QPointer<DiskLookup> mDiskLooKup;
+      QPointer<TagParserManager> mTagParserManager;
+      QString mCurrentSongHash;
+      QString mCurrentPlayListHash;
 };
 
 } //MusicLibrary

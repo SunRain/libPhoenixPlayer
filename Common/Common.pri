@@ -11,7 +11,8 @@ HEADERS += \
     $$PWD/include/MusicLibrary/IPlayListDAO.h \
     $$PWD/include/MusicLibrary/IMusicTagParser.h \
     $$PWD/include/PluginLoader.h \
-    $$PWD/include/MetadataLookup/IMetadataLookup.h
+    $$PWD/include/MetadataLookup/IMetadataLookup.h \
+    $$PWD/include/SingletonPointer.h
 
 SOURCES += \
     $$PWD/BaseMediaObject.cpp \

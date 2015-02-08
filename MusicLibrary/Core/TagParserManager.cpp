@@ -1,4 +1,6 @@
 
+#include "TagParserManager.h"
+
 #include <QCoreApplication>
 #include <QPointer>
 #include <QList>
@@ -13,8 +15,8 @@
 #include "MusicLibrary/IPlayListDAO.h"
 #include "PluginLoader.h"
 
-#include "TagParserManager.h"
 #include "SongMetaData.h"
+#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
@@ -22,6 +24,9 @@ namespace MusicLibrary {
 TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
 {
     mCurrentIndex = -1;
+    SingletonPointer<PluginLoader> s;
+    mPluginLoader = s.getInstance ();
+    setPluginLoader ();
 }
 
 TagParserManager::~TagParserManager()
@@ -38,20 +43,15 @@ TagParserManager::~TagParserManager()
     }
 }
 
-void TagParserManager::setPluginLoader(PluginLoader *loader)
+void TagParserManager::setPluginLoader()
 {
-    mPluginLoader = loader;
-    if (mPluginLoader.isNull ())
-        return;
-
-    mPluginNameList = mPluginLoader.data ()
-            ->getPluginNames (PluginLoader::PluginType::TypeMusicTagParser);
+    mPluginNameList = mPluginLoader->getPluginNames (PluginLoader::PluginType::TypeMusicTagParser);
 
     //因为PluginLoader默认会返回第一个插件,
     //并且更改插件名字的时候,如果目标插件名和当前使用插件名相同,则不会发送更改的信号
     //所以先从插件列表里面取出当前使用的插件
     if (!mPluginNameList.isEmpty ()) {
-        IMusicTagParser *parser = mPluginLoader.data ()->getCurrentMusicTagParser ();
+        IMusicTagParser *parser = mPluginLoader->getCurrentMusicTagParser ();
         if (parser != nullptr) {
             mPluginList.append (parser);
             mPluginNameList.removeOne (parser->getPluginName ());
@@ -59,26 +59,25 @@ void TagParserManager::setPluginLoader(PluginLoader *loader)
     }
     if (!mPluginNameList.isEmpty ()) {
         foreach (QString str, mPluginNameList) {
-            mPluginLoader.data ()
-                    ->setNewPlugin (PluginLoader::PluginType::TypeMusicTagParser,
+            mPluginLoader->setNewPlugin (PluginLoader::PluginType::TypeMusicTagParser,
                                     str);
 
         }
     }
-    connect (mPluginLoader.data (),
+    connect (mPluginLoader,
              &PluginLoader::signalPluginChanged,
              [this] (PluginLoader::PluginType type) {
         if (type == PluginLoader::PluginType::TypeMusicTagParser) {
-            IMusicTagParser *parser = mPluginLoader.data ()->getCurrentMusicTagParser ();
+            IMusicTagParser *parser = mPluginLoader->getCurrentMusicTagParser ();
             mPluginList.append (parser);
         }
     });
 
 }
 
-void TagParserManager::setPlayListDAO(IPlayListDAO *dao)
+void TagParserManager::setPlayListDAO()
 {
-    mPlayListDAO = dao;
+    mPlayListDAO = mPluginLoader->getCurrentPlayListDAO ();
 }
 
 void TagParserManager::addItem(SongMetaData *data, bool startImmediately)

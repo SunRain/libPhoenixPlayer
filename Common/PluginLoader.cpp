@@ -14,14 +14,9 @@
 
 namespace PhoenixPlayer {
 
-PluginLoader *PluginLoader::getInstance()
-{
-    static PluginLoader loader;
-    return &loader;
-}
-
 PluginLoader::PluginLoader(QObject *parent)
     : QObject(parent)
+    ,isInit(false)
 {
     //TODO: 根据系统来设置插件的默认路径
     QString path = QString("%1/plugins").arg(QCoreApplication::applicationDirPath());
@@ -35,11 +30,14 @@ PluginLoader::PluginLoader(QObject *parent)
         mCurrentPluginName.insert(PluginType(i), QString());
     }
 
-//    initPlugins (PluginType::TypeAll);
+    if (!isInit)
+        initPlugins (PluginType::TypeAll);
 }
 
 PluginLoader::~PluginLoader()
 {
+    qDebug()<<__FUNCTION__;
+
     qDeleteAll (mPlayBackendList);
     if (!mPlayBackendList.isEmpty ())
         mPlayBackendList.clear ();
@@ -139,20 +137,34 @@ MetadataLookup::IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
 QStringList PluginLoader::getPluginNames(PluginLoader::PluginType type)
 {
     QStringList list;
-    if (type == PluginType::TypeMusicTagParser) {
+    switch (type) {
+    case PluginType::TypeMetadataLookup: {
+        foreach (MetadataLookup::IMetadataLookup *lookup, mMetaLookupList) {
+            list.append (lookup->getPluginName ());
+        }
+        break;
+    }
+    case PluginType::TypeMusicTagParser: {
         foreach (MusicLibrary::IMusicTagParser *parser, mMusicTagParserList) {
             list.append (parser->getPluginName ());
         }
-    } else if (type == PluginType::TypePlayBackend) {
+        break;
+    }
+    case PluginType::TypePlayBackend: {
         foreach (PlayBackend::IPlayBackend *backend, mPlayBackendList) {
             list.append (backend->getBackendName ());
         }
-    } else if (type == PluginType::TypePlayListDAO) {
+        break;
+    }
+    case PluginType::TypePlayListDAO: {
         foreach (MusicLibrary::IPlayListDAO *dao, mPlayListDAOList) {
             list.append (dao->getPluginName ());
         }
-    } else {
+        break;
+    }
+    default:
         qDebug()<<"Invalid plugin type.";
+        break;
     }
     return list;
 }
@@ -180,6 +192,7 @@ void PluginLoader::initPlugins(PluginType type)
         break;
     }
     }
+    isInit = true;
 }
 
 void PluginLoader::setNewPlugin(PluginLoader::PluginType type,

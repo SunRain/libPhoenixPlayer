@@ -6,6 +6,7 @@
 #include "TagParserPro.h"
 #include "SongMetaData.h"
 #include "Settings.h"
+#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 class SongMetaData;
@@ -98,7 +99,7 @@ bool TagParserPro::parserTag(SongMetaData *targetMetaDate)
     //get cover image
     QImage image = getImage ();
     if (!image.isNull ()) {
-        Settings *s = Settings::getInstance ();
+        SingletonPointer<Settings> s;
         QString imagePath = s->getMusicImageCachePath ();
         QString tmp = name;
         tmp = tmp.mid (0, tmp.lastIndexOf ("."));

@@ -14,47 +14,66 @@
 #include "SongMetaData.h"
 #include "MusicLibrary/IPlayListDAO.h"
 
+#include "SingletonPointer.h"
+
 namespace PhoenixPlayer {
 
 using namespace MetadataLookup;
+using namespace MusicLibrary;
+using namespace PlayBackend;
 
-Player::Player(QObject *parent) : QObject(parent)
+Player::Player(QObject *parent)
+    : QObject(parent)
+    ,isInit(false)
 {
     mPlayBackend = 0;
-    //    mPlayBackendLoader = 0;
-    mPluginLoader = 0;
-    mSettings = 0;
-    mMusicLibraryManager = 0;
-    mMetaLookupManager = 0;// new Lyrics::LyricsManager(this);
+
+    SingletonPointer<PluginLoader> p;
+    mPluginLoader =  p.getInstance ();
+    SingletonPointer<Settings> s;
+    mSettings = s.getInstance ();
+    SingletonPointer<MusicLibraryManager> m;
+    mMusicLibraryManager = m.getInstance ();
+
+    mMetaLookupManager = new MetadataLookupManager(this);
+
     mPlayMode = Common::PlayModeOrder;
+
+    if (!isInit)
+        init ();
 }
 
 Player::~Player()
 {
-    if (!mMetaLookupManager.isNull ())
-        mMetaLookupManager.data ()->deleteLater ();
+    qDebug()<<"[Player]"<<__FUNCTION__;
+    if (mMetaLookupManager)
+        mMetaLookupManager->deleteLater ();
+    qDebug()<<"[Player] after "<<__FUNCTION__;
 }
 
-void Player::setPluginLoader(PluginLoader *loader)
+void Player::setPluginLoader()
 {
-    if (loader != 0) {
-        mPluginLoader = loader;
+    if (mPluginLoader == nullptr) {
+        qDebug()<<"[Player] No mPluginLoader";
+        return;
     }
-
     if (mPlayBackend.isNull ()) {
-        mPlayBackend = mPluginLoader.data ()->getCurrentPlayBackend ();
+        mPlayBackend = mPluginLoader->getCurrentPlayBackend ();
         if (!PointerValid (EPointer::PPlaybackend))
             return;
-        qDebug()<<"user playbackend "<<mPlayBackend->getBackendName ();
+        qDebug()<<"[Player] user playbackend "<<mPlayBackend->getBackendName ();
         mPlayBackend->init ();
         mPlayBackend->stop ();
     }
-    connect (mPluginLoader.data (),
+    connect (mPluginLoader,
              &PluginLoader::signalPluginChanged,
              [this](PluginLoader::PluginType type) {
         if (type == PluginLoader::TypePlayBackend) {
-            mPlayBackend->stop ();
-            mPlayBackend = mPluginLoader.data ()->getCurrentPlayBackend ();
+            if (mPlayBackend) {
+                mPlayBackend->stop ();
+                mPlayBackend.data ()->deleteLater ();
+            }
+            mPlayBackend = mPluginLoader->getCurrentPlayBackend ();
             if (!PointerValid (EPointer::PPlaybackend))
                 return;
             qDebug()<<"change playbackend to"<<mPlayBackend->getBackendName ();
@@ -63,128 +82,167 @@ void Player::setPluginLoader(PluginLoader *loader)
         }
     });
 
-    if (PointerValid (EPointer::PPlaybackend)) {
-
-        // 播放状态改变信号
-        connect (mPlayBackend.data (),
-                 &PlayBackend::IPlayBackend::stateChanged,
-                 [this](Common::PlaybackState state) {
-            emit playStateChanged (state);
-            emit playStateChanged ((int)state);
-        });
-
-        //当一首曲目播放结束后
-        connect (mPlayBackend.data (),
-                 &PlayBackend::IPlayBackend::finished,
-                 [this] {
-            if (PointerValid (EPointer::PMusicLibraryManager)) {
-                switch (mPlayMode) {
-                case Common::PlayModeOrder: { //顺序播放
-                    if (mMusicLibraryManager.data ()->lastSongHash ()
-                            == mMusicLibraryManager.data ()->playingSongHash ()) {
-                        mPlayBackend.data ()->stop ();
-                    } else {
-                        mMusicLibraryManager.data ()->nextSong ();
-                    }
-                    break;
-                }
-                case Common::PlayModeRepeatCurrent: { //单曲播放
-                    QString playingHash = mMusicLibraryManager->playingSongHash ();
-                    PlayBackend::BaseMediaObject obj;
-
-                    QStringList list = mMusicLibraryManager
-                            ->querySongMetaElement (Common::E_FileName, playingHash);
-                    if (!list.isEmpty ())
-                        obj.setFileName (list.first ());
-
-                    list = mMusicLibraryManager
-                            ->querySongMetaElement (Common::E_FilePath, playingHash);
-                    if (!list.isEmpty ())
-                        obj.setFilePath (list.first ());
-
-                    obj.setMediaType (Common::MediaTypeLocalFile);
-                    mPlayBackend.data ()->changeMedia (&obj, 0, true);
-                    break;
-                }
-                case Common::PlayModeRepeatAll:  { //循环播放
-                    mMusicLibraryManager.data ()->nextSong ();
-                    break;
-                }
-                case Common::PlayModeShuffle: { //随机播放
-                    mMusicLibraryManager.data ()->randomSong ();
-                    break;
-                }
-                default:
-                    break;
-                }
-            }
-        });
-
-        //播放失败
-        connect (mPlayBackend.data (),
-                 &PlayBackend::IPlayBackend::failed,
-                 [this]() {
-            if (PointerValid (EPointer::PMusicLibraryManager)) {
-                mMusicLibraryManager.data ()->nextSong ();
-            }
-        });
-
-        //tick
-        connect (mPlayBackend.data (),
-                 &PlayBackend::IPlayBackend::tick,
-                 [this] (quint64 sec) {
-            mCurrentPlayPos = sec;
-            emit playTickActual (sec);
-            if (mCurrentSongLength <= 0)
-                return;
-
-            emit playTickPercent (((qreal)sec/mCurrentSongLength) * 100);
-        });
+    if (!PointerValid (EPointer::PPlaybackend)) {
+        qDebug()<<"[Player] No Playbackend found";
+        return;
     }
 
-}
+    // 播放状态改变信号
+    connect (mPlayBackend.data (),
+             &IPlayBackend::stateChanged,
+             [this](Common::PlaybackState state) {
+        emit playStateChanged (state);
+        emit playStateChanged ((int)state);
+    });
 
-void Player::setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager)
-{
-    if (manager == 0)
-        return;
-    mMusicLibraryManager = manager;
+    //当一首曲目播放结束后
+    connect (mPlayBackend.data (),
+             &IPlayBackend::finished,
+             [this] {
+        if (PointerValid (EPointer::PMusicLibraryManager)) {
+            switch (mPlayMode) {
+            case Common::PlayModeOrder: { //顺序播放
+                if (mMusicLibraryManager->lastSongHash ()
+                        == mMusicLibraryManager->playingSongHash ()) {
+                    mPlayBackend.data ()->stop ();
+                } else {
+                    mMusicLibraryManager->nextSong ();
+                }
+                break;
+            }
+            case Common::PlayModeRepeatCurrent: { //单曲播放
+                QString playingHash = mMusicLibraryManager->playingSongHash ();
+                PlayBackend::BaseMediaObject obj;
 
-    //播放列表上一首/下一首/随机
-    connect (mMusicLibraryManager.data (),
-             &MusicLibrary::MusicLibraryManager::playingSongChanged, [this] () {
-        if (PointerValid (EPointer::PPlaybackend)) {
-            QString playingHash = mMusicLibraryManager->playingSongHash ();
+                QStringList list = mMusicLibraryManager
+                        ->querySongMetaElement (Common::E_FileName, playingHash);
+                if (!list.isEmpty ())
+                    obj.setFileName (list.first ());
 
-            mCurrentSongLength = getSongLength (playingHash);
+                list = mMusicLibraryManager
+                        ->querySongMetaElement (Common::E_FilePath, playingHash);
+                if (!list.isEmpty ())
+                    obj.setFilePath (list.first ());
 
-            qDebug()<<"Player playingSongChanged mCurrentSongLength "<<mCurrentSongLength;
-
-            PlayBackend::BaseMediaObject obj;
-
-            QStringList list = mMusicLibraryManager
-                    ->querySongMetaElement (Common::E_FileName, playingHash);
-            if (!list.isEmpty ())
-                obj.setFileName (list.first ());
-
-            list = mMusicLibraryManager
-                    ->querySongMetaElement (Common::E_FilePath, playingHash);
-            if (!list.isEmpty ())
-                obj.setFilePath (list.first ());
-
-            obj.setMediaType (Common::MediaTypeLocalFile);
-            qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
-            mPlayBackend.data ()->changeMedia (&obj, 0, true);
+                obj.setMediaType (Common::MediaTypeLocalFile);
+                mPlayBackend.data ()->changeMedia (&obj, 0, true);
+                break;
+            }
+            case Common::PlayModeRepeatAll:  { //循环播放
+                mMusicLibraryManager->nextSong ();
+                break;
+            }
+            case Common::PlayModeShuffle: { //随机播放
+                mMusicLibraryManager->randomSong ();
+                break;
+            }
+            default:
+                break;
+            }
         }
+    });
+
+    //播放失败
+    connect (mPlayBackend.data (),
+             &IPlayBackend::failed,
+             [this]() {
+        if (PointerValid (EPointer::PMusicLibraryManager)) {
+            mMusicLibraryManager->nextSong ();
+        }
+    });
+
+    //tick
+    connect (mPlayBackend.data (),
+             &IPlayBackend::tick,
+             [this] (quint64 sec) {
+        mCurrentPlayPos = sec;
+        emit playTickActual (sec);
+        if (mCurrentSongLength <= 0)
+            return;
+
+        emit playTickPercent (((qreal)sec/mCurrentSongLength) * 100);
     });
 }
 
-void Player::setSettings(Settings *settings)
+void Player::setMusicLibraryManager()
 {
-    if (settings !=0) {
-        mSettings = settings;
+    if (mMusicLibraryManager == nullptr) {
+        qDebug()<<"[Player] no MusicLibraryManager";
+        return;
     }
+    //播放列表上一首/下一首/随机
+    connect (mMusicLibraryManager,
+             &MusicLibraryManager::playingSongChanged, [this] () {
+        if (!PointerValid (EPointer::PPlaybackend)) {
+            qDebug()<<"[Player] Can't connect playingSongChanged ";
+            return;
+        }
+        QString playingHash = mMusicLibraryManager->playingSongHash ();
+
+        mCurrentSongLength = getSongLength (playingHash);
+
+        qDebug()<<"Player playingSongChanged mCurrentSongLength"
+               <<mCurrentSongLength;
+
+        PlayBackend::BaseMediaObject obj;
+
+        QStringList list = mMusicLibraryManager
+                ->querySongMetaElement (Common::E_FileName, playingHash);
+        if (!list.isEmpty ())
+            obj.setFileName (list.first ());
+
+        list = mMusicLibraryManager
+                ->querySongMetaElement (Common::E_FilePath, playingHash);
+        if (!list.isEmpty ())
+            obj.setFilePath (list.first ());
+
+        obj.setMediaType (Common::MediaTypeLocalFile);
+        qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
+        mPlayBackend.data ()->changeMedia (&obj, 0, true);
+    });
 }
+
+void Player::setMetaLookupManager()
+{
+    if (mMetaLookupManager == nullptr) {
+        qDebug()<<"[Player] no MetaLookupManager";
+        return;
+    }
+    connect (mMetaLookupManager,
+             &MetadataLookupManager::lookupFailed,
+             [this] {
+        emitMetadataLookupResult (IMetadataLookup::TypeUndefined, false);
+    });
+
+    connect (mMetaLookupManager,
+             &MetadataLookupManager::lookupSucceed,
+             [this]
+             (QString songHash,
+             QByteArray result,
+             IMetadataLookup::LookupType type) {
+
+        if (type == IMetadataLookup::TypeLyrics) {
+            //将lyric数据写入数据库中
+            SongMetaData meta;
+            meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
+            meta.setMeta (Common::SongMetaTags::E_Lyrics, result);
+
+            //TODO 也许通过MusicLibraryManager来管理会更好
+            if (PointerValid (EPointer::PPluginLoader)) {
+                MusicLibrary::IPlayListDAO *dao =
+                        mPluginLoader->getCurrentPlayListDAO ();
+                if (dao)
+                    dao->updateMetaData (&meta, true);
+            }
+        }
+        emitMetadataLookupResult (type, true);
+    });
+}
+
+//void Player::setSettings()
+//{
+//    mSettings = SingletonPointer<Settings>::getInstance ();
+//}
 
 void Player::setPlayMode(Common::PlayMode mode)
 {
@@ -230,7 +288,7 @@ void Player::togglePlayPause()
 
             //设置播放歌曲的hash,使得MusicLibraryManager发送playingSongChanged信号
             //此处是为了使得前端qml界面能够在初始化时候刷新
-            mMusicLibraryManager.data ()->setPlayingSongHash (playingHash);
+            mMusicLibraryManager->setPlayingSongHash (playingHash);
 
             PlayBackend::BaseMediaObject obj;
             QStringList list = mMusicLibraryManager
@@ -295,6 +353,16 @@ void Player::setPosition(qreal pos, bool isPercent)
     }
 }
 
+void Player::init()
+{
+    setPluginLoader();
+    setMusicLibraryManager();
+    setMetaLookupManager ();
+    isInit = true;
+
+    qDebug()<<"[Player] after "<<__FUNCTION__;
+}
+
 bool Player::PointerValid(Player::EPointer pointer)
 {
     bool valid = false;
@@ -303,13 +371,13 @@ bool Player::PointerValid(Player::EPointer pointer)
         valid = !mPlayBackend.isNull ();
         break;
     case EPointer::PPluginLoader:
-        valid =!mPluginLoader.isNull ();
+        valid = (mPluginLoader != nullptr);
         break;
     case EPointer::PMusicLibraryManager:
-        valid = !mMusicLibraryManager.isNull ();
+        valid = (mMusicLibraryManager != nullptr);
         break;
     case EPointer::PPLyricsManager:
-        valid = !mMetaLookupManager.isNull ();
+        valid = (mMetaLookupManager != nullptr);
         break;
     default:
         break;
@@ -325,7 +393,7 @@ int Player::getSongLength(const QString &hash)
     if (!PointerValid (EPointer::PMusicLibraryManager))
         return 0;
 
-    QStringList list = mMusicLibraryManager.data ()
+    QStringList list = mMusicLibraryManager
             ->querySongMetaElement (Common::SongMetaTags::E_SongLength,
                                     hash, true);
     if (!list.isEmpty ()) {
@@ -335,69 +403,28 @@ int Player::getSongLength(const QString &hash)
 }
 
 void Player::metadataLookup(const QString &songHash,
-                            MetadataLookup::IMetadataLookup::LookupType type)
+                            IMetadataLookup::LookupType type)
 {
-    if (!PointerValid (EPointer::PPluginLoader))
-        return;
-
-    if (mMetaLookupManager.isNull ()) {
-        qDebug()<<"new mMetaLookupManager";
-
-        mMetaLookupManager = new MetadataLookup::MetadataLookupManager(this);
-        mMetaLookupManager.data ()->setPluginLoader (mPluginLoader);
-
-        connect (mMetaLookupManager.data (),
-                 &MetadataLookup::MetadataLookupManager::lookupFailed,
-                 [this] {
-            emitMetadataLookupResult (MetadataLookup::IMetadataLookup::TypeUndefined, false);
-        });
-
-        connect (mMetaLookupManager.data (),
-                 &MetadataLookup::MetadataLookupManager::lookupSucceed,
-                 [this]
-                 (QString songHash,
-                 QByteArray result,
-                 MetadataLookup::IMetadataLookup::LookupType type) {
-
-            if (type == MetadataLookup::IMetadataLookup::TypeLyrics) {
-                //将lyric数据写入数据库中
-                SongMetaData meta;
-                meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
-                meta.setMeta (Common::SongMetaTags::E_Lyrics, result);
-
-                //TODO 也许通过MusicLibraryManager来管理会更好
-                if (PointerValid (EPointer::PPluginLoader)) {
-                    MusicLibrary::IPlayListDAO *dao =
-                            mPluginLoader.data ()->getCurrentPlayListDAO ();
-                    if (dao)
-                        dao->updateMetaData (&meta, true);
-                }
-            }
-            emitMetadataLookupResult (type, true);
-        });
-
-    }
     SongMetaData data;
     QString hash = songHash;
     if (hash.isEmpty ())
-        hash = mMusicLibraryManager.data ()->playingSongHash ();
+        hash = mMusicLibraryManager->playingSongHash ();
 
     for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
          i < (int)Common::SongMetaTags::E_LastFlag;
          ++i) {
-        QStringList list = mMusicLibraryManager.data ()
+        QStringList list = mMusicLibraryManager
                 ->querySongMetaElement (Common::SongMetaTags(i), hash, true);
         if (list.isEmpty ())
             data.setMeta (Common::SongMetaTags(i), QVariant());
         else
             data.setMeta (Common::SongMetaTags(i), list.first ());
     }
-    mMetaLookupManager.data ()->lookup (&data,
-                                        MetadataLookup::IMetadataLookup::TypeLyrics);
+    mMetaLookupManager->lookup (&data, type);
 }
 
 void Player::emitMetadataLookupResult(
-        MetadataLookup::IMetadataLookup::LookupType type, bool result)
+        IMetadataLookup::LookupType type, bool result)
 {
     if (!result) {
         emit metadataLookupFailed ();
@@ -405,7 +432,7 @@ void Player::emitMetadataLookupResult(
     }
     //TODO 添加其他类型的emit
     switch (type) {
-    case MetadataLookup::IMetadataLookup::TypeLyrics:
+    case IMetadataLookup::TypeLyrics:
         lookupLyricSucceed ();
         break;
     default:

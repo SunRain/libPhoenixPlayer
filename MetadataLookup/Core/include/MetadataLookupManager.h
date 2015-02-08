@@ -22,7 +22,7 @@ public:
     virtual ~MetadataLookupManager();
 
     void lookup(SongMetaData *data, IMetadataLookup::LookupType type);
-    void setPluginLoader(PluginLoader *loader);
+//    void setPluginLoader(PluginLoader *loader);
 
 signals:
     void lookupSucceed(QString songHash,
@@ -42,7 +42,8 @@ private:
     void initPlugins();
     void processNext();
 private:
-    QPointer<PluginLoader> mPluginLoader;
+//    QPointer<PluginLoader> mPluginLoader;
+    PluginLoader *mPluginLoader;
     //QList<ILyricsLookup *> mPluginList;
     QPointer<IMetadataLookup> mLookup;
     IMetadataLookup *mBackupLookup;

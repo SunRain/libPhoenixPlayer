@@ -5,6 +5,9 @@
 #include "Backend/BaseMediaObject.h"
 #include "Backend/IPlayBackend.h"
 #include "PluginLoader.h"
+#include "SingletonPointer.h"
+
+using namespace PhoenixPlayer;
 
 int main(int argc, char *argv[])
 {
@@ -22,8 +25,11 @@ int main(int argc, char *argv[])
 
 //    PhoenixPlayer::PlayBackend::PlayBackendLoader *loader = new PhoenixPlayer::PlayBackend::PlayBackendLoader();
 //    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getCurrentBackend();
-    PhoenixPlayer::PluginLoader *loader = PhoenixPlayer::PluginLoader::getInstance ();
-    PhoenixPlayer::PlayBackend::IPlayBackend *backend = loader->getCurrentPlayBackend ();
+
+    SingletonPointer<PluginLoader> l;
+
+    PluginLoader *loader = l.getInstance ();
+    PlayBackend::IPlayBackend *backend = loader->getCurrentPlayBackend ();
     if (!backend) {
         qDebug() << "backend  is null";
     } else {

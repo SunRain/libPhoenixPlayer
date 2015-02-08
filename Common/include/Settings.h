@@ -12,7 +12,8 @@ class Settings : public QObject
 {
     Q_OBJECT
 public:
-    static Settings *getInstance();
+    explicit Settings(QObject *parent = 0);
+//    static Settings *getInstance();
     virtual ~Settings();
 
     Q_INVOKABLE bool setMusicDir(const QStringList &dirList);
@@ -34,7 +35,6 @@ signals:
 public slots:
 
 private:
-    explicit Settings(QObject *parent = 0);
 
 private:
     QSettings *mSettings;

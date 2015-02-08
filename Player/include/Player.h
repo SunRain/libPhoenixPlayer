@@ -36,9 +36,9 @@ public:
     virtual ~Player();
 
 //    void setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader = 0);
-    void setPluginLoader(PluginLoader *loader = 0);
-    void setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager = 0);
-    void setSettings(Settings *settings);
+//    void setPluginLoader(PluginLoader *loader = 0);
+//    void setMusicLibraryManager(MusicLibrary::MusicLibraryManager *manager = 0);
+//    void setSettings(Settings *settings);
 
     void setPlayMode(Common::PlayMode mode = Common::PlayModeOrder);
     Q_INVOKABLE void setPlayModeInt (int mode = 0);
@@ -98,6 +98,13 @@ public slots:
     void setPosition(qreal pos = 0, bool isPercent = true);
 
 private:
+    void init();
+
+    void setPluginLoader();
+    void setMusicLibraryManager();
+    void setMetaLookupManager();
+//    void setSettings(/*Settings *settings*/);
+
     bool PointerValid(EPointer pointer = EPointer::PNULL);
 
     int getSongLength(const QString &hash);
@@ -107,12 +114,18 @@ private:
     void emitMetadataLookupResult(MetadataLookup::IMetadataLookup::LookupType type,
                                   bool result);
 private:
-    QPointer<Settings> mSettings;
+    bool isInit;
+//    QPointer<Settings> mSettings;
+    Settings *mSettings;
 //    QPointer<PlayBackend::PlayBackendLoader> mPlayBackendLoader;
-    QPointer<PluginLoader> mPluginLoader;
+//    QPointer<PluginLoader> mPluginLoader;
+    PluginLoader *mPluginLoader;
+//    QPointer<MusicLibrary::MusicLibraryManager> mMusicLibraryManager;
+    MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
+//    QPointer<MetadataLookup::MetadataLookupManager> mMetaLookupManager;
+    MetadataLookup::MetadataLookupManager *mMetaLookupManager;
+
     QPointer<PlayBackend::IPlayBackend> mPlayBackend;
-    QPointer<MusicLibrary::MusicLibraryManager> mMusicLibraryManager;
-    QPointer<MetadataLookup::MetadataLookupManager> mMetaLookupManager;
 
     Common::PlayMode mPlayMode;
     quint64 mCurrentSongLength;

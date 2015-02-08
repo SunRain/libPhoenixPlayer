@@ -29,7 +29,7 @@ class SQLite3DAO : public IPlayListDAO
     Q_INTERFACES(PhoenixPlayer::MusicLibrary::IPlayListDAO)
 public:
     SQLite3DAO(QObject *parent = 0);
-    static SQLite3DAO *getInstance();
+//    static SQLite3DAO *getInstance();
     virtual ~SQLite3DAO();
 
     // IPlayListDAO interface

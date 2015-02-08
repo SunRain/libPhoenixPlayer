@@ -6,6 +6,7 @@
 #include <QQuickView>
 #include <QQmlComponent>
 #include <QQmlContext>
+#include <QScopedPointer>
 
 #include <QDebug>
 #include "Settings.h"
@@ -14,41 +15,42 @@
 #include "Player.h"
 #include "LyricsModel.h"
 
+#include "SingletonPointer.h"
+
 
 using namespace PhoenixPlayer;
+using namespace PhoenixPlayer::MusicLibrary;
+using namespace PhoenixPlayer::PlayBackend;
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication a(argc, argv);
-    qmlRegisterUncreatableType<PhoenixPlayer::Common>("com.sunrain.playlist", 1, 0, "Common", "");
+//    QGuiApplication a(argc, argv);
+    QScopedPointer<QGuiApplication> a(new QGuiApplication(argc, argv));
+    qmlRegisterUncreatableType<Common>("com.sunrain.playlist", 1, 0, "Common", "");
 
-    a.setOrganizationName ("SunRain");
-    a.setApplicationName ("PhoenixPlayer");
+    a.data ()->setOrganizationName ("SunRain");
+    a.data ()->setApplicationName ("PhoenixPlayer");
 
     qmlRegisterType<QmlPlugin::LyricsModel>("com.sunrain.qmlplugin", 1, 0, "LyricsModel");
 
-    Settings *settings = Settings::getInstance ();
-    MusicLibrary::MusicLibraryManager *manager = MusicLibrary::MusicLibraryManager::getInstance ();
-    manager->setSettings (settings);
-
-//    PlayBackend::PlayBackendLoader *backendLoader = PlayBackend::PlayBackendLoader::getInstance ();
-//    backendLoader->setNewBackend ("GStreamerBackend");
-    PluginLoader *loader = PluginLoader::getInstance ();
+    SingletonPointer<PluginLoader> p;
+    PluginLoader *loader = p.getInstance ();
     loader->setNewPlugin (PluginLoader::TypePlayBackend, "GStreamerBackend");
+    loader->setParent (a.data ());
 
-    Player *musicPlayer = new Player();
-    musicPlayer->setSettings (settings);
-    //musicPlayer->setPlayBackendLoader (backendLoader);
-    musicPlayer->setMusicLibraryManager (manager);
-    musicPlayer->setPluginLoader (loader);
+    SingletonPointer<MusicLibraryManager> m;
+    MusicLibraryManager *manager = m.getInstance ();
+    manager->setParent (a.data ());
+
+    QScopedPointer<Player> musicPlayer(new Player(a.data ()));
 
     Common c;
     QQmlApplicationEngine engine;
     QQmlContext *ctx = engine.rootContext ();
     ctx->setContextProperty ("musicLibraryManager", manager);
     ctx->setContextProperty ("common", &c);
-    ctx->setContextProperty ("musicPlayer", musicPlayer);
+    ctx->setContextProperty ("musicPlayer", musicPlayer.data ());
     engine.load (QUrl(QStringLiteral("qrc:/main.qml")));
 
-    return a.exec();
+    return a.data ()->exec ();
 }

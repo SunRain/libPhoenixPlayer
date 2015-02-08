@@ -21,11 +21,11 @@ SQLite3DAO::SQLite3DAO(QObject *parent)
 {
 }
 
-SQLite3DAO *SQLite3DAO::getInstance()
-{
-    static SQLite3DAO s;
-    return &s;
-}
+//SQLite3DAO *SQLite3DAO::getInstance()
+//{
+//    static SQLite3DAO s;
+//    return &s;
+//}
 
 SQLite3DAO::~SQLite3DAO()
 {
