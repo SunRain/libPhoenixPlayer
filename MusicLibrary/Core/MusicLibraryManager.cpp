@@ -30,8 +30,9 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 
     qDebug()<<__FUNCTION__;
 
-    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
     mSettings = SingletonPointer<Settings>::instance ();
+    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+
     mCurrentSongHash = QString();
     mCurrentPlayListHash = QString();
 
