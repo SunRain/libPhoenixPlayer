@@ -13,10 +13,12 @@ namespace MetadataLookup {
 
 MetadataLookupManager::MetadataLookupManager(QObject *parent) : QObject(parent)
 {
-//    SingletonPointer<PluginLoader> s;
-//    mPluginLoader = s.getInstance ();
+#ifdef SAILFISH_OS
+    SingletonPointer<PluginLoader> sp;
+    mPluginLoader = sp.instance();
+#else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-
+#endif
     initPlugins ();
 }
 

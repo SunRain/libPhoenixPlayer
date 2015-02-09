@@ -28,15 +28,19 @@ Player::Player(QObject *parent)
 {
     mPlayBackend = 0;
 
-//    SingletonPointer<PluginLoader> p;
-//    mPluginLoader =  p.getInstance ();
+#ifdef SAILFISH_OS
+    SingletonPointer<PluginLoader> sp;
+    SingletonPointer<Settings> ss;
+    SingletonPointer<MusicLibraryManager> sm;
+
+    mPluginLoader = sp.instance();
+    mSettings = ss.instance();
+    mMusicLibraryManager = sm.instance();
+#else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-//    SingletonPointer<Settings> s;
-//    mSettings = s.getInstance ();
     mSettings = SingletonPointer<Settings>::instance ();
-//    SingletonPointer<MusicLibraryManager> m;
-//    mMusicLibraryManager = m.getInstance ();
     mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
+#endif
 
     mMetaLookupManager = new MetadataLookupManager(this);
 

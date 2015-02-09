@@ -24,9 +24,13 @@ namespace MusicLibrary {
 TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
 {
     mCurrentIndex = -1;
-//    SingletonPointer<PluginLoader> s;
-//    mPluginLoader = s.getInstance ();
+
+#ifdef SAILFISH_OS
+    SingletonPointer<PluginLoader> sp;
+    mPluginLoader = sp.instance();
+#else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+#endif
     setPluginLoader ();
 }
 

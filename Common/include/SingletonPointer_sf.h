@@ -11,16 +11,55 @@ template <class T>
 class SingletonPointer
 {
 public:
+    SingletonPointer()
+    {
+        qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
+        if (Q_UNLIKELY(tptr.isNull())) {
+            qDebug()<<">>>>>>>> SingletonPointer statr new";
+            mLock.lock();
+            if (tptr.isNull()) {
+                qDebug()<<">>>>>>>> SingletonPointer aftre lock , statr new";
+                tptr.reset(new T);
+            }
+            qDebug()<<">>>>>>>> SingletonPointer finish start new, unlock";
+            mLock.unlock();
+        }
+        qDebug()<<">>>>>>>> SingletonPointer return "<<tptr.data()->metaObject()->className();;
+    }
+
+    ~SingletonPointer()
+    {
+        qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
+    }
+
+public:
+    T *instance()
+    {
+        qDebug()<<">>>>>>>> SingletonPointer getInstance <<<<<<<<<<<<<";
+        return tptr.data();
+    }
+private:
+    Q_DISABLE_COPY(SingletonPointer)
+    static QMutex mLock;
+    static QScopedPointer<T> tptr;
+};
+
+template<class T> QScopedPointer<T> SingletonPointer<T>::tptr(0);
+template<class T> QMutex SingletonPointer<T>::mLock(QMutex::NonRecursive);
+
+//template <typename T>
+//class SingletonPointer
+//{
+//public:
 //    SingletonPointer(void)
 //    {
-//        qDebug()<<">>>>>>>> SingletonPointer <<<<<<<<<<<<<";
+//        qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
 //        if (m_pInstance == nullptr)
 //        {
+//            qDebug()<<">>>>>>>> SingletonPointer statr new";
 //            try
 //            {
 //                m_pInstance = new T;
-//                qDebug()<<">>>>>>>> SingletonPointer new instance "
-//                       <<m_pInstance->metaObject()->className();
 //            }
 //            catch (...) //防止new分配内存可能出错的问题，内存分配错误异常为std::bad_alloc
 //            {
@@ -29,16 +68,16 @@ public:
 //        }
 
 //        m_uiReference++;
-
-//        qDebug()<<"SingletonPointer for "
-//                  <<m_pInstance->metaObject()->className()
-//                    <<" with num "<<m_uiReference;
+//        qDebug()<<">>>>>>>> SingletonPointer return "
+//               <<m_pInstance->metaObject()->className()
+//                 <<" with m_uiReference "<<m_uiReference;
 //    }
 
 //    ~SingletonPointer(void)
 //    {
-//        qDebug()<<">>>>>>>> ~ SingletonPointer <<<<<<<<<<<<<";
+//        qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
 //        m_uiReference--;
+//        qDebug()<<" cur m_uiReference "<<m_uiReference;
 //        if (m_uiReference == 0)
 //        {
 //            if (m_pInstance != nullptr)
@@ -49,46 +88,12 @@ public:
 //        }
 //    }
 
-public:
-    static T *instance() /*const throw()*/
-    {
-        qDebug()<<">>>>>>>> SingletonPointer getInstance <<<<<<<<<<<<<";
-//        if (m_pInstance == nullptr)
-//        {
-//            try
-//            {
-//                m_pInstance = new T;
-//                qDebug()<<">>>>>>>> SingletonPointer new instance "
-//                       <<m_pInstance->metaObject()->className();
-//            }
-//            catch (...) //防止new分配内存可能出错的问题，内存分配错误异常为std::bad_alloc
-//            {
-//                m_pInstance = nullptr;
-//            }
-//        }
-
-//        m_uiReference++;
-
-//        qDebug()<<"SingletonPointer for "
-//                  <<m_pInstance->metaObject()->className()
-//                    <<" with num "<<m_uiReference;
-
-
+//public:
+//    T *instance() const throw()
+//    {
+//        qDebug()<<">>>>>>>> SingletonPointer getInstance <<<<<<<<<<<<<";
 //        return m_pInstance;
-
-        if (Q_UNLIKELY(!tptr)) {
-            qDebug()<<">>>>>>>> SingletonPointer statr new";
-            mLock.lock();
-            if (!tptr) {
-                qDebug()<<">>>>>>>> SingletonPointer aftre lock , statr new";
-                tptr.reset(new T);
-            }
-            qDebug()<<">>>>>>>> SingletonPointer finish start new, unlock";
-            mLock.unlock();
-        }
-        qDebug()<<">>>>>>>> SingletonPointer return "<<tptr.data()->metaObject()->className();;
-        return tptr.data();
-    }
+//    }
 
 //    T& operator*() const
 //    {
@@ -105,22 +110,13 @@ public:
 //        return m_pInstance;
 //    }
 
-private:
+//private:
 //    static T *m_pInstance;
 //    static  std::size_t m_uiReference;
-    static QMutex mLock;
-    static QScopedPointer<T> tptr;
-//    static T *tp;
-};
-
-template<class T>
-QScopedPointer<T> SingletonPointer<T>::tptr(0);
-
-template<class T>
-QMutex SingletonPointer<T>::mLock(QMutex::NonRecursive);
+//};
 
 //template <typename T>
-//T *SingletonPointer<T>::tp = 0;
+//T *SingletonPointer<T>::m_pInstance = nullptr;
 
 //template <typename T>
 //std::size_t SingletonPointer<T>::m_uiReference = 0;

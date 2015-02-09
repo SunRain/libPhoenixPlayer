@@ -30,9 +30,17 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 
     qDebug()<<__FUNCTION__;
 
+#ifdef SAILFISH_OS
+    qDebug()<<"For Sailfish os";
+    SingletonPointer<Settings> ss;
+    SingletonPointer<PluginLoader> sp;
+    mSettings = ss.instance();
+    mPluginLoader = sp.instance();
+#else
+    qDebug()<<"For other os";
     mSettings = SingletonPointer<Settings>::instance ();
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-
+#endif
     mCurrentSongHash = QString();
     mCurrentPlayListHash = QString();
 
