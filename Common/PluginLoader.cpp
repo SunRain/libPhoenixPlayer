@@ -31,8 +31,8 @@ PluginLoader::PluginLoader(QObject *parent)
         mCurrentPluginName.insert(PluginType(i), QString());
     }
 
-//    if (!isInit)
-//        initPlugins (PluginType::TypeAll);
+    if (!isInit)
+        initPlugins (PluginType::TypeAll);
 }
 
 PluginLoader::~PluginLoader()
