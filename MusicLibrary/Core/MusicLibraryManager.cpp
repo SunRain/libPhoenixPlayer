@@ -2,6 +2,7 @@
 #include <QThread>
 #include <QDebug>
 #include <QPointer>
+#include <QMutex>
 
 #include "MusicLibrary/IPlayListDAO.h"
 #include "MusicLibraryManager.h"
@@ -32,10 +33,12 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 
 #ifdef SAILFISH_OS
     qDebug()<<"For Sailfish os";
-    SingletonPointer<Settings> ss;
-    SingletonPointer<PluginLoader> sp;
-    mSettings = ss.instance();
-    mPluginLoader = sp.instance();
+//    SingletonPointer<Settings> ss;
+//    SingletonPointer<PluginLoader> sp;
+//    mSettings = ss.instance();
+//    mPluginLoader = sp.instance();
+    mSettings = Settings::instance();
+    mPluginLoader = PluginLoader::instance();
 #else
     qDebug()<<"For other os";
     mSettings = SingletonPointer<Settings>::instance ();
@@ -81,6 +84,22 @@ MusicLibraryManager::~MusicLibraryManager()
 
     qDebug()<<">>>>>>>> after "<< __FUNCTION__ <<" <<<<<<<<<<<<<<<<";
 }
+#ifdef SAILFISH_OS
+MusicLibraryManager *MusicLibraryManager::instance()
+{
+    qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
+    static QMutex mutex;
+    static QScopedPointer<MusicLibraryManager> scp;
+    if (Q_UNLIKELY(scp.isNull())) {
+        qDebug()<<">>>>>>>> statr new";
+        mutex.lock();
+        scp.reset(new MusicLibraryManager(0));
+        mutex.unlock();
+    }
+    qDebug()<<">>>>>>>> return "<<scp.data()->metaObject()->className();;
+    return scp.data();
+}
+#endif
 
 //MusicLibraryManager *MusicLibraryManager::getInstance()
 //{

@@ -14,8 +14,7 @@ namespace MetadataLookup {
 MetadataLookupManager::MetadataLookupManager(QObject *parent) : QObject(parent)
 {
 #ifdef SAILFISH_OS
-    SingletonPointer<PluginLoader> sp;
-    mPluginLoader = sp.instance();
+    mPluginLoader = PluginLoader::instance();
 #else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
 #endif

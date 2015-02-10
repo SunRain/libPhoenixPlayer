@@ -16,6 +16,10 @@ public:
 //    static Settings *getInstance();
     virtual ~Settings();
 
+#ifdef SAILFISH_OS
+    static Settings *instance();
+#endif
+
     Q_INVOKABLE bool setMusicDir(const QStringList &dirList);
     Q_INVOKABLE QStringList getMusicDirs();
 

@@ -4,6 +4,8 @@
 #include <QCoreApplication>
 #include <QStringList>
 #include <QDebug>
+#include <QMutex>
+#include <QScopedPointer>
 
 #include "Settings.h"
 
@@ -46,6 +48,24 @@ Settings::~Settings()
     mSettings->sync ();
     mSettings->deleteLater ();
 }
+
+#ifdef SAILFISH_OS
+Settings *Settings::instance()
+{
+    qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
+    static QMutex mutex;
+    static QScopedPointer<Settings> scp;
+
+    if (Q_UNLIKELY(scp.isNull())) {
+        qDebug()<<">>>>>>>> statr new";
+        mutex.lock();
+        scp.reset(new Settings(0));
+        mutex.unlock();
+    }
+    qDebug()<<">>>>>>>> return "<<scp.data()->metaObject()->className();;
+    return scp.data();
+}
+#endif
 
 bool Settings::setMusicDir(const QStringList &dirList)
 {

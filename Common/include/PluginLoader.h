@@ -39,6 +39,10 @@ public:
     explicit PluginLoader(QObject *parent = 0);
     virtual ~PluginLoader();
 
+#ifdef SAILFISH_OS
+    static PluginLoader *instance();
+#endif
+
     void setPluginPath(PluginType type, const QString &path);
 
     ///

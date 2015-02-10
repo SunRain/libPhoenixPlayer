@@ -4,7 +4,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QPluginLoader>
-
+#include <QMutex>
 
 #include "PluginLoader.h"
 #include "Backend/IPlayBackend.h"
@@ -66,6 +66,24 @@ PluginLoader::~PluginLoader()
     if (!mPluginPath.isEmpty ())
         mPluginPath.clear ();
 }
+
+#ifdef SAILFISH_OS
+PluginLoader *PluginLoader::instance()
+{
+    qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
+    static QMutex mutex;
+    static QScopedPointer<PluginLoader> scp;
+
+    if (Q_UNLIKELY(scp.isNull())) {
+        qDebug()<<">>>>>>>> statr new";
+        mutex.lock();
+        scp.reset(new PluginLoader(0));
+        mutex.unlock();
+    }
+    qDebug()<<">>>>>>>> return "<<scp.data()->metaObject()->className();;
+    return scp.data();
+}
+#endif
 
 void PluginLoader::setPluginPath(PluginLoader::PluginType type, const QString &path)
 {

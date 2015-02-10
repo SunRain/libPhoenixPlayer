@@ -4,7 +4,7 @@
 #endif
 
 #ifdef SAILFISH_OS
-#include "SingletonPointer_sf.h"
+//#include "SingletonPointer_sf.h"
 #else
 #include "SingletonPointer_p.h"
 #endif

@@ -26,8 +26,7 @@ TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
     mCurrentIndex = -1;
 
 #ifdef SAILFISH_OS
-    SingletonPointer<PluginLoader> sp;
-    mPluginLoader = sp.instance();
+    mPluginLoader = PluginLoader::instance();
 #else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
 #endif

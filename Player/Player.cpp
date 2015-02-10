@@ -29,13 +29,9 @@ Player::Player(QObject *parent)
     mPlayBackend = 0;
 
 #ifdef SAILFISH_OS
-    SingletonPointer<PluginLoader> sp;
-    SingletonPointer<Settings> ss;
-    SingletonPointer<MusicLibraryManager> sm;
-
-    mPluginLoader = sp.instance();
-    mSettings = ss.instance();
-    mMusicLibraryManager = sm.instance();
+    mPluginLoader = PluginLoader::instance();
+    mSettings = Settings::instance();
+    mMusicLibraryManager = MusicLibraryManager::instance();
 #else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
     mSettings = SingletonPointer<Settings>::instance ();

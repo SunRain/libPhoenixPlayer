@@ -26,6 +26,9 @@ public:
     explicit MusicLibraryManager(QObject *parent = 0);
     virtual ~MusicLibraryManager();
 
+#ifdef SAILFISH_OS
+    static MusicLibraryManager *instance();
+#endif
     ///
     /// \brief scanLocalMusic 搜索本地音乐文件
     /// \return
