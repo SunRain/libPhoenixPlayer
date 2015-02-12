@@ -234,7 +234,7 @@ QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targe
     if (hash.isEmpty ()) {
         list = mPlayListDAO.data ()
                 ->queryMusicLibrary (targetColumn,
-                                     Common::SongMetaTags::E_FirstFlag,
+                                     Common::SongMetaTags::E_FirstFlag, //UnUsed
                                      QString(),
                                      skipDuplicates);
     } else {
