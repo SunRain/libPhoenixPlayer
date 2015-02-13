@@ -3,6 +3,7 @@
 #include <QMetaEnum>
 #include <QByteArray>
 #include <QVariant>
+#include <QDebug>
 
 #include "MusicLibraryManager.h"
 #include "Common.h"
@@ -11,6 +12,8 @@ namespace PhoenixPlayer {
 using namespace MusicLibrary;
 
 namespace QmlPlugin {
+
+//const static char *UNKNOW_TEXT = "Empty!!";
 
 MusicLibraryListModel::MusicLibraryListModel(QObject *parent) :
     QAbstractListModel(parent)
@@ -28,9 +31,9 @@ MusicLibraryListModel::~MusicLibraryListModel()
 
 void MusicLibraryListModel::showAllTracks()
 {
+    clear();
     mSongHashList = mMusicLibraryManager
             ->querySongMetaElement(Common::E_Hash, QString(), false);
-
     appendToModel();
 }
 
@@ -82,12 +85,27 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> MusicLibraryListModel::roleNames() const
 {
     QHash<int, QByteArray> role;
-    //必须根据enum排列顺序
-    for (int i = (int)ModelRoles::RoleFilePath;
-         i <= (int)ModelRoles::RoleGenre;
-         ++i) {
-        role.insert(i, enumToRole(i));
-    }
+//    //必须根据enum排列顺序
+//    for (int i = (int)ModelRoles::RoleFilePath;
+//         i <= (int)ModelRoles::RoleGenre;
+//         ++i) {
+//        qDebug()<<"insert role "<<i;
+//        role.insert(i, enumToRole(i));
+//    }
+    role.insert(ModelRoles::RoleAlbumImageUrl, "albumImageUrl");
+    role.insert(ModelRoles::RoleAlbumName, "albumName");
+    role.insert(ModelRoles::RoleArtistImageUri, "artistImageUri");
+    role.insert(ModelRoles::RoleArtistName, "artistName");
+    role.insert(ModelRoles::RoleCoverArtLarge, "coverArtLarge");
+    role.insert(ModelRoles::RoleCoverArtMiddle, "coverArtMiddle");
+    role.insert(ModelRoles::RoleCoverArtSmall, "coverArtSmall");
+    role.insert(ModelRoles::RoleFileName, "fileName");
+    role.insert(ModelRoles::RoleFilePath, "filePath");
+    role.insert(ModelRoles::RoleGenre, "genre");
+    role.insert(ModelRoles::RoleMediaType, "mediaType");
+    role.insert(ModelRoles::RoleSongTitle, "songTitle");
+    role.insert(ModelRoles::RoleUserRating, "userRating");
+
     return role;
 }
 
@@ -100,20 +118,12 @@ void MusicLibraryListModel::clear()
     mSongHashList.clear();
 }
 
-QByteArray MusicLibraryListModel::enumToRole(int enumValue) const
+void MusicLibraryListModel::appendToModel()
 {
-    int index  = metaObject ()->indexOfEnumerator ("ModelRoles");
-    QMetaEnum m = metaObject ()->enumerator (index);
-    return QByteArray(m.valueToKey (enumValue)).replace("Role", "").toLower();
-}
-
-void MusicLibraryListModel::appendToModel(bool clearBeforeAppend)
-{
-    if (clearBeforeAppend)
-        clear();
-
-    if (mSongHashList.isEmpty())
+    if (mSongHashList.isEmpty()) {
+        qDebug()<<__FUNCTION__<<" hash list is empty";
         return;
+    }
 
     for (int i=0; i<mSongHashList.size (); ++i) {
         beginInsertRows (QModelIndex(), i, i);
@@ -125,6 +135,8 @@ QString MusicLibraryListModel::queryOne(const QString &hash,
                                          Common::SongMetaTags tag,
                                          bool skipDuplicates) const
 {
+    if (hash.isEmpty())
+        return QString();
     QStringList list = mMusicLibraryManager
             ->querySongMetaElement(tag, hash, skipDuplicates);
     if (list.isEmpty())

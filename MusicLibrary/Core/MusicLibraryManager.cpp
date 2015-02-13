@@ -244,7 +244,7 @@ QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targe
                                      hash,
                                      skipDuplicates);
     }
-    qDebug()<<" query result "<< list;
+//    qDebug()<<" query result "<< list;
     return list;
 }
 

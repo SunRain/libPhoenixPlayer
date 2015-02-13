@@ -31,7 +31,7 @@ public:
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
     QHash<int, QByteArray> roleNames() const;
-protected:
+public:
     enum ModelRoles {
         RoleFilePath = Qt::UserRole + 1,
         RoleFileName,
@@ -54,8 +54,8 @@ public slots:
     void clear();
 
 private:
-    QByteArray enumToRole(int enumValue) const;
-    void appendToModel(bool clearBeforeAppend = true);
+//    QByteArray enumToRole(int enumValue) const;
+    void appendToModel();
     QString queryOne(const QString &hash,
                      Common::SongMetaTags tag,
                      bool skipDuplicates = true) const;
