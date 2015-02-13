@@ -31,6 +31,7 @@ TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
 #endif
     setPluginLoader ();
+    setPlayListDAO ();
 }
 
 TagParserManager::~TagParserManager()
@@ -135,6 +136,8 @@ void TagParserManager::parserItem(SongMetaData *data)
     if (!mPlayListDAO.isNull ()) {
         mPlayListDAO.data ()->insertMetaData (data);
         data->deleteLater ();
+    } else {
+        qDebug()<<"Warning: "<<__FUNCTION__<<" mPlayListDAO is null";
     }
 
     parserNextItem ();

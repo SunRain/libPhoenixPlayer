@@ -376,7 +376,8 @@ bool MusicLibraryManager::init()
     connect (mTagParserManager.data (), &TagParserManager::parserQueueFinished, [this]{
         //写入数据库
         qDebug()<<"********************* parserQueueFinished";
-        mPlayListDAO.data ()->commitTransaction ();
+        if (!mPlayListDAO.data ()->commitTransaction ())
+            qDebug()<<"******** write to database error";
     });
 
 //    //发送一个songhash change的信号,以便于qml界面在初始化后刷新

@@ -321,65 +321,6 @@ bool SQLite3DAO::insertMetaData(SongMetaData *metaData, bool skipDuplicates)
     }
     str += QString(" \"%1\") ")
             .arg (metaData->getMeta (Common::SongMetaTags(i)).toString ());
-//    str += "Hash, ";
-//    str += "FilePath, ";
-//    str += "FileName, ";
-//    str += "MediaBitrate, ";
-//    str += "FileSize, ";
-//    str += "ArtistName, ";
-//    str += "ArtistImageUri, ";
-//    str += "ArtistDescription, ";
-//    str += "AlbumName, ";
-//    str += "AlbumDescription, ";
-//    str += "AlbumYear, ";
-//    str += "CoverArtSmall, ";
-//    str += "CoverArtLarge, ";
-//    str += "CoverArtMiddle, ";
-//    str += "MediaType, ";
-//    str += "SongLength, ";
-//    str += "SongTitle, ";
-//    str += "SongDescription, ";
-//    str += "Category, ";
-//    str += "Year, ";
-//    str += "Date, ";
-//    str += "UserRating, ";
-//    str += "Keywords, ";
-//    str += "Language, ";
-//    str += "Publisher, ";
-//    str += "Copyright, ";
-//    str += "Lyrics, ";
-//    str += "Mood";
-//    str += ")";
-//    str += " values(";
-//    str += QString("\"%1\", ").arg (metaData->hash ());
-//    str += QString("\"%1\", ").arg (metaData->filePath ());
-//    str += QString("\"%1\", ").arg (metaData->fileName ());
-//    str += QString("%1, ").arg (metaData->mediaBitrate ());
-//    str += QString("%1, ").arg (metaData->fileSize ());
-//    str += QString("\"%1\", ").arg (metaData->artistName ());
-//    str += QString("\"%1\", ").arg (metaData->artistImageUri ());
-//    str += QString("\"%1\", ").arg (metaData->artistDescription ());
-//    str += QString("\"%1\", ").arg (metaData->albumName ());
-//    str += QString("\"%1\", ").arg (metaData->albumDescription ());
-//    str += QString("\"%1\", ").arg (metaData->albumYear ());
-//    str += QString("\"%1\", ").arg (metaData->coverArtSmall ());
-//    str += QString("\"%1\", ").arg (metaData->coverArtLarge ());
-//    str += QString("\"%1\", ").arg (metaData->coverArtMiddle ());
-//    str += QString("%1, ").arg (metaData->mediaType ());
-//    str += QString("%1, ").arg (metaData->songLength ());
-//    str += QString("\"%1\", ").arg (metaData->songTitle ());
-//    str += QString("\"%1\", ").arg (metaData->songDescription ());
-//    str += QString("\"%1\", ").arg (listToString (metaData->category ()));
-//    str += QString("\"%1\", ").arg (metaData->year ());
-//    str += QString("\"%1\", ").arg (metaData->date ().toString ());
-//    str += QString("%1, ").arg (metaData->userRating ());
-//    str += QString("\"%1\", ").arg (listToString (metaData->keywords ()));
-//    str += QString("\"%1\", ").arg (metaData->language ());
-//    str += QString("\"%1\", ").arg (metaData->publisher ());
-//    str += QString("\"%1\", ").arg (metaData->copyright ());
-//    str += QString("\"%1\", ").arg (metaData->lyrics ());
-//    str += QString("\"%1\"").arg (metaData->mood ());
-//    str += ")";
 
     if (q.exec (str)) {
         mExistSongHashes.append (metaData->getMeta (Common::SongMetaTags::E_Hash)
