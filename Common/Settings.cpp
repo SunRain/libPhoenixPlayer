@@ -25,8 +25,8 @@ Settings::Settings(QObject *parent) : QObject(parent)
     mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 
-    mDefualtMusicImageDir = QString("%1/%2")
-            .arg (mDefaultMusicDir)
+    mDefualtMusicImageDir = QString("%1/%2/Images")
+            .arg (QStandardPaths::CacheLocation)
             .arg (qApp->applicationName());
 
     QDir dir(mDefualtMusicImageDir);
