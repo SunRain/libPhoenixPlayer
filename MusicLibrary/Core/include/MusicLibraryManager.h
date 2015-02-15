@@ -134,6 +134,7 @@ public slots:
 
 private:
       bool init();
+      void initTagParserManager();
 //    void initSettings(/*Settings *settings = 0*/);
 //    void initPluginLoader(/*PluginLoader *loader = 0*/);
 private:
