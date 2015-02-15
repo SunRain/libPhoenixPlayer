@@ -2,6 +2,7 @@
 #include <QRegExp>
 #include <QTextStream>
 #include <QDebug>
+#include <QStringList>
 
 #include "LyricsParser.h"
 

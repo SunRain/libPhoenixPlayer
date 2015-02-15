@@ -28,6 +28,7 @@ MusicLibraryListModel::~MusicLibraryListModel()
 
 void MusicLibraryListModel::showAllTracks()
 {
+    clear();
     mSongHashList = mMusicLibraryManager
             ->querySongMetaElement(Common::E_Hash, QString(), false);
 
@@ -74,6 +75,8 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
         return queryOne(hash, Common::E_SongTitle, true);
     case ModelRoles::RoleUserRating:
         return queryOne(hash, Common::E_UserRating, true);
+    case ModelRoles::RoleHash:
+        return hash;
     default:
         return QVariant();
     }
@@ -82,13 +85,22 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> MusicLibraryListModel::roleNames() const
 {
     QHash<int, QByteArray> role;
-    //必须根据enum排列顺序
-    for (int i = (int)ModelRoles::RoleFilePath;
-         i <= (int)ModelRoles::RoleGenre;
-         ++i) {
-        role.insert(i, enumToRole(i));
-    }
-    return role;
+    role.insert(ModelRoles::RoleAlbumImageUrl, "albumImageUrl");
+    role.insert(ModelRoles::RoleAlbumName, "albumName");
+    role.insert(ModelRoles::RoleArtistImageUri, "artistImageUri");
+    role.insert(ModelRoles::RoleArtistName, "artistName");
+    role.insert(ModelRoles::RoleCoverArtLarge, "coverArtLarge");
+    role.insert(ModelRoles::RoleCoverArtMiddle, "coverArtMiddle");
+    role.insert(ModelRoles::RoleCoverArtSmall, "coverArtSmall");
+    role.insert(ModelRoles::RoleFileName, "fileName");
+    role.insert(ModelRoles::RoleFilePath, "filePath");
+    role.insert(ModelRoles::RoleGenre, "genre");
+    role.insert(ModelRoles::RoleHash, "hash");
+    role.insert(ModelRoles::RoleMediaType, "mediaType");
+    role.insert(ModelRoles::RoleSongTitle, "songTitle");
+    role.insert(ModelRoles::RoleUserRating, "userRating");
+    return role;;
+
 }
 
 void MusicLibraryListModel::clear()
@@ -100,18 +112,8 @@ void MusicLibraryListModel::clear()
     mSongHashList.clear();
 }
 
-QByteArray MusicLibraryListModel::enumToRole(int enumValue) const
+void MusicLibraryListModel::appendToModel()
 {
-    int index  = metaObject ()->indexOfEnumerator ("ModelRoles");
-    QMetaEnum m = metaObject ()->enumerator (index);
-    return QByteArray(m.valueToKey (enumValue)).replace("Role", "").toLower();
-}
-
-void MusicLibraryListModel::appendToModel(bool clearBeforeAppend)
-{
-    if (clearBeforeAppend)
-        clear();
-
     if (mSongHashList.isEmpty())
         return;
 

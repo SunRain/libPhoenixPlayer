@@ -45,7 +45,8 @@ protected:
         RoleMediaType,
         RoleSongTitle,
         RoleUserRating,
-        RoleGenre
+        RoleGenre,
+        RoleHash
     };
 
 signals:
@@ -54,8 +55,7 @@ public slots:
     void clear();
 
 private:
-    QByteArray enumToRole(int enumValue) const;
-    void appendToModel(bool clearBeforeAppend = true);
+    void appendToModel();
     QString queryOne(const QString &hash,
                      Common::SongMetaTags tag,
                      bool skipDuplicates = true) const;
