@@ -23,6 +23,7 @@ public:
 
     virtual QString getPluginName() = 0;
     virtual QString getPluginVersion() = 0;
+    virtual QString getDescription() = 0;
 
     virtual bool initDataBase() = 0;
 

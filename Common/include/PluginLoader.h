@@ -9,7 +9,6 @@ namespace PhoenixPlayer {
 
 namespace PlayBackend {
 class IPlayBackend;
-class IMusicTagParser;
 }
 
 namespace MusicLibrary {
@@ -79,7 +78,15 @@ public:
     QStringList getPluginNames(PluginType type);
 
 protected:
-    void initPlugins(PluginType type);
+    void initPlugins();
+    struct PluginObject {
+        PluginType type;
+        QString name;
+        QString version;
+        QString description;
+        QString file;
+    };
+
 signals:
     ///
     /// \brief signalPluginChanged setNewPlugin后如果新插件名和当前使用的插件名不同,则发送此信号
@@ -96,20 +103,21 @@ public slots:
      void setNewPlugin(PluginType type, const QString &newPluginName);
 
 private:
-     void initPlayBackendPlugin();
-     void initPlayListDaoPlugin();
-     void initMusicTagParserPlugin();
-     void initMetadataLookupPlugin();
+//     void initPlayBackendPlugin();
+//     void initPlayListDaoPlugin();
+//     void initMusicTagParserPlugin();
+//     void initMetadataLookupPlugin();
 private:
      bool isInit;
-      QList <PlayBackend::IPlayBackend*> mPlayBackendList;
-      QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
-      QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;
-      QList <MetadataLookup::IMetadataLookup*> mMetaLookupList;
+//      QList <PlayBackend::IPlayBackend*> mPlayBackendList;
+//      QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
+//      QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;
+//      QList <MetadataLookup::IMetadataLookup*> mMetaLookupList;
 
-      QHash<PluginType, int> mCurrentPluginIndex;
-      QHash<PluginType, QString> mCurrentPluginName;
-      QHash<PluginType, QString> mPluginPath;
+     QList<PluginObject> mPluginList;
+//     QHash<PluginType, int> mCurrentPluginIndex;
+     QHash<PluginType, QString> mCurrentPluginName;
+     QHash<PluginType, QString> mPluginPath;
 };
 
 } //PhoenixPlayer

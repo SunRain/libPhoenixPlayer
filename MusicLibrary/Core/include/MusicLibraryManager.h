@@ -139,7 +139,7 @@ private:
 //    void initPluginLoader(/*PluginLoader *loader = 0*/);
 private:
       bool isInit;
-      QPointer<IPlayListDAO> mPlayListDAO;
+      IPlayListDAO *mPlayListDAO;
       PluginLoader *mPluginLoader;
       Settings *mSettings;
 

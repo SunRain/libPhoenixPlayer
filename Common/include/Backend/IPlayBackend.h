@@ -19,6 +19,7 @@ public:
     virtual Common::PlaybackState  getPlaybackState() = 0;
     virtual QString	getBackendName() = 0;
     virtual QString getBackendVersion() = 0;
+    virtual QString getDescription() = 0;
     virtual void	init() = 0;
 signals:
 //    void positionChanged(quint64 posMs = 0);
