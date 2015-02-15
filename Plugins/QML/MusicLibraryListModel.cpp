@@ -77,6 +77,8 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
         return queryOne(hash, Common::E_SongTitle, true);
     case ModelRoles::RoleUserRating:
         return queryOne(hash, Common::E_UserRating, true);
+    case ModelRoles::RoleHash:
+        return hash;
     default:
         return QVariant();
     }
@@ -85,13 +87,6 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> MusicLibraryListModel::roleNames() const
 {
     QHash<int, QByteArray> role;
-//    //必须根据enum排列顺序
-//    for (int i = (int)ModelRoles::RoleFilePath;
-//         i <= (int)ModelRoles::RoleGenre;
-//         ++i) {
-//        qDebug()<<"insert role "<<i;
-//        role.insert(i, enumToRole(i));
-//    }
     role.insert(ModelRoles::RoleAlbumImageUrl, "albumImageUrl");
     role.insert(ModelRoles::RoleAlbumName, "albumName");
     role.insert(ModelRoles::RoleArtistImageUri, "artistImageUri");
@@ -102,11 +97,11 @@ QHash<int, QByteArray> MusicLibraryListModel::roleNames() const
     role.insert(ModelRoles::RoleFileName, "fileName");
     role.insert(ModelRoles::RoleFilePath, "filePath");
     role.insert(ModelRoles::RoleGenre, "genre");
+    role.insert(ModelRoles::RoleHash, "hash");
     role.insert(ModelRoles::RoleMediaType, "mediaType");
     role.insert(ModelRoles::RoleSongTitle, "songTitle");
     role.insert(ModelRoles::RoleUserRating, "userRating");
-
-    return role;
+    return role;;
 }
 
 void MusicLibraryListModel::clear()

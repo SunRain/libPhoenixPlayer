@@ -19,6 +19,22 @@ namespace SQLite3 {
 SQLite3DAO::SQLite3DAO(QObject *parent)
     :IPlayListDAO(parent)
 {
+    if (!mDatabase.isValid ()) {
+        qDebug()<<"Database is not valid";
+        mDatabase = QSqlDatabase::database ();
+        qDebug()<<"Try to add database form connection  'MusicLibrary', error is "<<mDatabase.lastError ().text ();
+    }
+    if (!mDatabase.isValid ()) {
+        qDebug()<<"Add database from connection 'MusicLibrary' failed";
+        mDatabase = QSqlDatabase::addDatabase("QSQLITE");
+        mDatabase.setDatabaseName(DATABASE_NAME);
+        qDebug()<<"Try to add a new connection MusicLibrary, error is "<<mDatabase.lastError ().text ();
+    }
+
+    if (!mDatabase.isValid ()) {
+        qDebug()<<"OOPS, We can't connetc to sqlite database "<<mDatabase.lastError ().text ();
+        mDatabase.removeDatabase (DATABASE_NAME);
+    }
 }
 
 //SQLite3DAO *SQLite3DAO::getInstance()
@@ -54,23 +70,23 @@ bool SQLite3DAO::initDataBase()
 {
     qDebug()<<">>>>>>>>>>>>>> "<<__FUNCTION__<<" <<<<<<<<<<<<<<<<<<<<<<";
 
-    if (!mDatabase.isValid ()) {
-        qDebug()<<"Database is not valid";
-        mDatabase = QSqlDatabase::database ();
-        qDebug()<<"Try to add database form connection  'MusicLibrary', error is "<<mDatabase.lastError ().text ();
-    }
-    if (!mDatabase.isValid ()) {
-        qDebug()<<"Add database from connection 'MusicLibrary' failed";
-        mDatabase = QSqlDatabase::addDatabase("QSQLITE");
-        mDatabase.setDatabaseName(DATABASE_NAME);
-        qDebug()<<"Try to add a new connection MusicLibrary, error is "<<mDatabase.lastError ().text ();
-    }
+//    if (!mDatabase.isValid ()) {
+//        qDebug()<<"Database is not valid";
+//        mDatabase = QSqlDatabase::database ();
+//        qDebug()<<"Try to add database form connection  'MusicLibrary', error is "<<mDatabase.lastError ().text ();
+//    }
+//    if (!mDatabase.isValid ()) {
+//        qDebug()<<"Add database from connection 'MusicLibrary' failed";
+//        mDatabase = QSqlDatabase::addDatabase("QSQLITE");
+//        mDatabase.setDatabaseName(DATABASE_NAME);
+//        qDebug()<<"Try to add a new connection MusicLibrary, error is "<<mDatabase.lastError ().text ();
+//    }
 
-    if (!mDatabase.isValid ()) {
-        qDebug()<<"OOPS, We can't connetc to sqlite database "<<mDatabase.lastError ().text ();
-        mDatabase.removeDatabase (DATABASE_NAME);
-        return false;
-    }
+//    if (!mDatabase.isValid ()) {
+//        qDebug()<<"OOPS, We can't connetc to sqlite database "<<mDatabase.lastError ().text ();
+//        mDatabase.removeDatabase (DATABASE_NAME);
+//        return false;
+//    }
     if (!mDatabase.open()) {
         qDebug()<<"Can't open mDatabase "<<mDatabase.lastError ().text ();
         mDatabase.removeDatabase (DATABASE_NAME);
