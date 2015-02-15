@@ -25,15 +25,19 @@ Settings::Settings(QObject *parent) : QObject(parent)
     mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 
-    mDefualtMusicImageDir = QString("%1/%2/Images")
-            .arg (QStandardPaths::CacheLocation)
-            .arg (qApp->applicationName());
+    mDefaultMusicImageDir = QString("%1/Images")
+            .arg (QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
 
-    QDir dir(mDefualtMusicImageDir);
+    QDir dir(mDefaultMusicImageDir);
     if (!dir.exists ()) {
-        if (!dir.mkpath (mDefualtMusicImageDir)) {
+        if (!dir.mkpath (mDefaultMusicImageDir)) {
             qDebug()<<"make music image dir fail";
         }
+    }
+    dir.setPath(mDefaultMusicDir);
+    if (!dir.exists()) {
+        if (!dir.mkpath(mDefaultMusicDir))
+            qDebug()<<"make music default dir fail";
     }
 }
 
@@ -142,6 +146,6 @@ bool Settings::setMusicImageCachePath(const QString &absolutePath)
 
 QString Settings::getMusicImageCachePath()
 {
-    return mSettings->value (KEY_MUSIC_IMAGE_CACHE, mDefualtMusicImageDir).toString ();
+    return mSettings->value (KEY_MUSIC_IMAGE_CACHE, mDefaultMusicImageDir).toString ();
 }
 } //PhoenixPlayer

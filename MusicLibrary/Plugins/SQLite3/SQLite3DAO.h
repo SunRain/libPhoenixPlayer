@@ -18,7 +18,7 @@ namespace SQLite3 {
 #define DAO_NAME "SQLite3"
 #define VERSION "0.1"
 
-#define DATABASE_NAME ":PhoenixPlayer_sqlite3:"
+#define DATABASE_NAME "PhoenixPlayer_sqlite3.sql"
 #define LIBRARY_TABLE_TAG "LIBRARY"
 #define PLAYLIST_TABLE_TAG "PLAYLIST"
 
@@ -28,7 +28,7 @@ class SQLite3DAO : public IPlayListDAO
     Q_PLUGIN_METADATA(IID "PhoenixPlayer.MusicLibrary.SQLite3DAO" FILE "playlistsqlite3plugin.json")
     Q_INTERFACES(PhoenixPlayer::MusicLibrary::IPlayListDAO)
 public:
-    SQLite3DAO(QObject *parent = 0);
+    explicit SQLite3DAO(QObject *parent = 0);
 //    static SQLite3DAO *getInstance();
     virtual ~SQLite3DAO();
 

@@ -121,19 +121,23 @@ MusicLibraryManager *MusicLibraryManager::instance()
 
 bool MusicLibraryManager::scanLocalMusic()
 {
+    qDebug()<<__FUNCTION__;
     //本地歌曲扫描线程
     if (mDiskLooKupThread.isNull ()) {
-        mDiskLooKupThread = new QThread(this);
+        qDebug()<<__FUNCTION__<<" new mDiskLooKupThread";
 
-        //signal/slot
-        connect (mDiskLooKupThread.data (), &QThread::finished,
-                 mDiskLooKup.data (), &DiskLookup::deleteLater);
+        mDiskLooKupThread = new QThread(this);
     }
     if (mDiskLooKup.isNull ()) {
+        qDebug()<<__FUNCTION__<<" new mDiskLooKup";
+
         mDiskLooKup = new DiskLookup(0);
         mDiskLooKup.data ()->moveToThread (mDiskLooKupThread);
 
         //signal/slot
+        connect (mDiskLooKupThread.data (), &QThread::finished,
+                 mDiskLooKup.data (), &DiskLookup::deleteLater);
+
         connect (mDiskLooKup.data (), &DiskLookup::pending,
                  mPlayListDAO.data (), &IPlayListDAO::beginTransaction);
 
@@ -202,6 +206,7 @@ bool MusicLibraryManager::scanLocalMusic()
 //        mTagParserManager.data ()->addItem (data, false);
 //    });
 
+    qDebug()<<__FUNCTION__<<" start add lookup dir";
 
     foreach (QString s, mSettings->getMusicDirs ()) {
         mDiskLooKup.data ()->addLookupDir (s, false);

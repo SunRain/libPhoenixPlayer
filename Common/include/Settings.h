@@ -44,7 +44,7 @@ private:
     QSettings *mSettings;
 
     QString mDefaultMusicDir;
-    QString mDefualtMusicImageDir;
+    QString mDefaultMusicImageDir;
 };
 } //PhoenixPlayer
 #endif // SETTINGS_H

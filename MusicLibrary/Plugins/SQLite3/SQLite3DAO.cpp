@@ -5,6 +5,8 @@
 
 #include <QLatin1String>
 #include <QtAlgorithms>
+#include <QStandardPaths>
+#include <QDir>
 
 #include <QDebug>
 
@@ -19,22 +21,7 @@ namespace SQLite3 {
 SQLite3DAO::SQLite3DAO(QObject *parent)
     :IPlayListDAO(parent)
 {
-    if (!mDatabase.isValid ()) {
-        qDebug()<<"Database is not valid";
-        mDatabase = QSqlDatabase::database ();
-        qDebug()<<"Try to add database form connection  'MusicLibrary', error is "<<mDatabase.lastError ().text ();
-    }
-    if (!mDatabase.isValid ()) {
-        qDebug()<<"Add database from connection 'MusicLibrary' failed";
-        mDatabase = QSqlDatabase::addDatabase("QSQLITE");
-        mDatabase.setDatabaseName(DATABASE_NAME);
-        qDebug()<<"Try to add a new connection MusicLibrary, error is "<<mDatabase.lastError ().text ();
-    }
 
-    if (!mDatabase.isValid ()) {
-        qDebug()<<"OOPS, We can't connetc to sqlite database "<<mDatabase.lastError ().text ();
-        mDatabase.removeDatabase (DATABASE_NAME);
-    }
 }
 
 //SQLite3DAO *SQLite3DAO::getInstance()
@@ -70,26 +57,39 @@ bool SQLite3DAO::initDataBase()
 {
     qDebug()<<">>>>>>>>>>>>>> "<<__FUNCTION__<<" <<<<<<<<<<<<<<<<<<<<<<";
 
-//    if (!mDatabase.isValid ()) {
-//        qDebug()<<"Database is not valid";
-//        mDatabase = QSqlDatabase::database ();
-//        qDebug()<<"Try to add database form connection  'MusicLibrary', error is "<<mDatabase.lastError ().text ();
-//    }
-//    if (!mDatabase.isValid ()) {
-//        qDebug()<<"Add database from connection 'MusicLibrary' failed";
-//        mDatabase = QSqlDatabase::addDatabase("QSQLITE");
-//        mDatabase.setDatabaseName(DATABASE_NAME);
-//        qDebug()<<"Try to add a new connection MusicLibrary, error is "<<mDatabase.lastError ().text ();
-//    }
+    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+    QString dbFile = QString("%1/%2").arg(dbPath).arg(DATABASE_NAME);
 
-//    if (!mDatabase.isValid ()) {
-//        qDebug()<<"OOPS, We can't connetc to sqlite database "<<mDatabase.lastError ().text ();
-//        mDatabase.removeDatabase (DATABASE_NAME);
-//        return false;
-//    }
+    qDebug()<<"===== path is "<<dbPath;
+
+    QDir dir(dbPath);
+    if (!dir.exists()) {
+        if (!dir.mkpath(dbPath)) {
+            qDebug()<<__FUNCTION__<<" Can't mkdir ";
+            return false;
+        }
+    }
+
+    if (!mDatabase.isValid ()) {
+        qDebug()<<"Database is not valid";
+        mDatabase = QSqlDatabase::database ();
+        qDebug()<<"Try to add database form connection  'MusicLibrary', error is "<<mDatabase.lastError ().text ();
+    }
+
+    if (!mDatabase.isValid ()) {
+        qDebug()<<"Add database from connection 'MusicLibrary' failed";
+        mDatabase = QSqlDatabase::addDatabase("QSQLITE");
+        mDatabase.setDatabaseName(dbFile);
+        qDebug()<<"Try to add a new connection MusicLibrary, error is "<<mDatabase.lastError ().text ();
+    }
+
+    if (!mDatabase.isValid ()) {
+        qDebug()<<"OOPS, We can't connetc to sqlite database "<<mDatabase.lastError ().text ();
+        mDatabase.removeDatabase (dbFile);
+    }
     if (!mDatabase.open()) {
         qDebug()<<"Can't open mDatabase "<<mDatabase.lastError ().text ();
-        mDatabase.removeDatabase (DATABASE_NAME);
+        mDatabase.removeDatabase (dbFile);
         return false;
     }
 
@@ -125,37 +125,6 @@ bool SQLite3DAO::initDataBase()
     str += QString("%1 TEXT )")
             .arg (mCommon.enumToStr ("SongMetaTags",
                                      (int)Common::SongMetaTags::E_LastFlag -1));
-//    str += "Hash TEXT,";
-////    str += "Hash integer primary key,";
-//    str += "FilePath TEXT,";
-//    str += "FileName TEXT,";
-//    str += "MediaBitrate integer,";
-//    str += "FileSize integer,";
-//    str += "ArtistName TEXT,";
-//    str += "ArtistImageUri TEXT,";
-//    str += "ArtistDescription TEXT,";
-//    str += "AlbumName TEXT,";
-////    str += "AlbumImageUrl TEXT,";
-//    str += "AlbumDescription TEXT,";
-//    str += "AlbumYear TEXT,";
-//    str += "CoverArtSmall TEXT,";
-//    str += "CoverArtLarge TEXT,";
-//    str += "CoverArtMiddle TEXT,";
-//    str += "MediaType integer,";
-//    str += "SongLength integer,";
-//    str += "SongTitle TEXT,";
-//    str += "SongDescription TEXT,";
-//    str += "Category TEXT,";
-//    str += "Year TEXT,";
-//    str += "Date TEXT,";
-//    str += "UserRating integer,";
-//    str += "Keywords TEXT,";
-//    str += "Language TEXT,";
-//    str += "Publisher TEXT,";
-//    str += "Copyright TEXT,";
-//    str += "Lyrics TEXT,";
-//    str += "Mood TEXT";
-//    str +=")";
 
     /*
      * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
@@ -182,8 +151,6 @@ bool SQLite3DAO::initDataBase()
     str += QString("%1 TEXT )")
             .arg (mCommon.enumToStr ("PlayListElement",
                                      (int)Common::PlayListElement::PlayListLastFlag -1));
-
-    qDebug()<<"run sql "<<str;
 
     if (!q.exec (str)) {
         qDebug() << "Create playlist tab error "
