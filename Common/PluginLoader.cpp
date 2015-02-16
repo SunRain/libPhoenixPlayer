@@ -317,61 +317,10 @@ QStringList PluginLoader::getPluginNames(PluginLoader::PluginType type)
 
 void PluginLoader::initPlugins()
 {
-//    switch (type) {
-//    case PluginType::TypePlayBackend:
-//        initPlayBackendPlugin ();
-//        break;
-//    case PluginType::TypeMetadataLookup:
-//        initMetadataLookupPlugin ();
-//        break;
-//    case PluginType::TypeMusicTagParser:
-//        initMusicTagParserPlugin ();
-//        break;
-//    case PluginType::TypePlayListDAO:
-//        initPlayListDaoPlugin ();
-//        break;
-//    default: {
-//        initPlayBackendPlugin ();
-//        initPlayListDaoPlugin ();
-//        initMusicTagParserPlugin ();
-//        initMetadataLookupPlugin ();
-//        break;
-//    }
-//    }
-//    isInit = true;
-
     //删除之前容器中保存的插件
     if (!mPluginList.isEmpty()) {
         mPluginList.clear();
     }
-//    int index = 0;
-
-//    //system plugins
-//    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
-//        if (plugin) {
-//            //播放后端
-//            if (IPlayBackend *obj = qobject_cast<IPlayBackend*>(plugin)) {
-//                Plugins p;
-//                p.type = PluginType::TypePlayBackend;
-//                p.description = obj->getDescription();
-//                p.file
-//            }
-////            PlayBackend::IPlayBackend *backend
-////                    = qobject_cast<PlayBackend::IPlayBackend*>(plugin);
-////            if (backend) {
-////                mPlayBackendList.append (backend);
-////                //检测当前找到的插件是否是当前使用的插件
-////                QString name = backend->getBackendName ().toLower ();
-////                if (name == mCurrentPluginName[PluginType::TypePlayBackend]
-////                        .toLower ()) {
-////                    mCurrentPluginIndex[PluginType::TypePlayBackend] = index;
-////                    mCurrentPluginName[PluginType::TypePlayBackend] = name;
-////                }
-////                index++;
-////            }
-//        }
-//    }
-
     // dynamic plugins
     qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypePlayBackend];
     QDir dir(mPluginPath[PluginType::TypePlayBackend]);
@@ -420,34 +369,19 @@ void PluginLoader::initPlugins()
             } else {
                 qDebug()<<__FUNCTION__<<" can't change to plugin";
             }
-//            PlayBackend::IPlayBackend *backend
-//                    = qobject_cast<PlayBackend::IPlayBackend*>(plugin);
-//            if (backend) {
-//                mPlayBackendList.append (backend);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = backend->getBackendName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypePlayBackend]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypePlayBackend] = index;
-//                    mCurrentPluginName[PluginType::TypePlayBackend] = name;
-//                }
-//                index++;
-//            }
         } else {
             qDebug()<<__FUNCTION__<<" load plugin error "<<loader.errorString();
         }
     }
 
-//    qDebug()<<"Find playbackend num "<<index;
+    foreach (PluginObject obj, mPluginList) {
+        qDebug()<<"Found plugins for type ["
+               <<obj.type<<"] name ["
+              <<obj.name<<"] file ["
+             <<obj.file<<"]";
+    }
 
-//    if (mPlayBackendList.isEmpty ()) {
-//        mCurrentPluginIndex[PluginType::TypePlayBackend] = -1;
-//        mCurrentPluginName[PluginType::TypePlayBackend] = QString();
-//    } else { //得到第一个插件
-//        mCurrentPluginIndex[PluginType::TypePlayBackend] = 0;
-//        mCurrentPluginName[PluginType::TypePlayBackend]
-//                = mPlayBackendList.at (0)->getBackendName ().toLower ();
-    //    }
+    isInit = true;
 }
 
 void PluginLoader::setNewPlugin(PluginLoader::PluginType type,

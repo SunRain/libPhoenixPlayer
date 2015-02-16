@@ -31,6 +31,7 @@ MusicLibraryListModel::~MusicLibraryListModel()
 
 void MusicLibraryListModel::showAllTracks()
 {
+    qDebug()<<__FUNCTION__;
     clear();
     mSongHashList = mMusicLibraryManager
             ->querySongMetaElement(Common::E_Hash, QString(), false);
