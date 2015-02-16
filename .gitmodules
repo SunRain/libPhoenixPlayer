@@ -1,0 +1,4 @@
+[submodule "CuteLogger"]
+	path = CuteLogger
+	url = https://github.com/SunRain/CuteLogger.git
+	branch = master
