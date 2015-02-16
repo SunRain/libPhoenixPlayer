@@ -310,7 +310,6 @@ QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targe
                                                       const QString &hash,
                                                       bool skipDuplicates)
 {
-    qDebug()<<__FUNCTION__<<" mPlayListDAO "<<(mPlayListDAO.isNull());
     QStringList list;
     if (hash.isEmpty ()) {
         list = mPlayListDAO.data()
