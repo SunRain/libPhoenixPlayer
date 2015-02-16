@@ -338,7 +338,6 @@ void PluginLoader::initPlugins()
                 p.name = obj->getBackendName();
                 p.version = obj->getBackendVersion();
                 mPluginList.append(p);
-                obj->deleteLater();
             } else if (IMetadataLookup *obj = qobject_cast<IMetadataLookup*>(plugin)) {
                 PluginObject p;
                 p.description = obj->getDescription();
@@ -347,7 +346,6 @@ void PluginLoader::initPlugins()
                 p.type = PluginType::TypeMetadataLookup;
                 p.version = obj->getPluginVersion();
                 mPluginList.append(p);
-                obj->deleteLater();
             } else if (IPlayListDAO *obj = qobject_cast<IPlayListDAO*>(plugin)) {
                 PluginObject p;
                 p.description = obj->getDescription();
@@ -356,7 +354,6 @@ void PluginLoader::initPlugins()
                 p.type = PluginType::TypePlayListDAO;
                 p.version = obj->getPluginVersion();
                 mPluginList.append(p);
-                obj->deleteLater();
             } else if (IMusicTagParser *obj = qobject_cast<IMusicTagParser*>(plugin)) {
                 PluginObject p;
                 p.description = obj->getDescription();
@@ -365,12 +362,16 @@ void PluginLoader::initPlugins()
                 p.type = PluginType::TypeMusicTagParser;
                 p.version = obj->getPluginVersion();
                 mPluginList.append(p);
-                obj->deleteLater();
             } else {
                 qDebug()<<__FUNCTION__<<" can't change to plugin";
             }
         } else {
             qDebug()<<__FUNCTION__<<" load plugin error "<<loader.errorString();
+        }
+        if (loader.isLoaded()) {
+            qDebug()<<__FUNCTION__<<" try to unload plugin now";
+            if (!loader.unload())
+                qDebug()<<__FUNCTION__<<" unload plugin fail";
         }
     }
 

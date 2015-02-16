@@ -49,6 +49,27 @@ GStreamerBackend::GStreamerBackend(QObject *parent)
 //    _sr_wanna_record = false;
 
     _gapless_track_available = false;
+
+
+    _pipeline = nullptr;
+    _equalizer = nullptr;
+    _eq_queue = nullptr;
+    _volume = nullptr;
+
+    _tee_app_pad  = nullptr;
+    _app_pad = nullptr;
+
+    _audio_sink = nullptr;
+    _audio_bin = nullptr;
+    _gio_src = nullptr;
+    _decodebin = nullptr;
+
+    _app_sink = nullptr;
+    _app_queue = nullptr;
+
+    _tee = nullptr;
+
+    _bus = nullptr;
 //    _stream_recorder = new StreamRecorder();
 
       /* _timer = new QTimer(this);
@@ -75,7 +96,7 @@ GStreamerBackend::~GStreamerBackend()
         gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_NULL);
         gst_object_unref (GST_OBJECT(_pipeline));
     }
-    gst_obj_ref = 0;
+    gst_obj_ref = nullptr;
 }
 
 PhoenixPlayer::Common::PlaybackState GStreamerBackend::getPlaybackState()
