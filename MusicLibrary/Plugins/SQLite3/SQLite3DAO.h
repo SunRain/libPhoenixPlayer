@@ -17,6 +17,7 @@ namespace SQLite3 {
 
 #define DAO_NAME "SQLite3"
 #define VERSION "0.1"
+#define DESCRIPTION "Save music library by SQLite3"
 
 #define DATABASE_NAME "PhoenixPlayer_sqlite3.sql"
 #define LIBRARY_TABLE_TAG "LIBRARY"
@@ -36,6 +37,7 @@ public:
 public:
     QString getPluginName();
     QString getPluginVersion();
+    QString getDescription();
     bool initDataBase();
     bool openDataBase();
 

@@ -53,6 +53,11 @@ QString SQLite3DAO::getPluginVersion()
     return VERSION;
 }
 
+QString SQLite3DAO::getDescription()
+{
+    return QString(DESCRIPTION);
+}
+
 bool SQLite3DAO::initDataBase()
 {
     qDebug()<<">>>>>>>>>>>>>> "<<__FUNCTION__<<" <<<<<<<<<<<<<<<<<<<<<<";

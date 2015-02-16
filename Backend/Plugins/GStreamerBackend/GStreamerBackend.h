@@ -28,6 +28,7 @@ namespace GStreamer {
 
 #define BACKEND_NAME "GStreamerBackend"
 #define BACKEND_VERSION "0.1"
+#define DESCRIPTION "Gstreamer play backend"
 
 //float f_channel[2];
 #define SCALE_SHORT 0.000000004f
@@ -82,6 +83,7 @@ public:
     PhoenixPlayer::Common::PlaybackState getPlaybackState();
     QString getBackendName();
     QString getBackendVersion();
+    QString getDescription();
     void init();
 
 
@@ -150,7 +152,6 @@ private:
      int			_seconds_now;
 
      bool		_scrobbled;
-
 };
 } //GStreamer
 } //PlayBackend

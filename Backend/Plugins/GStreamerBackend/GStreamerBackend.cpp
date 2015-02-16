@@ -93,6 +93,11 @@ QString GStreamerBackend::getBackendVersion()
     return BACKEND_VERSION;
 }
 
+QString GStreamerBackend::getDescription()
+{
+    return QString(DESCRIPTION);
+}
+
 void GStreamerBackend::init()
 {
     gst_init(0, 0);

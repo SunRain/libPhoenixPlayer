@@ -162,6 +162,11 @@ bool BaiduLookup::supportLookup(IMetadataLookup::LookupType type)
     }
 }
 
+QString BaiduLookup::getDescription()
+{
+    return QString(DESCRIPTION);
+}
+
 } //BaiduLookup
 } //Lyrics
 } //PhoenixPlayer
