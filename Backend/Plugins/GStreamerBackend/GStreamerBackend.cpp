@@ -83,6 +83,21 @@ GStreamerBackend::GStreamerBackend(QObject *parent)
 //               SLOT(sr_ended()));
 //       connect(_stream_recorder, SIGNAL(sig_stream_not_valid()), this,
 //               SLOT(sr_not_valid()));
+
+#ifdef SAILFISH_OS
+//    mAudioResource.setResourceType(AudioResourceQt::AudioResource::MediaType);
+    connect(&mAudioResource,
+            &AudioResourceQt::AudioResource::acquiredChanged,
+            [this] {
+        if (mAudioResource.isAcquired()) {
+            qDebug()<<"start gst play at "<<mStartSec;
+            gstPlay(mStartSec);
+        } /*else {
+            qDebug()<<"should pause";
+            gstPause();
+        }*/
+    });
+#endif
 }
 
 GStreamerBackend::~GStreamerBackend()
@@ -123,6 +138,7 @@ void GStreamerBackend::init()
 {
     gst_init(0, 0);
     init_play_pipeline();
+    mAudioResource.setResourceType(AudioResourceQt::AudioResource::MediaType);
 }
 
 void GStreamerBackend::state_changed()
@@ -270,19 +286,20 @@ void GStreamerBackend::emit_buffer(float inv_arr_channel_elements, float scale)
 
 void GStreamerBackend::play(quint64 startSec)
 {
-    _track_finished = false;
-    _state = PhoenixPlayer::Common::PlaybackPlaying;
-    emit stateChanged(_state);
-
-    gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PLAYING);
-
-    gst_obj_ref = this;
-    if (startSec > 0)
-        setPosition(startSec);
+#ifdef SAILFISH_OS
+    qDebug()<<__FUNCTION__<<" play";
+    mStartSec = startSec;
+    mAudioResource.acquire();
+#else
+    gstPlay(startSec);
+#endif
 }
 
 void GStreamerBackend::stop()
 {
+#ifdef SAILFISH_OS
+    mAudioResource.release();
+#endif
     _state = PhoenixPlayer::Common::PlaybackStopped;
     emit stateChanged(_state);
 
@@ -299,9 +316,10 @@ void GStreamerBackend::stop()
 
 void GStreamerBackend::pause()
 {
-    _state = PhoenixPlayer::Common::PlaybackPaused;
-    emit stateChanged(_state);
-    gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PAUSED);
+#ifdef SAILFISH_OS
+    mAudioResource.release();
+#endif
+    gstPause();
 }
 
 void GStreamerBackend::setVolume(int vol)
@@ -387,8 +405,12 @@ void GStreamerBackend::changeMedia(PlayBackend::BaseMediaObject *obj,
         __start_at_beginning = true;
     }
 
-    qDebug()<<" __start_at_beginning "<<__start_at_beginning;
+    qDebug()<<" __start_at_beginning "<<__start_at_beginning
+              <<" with play "<<startPlay;
 
+#ifdef SAILFISH_OS
+    mAudioResource.release();
+#endif
     if (startPlay) {
         play(startSec);
     } else if (!startPlay /*&& !(_playing_stream && _sr_active)*/) { // pause if streamripper is not active
@@ -580,6 +602,26 @@ bool GStreamerBackend::set_uri(PlayBackend::BaseMediaObject *obj, bool startPlay
     qDebug() << "Engine:  set uri: " << uri;
 
     return true;
+}
+
+void GStreamerBackend::gstPlay(quint64 startSec)
+{
+    _track_finished = false;
+    _state = PhoenixPlayer::Common::PlaybackPlaying;
+    emit stateChanged(_state);
+
+    gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PLAYING);
+
+    gst_obj_ref = this;
+    if (startSec > 0)
+        setPosition(startSec);
+}
+
+void GStreamerBackend::gstPause()
+{
+    _state = PhoenixPlayer::Common::PlaybackPaused;
+    emit stateChanged(_state);
+    gst_element_set_state(GST_ELEMENT(_pipeline), GST_STATE_PAUSED);
 }
 } //GStreamer
 } //PlayBackend

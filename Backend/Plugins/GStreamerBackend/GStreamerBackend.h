@@ -6,6 +6,10 @@
 #include <gst/gst.h>
 #include <gst/gstbuffer.h>
 
+#ifdef SAILFISH_OS
+#include <AudioResourceQt>
+#endif
+
 #include "Backend/IPlayBackend.h"
 #include "Backend/BaseMediaObject.h"
 
@@ -109,6 +113,8 @@ public slots:
 private:
     void init_play_pipeline();
     bool set_uri(PlayBackend::BaseMediaObject *obj = 0, bool startPlay = false);
+    void gstPlay(quint64 startSec = 0);
+    void gstPause();
 private:
     GstElement* _pipeline;
     GstElement* _equalizer;
@@ -152,6 +158,11 @@ private:
      int			_seconds_now;
 
      bool		_scrobbled;
+
+#ifdef SAILFISH_OS
+     AudioResourceQt::AudioResource mAudioResource;
+     quint64 mStartSec;
+#endif
 };
 } //GStreamer
 } //PlayBackend
