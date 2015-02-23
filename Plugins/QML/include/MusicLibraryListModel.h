@@ -46,7 +46,19 @@ public:
         RoleSongTitle,
         RoleUserRating,
         RoleGenre,
-        RoleHash
+        RoleHash,
+        RoleTrackTitle,     //播放列表中第一行显示内容
+        RoleTrackSubTitle,   //播放列表中第二行显示内容
+        /*
+         * 歌曲封面图片，按照
+         * CoverArtMiddle
+         * CoverArtLarge
+         * CoverArtSmall
+         * AlbumImageUrl
+         * ArtistImageUri
+         * 顺序返回图片地址，如果都不存在，则返回空
+         */
+        RoleTrackImageUri
     };
 
 signals:

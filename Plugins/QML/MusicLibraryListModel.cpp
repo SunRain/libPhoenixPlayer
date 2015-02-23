@@ -80,6 +80,37 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
         return queryOne(hash, Common::E_UserRating, true);
     case ModelRoles::RoleHash:
         return hash;
+    case ModelRoles::RoleTrackTitle: {
+        QString t = queryOne(hash, Common::E_SongTitle);
+        if (t.isEmpty()) {
+            t = queryOne(hash, Common::E_FileName);
+            if (!t.isEmpty())
+                t = t.mid(0, t.lastIndexOf("."));
+        }
+        return t;
+    }
+    case ModelRoles::RoleTrackSubTitle: {
+        QString s = queryOne(hash, Common::E_AlbumName);
+        if (!s.isEmpty())
+            s += " - ";
+        s += queryOne(hash, Common::E_ArtistName);
+        QString t = queryOne(hash, Common::E_SongLength);
+        if (!t.isEmpty())
+            s += QString(" (%1)").arg(t);
+        return s;
+    }
+    case ModelRoles::RoleTrackImageUri: {
+        QString uri = queryOne(hash, Common::E_CoverArtMiddle);
+        if (uri.isEmpty())
+            uri = queryOne(hash, Common::E_CoverArtLarge);
+        if (uri.isEmpty())
+            uri = queryOne(hash, Common::E_CoverArtSmall);
+        if (uri.isEmpty())
+            uri = queryOne(hash, Common::E_AlbumImageUrl);
+        if (uri.isEmpty())
+            uri = queryOne(hash, Common::E_ArtistImageUri);
+        return uri;
+    }
     default:
         return QVariant();
     }
@@ -102,6 +133,9 @@ QHash<int, QByteArray> MusicLibraryListModel::roleNames() const
     role.insert(ModelRoles::RoleMediaType, "mediaType");
     role.insert(ModelRoles::RoleSongTitle, "songTitle");
     role.insert(ModelRoles::RoleUserRating, "userRating");
+    role.insert(ModelRoles::RoleTrackTitle, "trackTitle");
+    role.insert(ModelRoles::RoleTrackSubTitle, "trackSubTitle");
+    role.insert(ModelRoles::RoleTrackImageUri, "trackImageUri");
     return role;;
 }
 
@@ -128,8 +162,8 @@ void MusicLibraryListModel::appendToModel()
 }
 
 QString MusicLibraryListModel::queryOne(const QString &hash,
-                                         Common::SongMetaTags tag,
-                                         bool skipDuplicates) const
+                                        Common::SongMetaTags tag,
+                                        bool skipDuplicates) const
 {
     if (hash.isEmpty())
         return QString();
