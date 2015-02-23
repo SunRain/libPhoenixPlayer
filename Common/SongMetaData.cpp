@@ -36,4 +36,22 @@ QVariant SongMetaData::getMeta(Common::SongMetaTags tagType)
     return mMetaHash[tagType];
 }
 
+QString SongMetaData::toString()
+{
+    Common c;
+    QString str;
+    for (int i = (int)Common::SongMetaTags::E_FirstFlag +1;
+         i < (int)Common::SongMetaTags::E_LastFlag - 1; ++i) {
+        str += QString("%1 = [%2], ")
+                .arg(c.enumToStr("SongMetaTags", i))
+                .arg(getMeta(Common::SongMetaTags(i)).toString());
+    }
+
+
+    str += QString("%1 = [%2]")
+            .arg(c.enumToStr("SongMetaTags",(int)Common::SongMetaTags::E_LastFlag -1))
+            .arg(getMeta(Common::SongMetaTags((int)Common::SongMetaTags::E_LastFlag -1)).toString());
+    return str;
+}
+
 }//PhoenixPlayer

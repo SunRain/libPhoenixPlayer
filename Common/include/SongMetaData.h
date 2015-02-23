@@ -19,6 +19,7 @@ public:
 
     void setMeta(Common::SongMetaTags tagType, const QVariant &value);
     QVariant getMeta(Common::SongMetaTags tagType);
+    QString toString();
 private:
     QHash<Common::SongMetaTags, QVariant> mMetaHash;
 };
