@@ -16,6 +16,7 @@ const char *KEY_LAST_SONG = "LastPlayedSongHash";
 const char *KEY_PLAY_LIST = "CurrentPlayListHash";
 const char *KEY_PLAY_BACKEND = "CurrentPlayBackend";
 const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
+const char *KEY_TRACE_LOG = "TraceLog";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
@@ -147,5 +148,17 @@ bool Settings::setMusicImageCachePath(const QString &absolutePath)
 QString Settings::getMusicImageCachePath()
 {
     return mSettings->value (KEY_MUSIC_IMAGE_CACHE, mDefaultMusicImageDir).toString ();
+}
+
+bool Settings::setTraceLog(bool trace)
+{
+    mSettings->setValue(KEY_TRACE_LOG, trace);
+    mSettings->sync();
+    return true;
+}
+
+bool Settings::traceLog()
+{
+    return mSettings->value(KEY_TRACE_LOG, false).toBool();
 }
 } //PhoenixPlayer

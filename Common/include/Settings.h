@@ -34,6 +34,9 @@ public:
 
     Q_INVOKABLE bool setMusicImageCachePath(const QString &absolutePath);
     Q_INVOKABLE QString getMusicImageCachePath();
+
+    Q_INVOKABLE bool setTraceLog(bool trace);
+    Q_INVOKABLE bool traceLog();
 signals:
 
 public slots:
