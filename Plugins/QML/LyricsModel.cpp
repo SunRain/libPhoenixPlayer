@@ -51,6 +51,10 @@ void LyricsModel::findIndex(quint64 tick)
         setCurrentIndex (0);
         return;
     }
+    if (mLyricsList.isEmpty()) {
+        qDebug()<<__FUNCTION__<<" mLyricsList is empty!!!";
+        return;
+    }
     /* 100s
      * 100/60 = 1 min
      * 100 %60 = 40s

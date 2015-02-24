@@ -13,6 +13,7 @@
 #include "Backend/IPlayBackend.h"
 #include "Backend/BaseMediaObject.h"
 
+class QTimer;
 namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace GStreamer {
@@ -115,6 +116,7 @@ private:
     bool set_uri(PlayBackend::BaseMediaObject *obj = 0, bool startPlay = false);
     void gstPlay(quint64 startSec = 0);
     void gstPause();
+    void gstStop();
 private:
     GstElement* _pipeline;
     GstElement* _equalizer;
@@ -162,6 +164,7 @@ private:
 #ifdef SAILFISH_OS
      AudioResourceQt::AudioResource mAudioResource;
      quint64 mStartSec;
+     QTimer *mTimer;
 #endif
 };
 } //GStreamer

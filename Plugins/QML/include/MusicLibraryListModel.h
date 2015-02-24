@@ -68,9 +68,9 @@ public slots:
 
 private:
     void appendToModel();
-    QString queryOne(const QString &hash,
-                     Common::SongMetaTags tag,
-                     bool skipDuplicates = true) const;
+//    QString queryOne(const QString &hash,
+//                     Common::SongMetaTags tag,
+//                     bool skipDuplicates = true) const;
 private:
     QStringList mSongHashList;
     MusicLibrary::MusicLibraryManager *mMusicLibraryManager;

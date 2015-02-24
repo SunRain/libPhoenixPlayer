@@ -72,9 +72,30 @@ public:
     ///
     Q_INVOKABLE void preSong();
     ///
-    /// \brief randomSong 随机歌曲hash
+    /// \brief randomSong 转到随机的一首歌曲
     ///
     Q_INVOKABLE void randomSong();
+
+    ///
+    /// \brief querySongTitle 按照SongTitle=>FileName的顺序返回歌曲信息
+    /// \param hash
+    /// \return 如果不存在，则返回空
+    ///
+    Q_INVOKABLE QString querySongTitle(const QString &hash);
+
+    ///
+    /// \brief querySongImage 歌曲封面图片，
+    /// 按照
+    /// CoverArtMiddle
+    /// CoverArtLarge
+    /// CoverArtSmall
+    /// AlbumImageUrl
+    /// ArtistImageUri
+    /// 顺序返回图片地址，如果都不存在，则返回空
+    /// \param hash
+    /// \return
+    ///
+    Q_INVOKABLE QString querySongImageUri(const QString &hash);
 
     ///
     /// \brief querySongMetaElement 查询某一个列
@@ -121,6 +142,7 @@ public:
                                         const QString &songHash,
                                         bool deleteFromStorage = false);
 
+    QString queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates = true);
 //protected:
 //    bool init();
 

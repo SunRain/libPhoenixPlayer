@@ -306,6 +306,31 @@ void MusicLibraryManager::randomSong()
     emit playingSongChanged ();
 }
 
+QString MusicLibraryManager::querySongImageUri(const QString &hash)
+{
+    QString uri = queryOne(hash, Common::E_CoverArtMiddle);
+    if (uri.isEmpty())
+        uri = queryOne(hash, Common::E_CoverArtLarge);
+    if (uri.isEmpty())
+        uri = queryOne(hash, Common::E_CoverArtSmall);
+    if (uri.isEmpty())
+        uri = queryOne(hash, Common::E_AlbumImageUrl);
+    if (uri.isEmpty())
+        uri = queryOne(hash, Common::E_ArtistImageUri);
+    return uri;
+}
+
+QString MusicLibraryManager::querySongTitle(const QString &hash)
+{
+    QString str = queryOne(hash, Common::E_SongTitle);
+    if (str.isEmpty()) {
+        str = queryOne(hash, Common::E_FileName);
+        if (!str.isEmpty())
+            str = str.mid(0, str.lastIndexOf("."));
+    }
+    return str;
+}
+
 QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targetColumn,
                                                       const QString &hash,
                                                       bool skipDuplicates)
@@ -496,6 +521,16 @@ void MusicLibraryManager::initTagParserManager()
         });
 
     }
+}
+
+QString MusicLibraryManager::queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates)
+{
+    if (hash.isEmpty())
+        return QString();
+    QStringList list = this->querySongMetaElement(tag, hash, skipDuplicates);
+    if (list.isEmpty())
+        return QString();
+    return list.first();
 }
 
 //void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)

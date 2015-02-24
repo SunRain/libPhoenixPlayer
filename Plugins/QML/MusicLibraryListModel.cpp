@@ -7,6 +7,7 @@
 
 #include "MusicLibraryManager.h"
 #include "Common.h"
+#include "Util.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;
@@ -53,63 +54,65 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     QString hash = mSongHashList.at(index.row());
     switch (role) {
     case ModelRoles::RoleAlbumImageUrl:
-        return queryOne(hash, Common::E_AlbumImageUrl, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl, true);
     case ModelRoles::RoleAlbumName:
-        return queryOne(hash, Common::E_AlbumName, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_AlbumName, true);
     case ModelRoles::RoleArtistImageUri:
-        return queryOne(hash, Common::E_ArtistImageUri, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri, true);
     case ModelRoles::RoleArtistName:
-        return queryOne(hash, Common::E_ArtistName, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_ArtistName, true);
     case ModelRoles::RoleCoverArtLarge:
-        return queryOne(hash, Common::E_CoverArtLarge, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_CoverArtLarge, true);
     case ModelRoles::RoleCoverArtMiddle:
-        return queryOne(hash, Common::E_CoverArtMiddle, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_CoverArtMiddle, true);
     case ModelRoles::RoleCoverArtSmall:
-        return queryOne(hash, Common::E_CoverArtSmall, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_CoverArtSmall, true);
     case ModelRoles::RoleFileName:
-        return queryOne(hash, Common::E_FileName, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_FileName, true);
     case ModelRoles::RoleFilePath:
-        return queryOne(hash, Common::E_FilePath, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_FilePath, true);
     case ModelRoles::RoleGenre:
-        return queryOne(hash, Common::E_Genre, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_Genre, true);
     case ModelRoles::RoleMediaType:
-        return queryOne(hash, Common::E_MediaType, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_MediaType, true);
     case ModelRoles::RoleSongTitle:
-        return queryOne(hash, Common::E_SongTitle, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_SongTitle, true);
     case ModelRoles::RoleUserRating:
-        return queryOne(hash, Common::E_UserRating, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_UserRating, true);
     case ModelRoles::RoleHash:
         return hash;
     case ModelRoles::RoleTrackTitle: {
-        QString t = queryOne(hash, Common::E_SongTitle);
-        if (t.isEmpty()) {
-            t = queryOne(hash, Common::E_FileName);
-            if (!t.isEmpty())
-                t = t.mid(0, t.lastIndexOf("."));
-        }
-        return t;
+//        QString t = mMusicLibraryManager->queryOne(hash, Common::E_SongTitle);
+//        if (t.isEmpty()) {
+//            t = mMusicLibraryManager->queryOne(hash, Common::E_FileName);
+//            if (!t.isEmpty())
+//                t = t.mid(0, t.lastIndexOf("."));
+//        }
+//        return t;
+        return mMusicLibraryManager->querySongTitle(hash);
     }
     case ModelRoles::RoleTrackSubTitle: {
-        QString s = queryOne(hash, Common::E_AlbumName);
+        QString s = mMusicLibraryManager->queryOne(hash, Common::E_AlbumName);
         if (!s.isEmpty())
             s += " - ";
-        s += queryOne(hash, Common::E_ArtistName);
-        QString t = queryOne(hash, Common::E_SongLength);
+        s += mMusicLibraryManager->queryOne(hash, Common::E_ArtistName);
+        QString t = mMusicLibraryManager->queryOne(hash, Common::E_SongLength);
         if (!t.isEmpty())
-            s += QString(" (%1)").arg(t);
+            s += QString(" (%1)").arg(Util::formateSongDuration(t.toInt()));
         return s;
     }
     case ModelRoles::RoleTrackImageUri: {
-        QString uri = queryOne(hash, Common::E_CoverArtMiddle);
-        if (uri.isEmpty())
-            uri = queryOne(hash, Common::E_CoverArtLarge);
-        if (uri.isEmpty())
-            uri = queryOne(hash, Common::E_CoverArtSmall);
-        if (uri.isEmpty())
-            uri = queryOne(hash, Common::E_AlbumImageUrl);
-        if (uri.isEmpty())
-            uri = queryOne(hash, Common::E_ArtistImageUri);
-        return uri;
+//        QString uri = mMusicLibraryManager->queryOne(hash, Common::E_CoverArtMiddle);
+//        if (uri.isEmpty())
+//            uri = mMusicLibraryManager->queryOne(hash, Common::E_CoverArtLarge);
+//        if (uri.isEmpty())
+//            uri = mMusicLibraryManager->queryOne(hash, Common::E_CoverArtSmall);
+//        if (uri.isEmpty())
+//            uri = mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl);
+//        if (uri.isEmpty())
+//            uri = mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri);
+//        return uri;
+        return mMusicLibraryManager->querySongImageUri(hash);
     }
     default:
         return QVariant();
@@ -161,18 +164,18 @@ void MusicLibraryListModel::appendToModel()
     }
 }
 
-QString MusicLibraryListModel::queryOne(const QString &hash,
-                                        Common::SongMetaTags tag,
-                                        bool skipDuplicates) const
-{
-    if (hash.isEmpty())
-        return QString();
-    QStringList list = mMusicLibraryManager
-            ->querySongMetaElement(tag, hash, skipDuplicates);
-    if (list.isEmpty())
-        return QString();
-    return list.first();
-}
+//QString MusicLibraryListModel::queryOne(const QString &hash,
+//                                        Common::SongMetaTags tag,
+//                                        bool skipDuplicates) const
+//{
+//    if (hash.isEmpty())
+//        return QString();
+//    QStringList list = mMusicLibraryManager
+//            ->querySongMetaElement(tag, hash, skipDuplicates);
+//    if (list.isEmpty())
+//        return QString();
+//    return list.first();
+//}
 
 } //QmlPlugin
 } //PhoenixPlayer

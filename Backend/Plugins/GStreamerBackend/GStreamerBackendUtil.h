@@ -99,6 +99,7 @@ static gboolean bus_state_changed(GstBus *bus, GstMessage *msg,
         g_error_free(err);
         break;
     case GST_MESSAGE_ASYNC_DONE:
+        qDebug() << "Engine: GST_MESSAGE_ASYNC_DONE";
         if (__start_at_beginning == false) {
             __start_at_beginning = true;
             gst_obj_ref->setPosition(0);

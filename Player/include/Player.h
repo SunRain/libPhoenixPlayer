@@ -113,6 +113,7 @@ private:
                         MetadataLookup::IMetadataLookup::LookupType type);
     void emitMetadataLookupResult(MetadataLookup::IMetadataLookup::LookupType type,
                                   bool result);
+
 private:
     bool isInit;
 //    QPointer<Settings> mSettings;
