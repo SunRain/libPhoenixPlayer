@@ -63,7 +63,7 @@ void LyricsModel::findIndex(quint64 tick)
 
     QTime time(0, tick/60, tick % 60, 0);
 
-    qDebug()<<"LyricsModel findIndex for tick "<<tick<<" time "<< time.toString ();
+//    qDebug()<<"LyricsModel findIndex for tick "<<tick<<" time "<< time.toString ();
 
     int index = currentIndex ();
     if (time < mLyricsList.at (index).time) { //jump before

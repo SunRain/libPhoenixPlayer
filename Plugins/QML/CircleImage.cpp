@@ -93,7 +93,7 @@ void CircleImage::setSource(const QUrl &source)
         return;
     mSource = source;
 
-    qDebug()<<"set Source file is "<<source;
+//    qDebug()<<"set Source file is "<<source;
 
     this->update();
 }

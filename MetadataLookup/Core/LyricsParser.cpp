@@ -14,7 +14,7 @@ QLyricsList LyricParser::parserLyrics(const QString &lyricsStr)
     if (lyricsStr.isEmpty ())
         return QLyricsList();
 
-    qDebug()<<"LyricParser start parser";
+//    qDebug()<<"LyricParser start parser";
 
     QRegExp timeExp;
     timeExp.setPatternSyntax(QRegExp::RegExp);
@@ -28,7 +28,7 @@ QLyricsList LyricParser::parserLyrics(const QString &lyricsStr)
     while (!stream.atEnd()) {
         QString line = stream.readLine();
 
-        qDebug()<<"readline "<<line;
+//        qDebug()<<"readline "<<line;
 
         int ret = timeExp.indexIn(line);
         QList<QTime> ticks;
@@ -45,8 +45,8 @@ QLyricsList LyricParser::parserLyrics(const QString &lyricsStr)
             QLyrics lyrics;
             lyrics.time = t;
             lyrics.lyrics = lyricstr;
-            qDebug()<<"Try to append lyrics line [time] "<<t.toString ()
-                   <<" [text] " <<lyricstr;
+//            qDebug()<<"Try to append lyrics line [time] "<<t.toString ()
+//                   <<" [text] " <<lyricstr;
 
             result.append(lyrics);
         }

@@ -58,8 +58,12 @@ void CoverCircleImage::setAutoChange(bool autoChange)
 
 void CoverCircleImage::setSongHash(const QString &hash)
 {
-    if (hash.isEmpty() || mSongHash == hash)
+    if (hash.isEmpty()) {
+        this->setSource(mDefaultSource);
         return;
+    }
+//    if (mSongHash == hash)
+//        return;
     mSongHash = hash;
     qDebug()<<__FUNCTION__<<" set image by hash "<<mSongHash;
     setImage(mSongHash);

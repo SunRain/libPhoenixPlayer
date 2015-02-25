@@ -8,15 +8,15 @@ namespace PhoenixPlayer {
 class Common : public QObject
 {
     Q_OBJECT
-    Q_ENUMS(PlaybackState)
+    Q_ENUMS(PlayBackendState)
     Q_ENUMS(PlayMode)
     Q_ENUMS(SongMetaTags)
     Q_ENUMS(PlayListElement)
 public:
-    enum PlaybackState {
-        PlaybackStopped = 0x0,  //播放停止
-        PlaybackPlaying,        //播放
-        PlaybackPaused          //暂停
+    enum PlayBackendState {
+        PlayBackendStopped = 0x0,  //播放停止
+        PlayBackendPlaying,        //播放
+        PlayBackendPaused          //暂停
     };
     enum PlayMode {
         PlayModeOrder = 0x10,            //顺序播放

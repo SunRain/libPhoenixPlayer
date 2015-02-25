@@ -93,9 +93,9 @@ void Player::setPluginLoader()
     // 播放状态改变信号
     connect (mPlayBackend.data (),
              &IPlayBackend::stateChanged,
-             [this](Common::PlaybackState state) {
-        emit playStateChanged (state);
-        emit playStateChanged ((int)state);
+             [this](Common::PlayBackendState state) {
+        emit playBackendStateChanged (state);
+        emit playBackendStateChanged ((int)state);
     });
 
     //当一首曲目播放结束后
@@ -255,7 +255,7 @@ void Player::setPlayMode(Common::PlayMode mode)
     emit playModeChanged (int(mode));
 }
 
-void Player::setPlayModeInt(int mode)
+void Player::setPlayMode(int mode)
 {
     setPlayMode (Common::PlayMode(mode));
 }
@@ -264,6 +264,21 @@ Common::PlayMode Player::getPlayMode()
 {
     return mPlayMode;
 }
+
+
+Common::PlayBackendState Player::getPlayBackendState()
+{
+    if (!PointerValid((EPointer::PPlaybackend))) {
+        Common::PlayBackendState s = Common::PlayBackendStopped;
+        return s;
+    }
+    return mPlayBackend.data()->getPlayBackendState();
+}
+
+//int Player::getPlayBackendState()
+//{
+//    return (int)getPlayBackendState();
+//}
 
 void Player::lookupLyric(const QString &songHash)
 {
@@ -275,14 +290,14 @@ void Player::togglePlayPause()
     if (!PointerValid (EPointer::PPlaybackend))
         return;
 
-    switch (mPlayBackend.data ()->getPlaybackState ()) {
-    case Common::PlaybackPlaying:
+    switch (mPlayBackend.data ()->getPlayBackendState ()) {
+    case Common::PlayBackendPlaying:
         mPlayBackend.data ()->pause ();
         break;
-    case Common::PlaybackPaused:
+    case Common::PlayBackendPaused:
         mPlayBackend.data ()->play (mCurrentPlayPos);
         break;
-    case Common::PlaybackStopped: {
+    case Common::PlayBackendStopped: {
         if (PointerValid (EPointer::PMusicLibraryManager)) {
             QString playingHash = mMusicLibraryManager->playingSongHash ();
 

@@ -16,7 +16,7 @@ public:
     explicit IPlayBackend(QObject *parent = 0) : QObject(parent) {}
 
     //    Q_INVOKABLE virtual void 	load_equalizer(vector<EQ_Setting>&)=0;
-    virtual Common::PlaybackState  getPlaybackState() = 0;
+    virtual Common::PlayBackendState  getPlayBackendState() = 0;
     virtual QString	getBackendName() = 0;
     virtual QString getBackendVersion() = 0;
     virtual QString getDescription() = 0;
@@ -35,7 +35,7 @@ signals:
     ///
     void failed();
 
-    void stateChanged(Common::PlaybackState state);
+    void stateChanged(Common::PlayBackendState state);
     void tick(quint64 sec = 0);
 
     //    void totalTimeChanged(qint64);

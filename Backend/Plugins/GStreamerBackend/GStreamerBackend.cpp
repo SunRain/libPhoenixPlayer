@@ -38,7 +38,7 @@ GStreamerBackend::GStreamerBackend(QObject *parent)
     _calc_log10_lut();
 //    _settings = CSettingsStorage::getInstance();
 //    _name = "GStreamer Backend";
-    _state = PhoenixPlayer::Common::PlaybackStopped; //STATE_STOP;
+    _state = PhoenixPlayer::Common::PlayBackendStopped; //STATE_STOP;
 
     _seconds_started = 0;
     _seconds_now = 0;
@@ -92,15 +92,15 @@ GStreamerBackend::GStreamerBackend(QObject *parent)
             [this] {
         if (mAudioResource.isAcquired()) {
             qDebug()<<"start gst play at "<<mStartSec;
-            if (_state == PhoenixPlayer::Common::PlaybackPlaying) {
+            if (_state == PhoenixPlayer::Common::PlayBackendPlaying) {
                 mTimer->start();
                 gstPlay(mStartSec);
             }
         } else {
             mTimer->stop();
-            if (_state == PhoenixPlayer::Common::PlaybackPaused)
+            if (_state == PhoenixPlayer::Common::PlayBackendPaused)
                 gstPause();
-            if (_state == PhoenixPlayer::Common::PlaybackStopped)
+            if (_state == PhoenixPlayer::Common::PlayBackendStopped)
                 gstStop();
         }
     });
@@ -128,7 +128,7 @@ GStreamerBackend::~GStreamerBackend()
     gst_obj_ref = nullptr;
 }
 
-PhoenixPlayer::Common::PlaybackState GStreamerBackend::getPlaybackState()
+PhoenixPlayer::Common::PlayBackendState GStreamerBackend::getPlayBackendState()
 {
     return _state;
 }
@@ -301,7 +301,7 @@ void GStreamerBackend::emit_buffer(float inv_arr_channel_elements, float scale)
 void GStreamerBackend::play(quint64 startSec)
 {
     _track_finished = false;
-    _state = PhoenixPlayer::Common::PlaybackPlaying;
+    _state = PhoenixPlayer::Common::PlayBackendPlaying;
     emit stateChanged(_state);
 
 #ifdef SAILFISH_OS
@@ -315,7 +315,7 @@ void GStreamerBackend::play(quint64 startSec)
 
 void GStreamerBackend::stop()
 {
-    _state = PhoenixPlayer::Common::PlaybackStopped;
+    _state = PhoenixPlayer::Common::PlayBackendStopped;
     emit stateChanged(_state);
 
 #ifdef SAILFISH_OS
@@ -332,7 +332,7 @@ void GStreamerBackend::stop()
 
 void GStreamerBackend::pause()
 {
-    _state = PhoenixPlayer::Common::PlaybackPaused;
+    _state = PhoenixPlayer::Common::PlayBackendPaused;
     emit stateChanged(_state);
 
 #ifdef SAILFISH_OS

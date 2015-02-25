@@ -85,7 +85,7 @@ public:
     virtual ~GStreamerBackend();
 
 // IPlayBackend interface
-    PhoenixPlayer::Common::PlaybackState getPlaybackState();
+    PhoenixPlayer::Common::PlayBackendState getPlayBackendState();
     QString getBackendName();
     QString getBackendVersion();
     QString getDescription();
@@ -146,7 +146,7 @@ private:
     MyCaps     _caps;
 
 
-    PhoenixPlayer::Common::PlaybackState _state;
+    PhoenixPlayer::Common::PlayBackendState _state;
     bool		_is_eq_enabled;
     int			_eq_type;
     bool		_track_finished;
