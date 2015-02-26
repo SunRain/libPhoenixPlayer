@@ -144,11 +144,9 @@ QHash<int, QByteArray> MusicLibraryListModel::roleNames() const
 
 void MusicLibraryListModel::clear()
 {
-    for (int i=0; i<mSongHashList.size(); ++i) {
-        beginRemoveRows(QModelIndex(), i, i);
-        endRemoveRows();
-    }
+    beginResetModel();
     mSongHashList.clear();
+    endResetModel();
 }
 
 void MusicLibraryListModel::appendToModel()
