@@ -16,7 +16,7 @@ namespace QmlPlugin {
 
 //const static char *UNKNOW_TEXT = "Empty!!";
 
-MusicLibraryListModel::MusicLibraryListModel(QObject *parent) :
+MusicLibraryListModel::MusicLibraryListModel(QAbstractListModel *parent) :
     QAbstractListModel(parent)
 {
 #ifdef SAILFISH_OS

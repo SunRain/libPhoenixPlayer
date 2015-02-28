@@ -18,7 +18,7 @@ class MusicLibraryListModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit MusicLibraryListModel(QObject *parent = 0);
+    explicit MusicLibraryListModel(QAbstractListModel *parent = 0);
     ~MusicLibraryListModel();
 
     ///
