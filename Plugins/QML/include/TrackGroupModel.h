@@ -3,6 +3,8 @@
 
 #include <QAbstractListModel>
 
+#include "Common.h"
+
 class QByteArray;
 class QVariant;
 class QStringList;
@@ -35,13 +37,8 @@ public:
 
 public:
     enum ModelRoles {
-//        RoleArtist = Qt::UserRole + 1,
-//        RoleAlbum,
-//        RoleMediaType,
-//        RoleUserRating,
-//        RoleGenre,
-//        RoleFolders
         RoleGroupName = Qt::UserRole + 1,
+        RoleImageUri
     };
     // QAbstractItemModel interface
 public:
@@ -57,9 +54,12 @@ signals:
 public slots:
     void clear();
 private:
+    QVariant queryGroupImageUri(const QString &groupName) const;
+private:
     MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
     QStringList mDataList;
     ModelType mModelType;
+    Common::SongMetaTags mSongMetaTag;
 };
 
 

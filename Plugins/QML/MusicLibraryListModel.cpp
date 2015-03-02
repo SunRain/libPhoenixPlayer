@@ -82,13 +82,6 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     case ModelRoles::RoleHash:
         return hash;
     case ModelRoles::RoleTrackTitle: {
-//        QString t = mMusicLibraryManager->queryOne(hash, Common::E_SongTitle);
-//        if (t.isEmpty()) {
-//            t = mMusicLibraryManager->queryOne(hash, Common::E_FileName);
-//            if (!t.isEmpty())
-//                t = t.mid(0, t.lastIndexOf("."));
-//        }
-//        return t;
         return mMusicLibraryManager->querySongTitle(hash);
     }
     case ModelRoles::RoleTrackSubTitle: {
@@ -102,16 +95,6 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
         return s;
     }
     case ModelRoles::RoleTrackImageUri: {
-//        QString uri = mMusicLibraryManager->queryOne(hash, Common::E_CoverArtMiddle);
-//        if (uri.isEmpty())
-//            uri = mMusicLibraryManager->queryOne(hash, Common::E_CoverArtLarge);
-//        if (uri.isEmpty())
-//            uri = mMusicLibraryManager->queryOne(hash, Common::E_CoverArtSmall);
-//        if (uri.isEmpty())
-//            uri = mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl);
-//        if (uri.isEmpty())
-//            uri = mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri);
-//        return uri;
         return mMusicLibraryManager->querySongImageUri(hash);
     }
     default:

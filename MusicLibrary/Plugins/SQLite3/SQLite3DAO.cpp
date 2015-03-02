@@ -415,10 +415,11 @@ QStringList SQLite3DAO::queryMusicLibrary(Common::SongMetaTags targetColumn,
     QSqlQuery q(str, mDatabase);
     QStringList list;
     while (q.next ()) {
-        list.append (q.value (mCommon.enumToStr ("SongMetaTags", (int)targetColumn))
-                     .toString ());
+        QVariant v = q.value(mCommon.enumToStr ("SongMetaTags", (int)targetColumn));
+        if (!v.isValid() || v.isNull())
+            continue;
+        list.append (v.toString());
     }
-
     return list;
 }
 

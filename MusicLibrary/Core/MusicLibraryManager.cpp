@@ -306,6 +306,14 @@ void MusicLibraryManager::randomSong()
     emit playingSongChanged ();
 }
 
+QStringList MusicLibraryManager::queryMusicLibrary(Common::SongMetaTags targetColumn,
+                                                   Common::SongMetaTags regColumn,
+                                                   const QString &regValue,
+                                                   bool skipDuplicates)
+{
+    return mPlayListDAO.data()->queryMusicLibrary(targetColumn, regColumn, regValue, skipDuplicates);
+}
+
 QString MusicLibraryManager::querySongImageUri(const QString &hash)
 {
     QString uri = queryOne(hash, Common::E_CoverArtMiddle);
@@ -349,7 +357,6 @@ QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targe
                                      hash,
                                      skipDuplicates);
     }
-//    qDebug()<<" query result "<< list;
     return list;
 }
 

@@ -97,6 +97,9 @@ public:
     ///
     Q_INVOKABLE QString querySongImageUri(const QString &hash);
 
+    QStringList queryMusicLibrary(Common::SongMetaTags targetColumn,
+                                    Common::SongMetaTags regColumn,
+                                    const QString &regValue, bool skipDuplicates = true);
     ///
     /// \brief querySongMetaElement 查询某一个列
     /// \param targetColumn 需要查询的列
@@ -107,6 +110,7 @@ public:
     QStringList querySongMetaElement(Common::SongMetaTags targetColumn,
                                      const QString &hash,
                                      bool skipDuplicates = true);
+
     ///
     /// \brief querySongMetaElement 由于qml不支持直接和cpp代码传递enum值,所以用int代替
     /// \param columnIndex

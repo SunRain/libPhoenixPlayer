@@ -1,6 +1,7 @@
 #include "TrackGroupModel.h"
 
 #include <QStringList>
+#include <QList>
 #include <QVariant>
 #include <QDebug>
 
@@ -26,11 +27,13 @@ TrackGroupModel::~TrackGroupModel()
 
 void TrackGroupModel::setModelType(TrackGroupModel::ModelType type)
 {
+    qDebug()<<__FUNCTION__<<" Set type to "<<type;
     if (mModelType != type)
         emit modelTypeChanged();
     mModelType = type;
     clear();
     queryData();
+    appendToModel();
 }
 
 TrackGroupModel::ModelType TrackGroupModel::getModelType()
@@ -51,18 +54,8 @@ QVariant TrackGroupModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case ModelRoles::RoleGroupName:
         return mDataList.at(index.row());
-//    case ModelRoles::RoleArtist:
-//        return mMusicLibraryManager->querySongMetaElement(Common::E_ArtistName, QString(), true);
-//    case ModelRoles::RoleAlbum:
-//        return mMusicLibraryManager->querySongMetaElement(Common::E_AlbumName, QString(), true);
-//    case ModelRoles::RoleFolders:
-//        return mMusicLibraryManager->querySongMetaElement(Common::E_FilePath, QString(), true);
-//    case ModelRoles::RoleGenre:
-//        return mMusicLibraryManager->querySongMetaElement(Common::E_Genre, QString(), true);
-//    case ModelRoles::RoleMediaType:
-//        return mMusicLibraryManager->querySongMetaElement(Common::E_MediaType, QString(), true);
-//    case ModelRoles::RoleUserRating:
-//        return mMusicLibraryManager->querySongMetaElement(Common::E_UserRating, QString(), true);
+    case ModelRoles::RoleImageUri:
+        return queryGroupImageUri(mDataList.at(index.row()));
     default:
         return QVariant();
     }
@@ -71,13 +64,8 @@ QVariant TrackGroupModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> TrackGroupModel::roleNames() const
 {
     QHash<int, QByteArray> role;
-//    role.insert(ModelRoles::RoleArtist, "artist");
-//    role.insert(ModelRoles::RoleAlbum, "album");
-//    role.insert(ModelRoles::RoleGenre, "genre");
-//    role.insert(ModelRoles::RoleMediaType, "mediaType");
-//    role.insert(ModelRoles::RoleUserRating, "userRating");
-//    role.insert(ModelRoles::RoleFolders, "folders");
     role.insert(ModelRoles::RoleGroupName, "groupName");
+    role.insert(ModelRoles::RoleImageUri, "imageUri");
     return role;;
 }
 
@@ -85,26 +73,27 @@ void TrackGroupModel::queryData()
 {
     switch (mModelType) {
     case ModelType::TypeAlbum:
-        mDataList = mMusicLibraryManager->querySongMetaElement(Common::E_AlbumName, QString(), true);
+        mSongMetaTag = Common::E_AlbumName;
         break;
     case ModelType::TypeArtist:
-        mDataList = mMusicLibraryManager->querySongMetaElement(Common::E_ArtistName, QString(), true);
+        mSongMetaTag = Common::E_ArtistName;
         break;
     case ModelType::TypeFolders:
-        mDataList = mMusicLibraryManager->querySongMetaElement(Common::E_FilePath, QString(), true);
+        mSongMetaTag = Common::E_FilePath;
         break;
     case ModelType::TypeGenre:
-        mDataList = mMusicLibraryManager->querySongMetaElement(Common::E_Genre, QString(), true);
+        mSongMetaTag = Common::E_Genre;
         break;
     case ModelType::TypeMediaType:
-        mDataList = mMusicLibraryManager->querySongMetaElement(Common::E_MediaType, QString(), true);
+        mSongMetaTag = Common::E_MediaType;
         break;
     case ModelType::TypeUserRating:
-        mDataList = mMusicLibraryManager->querySongMetaElement(Common::E_UserRating, QString(), true);
+        mSongMetaTag = Common::E_UserRating;
         break;
     default:
         break;
     }
+     mDataList = mMusicLibraryManager->querySongMetaElement(mSongMetaTag, QString(), true);
 }
 
 void TrackGroupModel::appendToModel()
@@ -113,7 +102,6 @@ void TrackGroupModel::appendToModel()
         qDebug()<<__FUNCTION__<<" hash list is empty";
         return;
     }
-
     for (int i=0; i<mDataList.size (); ++i) {
         beginInsertRows (QModelIndex(), i, i);
         endInsertRows ();
@@ -126,5 +114,63 @@ void TrackGroupModel::clear()
     mDataList.clear();
     endResetModel();
 }
+
+QVariant TrackGroupModel::queryGroupImageUri(const QString &groupName) const
+{
+    QStringList list;
+    Common::SongMetaTags tag;
+    switch (mModelType) {
+    case ModelType::TypeAlbum:
+        list = mMusicLibraryManager->queryMusicLibrary(Common::E_AlbumImageUrl, mSongMetaTag, groupName, true);
+        tag = Common::E_AlbumImageUrl;
+        break;
+    case ModelType::TypeArtist:
+        list = mMusicLibraryManager->queryMusicLibrary(Common::E_ArtistImageUri, mSongMetaTag, groupName, true);
+        tag = Common::E_ArtistImageUri;
+        break;
+    default:
+        return QString();
+    }
+
+    //因为当使用 select DISTINCT时候，空值也会被作为""元素加入到QStringList里面，所以此处去掉“”值
+    auto checkList = [] (QStringList &list) {
+        foreach (QString str, list) {
+            if (str.isEmpty())
+                list.removeOne(str);
+        }
+        return list;
+    };
+
+    list = checkList(list);
+
+    //循环查询图片地址
+    if (list.isEmpty()) {
+        QList<Common::SongMetaTags> tagList;
+        tagList.append(Common::E_AlbumImageUrl);
+        tagList.append(Common::E_ArtistImageUri);
+        tagList.append(Common::E_CoverArtMiddle);
+        tagList.append(Common::E_CoverArtSmall);
+        tagList.append(Common::E_CoverArtLarge);
+        for (int i = 0; i < tagList.size(); ++i) {
+            if (tagList[i] == tag)
+                continue;
+            list = mMusicLibraryManager->queryMusicLibrary(tagList[i], mSongMetaTag, groupName, true);
+            list = checkList(list);
+            if (!list.isEmpty())
+                break;
+        }
+    }
+    list = checkList(list);
+    if (list.isEmpty())
+        return QString();
+    return list.first();
+}
+
+
+
+
+
+
+
 } //QmlPlugin
 } //PhoenixPlayer
