@@ -245,6 +245,8 @@ QString MusicLibraryManager::playingSongHash()
                 && !mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).isEmpty ()) {
             qDebug()<<"try playingSongHash from first from library";
             mCurrentSongHash = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).first ();
+        } else {
+            qDebug()<<__FUNCTION__<<"get some error";
         }
     }
     qDebug()<<"playingSongHash is "<<mCurrentSongHash;
@@ -255,6 +257,9 @@ void MusicLibraryManager::setPlayingSongHash(const QString &newHash)
 {
     if (newHash.isEmpty ())
         return;
+    if (mCurrentSongHash == newHash)
+        return;
+    qDebug()<<__FUNCTION__<<"change current song hash from "<<mCurrentSongHash<<" to "<<newHash;
     mCurrentSongHash = newHash;
     emit playingSongChanged ();
 }
@@ -304,6 +309,11 @@ void MusicLibraryManager::randomSong()
     n = n % mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).size ();
     mCurrentSongHash = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).at (n);
     emit playingSongChanged ();
+}
+
+QString MusicLibraryManager::queryOneByIndex(const QString &hash, int tag, bool skipDuplicates)
+{
+    return queryOne(hash, Common::SongMetaTags(tag), skipDuplicates);
 }
 
 QStringList MusicLibraryManager::queryMusicLibrary(Common::SongMetaTags targetColumn,

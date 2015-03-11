@@ -126,6 +126,8 @@ GStreamerBackend::~GStreamerBackend()
         gst_object_unref (GST_OBJECT(_pipeline));
     }
     gst_obj_ref = nullptr;
+    qDebug() << "Engine: after close engine... ";
+
 }
 
 PhoenixPlayer::Common::PlayBackendState GStreamerBackend::getPlayBackendState()
@@ -305,7 +307,6 @@ void GStreamerBackend::play(quint64 startSec)
     emit stateChanged(_state);
 
 #ifdef SAILFISH_OS
-    qDebug()<<__FUNCTION__<<" play";
     mStartSec = startSec;
     mAudioResource.acquire();
 #else

@@ -406,12 +406,15 @@ QStringList SQLite3DAO::queryMusicLibrary(Common::SongMetaTags targetColumn,
     str += mCommon.enumToStr ("SongMetaTags", (int)targetColumn);
     str += " from ";
     str += LIBRARY_TABLE_TAG;
-    if (!regValue.isEmpty ()) {
+    if (!regValue.isEmpty ()
+            && !(regColumn == Common::E_FirstFlag || regColumn == Common::E_LastFlag)) {
         str += " where ";
         str += mCommon.enumToStr ("SongMetaTags", (int)regColumn);
         str += QString(" = \"%1\" ").arg (regValue);
 
     }
+//    qDebug()<<__FUNCTION__<<"run sql "<<str;
+
     QSqlQuery q(str, mDatabase);
     QStringList list;
     while (q.next ()) {

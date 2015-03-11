@@ -16,6 +16,7 @@ class CircleImage : public QQuickPaintedItem
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
 public:
     explicit CircleImage(QQuickPaintedItem *parent = 0);
+    virtual ~CircleImage();
 
     void paint(QPainter *painter);
 

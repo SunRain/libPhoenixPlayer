@@ -147,6 +147,7 @@ public:
                                         bool deleteFromStorage = false);
 
     QString queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates = true);
+    Q_INVOKABLE QString queryOneByIndex(const QString &hash, int tag, bool skipDuplicates = true);
 //protected:
 //    bool init();
 

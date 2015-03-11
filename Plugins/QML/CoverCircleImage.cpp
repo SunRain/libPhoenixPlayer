@@ -17,14 +17,26 @@ CoverCircleImage::CoverCircleImage(CircleImage *parent)
 #endif
 
     mAutoChange = false;
-    connect(mMusicLibraryManager,
-            &MusicLibraryManager::playingSongChanged,
-            [this]() {
-        if (autoChange()) {
-            mSongHash = mMusicLibraryManager->playingSongHash();
-            setImage(mSongHash);
-        }
-    });
+    //Fuck Qt ......
+    //lambda in Qml model making memory leak!!!!!
+//    connect(mMusicLibraryManager,
+//            &MusicLibraryManager::playingSongChanged,
+//            [this]() {
+//        if (autoChange()) {
+//            qDebug()<<__FUNCTION__<<"playingSongHash()";
+//            if (!mMusicLibraryManager) {
+//                qDebug()<<__FUNCTION__<<"mMusicLibraryManager is null";
+//            }
+//            mSongHash = mMusicLibraryManager->playingSongHash();
+//            setImage(mSongHash);
+//        }
+//    });
+    QObject::connect(mMusicLibraryManager, &MusicLibraryManager::playingSongChanged,
+                     this, &CoverCircleImage::drawImage);
+}
+
+CoverCircleImage::~CoverCircleImage()
+{
 }
 
 QUrl CoverCircleImage::defaultSource() const
@@ -46,7 +58,6 @@ void CoverCircleImage::setDefaultSource(const QUrl &source)
 {
     if (source.isEmpty() || !source.isValid() || mDefaultSource == source)
         return;
-    qDebug()<<"setDefaultSource to "<<source;
     mDefaultSource = source;
     this->setSource(mDefaultSource);
 }
@@ -62,11 +73,16 @@ void CoverCircleImage::setSongHash(const QString &hash)
         this->setSource(mDefaultSource);
         return;
     }
-//    if (mSongHash == hash)
-//        return;
     mSongHash = hash;
-    qDebug()<<__FUNCTION__<<" set image by hash "<<mSongHash;
     setImage(mSongHash);
+}
+
+void CoverCircleImage::drawImage()
+{
+    if (autoChange()) {
+        mSongHash = mMusicLibraryManager->playingSongHash();
+        setImage(mSongHash);
+    }
 }
 
 //QUrl CoverCircleImage::queryOne(const QString &hash,
@@ -98,6 +114,7 @@ void CoverCircleImage::setImage(const QString &hash)
 //    else
 //        this->setSource(uri);
 
+    qDebug()<<__FUNCTION__;
     QString str = mMusicLibraryManager->querySongImageUri(hash);
     if (str.isEmpty())
         this->setSource(mDefaultSource);

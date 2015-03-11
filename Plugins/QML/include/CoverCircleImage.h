@@ -19,6 +19,7 @@ class CoverCircleImage : public CircleImage
     Q_PROPERTY(QString songHash READ songHash WRITE setSongHash)
 public:
     explicit CoverCircleImage(CircleImage *parent = 0);
+    virtual ~CoverCircleImage();
 
     ///
     /// \brief defaultSource 默认图标
@@ -38,6 +39,8 @@ public slots:
     void setDefaultSource(const QUrl &source);
     void setAutoChange(bool autoChange);
     void setSongHash(const QString &hash);
+private slots:
+    void drawImage();
 
 private:
 //    QUrl queryOne(const QString &hash,

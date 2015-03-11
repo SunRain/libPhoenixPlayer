@@ -15,7 +15,11 @@ CircleImage::CircleImage(QQuickPaintedItem *parent)
     : QQuickPaintedItem(parent)
 {
     mSource = QUrl();
-//    mPixmap = 0;
+    //    mPixmap = 0;
+}
+
+CircleImage::~CircleImage()
+{
 }
 
 void CircleImage::paint(QPainter *painter)
@@ -77,9 +81,7 @@ void CircleImage::paint(QPainter *painter)
 
     QPixmap pixmap  = QPixmap::fromImage(out);
     painter->setRenderHint(QPainter::SmoothPixmapTransform);
-
     painter->drawPixmap(boundingRect().toRect(), pixmap);
-
 }
 
 QUrl CircleImage::source() const

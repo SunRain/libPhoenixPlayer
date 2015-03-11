@@ -22,6 +22,7 @@ MusicLibraryListModel::MusicLibraryListModel(QAbstractListModel *parent) :
 #ifdef SAILFISH_OS
     mMusicLibraryManager = MusicLibraryManager::instance();
 #endif
+    mLimitNum = -1;
 }
 
 MusicLibraryListModel::~MusicLibraryListModel()
@@ -32,17 +33,71 @@ MusicLibraryListModel::~MusicLibraryListModel()
 
 void MusicLibraryListModel::showAllTracks()
 {
-    qDebug()<<__FUNCTION__;
     clear();
     mSongHashList = mMusicLibraryManager
             ->querySongMetaElement(Common::E_Hash, QString(), false);
     appendToModel();
 }
 
+void MusicLibraryListModel::showFolderTracks(const QString &folder, int limitNum)
+{
+    mLimitNum = limitNum;
+    clear();
+    mSongHashList = mMusicLibraryManager
+            ->queryMusicLibrary(Common::E_Hash, Common::E_FilePath, folder);
+    appendToModel(limitNum);
+}
+
+void MusicLibraryListModel::showUserRatingTracks(const QString &rating, int limitNum)
+{
+    mLimitNum = limitNum;
+    clear();
+    mSongHashList = mMusicLibraryManager
+            ->queryMusicLibrary(Common::E_Hash, Common::E_UserRating, rating);
+    appendToModel(limitNum);
+}
+
+void MusicLibraryListModel::showMediaTypeTracks(const QString &mediaType, int limitNum)
+{
+    mLimitNum = limitNum;
+    clear();
+    mSongHashList = mMusicLibraryManager
+            ->queryMusicLibrary(Common::E_Hash, Common::E_MediaType, mediaType);
+    appendToModel(limitNum);
+}
+
+void MusicLibraryListModel::showGenreTracks(const QString &genreName, int limitNum)
+{
+    mLimitNum = limitNum;
+    clear();
+    mSongHashList = mMusicLibraryManager
+            ->queryMusicLibrary(Common::E_Hash, Common::E_Genre, genreName);
+    appendToModel(limitNum);
+}
+
+void MusicLibraryListModel::showAlbumTracks(const QString &albumName, int limitNum)
+{
+    mLimitNum = limitNum;
+    clear();
+    mSongHashList = mMusicLibraryManager
+            ->queryMusicLibrary(Common::E_Hash, Common::E_AlbumName, albumName);
+    appendToModel(limitNum);
+}
+
+void MusicLibraryListModel::showArtistTracks(const QString &artistName, int limitNum)
+{
+    mLimitNum = limitNum;
+    clear();
+    mSongHashList = mMusicLibraryManager->queryMusicLibrary(Common::E_Hash, Common::E_ArtistName, artistName);
+    appendToModel(limitNum);
+}
+
 
 int MusicLibraryListModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
+    if (mLimitNum >=0)
+        return qMin(mLimitNum, mSongHashList.size());
     return mSongHashList.size();
 }
 
@@ -50,7 +105,6 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
 {
     if (index.row () < 0 || index.row () >= mSongHashList.size ())
         return QVariant();
-
     QString hash = mSongHashList.at(index.row());
     switch (role) {
     case ModelRoles::RoleAlbumImageUrl:
@@ -132,7 +186,7 @@ void MusicLibraryListModel::clear()
     endResetModel();
 }
 
-void MusicLibraryListModel::appendToModel()
+void MusicLibraryListModel::appendToModel(int limitNum)
 {
     if (mSongHashList.isEmpty()) {
         qDebug()<<__FUNCTION__<<" hash list is empty";
@@ -140,6 +194,9 @@ void MusicLibraryListModel::appendToModel()
     }
 
     for (int i=0; i<mSongHashList.size (); ++i) {
+        if (limitNum > 0 && i >= limitNum) {
+            break;
+        }
         beginInsertRows (QModelIndex(), i, i);
         endInsertRows ();
     }

@@ -26,6 +26,13 @@ public:
     ///
     Q_INVOKABLE void showAllTracks();
 
+    Q_INVOKABLE void showArtistTracks(const QString &artistName,int limitNum = -1);
+    Q_INVOKABLE void showAlbumTracks(const QString  &albumName, int limitNum = -1);
+    Q_INVOKABLE void showGenreTracks(const QString &genreName, int limitNum = -1);
+    Q_INVOKABLE void showMediaTypeTracks(const QString &mediaType, int limitNum = -1);
+    Q_INVOKABLE void showUserRatingTracks(const QString &rating, int limitNum = -1);
+    Q_INVOKABLE void showFolderTracks(const QString &folder, int limitNum = -1);
+
     // QAbstractItemModel interface
 public:
     int rowCount(const QModelIndex &parent) const;
@@ -67,13 +74,14 @@ public slots:
     void clear();
 
 private:
-    void appendToModel();
+    void appendToModel(int limitNum = -1);
 //    QString queryOne(const QString &hash,
 //                     Common::SongMetaTags tag,
 //                     bool skipDuplicates = true) const;
 private:
     QStringList mSongHashList;
     MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
+    int mLimitNum;
 };
 
 } //QmlPlugin

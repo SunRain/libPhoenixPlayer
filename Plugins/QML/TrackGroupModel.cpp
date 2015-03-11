@@ -22,12 +22,11 @@ TrackGroupModel::TrackGroupModel(QAbstractListModel *parent)
 
 TrackGroupModel::~TrackGroupModel()
 {
-
+    qDebug()<<__FUNCTION__;
 }
 
 void TrackGroupModel::setModelType(TrackGroupModel::ModelType type)
 {
-    qDebug()<<__FUNCTION__<<" Set type to "<<type;
     if (mModelType != type)
         emit modelTypeChanged();
     mModelType = type;

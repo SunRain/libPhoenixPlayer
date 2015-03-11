@@ -181,24 +181,11 @@ void Player::setMusicLibraryManager()
             return;
         }
         QString playingHash = mMusicLibraryManager->playingSongHash ();
-
         mCurrentSongLength = getSongLength (playingHash);
 
-        qDebug()<<"Player playingSongChanged mCurrentSongLength"
-               <<mCurrentSongLength;
-
         PlayBackend::BaseMediaObject obj;
-
-        QStringList list = mMusicLibraryManager
-                ->querySongMetaElement (Common::E_FileName, playingHash);
-        if (!list.isEmpty ())
-            obj.setFileName (list.first ());
-
-        list = mMusicLibraryManager
-                ->querySongMetaElement (Common::E_FilePath, playingHash);
-        if (!list.isEmpty ())
-            obj.setFilePath (list.first ());
-
+        obj.setFileName (mMusicLibraryManager->queryOne(playingHash, Common::E_FileName));
+        obj.setFilePath (mMusicLibraryManager->queryOne(playingHash, Common::E_FilePath));
         obj.setMediaType (Common::MediaTypeLocalFile);
         qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
         mPlayBackend.data ()->changeMedia (&obj, 0, true);
@@ -299,6 +286,7 @@ void Player::togglePlayPause()
         break;
     case Common::PlayBackendStopped: {
         if (PointerValid (EPointer::PMusicLibraryManager)) {
+            qDebug()<<__FUNCTION__<<"playbackend stopped";
             QString playingHash = mMusicLibraryManager->playingSongHash ();
 
             mCurrentSongLength = getSongLength (playingHash);
@@ -425,8 +413,10 @@ void Player::metadataLookup(const QString &songHash,
 {
     SongMetaData data;
     QString hash = songHash;
-    if (hash.isEmpty ())
+    if (hash.isEmpty ()) {
+        qDebug()<<__FUNCTION__<<"hash is empty";
         hash = mMusicLibraryManager->playingSongHash ();
+    }
 
     for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
          i < (int)Common::SongMetaTags::E_LastFlag;

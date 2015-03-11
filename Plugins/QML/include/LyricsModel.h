@@ -13,7 +13,7 @@ class LyricsModel : public QAbstractListModel
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
 
 public:
-    LyricsModel(QObject *parent = 0);
+    explicit LyricsModel(QObject *parent = 0);
     ~LyricsModel();
 
     Q_INVOKABLE void setLyricsStr(const QString &lyrics);
