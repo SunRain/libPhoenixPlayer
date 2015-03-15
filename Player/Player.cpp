@@ -252,6 +252,11 @@ Common::PlayMode Player::getPlayMode()
     return mPlayMode;
 }
 
+int Player::getPlayModeInt()
+{
+    return (int)getPlayMode();
+}
+
 
 Common::PlayBackendState Player::getPlayBackendState()
 {
@@ -262,10 +267,10 @@ Common::PlayBackendState Player::getPlayBackendState()
     return mPlayBackend.data()->getPlayBackendState();
 }
 
-//int Player::getPlayBackendState()
-//{
-//    return (int)getPlayBackendState();
-//}
+int Player::getPlayBackendStateInt()
+{
+    return (int)getPlayBackendState();
+}
 
 void Player::lookupLyric(const QString &songHash)
 {
@@ -421,12 +426,18 @@ void Player::metadataLookup(const QString &songHash,
     for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
          i < (int)Common::SongMetaTags::E_LastFlag;
          ++i) {
-        QStringList list = mMusicLibraryManager
-                ->querySongMetaElement (Common::SongMetaTags(i), hash, true);
-        if (list.isEmpty ())
+//        QStringList list = mMusicLibraryManager
+//                ->querySongMetaElement (Common::SongMetaTags(i), hash, true);
+//        if (list.isEmpty ())
+//            data.setMeta (Common::SongMetaTags(i), QVariant());
+//        else
+//            data.setMeta (Common::SongMetaTags(i), list.first ());
+        QString str = mMusicLibraryManager->queryOne(hash, Common::SongMetaTags(i), true);
+        if (str.isEmpty())
             data.setMeta (Common::SongMetaTags(i), QVariant());
         else
-            data.setMeta (Common::SongMetaTags(i), list.first ());
+            data.setMeta (Common::SongMetaTags(i), str);
+
     }
     mMetaLookupManager->lookup (&data, type);
 }
@@ -441,7 +452,7 @@ void Player::emitMetadataLookupResult(
     //TODO 添加其他类型的emit
     switch (type) {
     case IMetadataLookup::TypeLyrics:
-        lookupLyricSucceed ();
+        emit lookupLyricSucceed ();
         break;
     default:
         break;

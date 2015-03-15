@@ -21,6 +21,7 @@ public:
     static QTextCodec *localeDefaultCodec();
 
     Q_INVOKABLE static QString formateSongDuration(int time);
+    Q_INVOKABLE static QString formateFileSize(int size);
 signals:
 
 public slots:

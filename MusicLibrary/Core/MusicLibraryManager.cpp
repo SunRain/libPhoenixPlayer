@@ -166,6 +166,7 @@ bool MusicLibraryManager::scanLocalMusic()
             data->setMeta (Common::SongMetaTags::E_FileName, file);
             data->setMeta (Common::SongMetaTags::E_FilePath, path);
             data->setMeta (Common::SongMetaTags::E_Hash, hash);
+            data->setMeta (Common::SongMetaTags::E_FileSize, size);
             if (mTagParserManager.isNull())
                 initTagParserManager();
             mTagParserManager.data ()->addItem (data, false);

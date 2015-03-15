@@ -27,7 +27,6 @@ public:
     }
 
     virtual ~IMetadataLookup() {
-        qDebug()<<__FUNCTION__;
     }
 
     virtual QString getPluginName() = 0;

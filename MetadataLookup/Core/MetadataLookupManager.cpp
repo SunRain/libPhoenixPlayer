@@ -83,8 +83,6 @@ void MetadataLookupManager::lookup(SongMetaData *data,
 
 void MetadataLookupManager::nextLookupPlugin()
 {
-    qDebug()<<__FUNCTION__;
-
     if (mCurrentIndex >= 0) { //如果存在其他插件
         if (mCurrentIndex < mPluginNameList.size ()) { //防止溢出
             mPluginLoader->setNewPlugin (PluginLoader::PluginType::TypeMetadataLookup,

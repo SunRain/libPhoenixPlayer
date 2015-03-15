@@ -31,8 +31,8 @@ class MetadataLookupManager;
 class Player : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(int playMode READ getPlayMode WRITE setPlayMode NOTIFY playModeChanged)
-    Q_PROPERTY(int playBackendState READ getPlayBackendState NOTIFY playBackendStateChanged)
+    Q_PROPERTY(int playMode READ getPlayModeInt WRITE setPlayMode NOTIFY playModeChanged)
+    Q_PROPERTY(int playBackendState READ getPlayBackendStateInt NOTIFY playBackendStateChanged)
 public:
     explicit Player(QObject *parent = 0);
     virtual ~Player();
@@ -45,9 +45,10 @@ public:
     void setPlayMode(Common::PlayMode mode = Common::PlayModeOrder);
     void setPlayMode (int mode);
     Common::PlayMode getPlayMode();
+    int getPlayModeInt();
 
     Common::PlayBackendState getPlayBackendState();
-//    int getPlayBackendState();
+    int getPlayBackendStateInt();
 
     ///
     /// \brief lookupLyric 搜索lyrics歌词

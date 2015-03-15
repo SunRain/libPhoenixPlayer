@@ -84,4 +84,19 @@ QString Util::formateSongDuration(int time)
     return str;
 }
 
+QString Util::formateFileSize(int size)
+{
+    if (size < 0)
+        return QString("0B");
+    QString str;
+    if (size < 1024) { //bytes
+        str = QString("%1 B").arg(size);
+    } else if (size >= 1024 && size < 1024 * 1024) { //kb
+        str = QString("%1 KB").arg(QString::number(((float)size)/1024, 'f', 2));
+    } else { //mb
+        str = QString("%1 MB").arg(QString::number(((float)size)/1024/1024, 'f', 2));
+    }
+    return str;
+}
+
 } //PhoenixPlayer
