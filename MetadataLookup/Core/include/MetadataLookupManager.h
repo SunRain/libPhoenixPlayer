@@ -28,7 +28,7 @@ signals:
     void lookupSucceed(QString songHash,
                        QByteArray result,
                        IMetadataLookup::LookupType type);
-    void lookupFailed();
+    void lookupFailed(QString songHash, IMetadataLookup::LookupType type);
 public slots:
 
 protected:

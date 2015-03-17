@@ -70,6 +70,7 @@ signals:
     void playModeChanged(Common::PlayMode mode);
     void playModeChanged (int mode);
     void lookupLyricSucceed();
+    void lookupLyricFailed();
     void metadataLookupFailed();
 
     ///
@@ -118,7 +119,8 @@ private:
     void metadataLookup(const QString &songHash,
                         MetadataLookup::IMetadataLookup::LookupType type);
     void emitMetadataLookupResult(MetadataLookup::IMetadataLookup::LookupType type,
-                                  bool result);
+                                  const QString &hash,
+                                  bool succeed);
 
 private:
     bool isInit;

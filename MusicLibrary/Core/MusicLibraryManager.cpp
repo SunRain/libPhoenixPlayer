@@ -23,20 +23,13 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     : QObject(parent)
     ,isInit(false)
 {
-    mDiskLooKupThread = 0;
-    mDiskLooKup = 0;
+    mDiskLooKupThread = nullptr;
+    mDiskLooKup = nullptr;
     mPlayListDAO = 0;
-    mTagParserManager = 0;
-    mTagParserThread = 0;
-
-    qDebug()<<__FUNCTION__;
+    mTagParserManager = nullptr;
+    mTagParserThread = nullptr;
 
 #ifdef SAILFISH_OS
-    qDebug()<<"For Sailfish os";
-//    SingletonPointer<Settings> ss;
-//    SingletonPointer<PluginLoader> sp;
-//    mSettings = ss.instance();
-//    mPluginLoader = sp.instance();
     mSettings = Settings::instance();
     mPluginLoader = PluginLoader::instance();
 #else
@@ -59,22 +52,21 @@ MusicLibraryManager::~MusicLibraryManager()
         mSettings->setLastPlayedSong (mCurrentSongHash);
     }
 
-    if (!mDiskLooKup.isNull ()) {
-        mDiskLooKup.data ()->stopLookup ();
-        mDiskLooKup.data ()->deleteLater ();
+    if (mDiskLooKup != nullptr) {
+        mDiskLooKup->stopLookup ();
     }
 
-    if (!mDiskLooKupThread.isNull ()) {
+    if (mDiskLooKupThread != nullptr) {
         qDebug()<<"wait for DiskLooKupThread";
-//        mDiskLooKupThread.data ()->quit ();
-        mDiskLooKupThread.data ()->wait (3 * 60 * 1000);
+        mDiskLooKupThread->wait (3 * 60 * 1000);
+        mDiskLooKupThread->quit();
     }
     mDiskLooKupThread->deleteLater ();
 
-    if (!mTagParserThread.isNull ()) {
+    if (mTagParserThread != nullptr) {
         qDebug()<<"wait for TagParserThread";
-//        mTagParserThread.data ()->quit ();
-        mDiskLooKupThread.data ()->wait (3 * 60 * 1000);
+        mTagParserThread->wait (3 * 60 * 1000);
+        mTagParserThread->quit();
     }
 
     qDebug()<<"after delete thread";
@@ -101,57 +93,49 @@ MusicLibraryManager *MusicLibraryManager::instance()
 }
 #endif
 
-//MusicLibraryManager *MusicLibraryManager::getInstance()
-//{
-//    static MusicLibraryManager m;
-//    return &m;
-//}
-
-//void MusicLibraryManager::initSettings()
-//{
-//    mSettings = Settings::getInstance ();
-//    mCurrentSongHash = mSettings->getLastPlayedSong ();
-//    mCurrentPlayListHash = mSettings->getPlayListHash ();
-//}
-
-//void MusicLibraryManager::initPluginLoader()
-//{
-//    mPluginLoader = PluginLoader::getInstance ();
-//}
-
 bool MusicLibraryManager::scanLocalMusic()
 {
     qDebug()<<__FUNCTION__;
     //本地歌曲扫描线程
-    if (mDiskLooKupThread.isNull ()) {
+    if (mDiskLooKupThread == nullptr) {
         qDebug()<<__FUNCTION__<<" new mDiskLooKupThread";
-
-        mDiskLooKupThread = new QThread(this);
+        mDiskLooKupThread = new QThread(0);
     }
-    if (mDiskLooKup.isNull ()) {
+    if (mDiskLooKup == nullptr) {
         qDebug()<<__FUNCTION__<<" new mDiskLooKup";
 
         mDiskLooKup = new DiskLookup(0);
-        mDiskLooKup.data ()->moveToThread (mDiskLooKupThread);
+        mDiskLooKup->moveToThread (mDiskLooKupThread);
 
-        //signal/slot
-        connect (mDiskLooKupThread.data (), &QThread::finished,
-                 mDiskLooKup.data (), &DiskLookup::deleteLater);
+        connect (mDiskLooKupThread, &QThread::started, [this] {
+            qDebug()<<__FUNCTION__<<" Thread start, we'll start lookup now";
+            mDiskLooKup->startLookup();
+        });
 
-        connect (mDiskLooKup.data (), &DiskLookup::pending,
+        //use Transaction in Sailfish OS will make app hang when trying to write large data
+#ifdef SAILFISH_OS
+        connect (mDiskLooKup, &DiskLookup::pending,
                  mPlayListDAO.data(), &IPlayListDAO::beginTransaction);
+#endif
 
-        connect (mDiskLooKup.data (),
-                 &DiskLookup::finished,
+        connect (mDiskLooKup, &DiskLookup::finished,
                  [this] {
-            if (mTagParserManager.isNull())
+            qDebug()<<__FUNCTION__<<" DiskLookup finished, we'll try to finish thread";
+            mDiskLooKupThread->quit();
+
+            if (mTagParserManager == nullptr || mTagParserThread == nullptr)
                 initTagParserManager();
-            mTagParserManager.data ()->startParserLoop ();
+            mTagParserThread->start();
             emit searchingFinished ();
         });
 
-        connect (mDiskLooKup.data (),
-                 &DiskLookup::fileFound,
+        connect (mDiskLooKupThread, &QThread::finished, [this] {
+            qDebug()<<__FUNCTION__<<" mDiskLooKupThread finished, we'll try to deleteLater";
+            mDiskLooKup->deleteLater();
+            mDiskLooKupThread->deleteLater();
+        });
+
+        connect (mDiskLooKup, &DiskLookup::fileFound,
                  [this]
                  (const QString &path, const QString &file, const qint64 &size) {
             QString hash = Util::calculateHash (path.toLocal8Bit ()
@@ -167,52 +151,17 @@ bool MusicLibraryManager::scanLocalMusic()
             data->setMeta (Common::SongMetaTags::E_FilePath, path);
             data->setMeta (Common::SongMetaTags::E_Hash, hash);
             data->setMeta (Common::SongMetaTags::E_FileSize, size);
-            if (mTagParserManager.isNull())
+            if (mTagParserManager == nullptr || mTagParserThread == nullptr)
                 initTagParserManager();
-            mTagParserManager.data ()->addItem (data, false);
+            mTagParserManager->addItem (data, false);
         });
     }
-
-//    //signal/slot
-//    connect (mDiskLooKupThread.data (), &QThread::finished,
-//             mDiskLooKup.data (), &DiskLookup::deleteLater);
-
-//    connect (mDiskLooKup.data (), &DiskLookup::pending,
-//             mPlayListDAO, &IPlayListDAO::beginTransaction);
-
-//    connect (mDiskLooKup.data (),
-//             &DiskLookup::finished,
-//             [this] {
-//        mTagParserManager.data ()->startParserLoop ();
-//        emit searchingFinished ();
-//    });
-
-//    connect (mDiskLooKup.data (),
-//             &DiskLookup::fileFound,
-//             [this]
-//             (const QString &path, const QString &file, const qint64 &size) {
-//        QString hash = Util::calculateHash (path.toLocal8Bit ()
-//                                            + file.toLocal8Bit ()
-//                                            + QString::number (size));
-
-//        qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
-
-//        emit searching (path, file, size);
-
-//        PhoenixPlayer::SongMetaData *data = new PhoenixPlayer::SongMetaData(0);
-//        data->setMeta (Common::SongMetaTags::E_FileName, file);
-//        data->setMeta (Common::SongMetaTags::E_FilePath, path);
-//        data->setMeta (Common::SongMetaTags::E_Hash, hash);
-
-//        mTagParserManager.data ()->addItem (data, false);
-//    });
-
-    qDebug()<<__FUNCTION__<<" start add lookup dir";
-
     foreach (QString s, mSettings->getMusicDirs ()) {
-        mDiskLooKup.data ()->addLookupDir (s, false);
+        mDiskLooKup->addLookupDir (s, false);
     }
-    return mDiskLooKup.data ()->startLookup ();
+    //return mDiskLooKup.data ()->startLookup ();
+    mDiskLooKupThread->start();
+    return true;
 }
 
 bool MusicLibraryManager::changePlayList(const QString &playListHash)
@@ -437,13 +386,6 @@ bool MusicLibraryManager::init()
 
     mCurrentSongHash = mSettings->getLastPlayedSong ();
     mCurrentPlayListHash = mSettings->getPlayListHash ();
-//    //本地歌曲扫描线程
-//    if (mDiskLooKupThread.isNull ())
-//        mDiskLooKupThread = new QThread(this);
-
-//    if (mDiskLooKup.isNull ())
-//        mDiskLooKup = new DiskLookup(0);
-//    mDiskLooKup.data ()->moveToThread (mDiskLooKupThread);
 
     if (mPlayListDAO.isNull())
         mPlayListDAO = mPluginLoader->getCurrentPlayListDAO ();
@@ -454,64 +396,6 @@ bool MusicLibraryManager::init()
     } else {
         qDebug()<<"Can't find mPlayListDAO";
     }
-
-//    //歌曲tag读取线程
-//    if (mTagParserThread.isNull ())
-//        mTagParserThread = new QThread(this);
-//    if (mTagParserManager.isNull ())
-//        mTagParserManager = new TagParserManager(0);
-//    mTagParserManager.data ()->moveToThread (mTagParserThread);
-
-//    //signal/slot
-//    connect (mDiskLooKupThread.data (), &QThread::finished,
-//             mDiskLooKup.data (), &DiskLookup::deleteLater);
-
-//    connect (mDiskLooKup.data (), &DiskLookup::pending,
-//             mPlayListDAO, &IPlayListDAO::beginTransaction);
-
-//    connect (mDiskLooKup.data (),
-//             &DiskLookup::finished,
-//             [this] {
-//        mTagParserManager.data ()->startParserLoop ();
-//        emit searchingFinished ();
-//    });
-
-//    connect (mDiskLooKup.data (),
-//             &DiskLookup::fileFound,
-//             [this]
-//             (const QString &path, const QString &file, const qint64 &size) {
-//        QString hash = Util::calculateHash (path.toLocal8Bit ()
-//                                            + file.toLocal8Bit ()
-//                                            + QString::number (size));
-
-//        qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
-
-//        emit searching (path, file, size);
-
-//        PhoenixPlayer::SongMetaData *data = new PhoenixPlayer::SongMetaData(0);
-//        data->setMeta (Common::SongMetaTags::E_FileName, file);
-//        data->setMeta (Common::SongMetaTags::E_FilePath, path);
-//        data->setMeta (Common::SongMetaTags::E_Hash, hash);
-
-//        mTagParserManager.data ()->addItem (data, false);
-//    });
-
-//    connect (mTagParserManager.data (), &TagParserManager::parserPending, [] {
-//        qDebug()<<"********************* parserPending";
-//    });
-//    connect (mTagParserThread.data (), &QThread::finished,
-//             mTagParserManager.data (), &TagParserManager::deleteLater);
-
-//    connect (mTagParserManager.data (), &TagParserManager::parserQueueFinished, [this]{
-//        //写入数据库
-//        qDebug()<<"********************* parserQueueFinished";
-//        mPlayListDAO->commitTransaction ();
-//    });
-
-//    //发送一个songhash change的信号,以便于qml界面在初始化后刷新
-//    emit playingSongChanged ();
-//    emit playListChanged ();
-
     isInit = true;
 
     return true;
@@ -520,24 +404,35 @@ bool MusicLibraryManager::init()
 void MusicLibraryManager::initTagParserManager()
 {
     //歌曲tag读取线程
-    if (mTagParserThread.isNull ())
-        mTagParserThread = new QThread(this);
-    if (mTagParserManager.isNull ()) {
+    if (mTagParserThread == nullptr)
+        mTagParserThread = new QThread(0);
+    if (mTagParserManager == nullptr) {
         mTagParserManager = new TagParserManager(0);
-        mTagParserManager.data ()->moveToThread (mTagParserThread);
+        mTagParserManager->moveToThread (mTagParserThread);
 
-        connect (mTagParserManager.data (), &TagParserManager::parserPending, [] {
+        connect (mTagParserManager, &TagParserManager::parserPending, [] {
             qDebug()<<"********************* parserPending";
         });
-        connect (mTagParserThread.data (), &QThread::finished,
-                 mTagParserManager.data (), &TagParserManager::deleteLater);
 
-        connect (mTagParserManager.data (), &TagParserManager::parserQueueFinished, [this]{
-            //写入数据库
-            qDebug()<<"********************* parserQueueFinished";
-            mPlayListDAO.data()->commitTransaction ();
+        connect (mTagParserThread, &QThread::started, [this] () {
+            qDebug()<<__FUNCTION__<<" mTagParserThread started, start parser tag";
+            mTagParserManager->startParserLoop();
         });
 
+        connect (mTagParserManager, &TagParserManager::parserQueueFinished, [this] () {
+            qDebug()<<__FUNCTION__<<" mTagParserManager finished, stop thread";
+            mTagParserThread->quit();
+            //use Transaction in Sailfish OS will make app hang when trying to write large data
+#ifdef SAILFISH_OS
+            mPlayListDAO.data()->commitTransaction ();
+#endif
+        });
+
+        connect (mTagParserThread, &QThread::finished, [this] {
+            qDebug()<<__FUNCTION__<<" mTagParserThread finished, we'll try to deleteLater";
+            mTagParserManager->deleteLater();
+            mTagParserThread->deleteLater();
+        });
     }
 }
 
@@ -550,22 +445,6 @@ QString MusicLibraryManager::queryOne(const QString &hash, Common::SongMetaTags 
         return QString();
     return list.first();
 }
-
-//void MusicLibraryManager::fileFound(QString path, QString file, qint64 size)
-//{
-//    QString hash = Util::calculateHash (path.toLocal8Bit ()+ file.toLocal8Bit ()+ QString::number (size));
-//    qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
-
-//    emit searching (path, file, size);
-
-//    PhoenixPlayer::SongMetaData data;
-//    data.setFileName (file);
-//    data.setFilePath (path);
-//    data.setFileSize (size);
-//    data.setHash (hash);
-
-//    mPlayListDAO->insertMetaData (&data);
-//}
 
 } //MusicLibrary
 } //PhoenixPlayer

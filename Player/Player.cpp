@@ -200,8 +200,8 @@ void Player::setMetaLookupManager()
     }
     connect (mMetaLookupManager,
              &MetadataLookupManager::lookupFailed,
-             [this] {
-        emitMetadataLookupResult (IMetadataLookup::TypeUndefined, false);
+             [this] (const QString &songHash, IMetadataLookup::LookupType type){
+        emitMetadataLookupResult (type, songHash, false);
     });
 
     connect (mMetaLookupManager,
@@ -225,7 +225,7 @@ void Player::setMetaLookupManager()
                     dao->updateMetaData (&meta, true);
             }
         }
-        emitMetadataLookupResult (type, true);
+        emitMetadataLookupResult (type, "", true);
     });
 }
 
@@ -442,20 +442,28 @@ void Player::metadataLookup(const QString &songHash,
     mMetaLookupManager->lookup (&data, type);
 }
 
-void Player::emitMetadataLookupResult(
-        IMetadataLookup::LookupType type, bool result)
+void Player::emitMetadataLookupResult(IMetadataLookup::LookupType type, const QString &hash, bool succeed)
 {
-    if (!result) {
-        emit metadataLookupFailed ();
-        return;
-    }
     //TODO 添加其他类型的emit
     switch (type) {
-    case IMetadataLookup::TypeLyrics:
-        emit lookupLyricSucceed ();
+    case IMetadataLookup::TypeLyrics: {
+        if (succeed)
+            emit lookupLyricSucceed ();
+        else
+            emit lookupLyricFailed ();
         break;
-    default:
+    }
+    case IMetadataLookup::TypeAlbumDescription:
+    case IMetadataLookup::TypeAlbumImage:
+    case IMetadataLookup::TypeArtistDescription:
+    case IMetadataLookup::TypeArtistImage:
+    case IMetadataLookup::TypeSongDescription:
+    case IMetadataLookup::TypeUndefined:
+    default: {
+        if (!succeed)
+            emit metadataLookupFailed ();
         break;
+    }
     }
 }
 

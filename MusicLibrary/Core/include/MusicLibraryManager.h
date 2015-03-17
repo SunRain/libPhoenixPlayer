@@ -170,10 +170,11 @@ private:
       PluginLoader *mPluginLoader;
       Settings *mSettings;
 
-      QPointer<QThread> mDiskLooKupThread;
-      QPointer<QThread> mTagParserThread;
-      QPointer<DiskLookup> mDiskLooKup;
-      QPointer<TagParserManager> mTagParserManager;
+      QThread *mDiskLooKupThread;
+      QThread *mTagParserThread;
+      DiskLookup *mDiskLooKup;
+      TagParserManager *mTagParserManager;
+
       QString mCurrentSongHash;
       QString mCurrentPlayListHash;
 };

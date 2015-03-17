@@ -55,7 +55,7 @@ void MetadataLookupManager::lookup(SongMetaData *data,
 {
     if (mLookup.isNull ()){
         qDebug()<<"MetadataLookupManager we can't found any lookup plugin now";
-        emit lookupFailed ();
+        emit lookupFailed (data->getMeta(Common::E_Hash).toString(), type);
         return;
     }
 
@@ -91,9 +91,11 @@ void MetadataLookupManager::nextLookupPlugin()
             mCurrentIndex += 1;
         } else {
             //所有插件都使用过了
-            emit lookupFailed ();
+//            emit lookupFailed ();
+            QString hash = mCurrentNode.data
+                    ->getMeta (Common::SongMetaTags::E_Hash).toString ();
+            emit lookupFailed (hash, mLookup.data ()->currentLookupFlag ());
         }
-
     }
 }
 
