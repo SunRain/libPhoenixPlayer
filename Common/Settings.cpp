@@ -40,6 +40,8 @@ Settings::Settings(QObject *parent) : QObject(parent)
         if (!dir.mkpath(mDefaultMusicDir))
             qDebug()<<"make music default dir fail";
     }
+
+    checkInit ();
 }
 
 //Settings *Settings::getInstance()
@@ -80,22 +82,46 @@ bool Settings::setMusicDir(const QStringList &dirList)
     QStringList list = dirList;
     list.removeDuplicates ();
     QString last = list.takeLast ();
+    //Only one dir in the list
     if (list.isEmpty ()) {
         mSettings->setValue (KEY_MUSIC_DIR, last);
         return true;
     }
     QString tmp;
     foreach (QString s, list) {
-        tmp = QString("%1||").arg (s);
+        tmp += QString("%1||").arg (s);
     }
     mSettings->setValue (KEY_MUSIC_DIR, QString("%1%2").arg (tmp).arg (last));
     mSettings->sync ();
     return true;
 }
 
+bool Settings::addMusicDir(const QString &dir)
+{
+    if (dir.isEmpty ())
+        return false;
+    QStringList list = getMusicDirs ();
+    if (list.contains (dir))
+        return false;
+    list.append (dir);
+    return setMusicDir (list);
+}
+
+
+bool Settings::deleteMusicDir(const QString &target)
+{
+    if (target.isEmpty ())
+        return false;
+    QStringList list = getMusicDirs ();
+    if (list.contains (target))
+        list.removeOne (target);
+    return setMusicDir (list);
+
+}
+
 QStringList Settings::getMusicDirs()
 {
-    return mSettings->value (KEY_MUSIC_DIR, mDefaultMusicDir).toStringList ();
+    return mSettings->value (KEY_MUSIC_DIR, mDefaultMusicDir).toString ().split ("||");
 }
 
 bool Settings::setLastPlayedSong(const QString &songHash)
@@ -160,5 +186,16 @@ bool Settings::setTraceLog(bool trace)
 bool Settings::traceLog()
 {
     return mSettings->value(KEY_TRACE_LOG, false).toBool();
+}
+
+void Settings::checkInit()
+{
+    QStringList list = mSettings->allKeys ();
+    if (!list.contains (KEY_MUSIC_DIR))
+        mSettings->setValue (KEY_MUSIC_DIR, mDefaultMusicDir);
+    if (!list.contains (KEY_MUSIC_IMAGE_CACHE))
+        mSettings->setValue (KEY_MUSIC_IMAGE_CACHE, mDefaultMusicImageDir);
+
+    mSettings->sync ();
 }
 } //PhoenixPlayer

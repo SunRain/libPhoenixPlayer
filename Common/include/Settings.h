@@ -21,6 +21,8 @@ public:
 #endif
 
     Q_INVOKABLE bool setMusicDir(const QStringList &dirList);
+    Q_INVOKABLE bool addMusicDir(const QString &dir);
+    Q_INVOKABLE bool deleteMusicDir(const QString &target);
     Q_INVOKABLE QStringList getMusicDirs();
 
     Q_INVOKABLE bool setLastPlayedSong(const QString &songHash);
@@ -42,7 +44,7 @@ signals:
 public slots:
 
 private:
-
+    void checkInit();
 private:
     QSettings *mSettings;
 
