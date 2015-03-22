@@ -24,7 +24,7 @@ public:
     BaiduLookup(QObject *parent = 0);
     virtual ~BaiduLookup();
 
-public:
+protected:
     QString getUrl();
 
      // ILyricsLookup interface
