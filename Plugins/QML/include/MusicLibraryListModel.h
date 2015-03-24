@@ -8,15 +8,18 @@
 class QByteArray;
 class QVariant;
 namespace PhoenixPlayer {
+class Player;
 
 namespace MusicLibrary {
 class MusicLibraryManager;
 }
+
 namespace QmlPlugin {
 
 class MusicLibraryListModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool autoFetchMetadata READ autoFetchMetadata WRITE setAutoFetchMetadata NOTIFY autoFetchMetadataChanged)
 public:
     explicit MusicLibraryListModel(QAbstractListModel *parent = 0);
     ~MusicLibraryListModel();
@@ -32,6 +35,9 @@ public:
     Q_INVOKABLE void showMediaTypeTracks(const QString &mediaType, int limitNum = -1);
     Q_INVOKABLE void showUserRatingTracks(const QString &rating, int limitNum = -1);
     Q_INVOKABLE void showFolderTracks(const QString &folder, int limitNum = -1);
+
+    void setAutoFetchMetadata(bool autoFetch);
+    bool autoFetchMetadata();
 
     // QAbstractItemModel interface
 public:
@@ -69,7 +75,7 @@ public:
     };
 
 signals:
-
+    void autoFetchMetadataChanged();
 public slots:
     void clear();
 
@@ -81,7 +87,9 @@ private:
 private:
     QStringList mSongHashList;
     MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
+    Player *mPlayer;
     int mLimitNum;
+    bool mAutoFetchMetadata;
 };
 
 } //QmlPlugin

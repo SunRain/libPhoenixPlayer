@@ -5,6 +5,7 @@
 #include <MetadataLookup/IMetadataLookup.h>
 
 class QByteArray;
+class QJsonObject;
 namespace PhoenixPlayer{
 class SongMetaData;
 
@@ -20,6 +21,19 @@ namespace LastFmLookup {
 
 #define API_BASE "http://ws.audioscrobbler.com/2.0"
 #define API_KEY "625fd47b3b685af19315cc3a1aa5920a"
+
+/*
+ *  macro based on last.fm json result
+ *  should use a configuration later
+ *
+ */
+#define IMAGE_SIZE_REGEXP_LARGE "large"
+#define IMAGE_SIZE_REGEXP_MEDIA "medium"
+#define IMAGE_SIZE_REGEXP_SMALL "small"
+#define IMAGE_SIZE_REGEXP_EXTRA_LARGE "extralarge"
+#define IMAGE_SIZE_REGEXP_MEGA "mega"
+
+#define DEFAULT_IMAGE_SIZE_REGEXP IMAGE_SIZE_REGEXP_MEDIA
 
 class LastFmLookup : public IMetadataLookup
 {
@@ -39,15 +53,16 @@ public:
     void lookup(SongMetaData *meta);
 
 protected:
-    void parseAlbumDescription(const QByteArray &qba);
-    void parseAlbumImage(const QByteArray &qba);
-    void parseArtistDescription(const QByteArray &qba);
-    void parseArtistImage(const QByteArray &qba);
+//    void parseAlbumDescription(const QByteArray &qba);
+//    void parseAlbumImage(const QByteArray &qba);
+//    void parseArtistDescription(const QByteArray &qba);
+//    void parseArtistImage(const QByteArray &qba);
     void parseSongDescription(const QByteArray &qba);
+    void parseAlbumData(const QByteArray &qba);
+    void parseArtisData(const QByteArray &qba);
 
 private:
-//    void lookupByFlag(const LookupType &type);
-//    void parseResult(const QByteArray &qba);
+    bool parseRootObject(QJsonObject &out, const QByteArray &in, const QString &key);
 private:
     BaseNetworkLookup *mNetworkLookup;
 //    SongMetaData *mSongMeta;

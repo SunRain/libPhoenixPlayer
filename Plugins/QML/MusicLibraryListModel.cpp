@@ -8,6 +8,7 @@
 #include "MusicLibraryManager.h"
 #include "Common.h"
 #include "Util.h"
+#include "Player.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;
@@ -21,8 +22,10 @@ MusicLibraryListModel::MusicLibraryListModel(QAbstractListModel *parent) :
 {
 #ifdef SAILFISH_OS
     mMusicLibraryManager = MusicLibraryManager::instance();
+    mPlayer = Player::instance ();
 #endif
     mLimitNum = -1;
+    mAutoFetchMetadata = false;
 }
 
 MusicLibraryListModel::~MusicLibraryListModel()
@@ -37,6 +40,18 @@ void MusicLibraryListModel::showAllTracks()
     mSongHashList = mMusicLibraryManager
             ->querySongMetaElement(Common::E_Hash, QString(), false);
     appendToModel();
+}
+
+void MusicLibraryListModel::setAutoFetchMetadata(bool autoFetch)
+{
+    if (mAutoFetchMetadata != autoFetch)
+        emit autoFetchMetadataChanged ();
+    mAutoFetchMetadata = autoFetch;
+}
+
+bool MusicLibraryListModel::autoFetchMetadata()
+{
+    return mAutoFetchMetadata;
 }
 
 void MusicLibraryListModel::showFolderTracks(const QString &folder, int limitNum)
@@ -106,13 +121,23 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     if (index.row () < 0 || index.row () >= mSongHashList.size ())
         return QVariant();
     QString hash = mSongHashList.at(index.row());
+    QString str;
     switch (role) {
-    case ModelRoles::RoleAlbumImageUrl:
-        return mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl, true);
-    case ModelRoles::RoleAlbumName:
+    case ModelRoles::RoleAlbumImageUrl: {
+        str = mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl, true);
+        if (str.isEmpty ())
+            mPlayer->lookupAlbumImage (hash);
+        return str;
+    }
+    case ModelRoles::RoleAlbumName: {
         return mMusicLibraryManager->queryOne(hash, Common::E_AlbumName, true);
-    case ModelRoles::RoleArtistImageUri:
-        return mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri, true);
+    }
+    case ModelRoles::RoleArtistImageUri: {
+        str = mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri, true);
+        if (str.isEmpty ())
+            mPlayer->lookupArtistImage (hash);
+        return str;
+    }
     case ModelRoles::RoleArtistName:
         return mMusicLibraryManager->queryOne(hash, Common::E_ArtistName, true);
     case ModelRoles::RoleCoverArtLarge:
@@ -149,7 +174,12 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
         return s;
     }
     case ModelRoles::RoleTrackImageUri: {
-        return mMusicLibraryManager->querySongImageUri(hash);
+        str = mMusicLibraryManager->querySongImageUri(hash);
+        if (str.isEmpty ()) {
+            mPlayer->lookupAlbumImage (hash);
+            mPlayer->lookupArtistImage (hash);
+        }
+        return str;
     }
     default:
         return QVariant();

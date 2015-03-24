@@ -17,9 +17,10 @@ public:
         TypeLyrics,             //歌词
         TypeAlbumImage,         //专辑封面
         TypeAlbumDescription,   //专辑介绍
+        TypeAlbumDate,          //
         TypeArtistImage,        //艺术家封面
         TypeArtistDescription,  //艺术家信息
-        TypeSongDescription     //歌曲信息
+        TypeTrackDescription    //歌曲信息
     };
 
     explicit IMetadataLookup(QObject *parent = 0) : QObject(parent) {

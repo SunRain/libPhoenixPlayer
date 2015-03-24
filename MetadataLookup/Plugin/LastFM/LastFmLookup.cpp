@@ -4,7 +4,11 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QUrlQuery>
-
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonParseError>
 
 #include "SongMetaData.h"
 #include "BaseNetworkLookup.h"
@@ -36,19 +40,16 @@ LastFmLookup::LastFmLookup(QObject *parent)
             return;
         }
         switch (currentLookupFlag ()) {
+        case LookupType::TypeAlbumDate:
         case LookupType::TypeAlbumDescription:
-            parseAlbumDescription (replyData);
-            break;
         case LookupType::TypeAlbumImage:
-            parseAlbumImage (replyData);
+            parseAlbumData (replyData);
             break;
         case LookupType::TypeArtistDescription:
-            parseArtistDescription (replyData);
-            break;
         case LookupType::TypeArtistImage:
-            parseArtistImage (replyData);
+            parseArtisData (replyData);
             break;
-        case LookupType::TypeSongDescription:
+        case LookupType::TypeTrackDescription:
             parseSongDescription (replyData);
             break;
         default:
@@ -84,9 +85,10 @@ bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
     switch (type) {
     case LookupType::TypeAlbumDescription:
     case LookupType::TypeAlbumImage:
+    case LookupType::TypeAlbumDate:
     case LookupType::TypeArtistDescription:
     case LookupType::TypeArtistImage:
-    case LookupType::TypeSongDescription:
+    case LookupType::TypeTrackDescription:
     case LookupType::TypeUndefined:
         return true;
     default:
@@ -104,9 +106,10 @@ void LastFmLookup::lookup(SongMetaData *meta)
 
     switch (currentLookupFlag ()) {
     case LookupType::TypeAlbumImage:
+    case LookupType::TypeAlbumDate:
     case LookupType::TypeAlbumDescription: {
         QString artist = meta->getMeta (Common::E_ArtistName).toString ();
-        QString album = meta->getMeta (Common.E_AlbumName).toSize ();
+        QString album = meta->getMeta (Common::E_AlbumName).toString ();
         if (!artist.isEmpty () && !album.isEmpty ()) {
             query.addQueryItem ("artist", artist);
             query.addQueryItem ("album", album);
@@ -114,6 +117,7 @@ void LastFmLookup::lookup(SongMetaData *meta)
         } else {
             //TODO: last.fm alum info need artist name
             emit lookupFailed ();
+            return;
         }
         break;
     }
@@ -125,14 +129,15 @@ void LastFmLookup::lookup(SongMetaData *meta)
             query.addQueryItem ("method", QString("artist.getInfo"));
         } else {
             emit lookupFailed ();
+            return;
         }
         break;
     }
-    case LookupType::TypeSongDescription: {
+    case LookupType::TypeTrackDescription: {
         QString artist = meta->getMeta (Common::E_ArtistName).toString ();
         QString track = meta->getMeta (Common::E_SongTitle).toString ();
         if (track.isEmpty ()) {
-            track = mMeta->getMeta (Common::SongMetaTags::E_FileName).toString ();
+            track = meta->getMeta (Common::SongMetaTags::E_FileName).toString ();
             //TODO: quick hack
             track = track.mid (0, track.indexOf ("."));
         }
@@ -143,6 +148,7 @@ void LastFmLookup::lookup(SongMetaData *meta)
         } else {
             //TODO: last.fm track info need artist name
             emit lookupFailed ();
+            return;
         }
         break;
     }
@@ -152,30 +158,193 @@ void LastFmLookup::lookup(SongMetaData *meta)
     }
     url.setQuery (query);
 
+    mNetworkLookup->setUrl (url.toString ());
+    mNetworkLookup->setRequestType (BaseNetworkLookup::RequestGet);
+    mNetworkLookup->startLookup ();
 }
 
-//void LastFmLookup::parseResult(QByteArray &qba)
-//{
-//    switch (currentLookupFlag ()) {
-//    case LookupType::TypeAlbumDescription:
-//        parseAlbumDescription (qba);
-//        break;
-//    case LookupType::TypeAlbumImage:
-//        parseAlbumImage (qba);
-//        break;
-//    case LookupType::TypeArtistDescription:
-//        parseArtistDescription (qba);
-//        break;
-//    case LookupType::TypeArtistImage:
-//        parseArtistImage (qba);
-//        break;
-//    case LookupType::TypeSongDescription:
-//        parseSongDescription (qba);
-//        break;
-//    default:
-//        break;
-//    }
-//}
+void LastFmLookup::parseSongDescription(const QByteArray &qba)
+{
+    QJsonObject mainObj;
+    if (!parseRootObject (mainObj, qba, QString("track"))) {
+        emit lookupFailed ();
+        return;
+    }
+    if (mainObj.isEmpty ()) {
+        qDebug()<<"mainObj is isEmpty";
+        emit lookupFailed ();
+        return;
+    }
+    if (currentLookupFlag () == LookupType::TypeTrackDescription) {
+        QJsonValue v = mainObj.value (QString("wiki"));
+        if (v.isUndefined ()) {
+            qDebug()<<"wiki is isEmpty";
+            emit lookupFailed ();
+            return;
+        }
+        QJsonObject o = v.toObject ();
+        if (o.isEmpty ()) {
+            qDebug()<<"wiki obj is isEmpty";
+            emit lookupFailed ();
+            return;
+        }
+        v = o.value (QString("content"));
+        if (v.isUndefined ()) {
+            qDebug()<<"wiki content is isUndefined";
+            emit lookupFailed ();
+        } else {
+            emit lookupSucceed (v.toString ().toLocal8Bit ());
+        }
+    }
+}
+
+void LastFmLookup::parseAlbumData(const QByteArray &qba)
+{
+    QJsonObject mainObj;
+    if (!parseRootObject (mainObj, qba, QString("album"))) {
+        emit lookupFailed ();
+        return;
+    }
+    if (mainObj.isEmpty ()) {
+        qDebug()<<"mainObj is isEmpty";
+        emit lookupFailed ();
+        return;
+    }
+    if (currentLookupFlag () == LookupType::TypeAlbumDate) {
+        QJsonValue v = mainObj.value (QString("releasedate"));
+        if (v.isUndefined ()) {
+            qDebug()<<"date is isEmpty";
+            emit lookupFailed ();
+        } else {
+            emit lookupSucceed (v.toString ().toLocal8Bit ());
+        }
+    } else if (currentLookupFlag () == LookupType::TypeAlbumDescription) {
+        QJsonValue v = mainObj.value (QString("wiki"));
+        if (v.isUndefined ()) {
+            qDebug()<<"wiki is isEmpty";
+            emit lookupFailed ();
+            return;
+        }
+        QJsonObject o = v.toObject ();
+        if (o.isEmpty ()) {
+            qDebug()<<"wiki obj is isEmpty";
+            emit lookupFailed ();
+            return;
+        }
+        v = o.value (QString("content"));
+        if (v.isUndefined ()) {
+            qDebug()<<"wiki content is isUndefined";
+            emit lookupFailed ();
+        } else {
+            emit lookupSucceed (v.toString ().toLocal8Bit ());
+        }
+    } else if (currentLookupFlag () == LookupType::TypeAlbumImage) {
+        QJsonValue v = mainObj.value (QString("image"));
+        if (v.isUndefined () || !v.isArray ()) {
+            qDebug()<<"image is isEmpty or no image array found";
+            emit lookupFailed ();
+            return;
+        }
+        QJsonArray array = v.toArray ();
+        bool found = false;
+        foreach (QJsonValue value, array) {
+            if (value.isUndefined ())
+                continue;
+            QJsonObject o = value.toObject ();
+            if (o.isEmpty ())
+                continue;
+            if (o.value (QString("size")).toString () == QString(DEFAULT_IMAGE_SIZE_REGEXP)) {
+                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            emit lookupFailed ();
+    }
+
+
+}
+
+void LastFmLookup::parseArtisData(const QByteArray &qba)
+{
+    QJsonObject mainObj;
+    if (!parseRootObject (mainObj, qba, QString("album"))) {
+        emit lookupFailed ();
+        return;
+    }
+    if (mainObj.isEmpty ()) {
+        qDebug()<<"mainObj is isEmpty";
+        emit lookupFailed ();
+        return;
+    }
+    if (currentLookupFlag () == LookupType::TypeArtistDescription) {
+        QJsonValue v = mainObj.value (QString("bio"));
+        if (v.isUndefined ()) {
+            qDebug()<<"bio is isUndefined";
+            emit lookupFailed ();
+            return;
+        }
+        QJsonObject o = v.toObject ();
+        if (o.isEmpty ()) {
+            qDebug()<<"bio obj is isEmpty";
+            emit lookupFailed ();
+            return;
+        }
+        v = o.value (QString("content"));
+        if (v.isUndefined ()) {
+            qDebug()<<"content is isUndefined";
+            emit lookupFailed ();
+        } else {
+            emit lookupSucceed (v.toString ().toLocal8Bit ());
+        }
+    } else if (currentLookupFlag () == LookupType::TypeArtistImage) {
+        QJsonValue v = mainObj.value (QString("image"));
+        if (v.isUndefined () || !v.isArray ()) {
+            qDebug()<<"image is isEmpty or no image array found";
+            emit lookupFailed ();
+            return;
+        }
+        QJsonArray array = v.toArray ();
+        bool found = false;
+        foreach (QJsonValue value, array) {
+            if (value.isUndefined ())
+                continue;
+            QJsonObject o = value.toObject ();
+            if (o.isEmpty ())
+                continue;
+            if (o.value (QString("size")).toString () == QString(DEFAULT_IMAGE_SIZE_REGEXP)) {
+                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            emit lookupFailed ();
+    }
+}
+
+bool LastFmLookup::parseRootObject(QJsonObject &out, const QByteArray &in, const QString &key)
+{
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson (in, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qDebug()<<error.errorString ();
+        return false;
+    }
+    if (!doc.isObject ()) {
+        qDebug()<<"data is not json obj";
+        return false;
+    }
+    QJsonObject docObj = doc.object ();
+    QJsonValue mainValue = docObj.value (key);
+    if (mainValue.isUndefined ()) {
+        qDebug()<<"mainValue  for key "<<key<<" is undefined";
+        return false;
+    }
+    out = mainValue.toObject ();
+    return true;
+}
 
 
 } //LastFmLookup
