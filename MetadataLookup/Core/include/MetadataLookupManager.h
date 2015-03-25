@@ -38,6 +38,7 @@ protected:
     };
 
 private:
+    void setConnection(IMetadataLookup *lookup);
     void nextLookupPlugin();
     void initPlugins();
     void processNext();
@@ -45,14 +46,17 @@ private:
 //    QPointer<PluginLoader> mPluginLoader;
     PluginLoader *mPluginLoader;
     //QList<ILyricsLookup *> mPluginList;
-    QPointer<IMetadataLookup> mLookup;
+//    QPointer<IMetadataLookup> mLookup;
+    IMetadataLookup *mLookup;
     IMetadataLookup *mBackupLookup;
+    QString mPreConnection;
     QStringList mPluginNameList;
 //    SongMetaData *mSongMeta;
     int mCurrentIndex;
 //    IMetadataLookup::LookupType mCurLookupType;
     QList<WorkNode> mWorkQueue;
     WorkNode mCurrentNode;
+    bool mLookupStarted;
 };
 
 

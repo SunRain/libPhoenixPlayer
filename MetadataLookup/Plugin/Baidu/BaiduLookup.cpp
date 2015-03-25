@@ -95,7 +95,7 @@ BaiduLookup::~BaiduLookup()
 //    if (mLyricsDL != nullptr)
 //        mLyricsDL->deleteLater ();
 
-//    qDebug()<<"after"<<__FUNCTION__;
+    qDebug()<<"after"<<__FUNCTION__;
 }
 
 QString BaiduLookup::getUrl()

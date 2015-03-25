@@ -1,0 +1,212 @@
+{
+    "artist": {
+        "name": "Cher",
+        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+        "url": "http://www.last.fm/music/Cher",
+        "image": [
+            {
+                "#text": "http://userserve-ak.last.fm/serve/34/62360425.png",
+                "size": "small"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/64/62360425.png",
+                "size": "medium"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/126/62360425.png",
+                "size": "large"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/252/62360425.png",
+                "size": "extralarge"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/500/62360425/Cher.png",
+                "size": "mega"
+            }
+        ],
+        "streamable": "0",
+        "ontour": "0",
+        "stats": {
+            "listeners": "954531",
+            "playcount": "12209305"
+        },
+        "similar": {
+            "artist": [
+                {
+                    "name": "Sonny & Cher",
+                    "url": "http://www.last.fm/music/Sonny+&+Cher",
+                    "image": [
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/34/40211017.jpg",
+                            "size": "small"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/64/40211017.jpg",
+                            "size": "medium"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/126/40211017.jpg",
+                            "size": "large"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/252/40211017.jpg",
+                            "size": "extralarge"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/_/40211017/Sonny++Cher+sonny_cher.jpg",
+                            "size": "mega"
+                        }
+                    ]
+                },
+                {
+                    "name": "Madonna",
+                    "url": "http://www.last.fm/music/Madonna",
+                    "image": [
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/34/103651825.png",
+                            "size": "small"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/64/103651825.png",
+                            "size": "medium"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/126/103651825.png",
+                            "size": "large"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/252/103651825.png",
+                            "size": "extralarge"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/500/103651825/Madonna+Joan+Of+Arc+By+Mert+Alas++Marc.png",
+                            "size": "mega"
+                        }
+                    ]
+                },
+                {
+                    "name": "Kylie Minogue",
+                    "url": "http://www.last.fm/music/Kylie+Minogue",
+                    "image": [
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/34/75686952.png",
+                            "size": "small"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/64/75686952.png",
+                            "size": "medium"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/126/75686952.png",
+                            "size": "large"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/252/75686952.png",
+                            "size": "extralarge"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/_/75686952/Kylie+Minogue+KYLIE.png",
+                            "size": "mega"
+                        }
+                    ]
+                },
+                {
+                    "name": "Céline Dion",
+                    "url": "http://www.last.fm/music/C%C3%A9line+Dion",
+                    "image": [
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/34/98676371.png",
+                            "size": "small"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/64/98676371.png",
+                            "size": "medium"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/126/98676371.png",
+                            "size": "large"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/252/98676371.png",
+                            "size": "extralarge"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/500/98676371/Cline+Dion+PNG.png",
+                            "size": "mega"
+                        }
+                    ]
+                },
+                {
+                    "name": "Barbra Streisand",
+                    "url": "http://www.last.fm/music/Barbra+Streisand",
+                    "image": [
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/34/103425769.png",
+                            "size": "small"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/64/103425769.png",
+                            "size": "medium"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/126/103425769.png",
+                            "size": "large"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/252/103425769.png",
+                            "size": "extralarge"
+                        },
+                        {
+                            "#text": "http://userserve-ak.last.fm/serve/500/103425769/Barbra+Streisand+Essential+Barbra.png",
+                            "size": "mega"
+                        }
+                    ]
+                }
+            ]
+        },
+        "tags": {
+            "tag": [
+                {
+                    "name": "pop",
+                    "url": "http://www.last.fm/tag/pop"
+                },
+                {
+                    "name": "female vocalists",
+                    "url": "http://www.last.fm/tag/female%20vocalists"
+                },
+                {
+                    "name": "80s",
+                    "url": "http://www.last.fm/tag/80s"
+                },
+                {
+                    "name": "dance",
+                    "url": "http://www.last.fm/tag/dance"
+                },
+                {
+                    "name": "rock",
+                    "url": "http://www.last.fm/tag/rock"
+                }
+            ]
+        },
+        "bio": {
+            "links": {
+                "link": {
+                    "#text": "",
+                    "rel": "original",
+                    "href": "http://www.last.fm/music/Cher/+wiki"
+                }
+            },
+            "published": "Thu, 6 Mar 2014 11:40:46 +0000",
+            "summary": "\n                Cher (born Cherilyn Sarkisian; May 20, 1946) is an Oscar - and Grammy- winning American singer and actress. A major figure for over five decades in the world of popular culture, she is often referred to as the Goddess of Pop for having first brought the sense of female autonomy and self-actualization into the entertainment industry.  She is known for her distinctive contralto and for having worked extensively across media, as well as for continuously reinventing both her music and image, the latter of which has been known to induce controversy. \n\n        <a href=\"http://www.last.fm/music/Cher\">Read more about Cher on Last.fm</a>.\n    \n    ",
+            "content": "\n                    Cher (born Cherilyn Sarkisian; May 20, 1946) is an Oscar - and Grammy- winning American singer and actress. A major figure for over five decades in the world of popular culture, she is often referred to as the Goddess of Pop for having first brought the sense of female autonomy and self-actualization into the entertainment industry.  She is known for her distinctive contralto and for having worked extensively across media, as well as for continuously reinventing both her music and image, the latter of which has been known to induce controversy. \n\n        <a href=\"http://www.last.fm/music/Cher\">Read more about Cher on Last.fm</a>.\n    \n    \nUser-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.\n    ",
+            "yearformed": "1965",
+            "formationlist": {
+                "formation": {
+                    "yearfrom": "1965",
+                    "yearto": ""
+                }
+            }
+        }
+    }
+} 

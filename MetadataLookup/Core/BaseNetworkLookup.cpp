@@ -45,13 +45,11 @@ void BaseNetworkLookup::setRequestType(BaseNetworkLookup::RequestType type)
 
 bool BaseNetworkLookup::startLookup()
 {
+    qDebug()<<__FUNCTION__;
     if (mUrl.isEmpty ())
         return false;
 
     QUrl url(mUrl);
-
-    qDebug()<<"************ url "<<url<<" ******************";
-
     if (url.isEmpty ())
         return false;
 
@@ -92,9 +90,9 @@ bool BaseNetworkLookup::startLookup()
             qDebug()<<"===  BaseNetworkLookup  succeed";
 
             QByteArray qba = mReply->readAll ();
-            emit succeed (mReply->request ().url (), qba);
+            QUrl url(mReply->request ().url ());
             mReply->deleteLater ();
-
+            emit succeed (url, qba);
         });
 
         //请求失败
@@ -104,11 +102,12 @@ bool BaseNetworkLookup::startLookup()
                  [this](QNetworkReply::NetworkError error) {
             Q_UNUSED(error)
 
-             qDebug()<<"===  BaseNetworkLookup  error "<<mReply->errorString ();
+            qDebug()<<"===  BaseNetworkLookup  error "<<mReply->errorString ();
 
-            emit failed (mReply->request ().url (), mReply->errorString ());
-             mReply->deleteLater ();
-
+            QUrl url(mReply->request ().url ());
+            QString errorStr(mReply->errorString ());
+            mReply->deleteLater ();
+            emit failed (url, errorStr);
         });
         return true;
     }

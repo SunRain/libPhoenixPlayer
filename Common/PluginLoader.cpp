@@ -33,6 +33,11 @@ PluginLoader::PluginLoader(QObject *parent)
         mCurrentPluginName.insert(PluginType(i), QString());
     }
 
+    mPlayBackendLoader = new QPluginLoader(this);
+    mDaoLoader = new QPluginLoader(this);
+    mTagParserLoader = new QPluginLoader(this);
+    mMetaLookupLoader = new QPluginLoader(this);
+
     if (!isInit)
         initPlugins ();
 }
@@ -40,33 +45,10 @@ PluginLoader::PluginLoader(QObject *parent)
 PluginLoader::~PluginLoader()
 {
     qDebug()<<__FUNCTION__;
-
-//    qDeleteAll (mPlayBackendList);
-//    if (!mPlayBackendList.isEmpty ())
-//        mPlayBackendList.clear ();
-
-//    qDeleteAll (mPlayListDAOList);
-//    if (!mPlayListDAOList.isEmpty ())
-//        mPlayListDAOList.clear ();
-
-//    qDeleteAll (mMusicTagParserList);
-//    if (!mMusicTagParserList.isEmpty ())
-//        mMusicTagParserList.clear ();
-
-    //TODO:why this makes crash?
-//    qDeleteAll (mMetaLookupList);
-//    if (!mMetaLookupList.isEmpty ()) {
-//        mMetaLookupList.clear ();
-//    }
     if (!mPluginList.isEmpty())
         mPluginList.clear();
-
-//    if (!mCurrentPluginIndex.isEmpty ())
-//        mCurrentPluginIndex.clear ();
-
     if (!mCurrentPluginName.isEmpty ())
         mCurrentPluginName.clear ();
-
     if (!mPluginPath.isEmpty ())
         mPluginPath.clear ();
 }
@@ -130,8 +112,13 @@ PlayBackend::IPlayBackend *PluginLoader::getCurrentPlayBackend()
     qDebug()<<"CurrentBackend index Name "
          <<mCurrentPluginName[PluginType::TypePlayBackend];
 
-    QPluginLoader loader(f);
-    QObject *plugin = loader.instance();
+    if (mPlayBackendLoader->isLoaded ()) {
+        if (!mPlayBackendLoader->unload ())
+            qDebug()<<__FUNCTION__<<mPlayBackendLoader->errorString ();
+    }
+    //QPluginLoader loader(f);
+    mPlayBackendLoader->setFileName (f);
+    QObject *plugin = mPlayBackendLoader->instance ();//loader.instance();
     if (plugin) {
         IPlayBackend *p = qobject_cast<IPlayBackend*>(plugin);
         if (p) {
@@ -141,7 +128,7 @@ PlayBackend::IPlayBackend *PluginLoader::getCurrentPlayBackend()
             return nullptr;
         }
     } else {
-        qDebug()<<__FUNCTION__<<" cant load plugin "<<loader.errorString();
+        qDebug()<<__FUNCTION__<<" cant load plugin "<<mPlayBackendLoader->errorString();
         return nullptr;
     }
 }
@@ -172,8 +159,13 @@ MusicLibrary::IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
     qDebug()<<"Current IPlayListDAO index Name "
          <<mCurrentPluginName[PluginType::TypePlayListDAO];
 
-    QPluginLoader loader(f);
-    QObject *plugin = loader.instance();
+    if (mDaoLoader->isLoaded ()) {
+        if (!mDaoLoader->unload ())
+            qDebug()<<__FUNCTION__<<mDaoLoader->errorString ();
+    }
+    mDaoLoader->setFileName (f);
+//    QPluginLoader loader(f);
+    QObject *plugin = mDaoLoader->instance ();//loader.instance();
     if (plugin) {
         IPlayListDAO *p = qobject_cast<IPlayListDAO*>(plugin);
         if (p) {
@@ -183,7 +175,7 @@ MusicLibrary::IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
             return nullptr;
         }
     } else {
-        qDebug()<<__FUNCTION__<<" cant load plugin "<<loader.errorString();
+        qDebug()<<__FUNCTION__<<" cant load plugin "<<mDaoLoader->errorString();
         return nullptr;
     }
 }
@@ -214,8 +206,13 @@ MusicLibrary::IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
     qDebug()<<"Current TypeMusicTagParser index Name "
          <<mCurrentPluginName[PluginType::TypeMusicTagParser];
 
-    QPluginLoader loader(f);
-    QObject *plugin = loader.instance();
+    if (mTagParserLoader->isLoaded ()) {
+        if (!mTagParserLoader->unload ())
+            qDebug()<<__FUNCTION__<<mTagParserLoader->errorString ();
+    }
+    mTagParserLoader->setFileName (f);
+//    QPluginLoader loader(f);
+    QObject *plugin = mTagParserLoader->instance ();//loader.instance();
     if (plugin) {
         IMusicTagParser *p = qobject_cast<IMusicTagParser*>(plugin);
         if (p) {
@@ -225,7 +222,7 @@ MusicLibrary::IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
             return nullptr;
         }
     } else {
-        qDebug()<<__FUNCTION__<<" cant load plugin "<<loader.errorString();
+        qDebug()<<__FUNCTION__<<" cant load plugin "<<mTagParserLoader->errorString();
         return nullptr;
     }
 }
@@ -256,8 +253,13 @@ IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
     qDebug()<<"Current IMetadataLookup index Name "
          <<mCurrentPluginName[PluginType::TypeMetadataLookup];
 
-    QPluginLoader loader(f);
-    QObject *plugin = loader.instance();
+    if (mMetaLookupLoader->isLoaded ()) {
+        if (!mMetaLookupLoader->unload ())
+            qDebug()<<__FUNCTION__<<mMetaLookupLoader->errorString ();
+    }
+    mMetaLookupLoader->setFileName (f);
+//    QPluginLoader loader(f);
+    QObject *plugin = mMetaLookupLoader->instance ();//loader.instance();
     if (plugin) {
         IMetadataLookup *p = qobject_cast<IMetadataLookup*>(plugin);
         if (p) {
@@ -267,7 +269,7 @@ IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
             return nullptr;
         }
     } else {
-        qDebug()<<__FUNCTION__<<" cant load plugin "<<loader.errorString();
+        qDebug()<<__FUNCTION__<<" cant load plugin "<<mMetaLookupLoader->errorString();
         return nullptr;
     }
 }
@@ -399,7 +401,10 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
         }
 
         qDebug() << "change backend to " << newPluginName;
-
+        if (mPlayBackendLoader->isLoaded ()) {
+           if (!mPlayBackendLoader->unload ())
+               qDebug()<<__FUNCTION__<<mPlayBackendLoader->errorString ();
+        }
         foreach (PluginObject p, mPluginList) {
             if (p.type == PluginType::TypePlayBackend
                     && p.name.toLower() == newPluginName.toLower()) {
@@ -417,6 +422,10 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
 
         qDebug() << "change play list dao to " << newPluginName;
 
+        if (mDaoLoader->isLoaded ()) {
+            if (!mDaoLoader->unload ())
+                qDebug()<<__FUNCTION__<<mDaoLoader->errorString ();
+        }
         foreach (PluginObject p, mPluginList) {
             if (p.type == PluginType::TypePlayListDAO
                     && p.name.toLower() == newPluginName.toLower()) {
@@ -434,6 +443,11 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
 
         qDebug() << "change music tag parser to " << newPluginName;
 
+        if (mTagParserLoader->isLoaded ()) {
+            if (!mTagParserLoader->unload ())
+                qDebug()<<__FUNCTION__<<mTagParserLoader->errorString ();
+        }
+
         foreach (PluginObject p, mPluginList) {
             if (p.type == PluginType::TypeMusicTagParser
                     && p.name.toLower() == newPluginName.toLower()) {
@@ -449,7 +463,12 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
             return;
         }
 
-        qDebug() << "change lyricsLookup to " << newPluginName;
+        qDebug() << "change TypeMetadataLookup to " << newPluginName;
+
+        if (mMetaLookupLoader->isLoaded ()) {
+            if (!mMetaLookupLoader->unload ())
+                qDebug()<<__FUNCTION__<<mMetaLookupLoader->errorString ();
+        }
 
         foreach (PluginObject p, mPluginList) {
             if (p.type == PluginType::TypeMetadataLookup
@@ -461,204 +480,4 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
         }
     }
 }
-
-//void PluginLoader::initPlayBackendPlugin()
-//{
-//    //删除之前容器中保存的插件
-//    if (!mPlayBackendList.isEmpty ()) {
-//        //删除插件本身
-//        qDeleteAll(mPlayBackendList);
-//        mPlayBackendList.clear ();
-//    }
-//    int index = 0;
-
-//    //system plugins
-//    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
-//        if (plugin) {
-//            //播放后端
-//            PlayBackend::IPlayBackend *backend
-//                    = qobject_cast<PlayBackend::IPlayBackend*>(plugin);
-//            if (backend) {
-//                mPlayBackendList.append (backend);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = backend->getBackendName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypePlayBackend]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypePlayBackend] = index;
-//                    mCurrentPluginName[PluginType::TypePlayBackend] = name;
-//                }
-//                index++;
-//            }
-//        }
-//    }
-
-//    // dynamic plugins
-//    qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypePlayBackend];
-//    QDir dir(mPluginPath[PluginType::TypePlayBackend]);
-//    foreach (QString fileName, dir.entryList(QDir::Files)) {
-//        QPluginLoader loader(dir.absoluteFilePath(fileName));
-//        QObject *plugin = loader.instance();
-//        if (plugin) {
-//            //播放后端
-//            PlayBackend::IPlayBackend *backend
-//                    = qobject_cast<PlayBackend::IPlayBackend*>(plugin);
-//            if (backend) {
-//                mPlayBackendList.append (backend);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = backend->getBackendName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypePlayBackend]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypePlayBackend] = index;
-//                    mCurrentPluginName[PluginType::TypePlayBackend] = name;
-//                }
-//                index++;
-//            }
-//        } else {
-//            qDebug()<<"no plugin for "<<dir.absoluteFilePath(fileName);
-//        }
-//    }
-
-//    qDebug()<<"Find playbackend num "<<index;
-
-//    if (mPlayBackendList.isEmpty ()) {
-//        mCurrentPluginIndex[PluginType::TypePlayBackend] = -1;
-//        mCurrentPluginName[PluginType::TypePlayBackend] = QString();
-//    } else { //得到第一个插件
-//        mCurrentPluginIndex[PluginType::TypePlayBackend] = 0;
-//        mCurrentPluginName[PluginType::TypePlayBackend]
-//                = mPlayBackendList.at (0)->getBackendName ().toLower ();
-//    }
-//}
-
-//void PluginLoader::initPlayListDaoPlugin()
-//{
-//    if (!mPlayListDAOList.isEmpty ()) {
-//        qDeleteAll(mPlayListDAOList);
-//        mPlayBackendList.clear ();
-//    }
-//    int index = 0;
-//    // dynamic plugins
-//    qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypePlayListDAO];
-//    QDir dir(mPluginPath[PluginType::TypePlayListDAO]);
-//    foreach (QString fileName, dir.entryList(QDir::Files)) {
-//        QPluginLoader loader(dir.absoluteFilePath(fileName));
-//        QObject *plugin = loader.instance();
-//        if (plugin) {
-//            //媒体库数据存储后端
-//            MusicLibrary::IPlayListDAO *dao
-//                    = qobject_cast<MusicLibrary::IPlayListDAO*>(plugin);
-//            if (dao) {
-//                mPlayListDAOList.append (dao);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = dao->getPluginName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypePlayListDAO]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypePlayListDAO] = index;
-//                    mCurrentPluginName[PluginType::TypePlayListDAO] = name;
-//                }
-//                index++;
-//            }
-//        } else {
-//            qDebug()<<"no plugin for "<<dir.absoluteFilePath(fileName);
-//        }
-//    }
-
-//    qDebug()<<"Find IPlayListDAO num "<<index;
-
-//    if (mPlayListDAOList.isEmpty ()) {
-//        mCurrentPluginIndex[PluginType::TypePlayListDAO] = -1;
-//        mCurrentPluginName[PluginType::TypePlayListDAO] = QString();
-//    } else { //得到第一个插件
-//        mCurrentPluginIndex[PluginType::TypePlayListDAO] = 0;
-//        mCurrentPluginName[PluginType::TypePlayListDAO]
-//                = mPlayListDAOList.at (0)->getPluginName ().toLower ();
-//    }
-//}
-
-//void PluginLoader::initMusicTagParserPlugin()
-//{
-//    if (!mMusicTagParserList.isEmpty ()) {
-//        qDeleteAll(mMusicTagParserList);
-//        mMusicTagParserList.clear ();
-//    }
-//    int index = 0;
-//    // dynamic plugins
-//    qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypeMusicTagParser];
-//    QDir dir(mPluginPath[PluginType::TypeMusicTagParser]);
-//    foreach (QString fileName, dir.entryList(QDir::Files)) {
-//        QPluginLoader loader(dir.absoluteFilePath(fileName));
-//        QObject *plugin = loader.instance();
-//        if (plugin) {
-//            MusicLibrary::IMusicTagParser *parser
-//                    = qobject_cast<MusicLibrary::IMusicTagParser*>(plugin);
-//            if (parser) {
-//                mMusicTagParserList.append (parser);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = parser->getPluginName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypeMusicTagParser]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypeMusicTagParser] = index;
-//                    mCurrentPluginName[PluginType::TypeMusicTagParser] = name;
-//                }
-//                index++;
-//            }
-//        } else {
-//            qDebug()<<"no plugin for "<<dir.absoluteFilePath(fileName);
-//        }
-//    }
-
-//    qDebug()<<"Find MusicTagParser num "<<index;
-
-//    if (mMusicTagParserList.isEmpty ()) {
-//        mCurrentPluginIndex[PluginType::TypeMusicTagParser] = -1;
-//        mCurrentPluginName[PluginType::TypeMusicTagParser] = QString();
-//    } else { //得到第一个插件
-//        mCurrentPluginIndex[PluginType::TypeMusicTagParser] = 0;
-//        mCurrentPluginName[PluginType::TypeMusicTagParser]
-//                = mMusicTagParserList.at (0)->getPluginName ().toLower ();
-//    }
-//}
-
-//void PluginLoader::initMetadataLookupPlugin()
-//{
-//    if (!mMetaLookupList.isEmpty ()) {
-//        qDeleteAll(mMetaLookupList);
-//        mMetaLookupList.clear ();
-//    }
-//    int index = 0;
-//    // dynamic plugins
-//    qDebug()<<"Search plugin in dir "<<mPluginPath[PluginType::TypeMetadataLookup];
-//    QDir dir(mPluginPath[PluginType::TypeMetadataLookup]);
-//    foreach (QString fileName, dir.entryList(QDir::Files)) {
-//        QPluginLoader loader(dir.absoluteFilePath(fileName));
-//        QObject *plugin = loader.instance();
-//        if (plugin) {
-//            IMetadataLookup *lookup = qobject_cast<IMetadataLookup*>(plugin);
-//            if (lookup) {
-//                mMetaLookupList.append (lookup);
-//                //检测当前找到的插件是否是当前使用的插件
-//                QString name = lookup->getPluginName ().toLower ();
-//                if (name == mCurrentPluginName[PluginType::TypeMetadataLookup]
-//                        .toLower ()) {
-//                    mCurrentPluginIndex[PluginType::TypeMetadataLookup] = index;
-//                    mCurrentPluginName[PluginType::TypeMetadataLookup] = name;
-//                }
-//                index++;
-//            }
-//        } else {
-//            qDebug()<<"no plugin for "<<dir.absoluteFilePath(fileName);
-//        }
-//    }
-
-//    qDebug()<<"Find MetadataLookup num "<<index;
-
-//    if (mMetaLookupList.isEmpty ()) {
-//        mCurrentPluginIndex[PluginType::TypeMetadataLookup] = -1;
-//        mCurrentPluginName[PluginType::TypeMetadataLookup] = QString();
-//    } else { //得到第一个插件
-//        mCurrentPluginIndex[PluginType::TypeMetadataLookup] = 0;
-//        mCurrentPluginName[PluginType::TypeMetadataLookup]
-//                = mMetaLookupList.at (0)->getPluginName ().toLower ();
-//    }
-//}
 }

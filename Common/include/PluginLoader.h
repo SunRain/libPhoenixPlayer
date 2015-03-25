@@ -5,6 +5,8 @@
 #include <QHash>
 #include <QList>
 
+class QPluginLoader;
+
 namespace PhoenixPlayer {
 
 namespace PlayBackend {
@@ -113,7 +115,10 @@ private:
 //      QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
 //      QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;
 //      QList <MetadataLookup::IMetadataLookup*> mMetaLookupList;
-
+     QPluginLoader *mPlayBackendLoader;
+     QPluginLoader *mDaoLoader;
+     QPluginLoader *mTagParserLoader;
+     QPluginLoader *mMetaLookupLoader;
      QList<PluginObject> mPluginList;
 //     QHash<PluginType, int> mCurrentPluginIndex;
      QHash<PluginType, QString> mCurrentPluginName;

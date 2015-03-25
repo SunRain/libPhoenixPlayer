@@ -27,13 +27,16 @@ LastFmLookup::LastFmLookup(QObject *parent)
     connect (mNetworkLookup, &BaseNetworkLookup::failed,
              [this](const QUrl &requestedUrl, const QString &error) {
         Q_UNUSED(requestedUrl);
-        qDebug()<<__FUNCTION__<<"lookup failed "<<error;
+//        qDebug()<<__FUNCTION__<<"lookup failed "<<error;
         emit lookupFailed ();
     });
 
     connect (mNetworkLookup, &BaseNetworkLookup::succeed,
              [this](const QUrl &requestedUrl, const QByteArray &replyData) {
         Q_UNUSED(requestedUrl);
+
+        qDebug()<<replyData;
+
         if (replyData.isEmpty ()) {
             qDebug()<<__FUNCTION__<<"replyData is empty ";
             emit lookupFailed ();
@@ -62,7 +65,7 @@ LastFmLookup::LastFmLookup(QObject *parent)
 
 LastFmLookup::~LastFmLookup()
 {
-
+    qDebug()<<__FUNCTION__;
 }
 
 QString LastFmLookup::getPluginName()
@@ -99,6 +102,8 @@ bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
 //http://ws.audioscrobbler.com/2.0/?method=album.search&album=F.I.R&api_key=625fd47b3b685af19315cc3a1aa5920a&format=json
 void LastFmLookup::lookup(SongMetaData *meta)
 {
+    qDebug()<<"====> "<<__FUNCTION__<<" <====";
+
     QUrl url(API_BASE);
     QUrlQuery query;
     query.addQueryItem ("api_key", QString(API_KEY));
@@ -158,6 +163,8 @@ void LastFmLookup::lookup(SongMetaData *meta)
     }
     url.setQuery (query);
 
+    qDebug()<<__FUNCTION__<<" URL "<<url <<" network is null "<<(mNetworkLookup == nullptr);
+
     mNetworkLookup->setUrl (url.toString ());
     mNetworkLookup->setRequestType (BaseNetworkLookup::RequestGet);
     mNetworkLookup->startLookup ();
@@ -193,7 +200,11 @@ void LastFmLookup::parseSongDescription(const QByteArray &qba)
             qDebug()<<"wiki content is isUndefined";
             emit lookupFailed ();
         } else {
-            emit lookupSucceed (v.toString ().toLocal8Bit ());
+            QString str = v.toString ();
+            if (str.isEmpty ())
+                emit lookupFailed ();
+            else
+                emit lookupSucceed (str.toLocal8Bit ());
         }
     }
 }
@@ -216,7 +227,11 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
             qDebug()<<"date is isEmpty";
             emit lookupFailed ();
         } else {
-            emit lookupSucceed (v.toString ().toLocal8Bit ());
+            QString str = v.toString ();
+            if (str.isEmpty ())
+                emit lookupFailed ();
+            else
+                emit lookupSucceed (str.toLocal8Bit ());
         }
     } else if (currentLookupFlag () == LookupType::TypeAlbumDescription) {
         QJsonValue v = mainObj.value (QString("wiki"));
@@ -236,7 +251,11 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
             qDebug()<<"wiki content is isUndefined";
             emit lookupFailed ();
         } else {
-            emit lookupSucceed (v.toString ().toLocal8Bit ());
+            QString str = v.toString ();
+            if (str.isEmpty ())
+                emit lookupFailed ();
+            else
+                emit lookupSucceed (str.toLocal8Bit ());
         }
     } else if (currentLookupFlag () == LookupType::TypeAlbumImage) {
         QJsonValue v = mainObj.value (QString("image"));
@@ -247,6 +266,7 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
         }
         QJsonArray array = v.toArray ();
         bool found = false;
+        QString str;
         foreach (QJsonValue value, array) {
             if (value.isUndefined ())
                 continue;
@@ -254,12 +274,19 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
             if (o.isEmpty ())
                 continue;
             if (o.value (QString("size")).toString () == QString(DEFAULT_IMAGE_SIZE_REGEXP)) {
-                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
+                str = o.value (QString("#text")).toString ();
+//                if (str.isEmpty ())
+//                    emit lookupFailed ();
+//                else
+//                    emit lookupSucceed (str.toLocal8Bit ());
+////                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
                 found = true;
                 break;
             }
         }
-        if (!found)
+        if (found && !str.isEmpty ())
+            emit lookupSucceed (str.toLocal8Bit ());
+        else
             emit lookupFailed ();
     }
 
@@ -269,7 +296,7 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
 void LastFmLookup::parseArtisData(const QByteArray &qba)
 {
     QJsonObject mainObj;
-    if (!parseRootObject (mainObj, qba, QString("album"))) {
+    if (!parseRootObject (mainObj, qba, QString("artist"))) {
         emit lookupFailed ();
         return;
     }
@@ -296,7 +323,11 @@ void LastFmLookup::parseArtisData(const QByteArray &qba)
             qDebug()<<"content is isUndefined";
             emit lookupFailed ();
         } else {
-            emit lookupSucceed (v.toString ().toLocal8Bit ());
+            QString str = v.toString ();
+            if (str.isEmpty ())
+                emit lookupFailed ();
+            else
+                emit lookupSucceed (str.toLocal8Bit ());
         }
     } else if (currentLookupFlag () == LookupType::TypeArtistImage) {
         QJsonValue v = mainObj.value (QString("image"));
@@ -307,6 +338,7 @@ void LastFmLookup::parseArtisData(const QByteArray &qba)
         }
         QJsonArray array = v.toArray ();
         bool found = false;
+        QString str;
         foreach (QJsonValue value, array) {
             if (value.isUndefined ())
                 continue;
@@ -314,12 +346,15 @@ void LastFmLookup::parseArtisData(const QByteArray &qba)
             if (o.isEmpty ())
                 continue;
             if (o.value (QString("size")).toString () == QString(DEFAULT_IMAGE_SIZE_REGEXP)) {
-                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
+                str = o.value (QString("#text")).toString ();
+//                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
                 found = true;
                 break;
             }
         }
-        if (!found)
+        if (found && !str.isEmpty ())
+            emit lookupSucceed (str.toLocal8Bit ());
+        else
             emit lookupFailed ();
     }
 }

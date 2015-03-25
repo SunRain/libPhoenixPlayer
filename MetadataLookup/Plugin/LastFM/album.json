@@ -1,0 +1,248 @@
+ 
+{
+    "album": {
+        "name": "Believe",
+        "artist": "Cher",
+        "id": "2026126",
+        "mbid": "b89efb32-1c23-3f36-b9e8-a26de463002a",
+        "url": "http://www.last.fm/music/Cher/Believe",
+        "releasedate": "    5 Jul 2005, 00:00",
+        "image": [
+            {
+                "#text": "http://userserve-ak.last.fm/serve/34s/88057565.png",
+                "size": "small"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/64s/88057565.png",
+                "size": "medium"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/174s/88057565.png",
+                "size": "large"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/300x300/88057565.png",
+                "size": "extralarge"
+            },
+            {
+                "#text": "http://userserve-ak.last.fm/serve/_/88057565/Believe.png",
+                "size": "mega"
+            }
+        ],
+        "listeners": "263328",
+        "playcount": "1530214",
+        "tracks": {
+            "track": [
+                {
+                    "name": "Believe",
+                    "duration": "239",
+                    "mbid": "0de16c7f-bf6b-4aa0-9b08-36edcd293247",
+                    "url": "http://www.last.fm/music/Cher/_/Believe",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "1"
+                    }
+                },
+                {
+                    "name": "The Power",
+                    "duration": "233",
+                    "mbid": "6b3de6b5-db70-49c9-b58d-e132a3eb1a36",
+                    "url": "http://www.last.fm/music/Cher/_/The+Power",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "2"
+                    }
+                },
+                {
+                    "name": "Runaway",
+                    "duration": "286",
+                    "mbid": "379f760d-1f29-4317-ab04-06a8218a874d",
+                    "url": "http://www.last.fm/music/Cher/_/Runaway",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "3"
+                    }
+                },
+                {
+                    "name": "All or Nothing",
+                    "duration": "238",
+                    "mbid": "a88735e6-b35c-4379-8ef7-bbd2b793ccf4",
+                    "url": "http://www.last.fm/music/Cher/_/All+or+Nothing",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "4"
+                    }
+                },
+                {
+                    "name": "Strong Enough",
+                    "duration": "220",
+                    "mbid": "26107af6-7dda-4844-85a5-8d61f24f4fc2",
+                    "url": "http://www.last.fm/music/Cher/_/Strong+Enough",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "5"
+                    }
+                },
+                {
+                    "name": "Dov'è L'amore",
+                    "duration": "258",
+                    "mbid": "58153307-25dd-4ff6-87f0-e08777e34539",
+                    "url": "http://www.last.fm/music/Cher/_/Dov%27%C3%A8+L%27amore",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "6"
+                    }
+                },
+                {
+                    "name": "Takin' Back My Heart",
+                    "duration": "272",
+                    "mbid": "07a38e80-ba81-494a-a61a-e8d81a40413e",
+                    "url": "http://www.last.fm/music/Cher/_/Takin%27+Back+My+Heart",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "7"
+                    }
+                },
+                {
+                    "name": "Taxi Taxi",
+                    "duration": "304",
+                    "mbid": "66f526c9-b135-4458-86cf-77065ce8f0aa",
+                    "url": "http://www.last.fm/music/Cher/_/Taxi+Taxi",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "8"
+                    }
+                },
+                {
+                    "name": "Love Is the Groove",
+                    "duration": "271",
+                    "mbid": "832f8f9a-95e4-476b-b108-14dec1dc84ba",
+                    "url": "http://www.last.fm/music/Cher/_/Love+Is+the+Groove",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "9"
+                    }
+                },
+                {
+                    "name": "We All Sleep Alone",
+                    "duration": "236",
+                    "mbid": "2286a77a-644a-4c86-9d43-31c029c3625b",
+                    "url": "http://www.last.fm/music/Cher/_/We+All+Sleep+Alone",
+                    "streamable": {
+                        "#text": "0",
+                        "fulltrack": "0"
+                    },
+                    "artist": {
+                        "name": "Cher",
+                        "mbid": "bfcc6d75-a6a5-4bc6-8282-47aec8531818",
+                        "url": "http://www.last.fm/music/Cher"
+                    },
+                    "@attr": {
+                        "rank": "10"
+                    }
+                }
+            ]
+        },
+        "toptags": {
+            "tag": [
+                {
+                    "name": "sourabh",
+                    "url": "http://www.last.fm/tag/sourabh"
+                },
+                {
+                    "name": "albums",
+                    "url": "http://www.last.fm/tag/albums"
+                },
+                {
+                    "name": "pop",
+                    "url": "http://www.last.fm/tag/pop"
+                },
+                {
+                    "name": "90s",
+                    "url": "http://www.last.fm/tag/90s"
+                },
+                {
+                    "name": "dance",
+                    "url": "http://www.last.fm/tag/dance"
+                }
+            ]
+        },
+        "wiki": {
+            "published": "Sat, 6 Mar 2010 16:48:03 +0000",
+            "summary": "Believe is the twenty-third studio album by American  singer-actress Cher, released on November 10, 1998 by Warner Bros. Records. The RIAA certified it Quadruple Platinum on December 23, 1999, recognizing four million shipments in the United States; Worldwide, the album has sold more than 20 million copies, making it the biggest-selling album of her career. In 1999 the album received three Grammy Awards nominations including &quot;Record of the Year&quot;, &quot;Best Pop Album&quot; and winning &quot;Best Dance Recording&quot; for the single &quot;Believe&quot;. ",
+            "content": "Believe is the twenty-third studio album by American  singer-actress Cher, released on November 10, 1998 by Warner Bros. Records. The RIAA certified it Quadruple Platinum on December 23, 1999, recognizing four million shipments in the United States; Worldwide, the album has sold more than 20 million copies, making it the biggest-selling album of her career. In 1999 the album received three Grammy Awards nominations including &quot;Record of the Year&quot;, &quot;Best Pop Album&quot; and winning &quot;Best Dance Recording&quot; for the single &quot;Believe&quot;.\n \n It was released by Warner Bros. Records at the end of 1998. The album was executive produced by Rob Dickens. Upon its debut, critical reception was generally positive. Believe became Cher's most commercially-successful release, reached number one and Top 10 all over the world. In the United States, the album was released on November 10, 1998, and reached number four on the Billboard 200 chart, where it was certified four times platinum.\n \n The album featured a change in Cher's music; in addition, Believe presented a vocally stronger Cher and a massive use of vocoder and Auto-Tune. In 1999, the album received 3 Grammy Awards nominations for &quot;Record of the Year&quot;, &quot;Best Pop Album&quot; and winning &quot;Best Dance Recording&quot;. Throughout 1999 and into 2000 Cher was nominated and winning many awards for the album including a Billboard Music Award for &quot;Female Vocalist of the Year&quot;, Lifelong Contribution Awards and a Star on the Walk of Fame shared with former Sonny Bono. The boost in Cher's popularity led to a very successful Do You Believe? Tour.\n \n The album was dedicated to Sonny Bono, Cher's former husband who died earlier that year from a skiing accident.\n \n Cher also recorded a cover version of &quot;Love Is in the Air&quot; during early sessions for this album. Although never officially released, the song has leaked on file sharing networks.\n \n Singles\n \n \n &quot;Believe&quot;\n &quot;Strong Enough&quot;\n &quot;All or Nothing&quot;\n &quot;Dov'è L'Amore&quot;\n        \nUser-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL."
+        }
+    }
+}
