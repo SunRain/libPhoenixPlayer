@@ -56,7 +56,3 @@ win32 {
 #	SOURCES -= tagReaderGstreamer.cpp
 #}
 
-HEADERS += \
-    ../../../Common/include/Lyrics/ILyricsDownloader.h
-
-

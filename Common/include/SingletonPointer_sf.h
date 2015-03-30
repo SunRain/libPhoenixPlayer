@@ -1,5 +1,5 @@
-#ifndef SINGLETONPOINTER_H
-#define SINGLETONPOINTER_H
+#ifndef SINGLETONPOINTER_SF_H
+#define SINGLETONPOINTER_SF_H
 
 #include <QDebug>
 #include <QMutex>
@@ -123,4 +123,4 @@ template<class T> QMutex SingletonPointer<T>::mLock(QMutex::NonRecursive);
 
 } //PhoenixPlayer
 
-#endif // SINGLETONPOINTER_H
+#endif // SINGLETONPOINTER_SF_H

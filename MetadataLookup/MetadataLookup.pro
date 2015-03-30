@@ -27,4 +27,6 @@ baidu.file = Plugin/Baidu/Baidu.pro
 baidu.depends = common metadatalookupcore
 SUBDIRS += baidu
 
-
+lastfm.file = Plugin/LastFM/LastFM.pro
+lastfm.depends = common metadatalookupcore
+SUBDIRS += lastfm

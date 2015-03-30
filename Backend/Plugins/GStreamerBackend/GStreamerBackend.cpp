@@ -154,7 +154,9 @@ void GStreamerBackend::init()
 {
     gst_init(0, 0);
     init_play_pipeline();
+#ifdef SAILFISH_OS
     mAudioResource.setResourceType(AudioResourceQt::AudioResource::MediaType);
+#endif
 }
 
 void GStreamerBackend::state_changed()

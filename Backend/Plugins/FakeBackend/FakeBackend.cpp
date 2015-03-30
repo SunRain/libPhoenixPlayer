@@ -10,9 +10,14 @@ FakeBackend::FakeBackend(QObject *parent) : IPlayBackend(parent)
 {
 }
 
-Common::PlaybackState FakeBackend::getPlaybackState()
+PhoenixPlayer::Common::PlayBackendState FakeBackend::getPlayBackendState()
 {
-    return Common::PlaybackStopped;
+    return PhoenixPlayer::Common::PlayBackendStopped;
+}
+
+QString FakeBackend::getDescription()
+{
+    return QString("Fake PlayBackend");
 }
 
 QString FakeBackend::getBackendName()

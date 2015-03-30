@@ -1,5 +1,5 @@
-#ifndef SINGLETONPOINTER_H
-#define SINGLETONPOINTER_H
+#ifndef SINGLETONPOINTER_P_H
+#define SINGLETONPOINTER_P_H
 
 #include <cstddef>
 #include <QDebug>
@@ -171,5 +171,5 @@ template<class T> QBasicAtomicInt SingletonPointer<T>::flag
 //std::size_t SingletonPointer<T>::m_uiReference = 0;
 
 } //PhoenixPlayer
-#endif // SINGLETONPOINTER_H
+#endif // SINGLETONPOINTER_P_H
 

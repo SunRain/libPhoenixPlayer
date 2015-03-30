@@ -148,6 +148,11 @@ QString TagParserPro::getPluginVersion()
     return QString(PLUGIN_VERSION);
 }
 
+QString TagParserPro::getDescription()
+{
+    return QString(DESCRIPTION);
+}
+
 QImage TagParserPro::getImage()
 {
     QImage image;

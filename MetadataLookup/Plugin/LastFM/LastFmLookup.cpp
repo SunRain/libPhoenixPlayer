@@ -27,7 +27,7 @@ LastFmLookup::LastFmLookup(QObject *parent)
     connect (mNetworkLookup, &BaseNetworkLookup::failed,
              [this](const QUrl &requestedUrl, const QString &error) {
         Q_UNUSED(requestedUrl);
-//        qDebug()<<__FUNCTION__<<"lookup failed "<<error;
+        qDebug()<<__FUNCTION__<<"lookup failed "<<error;
         emit lookupFailed ();
     });
 
@@ -113,8 +113,8 @@ void LastFmLookup::lookup(SongMetaData *meta)
     case LookupType::TypeAlbumImage:
     case LookupType::TypeAlbumDate:
     case LookupType::TypeAlbumDescription: {
-        QString artist = meta->getMeta (Common::E_ArtistName).toString ();
-        QString album = meta->getMeta (Common::E_AlbumName).toString ();
+        QString artist = formatStr (meta->getMeta (Common::E_ArtistName).toString ());
+        QString album = formatStr (meta->getMeta (Common::E_AlbumName).toString ());
         if (!artist.isEmpty () && !album.isEmpty ()) {
             query.addQueryItem ("artist", artist);
             query.addQueryItem ("album", album);
@@ -128,7 +128,7 @@ void LastFmLookup::lookup(SongMetaData *meta)
     }
     case LookupType::TypeArtistImage:
     case LookupType::TypeArtistDescription: {
-        QString artist = meta->getMeta (Common::E_ArtistName).toString ();
+        QString artist = formatStr (meta->getMeta (Common::E_ArtistName).toString ());
         if (!artist.isEmpty ()) {
             query.addQueryItem ("artist", artist);
             query.addQueryItem ("method", QString("artist.getInfo"));
@@ -139,8 +139,8 @@ void LastFmLookup::lookup(SongMetaData *meta)
         break;
     }
     case LookupType::TypeTrackDescription: {
-        QString artist = meta->getMeta (Common::E_ArtistName).toString ();
-        QString track = meta->getMeta (Common::E_SongTitle).toString ();
+        QString artist = formatStr (meta->getMeta (Common::E_ArtistName).toString ());
+        QString track = formatStr (meta->getMeta (Common::E_SongTitle).toString ());
         if (track.isEmpty ()) {
             track = meta->getMeta (Common::SongMetaTags::E_FileName).toString ();
             //TODO: quick hack
@@ -379,6 +379,16 @@ bool LastFmLookup::parseRootObject(QJsonObject &out, const QByteArray &in, const
     }
     out = mainValue.toObject ();
     return true;
+}
+
+QString LastFmLookup::formatStr(const QString &in)
+{
+    QString s = in;
+    s = s.replace('#',"%23");
+    s = s.replace('&',"%26");
+    s = s.replace('+',"%2B");
+    s = s.replace(' ',"+");
+    return s;
 }
 
 

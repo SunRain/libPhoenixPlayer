@@ -63,6 +63,7 @@ protected:
 
 private:
     bool parseRootObject(QJsonObject &out, const QByteArray &in, const QString &key);
+    QString formatStr(const QString &in);
 private:
     BaseNetworkLookup *mNetworkLookup;
 //    SongMetaData *mSongMeta;

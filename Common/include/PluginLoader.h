@@ -81,12 +81,21 @@ public:
 
 protected:
     void initPlugins();
-    struct PluginObject {
+
+    class PluginObject {
+    public:
         PluginType type;
         QString name;
         QString version;
         QString description;
         QString file;
+        bool operator == (const PluginObject &other) {
+            return this->type == other.type
+                    && this->name == other.name
+                    && this->version == other.version
+                    && this->description == other.description
+                    && this->file == other.file;
+        }
     };
 
 signals:
@@ -115,13 +124,18 @@ private:
 //      QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
 //      QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;
 //      QList <MetadataLookup::IMetadataLookup*> mMetaLookupList;
+     PlayBackend::IPlayBackend *mPlayBackend;
+     MusicLibrary::IPlayListDAO *mDao;
+     MusicLibrary::IMusicTagParser *mTagParser;
+     MetadataLookup::IMetadataLookup *mMetaLookup;
+
      QPluginLoader *mPlayBackendLoader;
      QPluginLoader *mDaoLoader;
      QPluginLoader *mTagParserLoader;
      QPluginLoader *mMetaLookupLoader;
      QList<PluginObject> mPluginList;
 //     QHash<PluginType, int> mCurrentPluginIndex;
-     QHash<PluginType, QString> mCurrentPluginName;
+//     QHash<PluginType, QString> mCurrentPluginName;
      QHash<PluginType, QString> mPluginPath;
 };
 

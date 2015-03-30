@@ -53,11 +53,20 @@ bool BaseNetworkLookup::startLookup()
     if (url.isEmpty ())
         return false;
 
+    if (mReply) {
+        mReply->abort ();
+        delete mReply;
+        mReply = nullptr;
+    }
+
     switch (mRequestType) {
     case RequestType::RequestGet: {
         qDebug()<<"Get "<< url.toString ();
         QNetworkRequest request(url);
+        qDebug()<<"..............................................";
         mReply = mNetwork->get (request);
+
+        qDebug()<<"########### "<<(mReply == 0);
         break;
     }
     case RequestType::RequestPut: {
@@ -91,7 +100,7 @@ bool BaseNetworkLookup::startLookup()
 
             QByteArray qba = mReply->readAll ();
             QUrl url(mReply->request ().url ());
-            mReply->deleteLater ();
+//            mReply->deleteLater ();
             emit succeed (url, qba);
         });
 
@@ -102,11 +111,14 @@ bool BaseNetworkLookup::startLookup()
                  [this](QNetworkReply::NetworkError error) {
             Q_UNUSED(error)
 
-            qDebug()<<"===  BaseNetworkLookup  error "<<mReply->errorString ();
+            qDebug()<<"===  xxxxxxxxxxxxxxxxxxxxxxxxxxx ";
 
             QUrl url(mReply->request ().url ());
             QString errorStr(mReply->errorString ());
-            mReply->deleteLater ();
+
+            qDebug()<<"===  BaseNetworkLookup  error "<<errorStr;
+
+//            mReply->deleteLater ();
             emit failed (url, errorStr);
         });
         return true;

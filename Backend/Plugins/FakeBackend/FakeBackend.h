@@ -4,10 +4,10 @@
 #include "Backend/IPlayBackend.h"
 
 namespace PhoenixPlayer {
-class Common;
 namespace PlayBackend {
 namespace FakeBackend {
 
+class Common;
 class FakeBackend : public IPlayBackend
 {
     Q_OBJECT
@@ -16,18 +16,19 @@ class FakeBackend : public IPlayBackend
 public:
     FakeBackend(QObject *parent = 0);
 
-    Common::PlaybackState  getPlaybackState() ;
-    QString	getBackendName() ;
-    QString getBackendVersion() ;
-    void	init() ;
+    PhoenixPlayer::Common::PlayBackendState getPlayBackendState();
+    QString getDescription();
+    QString	getBackendName();
+    QString getBackendVersion();
+    void	init();
 
 public slots:
-    void play(quint64 startMs ) ;
-    void stop() ;
-    void pause() ;
-    void setVolume(int vol ) ;
-    void setPosition(quint64 posMs ) ;
-    void changeMedia(PlayBackend::BaseMediaObject *obj ,quint64 startMs , bool startPlay = false) ;
+    void play(quint64 startMs );
+    void stop();
+    void pause();
+    void setVolume(int vol );
+    void setPosition(quint64 posMs );
+    void changeMedia(PlayBackend::BaseMediaObject *obj ,quint64 startMs , bool startPlay = false);
 };
 
 } //FakeBackend
