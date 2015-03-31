@@ -94,8 +94,6 @@ void MetadataLookupManager::slotDoLookup()
     qDebug()<<__FUNCTION__<<" do work by plugin "<<mLookup->getPluginName ();
     //将插件指向列表第一个
     mCurrentIndex = 0;
-    mLookup = mPluginList.first ();
-
     mMutex.lock ();
     mCurrentNode = mWorkQueue.takeFirst ();
     mMutex.unlock ();
@@ -107,47 +105,23 @@ void MetadataLookupManager::nextLookupPlugin()
     qDebug()<<__FUNCTION__<<" current index "<<mCurrentIndex
            <<" with pluginList size "<<mPluginNameList.size ();
 
-//    if (mCurrentIndex >= 0) { //如果存在其他插件
-//        if (mCurrentIndex < mPluginNameList.size ()) { //防止溢出
-//            qDebug()<<__FUNCTION__<<" new plugin "<<mPluginNameList.at (mCurrentIndex)
-//                      <<" index "<<mCurrentIndex;
-
-//            //指向下一个插件
-//            mPluginLoader->setNewPlugin (PluginLoader::PluginType::TypeMetadataLookup,
-//                                    mPluginNameList.at (mCurrentIndex++));
-
-//        } else {
-//            //所有插件都使用过了
-//            QString hash = mCurrentNode.data
-//                    ->getMeta (Common::SongMetaTags::E_Hash).toString ();
-//            qDebug()<<__FUNCTION__<<" all plugin used ===> failed for hash "<<hash;
-//            emit lookupFailed (hash, mLookup->currentLookupFlag ());
-
-//            initPluginNames ();
-//            processNext ();
-//        }
-//    }
-    if (mPluginList.size () == 1 || mCurrentIndex == -1) { //only one plugin
-        //所有插件都使用过了
-        QString hash = mCurrentNode.data
-                ->getMeta (Common::SongMetaTags::E_Hash).toString ();
-        qDebug()<<__FUNCTION__<<" all plugin used ===> failed for hash "<<hash;
-        emit lookupFailed (hash, mLookup->currentLookupFlag ());
-        processNext ();
-    } else {
-        if (mCurrentIndex < mPluginList.size ()) { //防止溢出
-            qDebug()<<__FUNCTION__<<" new plugin "<<mPluginList.at (mCurrentIndex)->getPluginName ()
-                   <<" index "<<mCurrentIndex;
+    if (mCurrentIndex >= 0) { //如果存在其他插件
+        if (mCurrentIndex < mPluginNameList.size ()) { //防止溢出
+            qDebug()<<__FUNCTION__<<" new plugin "<<mPluginNameList.at (mCurrentIndex)
+                      <<" index "<<mCurrentIndex;
 
             //指向下一个插件
-            mLookup = mPluginList.at (mCurrentIndex++);
-            if (mLookup != nullptr)
-                doLookup ();
+            mPluginLoader->setNewPlugin (PluginLoader::PluginType::TypeMetadataLookup,
+                                    mPluginNameList.at (mCurrentIndex++));
+
         } else {
+            //所有插件都使用过了
             QString hash = mCurrentNode.data
                     ->getMeta (Common::SongMetaTags::E_Hash).toString ();
             qDebug()<<__FUNCTION__<<" all plugin used ===> failed for hash "<<hash;
             emit lookupFailed (hash, mLookup->currentLookupFlag ());
+
+            initPluginNames ();
             processNext ();
         }
     }
@@ -175,45 +149,36 @@ void MetadataLookupManager::initPluginObject()
     QList<QObject*> objList = mPluginLoader->getPluginList (PluginLoader::TypeMetadataLookup);
     foreach (QObject *o, objList) {
         IMetadataLookup *lookup = qobject_cast<IMetadataLookup *>(o);
-        if (lookup) {
-            qDebug()<<"   append "<<lookup->getPluginName ();
+        if (lookup)
             mPluginList.append (lookup);
-        }
-    }
-    if (mPluginList.isEmpty ()) {
-        mCurrentIndex = -1;
-        mLookup = nullptr;
-    } else {
-        mLookup = mPluginList.first ();
-        mCurrentIndex = 0;
     }
 }
 
 void MetadataLookupManager::initPluginNames()
 {
-//    if (!mPluginNameList.isEmpty ())
-//        mPluginNameList.clear ();
+    if (!mPluginNameList.isEmpty ())
+        mPluginNameList.clear ();
 
-//    mPluginNameList = mPluginLoader->getPluginNames (PluginLoader::PluginType::TypeMetadataLookup);
+    mPluginNameList = mPluginLoader->getPluginNames (PluginLoader::PluginType::TypeMetadataLookup);
 
-//    qDebug()<<__FUNCTION__<<" ******* "<<mPluginNameList;
+    qDebug()<<__FUNCTION__<<" ******* "<<mPluginNameList;
 
-//    //因为PluginLoader默认会返回第一个插件,
-//    //并且更改插件名字的时候,如果目标插件名和当前使用插件名相同,则不会发送更改的信号
-//    //所以先从插件列表里面取出当前使用的插件
-//    if (!mPluginNameList.isEmpty ()) {
-//        if (mLookup != nullptr) {
-//            mPluginNameList.removeOne (mLookup->getPluginName ());
-//            if (!mPluginNameList.isEmpty ()) {
-//                //指向剩余列表的第一个
-//                mCurrentIndex = 0;
-//            } else {
-//                mCurrentIndex = -1; //重置
-//            }
-//        }
-//    }
+    //因为PluginLoader默认会返回第一个插件,
+    //并且更改插件名字的时候,如果目标插件名和当前使用插件名相同,则不会发送更改的信号
+    //所以先从插件列表里面取出当前使用的插件
+    if (!mPluginNameList.isEmpty ()) {
+        if (mLookup != nullptr) {
+            mPluginNameList.removeOne (mLookup->getPluginName ());
+            if (!mPluginNameList.isEmpty ()) {
+                //指向剩余列表的第一个
+                mCurrentIndex = 0;
+            } else {
+                mCurrentIndex = -1; //重置
+            }
+        }
+    }
 
-//    qDebug()<<__FUNCTION__<<" *******  exist plugin name "<<mPluginNameList;
+    qDebug()<<__FUNCTION__<<" *******  exist plugin name "<<mPluginNameList;
 }
 
 void MetadataLookupManager::processNext()
@@ -241,7 +206,7 @@ void MetadataLookupManager::processNext()
 //        mMutex.unlock ();
 //        doLookup ();
 //    });
-    QTimer::singleShot (100, this, SLOT(slotDoLookup()));
+    QTimer::singleShot (10, this, SLOT(slotDoLookup()));
 //    qDebug()<<__FUNCTION__<<" do work by plugin "<<mLookup->getPluginName ();
 //    //将插件指向列表第一个
 //    mCurrentIndex = 0;
@@ -288,21 +253,13 @@ void MetadataLookupManager::setLookupConnection()
         qDebug()<<__FUNCTION__<<" mLookup NULL";
         return;
     }
-//    if (mPreConnection.toLower () == mLookup->getPluginName ().toLower ()) {
-//        qDebug()<<__FUNCTION__<<" mLookup same name";
-//        return;
-//    }
-//    qDebug()<<__FUNCTION__<<" add connection for "<<mLookup->getPluginName ();
-
-//    mPreConnection = mLookup->getPluginName ().toLower ();
-
-    if (mConnectList.contains (mLookup->getPluginName ())) {
+    if (mPreConnection.toLower () == mLookup->getPluginName ().toLower ()) {
         qDebug()<<__FUNCTION__<<" mLookup same name";
         return;
     }
     qDebug()<<__FUNCTION__<<" add connection for "<<mLookup->getPluginName ();
 
-    mConnectList.append (mLookup->getPluginName ());
+    mPreConnection = mLookup->getPluginName ().toLower ();
 
     connect (mLookup, &IMetadataLookup::lookupFailed,
              [this]{

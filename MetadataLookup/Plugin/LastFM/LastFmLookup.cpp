@@ -104,6 +104,11 @@ void LastFmLookup::lookup(SongMetaData *meta)
 {
     qDebug()<<"====> "<<__FUNCTION__<<" <====";
 
+#if 0
+    emit lookupFailed ();
+    return;
+#endif
+
     QUrl url(API_BASE);
     QUrlQuery query;
     query.addQueryItem ("api_key", QString(API_KEY));

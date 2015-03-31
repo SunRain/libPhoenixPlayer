@@ -91,48 +91,6 @@ void PluginLoader::setPluginPath(PluginLoader::PluginType type, const QString &p
 
 PlayBackend::IPlayBackend *PluginLoader::getCurrentPlayBackend()
 {
-//    if (mPluginList.isEmpty()) {
-//        qDebug()<<__FUNCTION__<<" mPluginList is empty";
-//        return nullptr;
-//    }
-//    QString f;
-//    foreach (PluginObject obj, mPluginList) {
-//        if (mCurrentPluginName[PluginType::TypePlayBackend].isEmpty()) {
-//            if (obj.type == PluginType::TypePlayBackend) {
-//                f = obj.file;
-//                mCurrentPluginName[PluginType::TypePlayBackend] = obj.name;
-//                break;
-//            }
-//        } else {
-//            if ((obj.name.toLower() == mCurrentPluginName[PluginType::TypePlayBackend].toLower())
-//                    && (obj.type == PluginType::TypePlayBackend)) {
-//                f = obj.file;
-//                break;
-//            }
-//        }
-//    }
-
-//    qDebug()<<"CurrentBackend index Name "
-//         <<mCurrentPluginName[PluginType::TypePlayBackend];
-
-//    if (mPlayBackendLoader->isLoaded ()) {
-//        if (!mPlayBackendLoader->unload ())
-//            qDebug()<<__FUNCTION__<<mPlayBackendLoader->errorString ();
-//    }
-//    mPlayBackendLoader->setFileName (f);
-//    QObject *plugin = mPlayBackendLoader->instance ();
-//    if (plugin) {
-//        IPlayBackend *p = qobject_cast<IPlayBackend*>(plugin);
-//        if (p) {
-//            return p;
-//        } else {
-//            qDebug()<<__FUNCTION__<<" cant change to IPlayBackend";
-//            return nullptr;
-//        }
-//    } else {
-//        qDebug()<<__FUNCTION__<<" cant load plugin "<<mPlayBackendLoader->errorString();
-//        return nullptr;
-//    }
     if (mPlayBackend == nullptr) {
         foreach (PluginObject obj, mPluginList) {
             if (obj.type == PluginType::TypePlayBackend) {
@@ -162,49 +120,6 @@ PlayBackend::IPlayBackend *PluginLoader::getCurrentPlayBackend()
 
 MusicLibrary::IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
 {
-//    if (mPluginList.isEmpty()) {
-//        qDebug()<<__FUNCTION__<<" mPluginList is empty";
-//        return nullptr;
-//    }
-//    QString f;
-//    foreach (PluginObject obj, mPluginList) {
-//        if (mCurrentPluginName[PluginType::TypePlayListDAO].isEmpty()) {
-//            if (obj.type == PluginType::TypePlayListDAO) {
-//                f = obj.file;
-//                mCurrentPluginName[PluginType::TypePlayListDAO] = obj.name;
-//                break;
-//            }
-//        } else {
-//            if ((obj.name.toLower() == mCurrentPluginName[PluginType::TypePlayListDAO].toLower())
-//                    && (obj.type == PluginType::TypePlayListDAO)) {
-//                f = obj.file;
-//                break;
-//            }
-//        }
-//    }
-
-//    qDebug()<<"Current IPlayListDAO index Name "
-//         <<mCurrentPluginName[PluginType::TypePlayListDAO];
-
-//    if (mDaoLoader->isLoaded ()) {
-//        if (!mDaoLoader->unload ())
-//            qDebug()<<__FUNCTION__<<mDaoLoader->errorString ();
-//    }
-//    mDaoLoader->setFileName (f);
-////    QPluginLoader loader(f);
-//    QObject *plugin = mDaoLoader->instance ();//loader.instance();
-//    if (plugin) {
-//        IPlayListDAO *p = qobject_cast<IPlayListDAO*>(plugin);
-//        if (p) {
-//            return p;
-//        } else {
-//            qDebug()<<__FUNCTION__<<" cant change to TypePlayListDAO";
-//            return nullptr;
-//        }
-//    } else {
-//        qDebug()<<__FUNCTION__<<" cant load plugin "<<mDaoLoader->errorString();
-//        return nullptr;
-//    }
     if (mDao == nullptr) {
         foreach (PluginObject obj, mPluginList) {
             if (obj.type == PluginType::TypePlayListDAO) {
@@ -234,49 +149,6 @@ MusicLibrary::IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
 
 MusicLibrary::IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
 {
-//    if (mPluginList.isEmpty()) {
-//        qDebug()<<__FUNCTION__<<" mPluginList is empty";
-//        return nullptr;
-//    }
-//    QString f;
-//    foreach (PluginObject obj, mPluginList) {
-//        if (mCurrentPluginName[PluginType::TypeMusicTagParser].isEmpty()) {
-//            if (obj.type == PluginType::TypeMusicTagParser) {
-//                f = obj.file;
-//                mCurrentPluginName[PluginType::TypeMusicTagParser] = obj.name;
-//                break;
-//            }
-//        } else {
-//            if ((obj.name.toLower() == mCurrentPluginName[PluginType::TypeMusicTagParser].toLower())
-//                    && (obj.type == PluginType::TypeMusicTagParser)) {
-//                f = obj.file;
-//                break;
-//            }
-//        }
-//    }
-
-//    qDebug()<<"Current TypeMusicTagParser index Name "
-//         <<mCurrentPluginName[PluginType::TypeMusicTagParser];
-
-//    if (mTagParserLoader->isLoaded ()) {
-//        if (!mTagParserLoader->unload ())
-//            qDebug()<<__FUNCTION__<<mTagParserLoader->errorString ();
-//    }
-//    mTagParserLoader->setFileName (f);
-////    QPluginLoader loader(f);
-//    QObject *plugin = mTagParserLoader->instance ();//loader.instance();
-//    if (plugin) {
-//        IMusicTagParser *p = qobject_cast<IMusicTagParser*>(plugin);
-//        if (p) {
-//            return p;
-//        } else {
-//            qDebug()<<__FUNCTION__<<" cant change to IMusicTagParser";
-//            return nullptr;
-//        }
-//    } else {
-//        qDebug()<<__FUNCTION__<<" cant load plugin "<<mTagParserLoader->errorString();
-//        return nullptr;
-//    }
     if (mTagParser == nullptr) {
         foreach (PluginObject obj, mPluginList) {
             if (obj.type == PluginType::TypeMusicTagParser) {
@@ -306,49 +178,6 @@ MusicLibrary::IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
 
 IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
 {
-//    if (mPluginList.isEmpty()) {
-//        qDebug()<<__FUNCTION__<<" mPluginList is empty";
-//        return nullptr;
-//    }
-//    QString f;
-//    foreach (PluginObject obj, mPluginList) {
-//        if (mCurrentPluginName[PluginType::TypeMetadataLookup].isEmpty()) {
-//            if (obj.type == PluginType::TypeMetadataLookup) {
-//                f = obj.file;
-//                mCurrentPluginName[PluginType::TypeMetadataLookup] = obj.name;
-//                break;
-//            }
-//        } else {
-//            if ((obj.name.toLower() == mCurrentPluginName[PluginType::TypeMetadataLookup].toLower())
-//                    && (obj.type == PluginType::TypeMetadataLookup)) {
-//                f = obj.file;
-//                break;
-//            }
-//        }
-//    }
-
-//    qDebug()<<"Current IMetadataLookup index Name "
-//         <<mCurrentPluginName[PluginType::TypeMetadataLookup];
-
-//    if (mMetaLookupLoader->isLoaded ()) {
-//        if (!mMetaLookupLoader->unload ())
-//            qDebug()<<__FUNCTION__<<mMetaLookupLoader->errorString ();
-//    }
-//    mMetaLookupLoader->setFileName (f);
-////    QPluginLoader loader(f);
-//    QObject *plugin = mMetaLookupLoader->instance ();//loader.instance();
-//    if (plugin) {
-//        IMetadataLookup *p = qobject_cast<IMetadataLookup*>(plugin);
-//        if (p) {
-//            return p;
-//        } else {
-//            qDebug()<<__FUNCTION__<<" cant change to IMetadataLookup";
-//            return nullptr;
-//        }
-//    } else {
-//        qDebug()<<__FUNCTION__<<" cant load plugin "<<mMetaLookupLoader->errorString();
-//        return nullptr;
-//    }
     if (mMetaLookup == nullptr) {
         foreach (PluginObject obj, mPluginList) {
             if (obj.type == PluginType::TypeMetadataLookup) {
@@ -415,6 +244,22 @@ QStringList PluginLoader::getPluginNames(PluginLoader::PluginType type)
     default:
         qDebug()<<"Invalid plugin type.";
         break;
+    }
+    return list;
+}
+
+QList<QObject *> PluginLoader::getPluginList(PluginLoader::PluginType type)
+{
+    QList<QObject *> list;
+    if (mPluginList.isEmpty ())
+        return list;
+    foreach (PluginObject obj, mPluginList) {
+        if (obj.type == type) {
+            QPluginLoader loader(obj.file);
+            QObject *obj = loader.instance ();
+            if (obj)
+                list.append (obj);
+        }
     }
     return list;
 }
@@ -497,8 +342,7 @@ void PluginLoader::initPlugins()
     isInit = true;
 }
 
-void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
-                                const QString &newPluginName)
+void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &newPluginName)
 {
     if (mPluginList.isEmpty()) {
         qDebug()<<__FUNCTION__<<" mPluginList is empty!!!!";
@@ -591,19 +435,22 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type,
         qDebug() << "change TypeMetadataLookup to " << newPluginName;
 
         if (mMetaLookupLoader->isLoaded ()) {
-            if (!mMetaLookupLoader->unload ())
+            if (!mMetaLookupLoader->unload ()) {
                 qDebug()<<__FUNCTION__<<mMetaLookupLoader->errorString ();
+            } else {
+                qDebug()<<__FUNCTION__<<"unload succeed width "<<mMetaLookupLoader->errorString ();
+            }
         }
 
         foreach (PluginObject p, mPluginList) {
             if (p.type == PluginType::TypeMetadataLookup
                     && p.name.toLower() == newPluginName.toLower()) {
-//                mCurrentPluginName[PluginType::TypeMetadataLookup] = p.name;
-//                emit signalPluginChanged (type);
                 mMetaLookupLoader->setFileName (p.file);
                 QObject *o = mMetaLookupLoader->instance ();
                 if (o)
                     mMetaLookup = qobject_cast<IMetadataLookup*>(o);
+                else
+                    qDebug()<<__FUNCTION__<<mMetaLookupLoader->errorString ();
                 changed = true;
                 break;
             }

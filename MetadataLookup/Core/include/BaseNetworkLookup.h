@@ -36,7 +36,7 @@ private:
     QNetworkAccessManager *mNetwork;
     QString mUrl;
     RequestType mRequestType;
-    QNetworkReply *mReply;
+//    QNetworkReply *mReply;
 };
 } //Lyrics
 } //PhoenixPlayer

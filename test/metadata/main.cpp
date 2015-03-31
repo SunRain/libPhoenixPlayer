@@ -33,11 +33,14 @@ int main(int argc, char *argv[])
 
     QScopedPointer<Player> musicPlayer(new Player(&a));
 
+#if 1
     QStringList hashList = manager->querySongMetaElement(Common::E_Hash, QString(), false);
 
     qDebug()<<"===== hash list "<<hashList.size ();
 
-    foreach (QString hash, hashList) {
+    for (int i=0; i<hashList.size (); ++i) {
+        if (i == 10) break;
+        QString hash = hashList.at (i);
         musicPlayer.data ()->lookupAlbumDate (hash);
         musicPlayer.data ()->lookupAlbumDescription (hash);
         musicPlayer.data ()->lookupAlbumImage (hash);
@@ -45,5 +48,18 @@ int main(int argc, char *argv[])
         musicPlayer.data ()->lookupArtistImage (hash);
         musicPlayer.data ()->lookupTrackDescription (hash);
     }
+#endif
+
+#if 0
+    QStringList metaList = loader->getPluginNames (PluginLoader::TypeMetadataLookup);
+
+    for (int i=0; i<20; ++i) {
+        qDebug()<<"======================== \n\n";
+        if (i/2 == 0)
+            loader->setNewPlugin (PluginLoader::TypeMetadataLookup, metaList[0]);
+        else
+            loader->setNewPlugin (PluginLoader::TypeMetadataLookup, metaList[1]);
+    }
+#endif
     return a.exec();
 }

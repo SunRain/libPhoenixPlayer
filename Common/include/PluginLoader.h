@@ -79,6 +79,8 @@ public:
     ///
     QStringList getPluginNames(PluginType type);
 
+    QList<QObject *> getPluginList(PluginType type);
+
 protected:
     void initPlugins();
 
