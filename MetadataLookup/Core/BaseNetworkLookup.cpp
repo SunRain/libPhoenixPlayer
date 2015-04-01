@@ -15,19 +15,13 @@ namespace MetadataLookup {
 BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
 {
     mNetwork = new QNetworkAccessManager(this);
-//    mReply = nullptr;
 }
 
 BaseNetworkLookup::~BaseNetworkLookup()
 {
     qDebug()<<__FUNCTION__;
 
-//    if (mReply) {
-//        mReply->abort ();
-//        mReply->deleteLater ();
-//    }
-
-    if (mNetwork != nullptr)
+    if (mNetwork != 0)
         mNetwork->deleteLater ();
 
      qDebug()<<"after"<<__FUNCTION__;
@@ -53,21 +47,13 @@ bool BaseNetworkLookup::startLookup()
     if (url.isEmpty ())
         return false;
 
-//    if (mReply) {
-//        mReply->abort ();
-//        delete mReply;
-//        mReply = nullptr;
-//    }
-    QNetworkReply *reply = nullptr;
+    QNetworkReply *reply = 0;
 
     switch (mRequestType) {
     case RequestType::RequestGet: {
         qDebug()<<"Get "<< url.toString ();
         QNetworkRequest request(url);
-        qDebug()<<"..............................................";
         reply = mNetwork->get (request);
-
-        qDebug()<<"########### "<<(reply == 0);
         break;
     }
     case RequestType::RequestPut: {
@@ -112,18 +98,12 @@ bool BaseNetworkLookup::startLookup()
                  //解决信号和方法函数重载问题
                  static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
                  [=](QNetworkReply::NetworkError error) {
-//            Q_UNUSED(error)
+            Q_UNUSED(error)
 
-            qDebug()<<"===  xxxxxxxxxxxxxxxxxxxxxxxxxxx "<<(!reply);
-
-            if (!reply) {
-                emit failed (QUrl(), QString::number ((int)error));
-                return;
-            }
-//            QNetworkRequest r = reply->request ();
-////            qDebug()<<"===  xxxxxxxxxxxxxxxxxx  r "<<(r == 0);
-////            if (r)
-//                qDebug()<<"===  xxxxxxxxxxxxxxxxxx  "<<r.url ();
+//            if (!reply) {
+//                emit failed (QUrl(), QString::number ((int)error));
+//                return;
+//            }
 
             QUrl url = reply->request ().url ();
             QString errorStr = reply->errorString ();

@@ -38,8 +38,8 @@ protected:
         IMetadataLookup::LookupType type;
     };
 
-private slots:
-    void slotDoLookup();
+//private slots:
+//    void slotDoLookup();
 private:
     void setLookupConnection(/*IMetadataLookup *lookup*/);
     void nextLookupPlugin();
@@ -55,8 +55,8 @@ private:
 //    QPointer<IMetadataLookup> mLookup;
     IMetadataLookup *mLookup;
 //    IMetadataLookup *mBackupLookup;
-    QString mPreConnection;
-    QStringList mPluginNameList;
+//    QString mPreConnection;
+//    QStringList mPluginNameList;
     QStringList mConnectList;
 //    SongMetaData *mSongMeta;
     int mCurrentIndex;

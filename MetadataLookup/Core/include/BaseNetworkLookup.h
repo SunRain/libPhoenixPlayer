@@ -22,8 +22,6 @@ public:
     explicit BaseNetworkLookup(QObject *parent = 0);
     virtual ~BaseNetworkLookup();
 
-//    virtual QString getUrl() = 0;
-//    virtual RequestType getRequestType() = 0;
     void setUrl(const QString &url);
     void setRequestType(RequestType type);
     bool startLookup();
@@ -36,7 +34,6 @@ private:
     QNetworkAccessManager *mNetwork;
     QString mUrl;
     RequestType mRequestType;
-//    QNetworkReply *mReply;
 };
 } //Lyrics
 } //PhoenixPlayer
