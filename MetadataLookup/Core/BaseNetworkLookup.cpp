@@ -19,14 +19,14 @@ BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
     mReply = 0;
     mInterval = 10000;
     mFailEmitted = false;
+    mRequestAborted = false;
 
     mTimer = new QTimer(this);
     mTimer->setSingleShot (true);
     connect (mTimer, &QTimer::timeout, [this] () {
-        if (mReply) {
+        mRequestAborted = true;
+        if (mReply)
             mReply->abort ();
-            mReply->deleteLater ();
-        }
     });
 }
 
@@ -73,8 +73,7 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
     if (mReply) {
         mReply->abort ();
         qDebug()<<"====== mReply is running "<<mReply->isRunning ();
-        mReply->deleteLater ();
-        mReply = 0;
+        mRequestAborted = true;
     }
     mFailEmitted = false;
 
@@ -102,62 +101,98 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
         break;
     }
     if (watchTimeout) {
+        mRequestAborted = false;
         mTimer->start (mInterval);
     }
 
     if (mReply) {
-        //请求成功
-        connect (mReply,
-                 &QNetworkReply::finished,
-                 [=]() {
-            qDebug()<<"===  BaseNetworkLookup  finished";
-
-            mTimer->stop ();
-
-            QNetworkReply::NetworkError error = mReply->error ();
-            if (error != QNetworkReply::NetworkError::NoError) {
-                if (!mFailEmitted) {
-                    mFailEmitted = true;
-                    emit failed (QUrl(), mReply->errorString ());
-                }
-                mReply->deleteLater ();
-                mReply = 0;
-                return;
-            }
-            qDebug()<<"===  BaseNetworkLookup  succeed";
-
-            QByteArray qba = mReply->readAll ();
-            QUrl url(mReply->request ().url ());
-            mReply->deleteLater ();
-            mReply = 0;
-            emit succeed (url, qba);
-        });
-
-        //请求失败
-        connect (mReply,
-                 //解决信号和方法函数重载问题
-                 static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-                 [=](QNetworkReply::NetworkError error) {
-            Q_UNUSED(error)
-
-            mTimer->stop ();
-
-            QUrl url = mReply->request ().url ();
-            QString errorStr = mReply->errorString ();
-
-            qDebug()<<"===  BaseNetworkLookup  error "<<errorStr;
-
-            mReply->deleteLater ();
-            mReply = 0;
-            if (!mFailEmitted) {
-                mFailEmitted = true;
-                emit failed (url, errorStr);
-            }
-        });
-        return true;
+        connect (mReply, &QNetworkReply::finished,
+                 this, &BaseNetworkLookup::readReplyData);
     }
-    return false;
+//    if (mReply) {
+//        //请求成功
+//        connect (mReply,
+//                 &QNetworkReply::finished,
+//                 [=]() {
+//            qDebug()<<"===  BaseNetworkLookup  finished";
+
+//            mTimer->stop ();
+
+//            QNetworkReply::NetworkError error = mReply->error ();
+//            if (error != QNetworkReply::NetworkError::NoError) {
+//                if (!mFailEmitted) {
+//                    mFailEmitted = true;
+//                    emit failed (QUrl(), mReply->errorString ());
+//                }
+//                mReply->deleteLater ();
+//                mReply = 0;
+//                return;
+//            }
+//            qDebug()<<"===  BaseNetworkLookup  succeed";
+
+//            QByteArray qba = mReply->readAll ();
+//            QUrl url(mReply->request ().url ());
+//            mReply->deleteLater ();
+//            mReply = 0;
+//            emit succeed (url, qba);
+//        });
+
+//        //请求失败
+//        connect (mReply,
+//                 //解决信号和方法函数重载问题
+//                 static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+//                 [=](QNetworkReply::NetworkError error) {
+//            Q_UNUSED(error)
+
+//            mTimer->stop ();
+
+//            QUrl url = mReply->request ().url ();
+//            QString errorStr = mReply->errorString ();
+
+//            qDebug()<<"===  BaseNetworkLookup  error "<<errorStr;
+
+//            mReply->deleteLater ();
+//            mReply = 0;
+//            if (!mFailEmitted) {
+//                mFailEmitted = true;
+//                emit failed (url, errorStr);
+//            }
+//        });
+//        return true;
+//    }
+    //    return false;
 }
 
+void BaseNetworkLookup::readReplyData()
+{
+    mTimer->stop ();
+    QUrl url = mReply->request ().url ();
+    if (mRequestAborted) {
+        mReply->deleteLater ();
+        mReply = 0;
+        if (!mFailEmitted) {
+            mFailEmitted = true;
+            emit failed (url, QString("Aborted du to time out"));
+        }
+        return;
+    }
+    QNetworkReply::NetworkError error = mReply->error ();
+    if (error != QNetworkReply::NetworkError::NoError) {
+        QString errorStr = mReply->errorString ();
+        mReply->deleteLater ();
+        mReply = 0;
+        if (!mFailEmitted) {
+            mFailEmitted = true;
+            emit failed (url, errorStr);
+        }
+        return;
+    }
+    qDebug()<<"===  BaseNetworkLookup  succeed";
+
+    QByteArray qba = mReply->readAll ();
+    mReply->deleteLater ();
+    mReply = 0;
+    emit succeed (url, qba);
+}
 } //Lyrics
 } //PhoenixPlayer

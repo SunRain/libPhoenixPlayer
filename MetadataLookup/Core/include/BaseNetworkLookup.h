@@ -33,6 +33,8 @@ signals:
 public slots:
 
 private:
+    void readReplyData();
+private:
     QNetworkAccessManager *mNetwork;
     QNetworkReply *mReply;
     QString mUrl;
@@ -40,6 +42,7 @@ private:
     QTimer *mTimer;
     int mInterval;
     bool mFailEmitted;
+    bool mRequestAborted;
 };
 } //Lyrics
 } //PhoenixPlayer
