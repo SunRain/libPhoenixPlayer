@@ -6,6 +6,7 @@
 class QNetworkAccessManager;
 class QByteArray;
 class QNetworkReply;
+class QTimer;
 
 namespace PhoenixPlayer {
 namespace MetadataLookup {
@@ -24,7 +25,8 @@ public:
 
     void setUrl(const QString &url);
     void setRequestType(RequestType type);
-    bool startLookup();
+    void setInterval(int msec);
+    bool startLookup(bool watchTimeout = true);
 signals:
     void succeed(const QUrl &requestedUrl, const QByteArray &replyData);
     void failed(const QUrl &requestedUrl, const QString &error);
@@ -32,8 +34,12 @@ public slots:
 
 private:
     QNetworkAccessManager *mNetwork;
+    QNetworkReply *mReply;
     QString mUrl;
     RequestType mRequestType;
+    QTimer *mTimer;
+    int mInterval;
+    bool mFailEmitted;
 };
 } //Lyrics
 } //PhoenixPlayer

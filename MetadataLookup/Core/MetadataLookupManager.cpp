@@ -138,6 +138,7 @@ void MetadataLookupManager::nextLookupPlugin()
 //            processNext ();
 //        }
 //    }
+
     if (mPluginList.size () == 1 || mCurrentIndex == -1) { //only one plugin
         //所有插件都使用过了
         QString hash = mCurrentNode.data
@@ -147,6 +148,18 @@ void MetadataLookupManager::nextLookupPlugin()
         processNext ();
     } else {
         if (mCurrentIndex < mPluginList.size ()-1) { //防止溢出
+
+//            bool ret = disconnect (mLookup, &IMetadataLookup::lookupFailed,
+//                                this, MetadataLookupManager::nextLookupPlugin);
+
+            bool ret = mLookup->disconnect ();
+            qDebug()<<"************ "<<__FUNCTION__<<" disconnect lookupFailed ret "<<ret;
+
+//            ret = disconnect (mLookup, &IMetadataLookup::lookupSucceed,
+//                     this, MetadataLookupManager::doLookupSucceed);
+
+//            qDebug()<<"************ "<<__FUNCTION__<<" disconnect lookupSucceed ret "<<ret;
+
             //指向下一个插件
             mCurrentIndex++;
             mLookup = mPluginList.at (mCurrentIndex);
@@ -232,14 +245,25 @@ void MetadataLookupManager::processNext()
 {
     qDebug()<<">>>>>>>>>>>>>>>>>>>>"<<__FUNCTION__<<" queue size is "<<mWorkQueue.size ();
 
-    if (mWorkQueue.isEmpty ()) {
-        qDebug()<<">>>>>>>>>>>>>>>>>>>>"<<__FUNCTION__<<" mWorkQueue isEmpty ";
-        emitFinish ();
-        return;
-    }
     if (mLookup == 0) {
         qDebug()<<"[MetadataLookupManager] Fatal error"
                   <<"we got some logic error on getting lookup plugin";
+        emitFinish ();
+        return;
+    }
+
+    bool ret = disconnect (mLookup, &IMetadataLookup::lookupFailed,
+                        this, &MetadataLookupManager::nextLookupPlugin);
+
+    qDebug()<<"************ "<<__FUNCTION__<<" disconnect lookupFailed ret "<<ret;
+
+    ret = disconnect (mLookup, &IMetadataLookup::lookupSucceed,
+             this, &MetadataLookupManager::doLookupSucceed);
+
+    qDebug()<<"************ "<<__FUNCTION__<<" disconnect lookupSucceed ret "<<ret;
+
+    if (mWorkQueue.isEmpty ()) {
+        qDebug()<<">>>>>>>>>>>>>>>>>>>>"<<__FUNCTION__<<" mWorkQueue isEmpty ";
         emitFinish ();
         return;
     }
@@ -254,6 +278,7 @@ void MetadataLookupManager::processNext()
 //        doLookup ();
 //    });
 //    QTimer::singleShot (100, this, SLOT(slotDoLookup()));
+
     //将插件指向列表第一个
     mCurrentIndex = 0;
     mLookup = mPluginList.first ();
@@ -281,7 +306,12 @@ void MetadataLookupManager::doLookup()
                <<" for lookup type "<<mCurrentNode.type
               <<" With song "<<mCurrentNode.data->getMeta (Common::E_FileName);
 
-        setLookupConnection ();
+//        setLookupConnection ();
+        connect (mLookup, &IMetadataLookup::lookupFailed,
+                            this, &MetadataLookupManager::nextLookupPlugin);
+        connect (mLookup, &IMetadataLookup::lookupSucceed,
+                 this, &MetadataLookupManager::doLookupSucceed);
+
         mLookup->setCurrentLookupFlag (mCurrentNode.type);
         mLookup->lookup (mCurrentNode.data);
     } else {
@@ -295,6 +325,19 @@ void MetadataLookupManager::emitFinish()
     mLookupStarted = false;
     mMutex.unlock ();
     emit queueFinished ();
+}
+
+void MetadataLookupManager::doLookupSucceed(const QByteArray &result)
+{
+    qDebug()<<__FUNCTION__<<mLookup->getPluginName ()<<" lookupSucceed";
+
+    if (mCurrentNode.data) {
+        QString hash = mCurrentNode.data
+                ->getMeta (Common::SongMetaTags::E_Hash).toString ();
+        emit lookupSucceed (hash, result, mLookup->currentLookupFlag ());
+    }
+    this->processNext ();
+
 }
 
 void MetadataLookupManager::setLookupConnection()
@@ -329,9 +372,11 @@ void MetadataLookupManager::setLookupConnection()
              [this](const QByteArray &result) {
         qDebug()<<__FUNCTION__<<mLookup->getPluginName ()<<" lookupSucceed processNext";
 
-        QString hash = mCurrentNode.data
-                ->getMeta (Common::SongMetaTags::E_Hash).toString ();
-        emit lookupSucceed (hash, result, mLookup->currentLookupFlag ());
+        if (mCurrentNode.data) {
+            QString hash = mCurrentNode.data
+                    ->getMeta (Common::SongMetaTags::E_Hash).toString ();
+            emit lookupSucceed (hash, result, mLookup->currentLookupFlag ());
+        }
         this->processNext ();
     });
 }

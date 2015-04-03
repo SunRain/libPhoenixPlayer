@@ -42,12 +42,14 @@ protected:
 //    void slotDoLookup();
 private:
     void setLookupConnection(/*IMetadataLookup *lookup*/);
+//    void resetLookupConnection();
     void nextLookupPlugin();
     void initPluginObject();
     void initPluginNames();
     void processNext();
     void doLookup();
     void emitFinish();
+    void doLookupSucceed(const QByteArray &result);
 private:
 //    QPointer<PluginLoader> mPluginLoader;
     PluginLoader *mPluginLoader;
