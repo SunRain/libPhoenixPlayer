@@ -36,6 +36,10 @@ protected:
     struct WorkNode {
         SongMetaData *data;
         IMetadataLookup::LookupType type;
+        bool operator == (const WorkNode &other) const {
+            return (this->data->getMeta (Common::E_Hash).toString () == other.data->getMeta (Common::E_Hash).toString ())
+                    && (this->type == other.type);
+        }
     };
 
 //private slots:

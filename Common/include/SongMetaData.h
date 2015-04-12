@@ -18,8 +18,9 @@ public:
     virtual ~SongMetaData();
 
     void setMeta(Common::SongMetaTags tagType, const QVariant &value);
-    QVariant getMeta(Common::SongMetaTags tagType);
+    QVariant getMeta(Common::SongMetaTags tagType) const;
     QString toString();
+    bool operator == (const SongMetaData &other) const;
 private:
     QHash<Common::SongMetaTags, QVariant> mMetaHash;
 };

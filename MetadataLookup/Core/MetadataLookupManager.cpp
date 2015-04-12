@@ -88,7 +88,12 @@ void MetadataLookupManager::lookup(SongMetaData *data,
     node.type = type;
 
     mMutex.lock ();
-    mWorkQueue.append (node);
+    if (!mWorkQueue.contains (node)) {
+        mWorkQueue.append (node);
+    } else {
+        delete node.data;
+        node.data = 0;
+    }
     mMutex.unlock ();
 
     qDebug()<<__FUNCTION__<<" add node "<<d->getMeta (Common::E_FileName).toString ()

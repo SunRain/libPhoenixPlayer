@@ -27,7 +27,7 @@ void SongMetaData::setMeta(Common::SongMetaTags tagType, const QVariant &value)
     mMetaHash[tagType] = value;
 }
 
-QVariant SongMetaData::getMeta(Common::SongMetaTags tagType)
+QVariant SongMetaData::getMeta(Common::SongMetaTags tagType) const
 {
     if (tagType == Common::SongMetaTags::E_FirstFlag
             || tagType == Common::SongMetaTags::E_LastFlag) {
@@ -52,6 +52,11 @@ QString SongMetaData::toString()
             .arg(c.enumToStr("SongMetaTags",(int)Common::SongMetaTags::E_LastFlag -1))
             .arg(getMeta(Common::SongMetaTags((int)Common::SongMetaTags::E_LastFlag -1)).toString());
     return str;
+}
+
+bool SongMetaData::operator ==(const SongMetaData &other) const
+{
+    return mMetaHash[Common::E_Hash].toString () == other.getMeta (Common::E_Hash).toString ();
 }
 
 }//PhoenixPlayer
