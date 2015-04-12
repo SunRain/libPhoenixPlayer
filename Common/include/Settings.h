@@ -11,6 +11,7 @@ namespace PhoenixPlayer {
 class Settings : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool autoFetchMetaData READ autoFetchMetaData WRITE setAutoFetchMetaData NOTIFY autoFetchMetaDataChanged)
 public:
     explicit Settings(QObject *parent = 0);
 //    static Settings *getInstance();
@@ -39,8 +40,12 @@ public:
 
     Q_INVOKABLE bool setTraceLog(bool trace);
     Q_INVOKABLE bool traceLog();
-signals:
 
+    bool autoFetchMetaData();
+    void setAutoFetchMetaData(bool autoFetch);
+
+signals:
+    void autoFetchMetaDataChanged();
 public slots:
 
 private:
@@ -50,6 +55,7 @@ private:
 
     QString mDefaultMusicDir;
     QString mDefaultMusicImageDir;
+    QString mAutoFetchMetadata;
 };
 } //PhoenixPlayer
 #endif // SETTINGS_H

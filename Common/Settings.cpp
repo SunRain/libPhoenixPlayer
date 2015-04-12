@@ -17,6 +17,7 @@ const char *KEY_PLAY_LIST = "CurrentPlayListHash";
 const char *KEY_PLAY_BACKEND = "CurrentPlayBackend";
 const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
 const char *KEY_TRACE_LOG = "TraceLog";
+const char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
@@ -41,6 +42,7 @@ Settings::Settings(QObject *parent) : QObject(parent)
             qDebug()<<"make music default dir fail";
     }
 
+    mAutoFetchMetadata = false;
     checkInit ();
 }
 
@@ -124,14 +126,14 @@ QStringList Settings::getMusicDirs()
     return mSettings->value (KEY_MUSIC_DIR, mDefaultMusicDir).toString ().split ("||");
 }
 
-bool Settings::setLastPlayedSong(const QString &songHash)
+void Settings::setLastPlayedSong(const QString &songHash)
 {
     mSettings->setValue (KEY_LAST_SONG, songHash);
     mSettings->sync ();
-    return true;
+    emit lastPlayedSongChanged ();
 }
 
-QString Settings::getLastPlayedSong()
+QString Settings::lastPlayedSong() const
 {
     return mSettings->value (KEY_LAST_SONG, QString()).toString ();
 }
@@ -186,6 +188,21 @@ bool Settings::setTraceLog(bool trace)
 bool Settings::traceLog()
 {
     return mSettings->value(KEY_TRACE_LOG, false).toBool();
+}
+
+bool Settings::autoFetchMetaData()
+{
+    return mAutoFetchMetadata;
+}
+
+void Settings::setAutoFetchMetaData(bool autoFetch)
+{
+    if (mAutoFetchMetadata == autoFetch)
+        return;
+    mAutoFetchMetadata = autoFetch;
+    mSettings->setValue (KEY_AUTO_FETCH_METADATA, autoFetch);
+    mSettings->sync ();
+    emit autoFetchMetaDataChanged ();
 }
 
 void Settings::checkInit()
