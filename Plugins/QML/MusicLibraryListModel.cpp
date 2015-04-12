@@ -44,9 +44,10 @@ void MusicLibraryListModel::showAllTracks()
 
 void MusicLibraryListModel::setAutoFetchMetadata(bool autoFetch)
 {
-    if (mAutoFetchMetadata != autoFetch)
-        emit autoFetchMetadataChanged ();
+    if (mAutoFetchMetadata == autoFetch)
+        return;
     mAutoFetchMetadata = autoFetch;
+    emit autoFetchMetadataChanged ();
 }
 
 bool MusicLibraryListModel::autoFetchMetadata()

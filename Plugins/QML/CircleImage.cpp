@@ -105,8 +105,8 @@ QUrl CircleImage::source() const
 
 void CircleImage::setSource(const QUrl &source)
 {
-    qDebug()<<__FUNCTION__<<" source set to "<<source
-              <<" msource is "<<mSource;
+//    qDebug()<<__FUNCTION__<<" source set to "<<source
+//              <<" msource is "<<mSource;
 
     if (mSource == source) {
         return;

@@ -47,7 +47,8 @@ MetadataLookupManager::~MetadataLookupManager()
         qDebug()<<"=== delete plugin list";
         foreach (IMetadataLookup *o, mPluginList) {
             if (o) {
-                o->deleteLater ();
+//                o->deleteLater ();
+                delete o;
                 o = 0;
             }
         }

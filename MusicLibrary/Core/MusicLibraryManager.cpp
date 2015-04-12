@@ -126,7 +126,7 @@ bool MusicLibraryManager::scanLocalMusic()
             if (mTagParserManager == nullptr || mTagParserThread == nullptr)
                 initTagParserManager();
             mTagParserThread->start();
-            emit searchingFinished ();
+//            emit searchingFinished ();
         });
 
         connect (mDiskLooKupThread, &QThread::finished, [this] {
@@ -426,6 +426,7 @@ void MusicLibraryManager::initTagParserManager()
 //#ifndef SAILFISH_OS
             mPlayListDAO.data()->commitTransaction ();
 //#endif
+            emit searchingFinished ();
         });
 
         connect (mTagParserThread, &QThread::finished, [this] {
