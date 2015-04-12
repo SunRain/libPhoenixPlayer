@@ -85,44 +85,14 @@ void CoverCircleImage::drawImage()
     }
 }
 
-//QUrl CoverCircleImage::queryOne(const QString &hash,
-//                                   Common::SongMetaTags tag,
-//                                   bool skipDuplicates)
-//{
-//    if (hash.isEmpty())
-//        return QUrl();
-//    QStringList list = mMusicLibraryManager
-//            ->querySongMetaElement(tag, hash, skipDuplicates);
-//    if (list.isEmpty())
-//        return QUrl();
-//    return QUrl(list.first());
-//}
-
 void CoverCircleImage::setImage(const QString &hash)
 {
-//    QUrl uri = queryOne(hash, Common::E_CoverArtMiddle);
-//    if (uri.isEmpty() || !uri.isValid())
-//        uri = queryOne(hash, Common::E_CoverArtLarge);
-//    if (uri.isEmpty() || !uri.isValid())
-//        uri = queryOne(hash, Common::E_CoverArtSmall);
-//    if (uri.isEmpty() || !uri.isValid())
-//        uri = queryOne(hash, Common::E_AlbumImageUrl);
-//    if (uri.isEmpty()|| !uri.isValid())
-//        uri = queryOne(hash, Common::E_ArtistImageUri);
-//    if (uri.isEmpty() || !uri.isValid())
-//        this->setSource(mDefaultSource);
-//    else
-//        this->setSource(uri);
-
-    qDebug()<<__FUNCTION__;
     QString str = mMusicLibraryManager->querySongImageUri(hash);
     if (str.isEmpty())
         this->setSource(mDefaultSource);
     else
         this->setSource(QUrl(str));
 }
-
-
 
 } //QmlPlugin
 } //PhoenixPlayer

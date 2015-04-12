@@ -105,7 +105,6 @@ QUrl CircleImage::source() const
 
 void CircleImage::setSource(const QUrl &source)
 {
-
     qDebug()<<__FUNCTION__<<" source set to "<<source
               <<" msource is "<<mSource;
 
@@ -113,9 +112,6 @@ void CircleImage::setSource(const QUrl &source)
         return;
     }
     mSource = source;
-//    emit sourceChanged (mSource);
-
-    qDebug()<<__FUNCTION__<<" 11111111111";
     if (mSource.isEmpty() || !mSource.isValid()) {
         this->setStatus (Status::Error);
         return;
@@ -128,8 +124,6 @@ void CircleImage::setSource(const QUrl &source)
         return;
     }
 
-    qDebug()<<__FUNCTION__<<" 2222222222";
-
     this->setStatus (Status::Loading);
 
     if (str.startsWith (("http"))) { //url
@@ -137,14 +131,10 @@ void CircleImage::setSource(const QUrl &source)
         return;
     }
 
-    qDebug()<<__FUNCTION__<<" 333333333333";
-
     //remove qrc: from file uri to fix image load
     if (str.startsWith("qrc:")) {
         str = str.mid(3, str.length() - 3);
     }
-    qDebug()<<__FUNCTION__<<" 44444444";
-
     if (fillImage (str)) {
         this->update ();
     }
@@ -199,7 +189,8 @@ void CircleImage::downloadFile(const QUrl &url)
             }
         }
 
-        if (mFile) { // constructe a new file to save image data
+        // constructe a new file to save image data
+        if (mFile) {
             mFile->close ();
             mFile->remove ();
             delete  mFile;
@@ -251,14 +242,12 @@ bool CircleImage::fillImage(const QString &imagePath)
     }
     bool ret = false;
 
-    qDebug()<<__FUNCTION__<<" 111111";
     mLock.lock ();
     if (mImage) {
         delete mImage;
         mImage = 0;
     }
-    mImage = new QImage(1,1, QImage::Format_ARGB32_Premultiplied);
-    qDebug()<<__FUNCTION__<<" 222222222";
+    mImage = new QImage();
     if (mImage->load (imagePath)) {
         ret = true;
     } else {
@@ -268,9 +257,7 @@ bool CircleImage::fillImage(const QString &imagePath)
         }
         ret = false;
     }
-    qDebug()<<__FUNCTION__<<" 333333";
     mLock.unlock ();
-    qDebug()<<__FUNCTION__<<" load image with ret "<<ret;
     return ret;
 }
 
@@ -286,7 +273,7 @@ bool CircleImage::fillImage(const QByteArray &qba)
         delete mImage;
         mImage = 0;
     }
-    mImage = new QImage(1,1, QImage::Format_ARGB32_Premultiplied);
+    mImage = new QImage();
     if (mImage->loadFromData (qba)) {
         ret = true;
     } else {
@@ -297,7 +284,6 @@ bool CircleImage::fillImage(const QByteArray &qba)
         ret = false;
     }
     mLock.unlock ();
-    qDebug()<<__FUNCTION__<<" load image with ret "<<ret;
     return ret;
 }
 
@@ -332,7 +318,6 @@ void CircleImage::httpFinished()
     mReply->deleteLater ();
     mReply = 0;
     if (mFile) {
-        qDebug()<<__FUNCTION__<<"******* file name "<<mFile->fileName ();
         if (fillImage (mFile->fileName ())) {
             this->update ();
         } else {

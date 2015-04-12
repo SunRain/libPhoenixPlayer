@@ -125,7 +125,7 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case ModelRoles::RoleAlbumImageUrl: {
         str = mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl, true);
-        if (str.isEmpty ())
+        if (str.isEmpty () && mAutoFetchMetadata)
             mPlayer->lookupAlbumImage (hash);
         return str;
     }
@@ -134,7 +134,7 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     }
     case ModelRoles::RoleArtistImageUri: {
         str = mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri, true);
-        if (str.isEmpty ())
+        if (str.isEmpty () && mAutoFetchMetadata)
             mPlayer->lookupArtistImage (hash);
         return str;
     }
@@ -175,7 +175,7 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     }
     case ModelRoles::RoleTrackImageUri: {
         str = mMusicLibraryManager->querySongImageUri(hash);
-        if (str.isEmpty ()) {
+        if (str.isEmpty () && mAutoFetchMetadata) {
             mPlayer->lookupAlbumImage (hash);
             mPlayer->lookupArtistImage (hash);
         }
@@ -231,19 +231,6 @@ void MusicLibraryListModel::appendToModel(int limitNum)
         endInsertRows ();
     }
 }
-
-//QString MusicLibraryListModel::queryOne(const QString &hash,
-//                                        Common::SongMetaTags tag,
-//                                        bool skipDuplicates) const
-//{
-//    if (hash.isEmpty())
-//        return QString();
-//    QStringList list = mMusicLibraryManager
-//            ->querySongMetaElement(tag, hash, skipDuplicates);
-//    if (list.isEmpty())
-//        return QString();
-//    return list.first();
-//}
 
 } //QmlPlugin
 } //PhoenixPlayer
