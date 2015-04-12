@@ -55,7 +55,7 @@ private:
 
     QString mDefaultMusicDir;
     QString mDefaultMusicImageDir;
-    QString mAutoFetchMetadata;
+    bool mAutoFetchMetadata;
 };
 } //PhoenixPlayer
 #endif // SETTINGS_H

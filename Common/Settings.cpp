@@ -126,16 +126,15 @@ QStringList Settings::getMusicDirs()
     return mSettings->value (KEY_MUSIC_DIR, mDefaultMusicDir).toString ().split ("||");
 }
 
-void Settings::setLastPlayedSong(const QString &songHash)
+QString Settings::getLastPlayedSong()
+{
+    return mSettings->value (KEY_LAST_SONG, QString()).toString ();
+}
+
+bool Settings::setLastPlayedSong(const QString &songHash)
 {
     mSettings->setValue (KEY_LAST_SONG, songHash);
     mSettings->sync ();
-    emit lastPlayedSongChanged ();
-}
-
-QString Settings::lastPlayedSong() const
-{
-    return mSettings->value (KEY_LAST_SONG, QString()).toString ();
 }
 
 bool Settings::setCurrentPlayListHash(const QString &hash)
