@@ -69,12 +69,12 @@ void CircleImage::paint(QPainter *painter)
     int targetWidth = this->width();
     int height = mImage->height();
     int targetHeight = this->height();
-    QImage img = mImage->scaled(targetWidth, targetHeight, Qt::KeepAspectRatio);
+    QImage img = mImage->scaled(targetWidth, targetHeight, Qt::KeepAspectRatioByExpanding);
 
     width = img.width();
     height = img.height();
 
-    int radius = width > height ? height : width;
+    int radius = qMin(width, height);
 
     //make a transparent image
     QImage out(radius, radius, QImage::Format_ARGB32_Premultiplied);
