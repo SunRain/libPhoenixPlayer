@@ -112,11 +112,11 @@ bool MusicLibraryManager::scanLocalMusic()
             mDiskLooKup->startLookup();
         });
 
-        //use Transaction in Sailfish OS will make app hang when trying to write large data
-#ifndef SAILFISH_OS
+//        //use Transaction in Sailfish OS will make app hang when trying to write large data
+//#ifndef SAILFISH_OS
         connect (mDiskLooKup, &DiskLookup::pending,
                  mPlayListDAO.data(), &IPlayListDAO::beginTransaction);
-#endif
+//#endif
 
         connect (mDiskLooKup, &DiskLookup::finished,
                  [this] {
@@ -422,10 +422,10 @@ void MusicLibraryManager::initTagParserManager()
         connect (mTagParserManager, &TagParserManager::parserQueueFinished, [this] () {
             qDebug()<<__FUNCTION__<<" mTagParserManager finished, stop thread";
             mTagParserThread->quit();
-            //use Transaction in Sailfish OS will make app hang when trying to write large data
-#ifndef SAILFISH_OS
+//            //use Transaction in Sailfish OS will make app hang when trying to write large data
+//#ifndef SAILFISH_OS
             mPlayListDAO.data()->commitTransaction ();
-#endif
+//#endif
         });
 
         connect (mTagParserThread, &QThread::finished, [this] {
