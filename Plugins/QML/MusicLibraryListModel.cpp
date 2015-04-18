@@ -5,10 +5,10 @@
 #include <QVariant>
 #include <QDebug>
 
-#include "MusicLibraryManager.h"
+#include "MusicLibrary/MusicLibraryManager.h"
 #include "Common.h"
 #include "Util.h"
-#include "Player.h"
+#include "Player/Player.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;

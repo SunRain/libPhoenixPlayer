@@ -6,10 +6,9 @@
 #include "PluginLoader.h"
 #include "SingletonPointer.h"
 #include "Settings.h"
-#include "MusicLibraryManager.h"
+#include "MusicLibrary/MusicLibraryManager.h"
 #include "PluginLoader.h"
-#include "Player.h"
-#include "LyricsModel.h"
+#include "Player/Player.h"
 
 #include "SingletonPointer.h"
 

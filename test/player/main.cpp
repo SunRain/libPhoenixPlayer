@@ -10,9 +10,9 @@
 
 #include <QDebug>
 #include "Settings.h"
-#include "MusicLibraryManager.h"
+#include "MusicLibrary/MusicLibraryManager.h"
 #include "PluginLoader.h"
-#include "Player.h"
+#include "Player/Player.h"
 #include "LyricsModel.h"
 
 #include "SingletonPointer.h"

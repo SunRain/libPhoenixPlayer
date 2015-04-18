@@ -7,25 +7,26 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-common.file = Common/Common.pro
-SUBDIRS += common
+#common.file = Common/Common.pro
+#SUBDIRS += common
 
-musiclibrarycore.file = MusicLibrary/Core/MusicLibraryCore.pro
-musiclibrarycore.depends = common
-SUBDIRS += musiclibrarycore
+#musiclibrarycore.file = MusicLibrary/Core/MusicLibraryCore.pro
+#musiclibrarycore.depends = common
+#SUBDIRS += musiclibrarycore
 
-player.file = Player/Player.pro
-player.depends = common musiclibrarycore
-SUBDIRS += player
+#player.file = Player/Player.pro
+#player.depends = common musiclibrarycore
+#SUBDIRS += player
 
-metadatalookupcore.file = MetadataLookup/Core/MetadataLookupCore.pro
-metadatalookupcore.depends = common
-SUBDIRS += metadatalookupcore
+#metadatalookupcore.file = MetadataLookup/Core/MetadataLookupCore.pro
+#metadatalookupcore.depends = common
+#SUBDIRS += metadatalookupcore
 
 SUBDIRS += \
-    Backend \
-    MusicLibrary \
-    MetadataLookup \
+    Core \
+#    Backend \
+#    MusicLibrary \
+#    MetadataLookup \
     Plugins \
 #    Player \
 #    Common \

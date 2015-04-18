@@ -43,7 +43,15 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 
-#include(../backend/backend.pri)
-#include(../../Core/Core.pri)
-include(../../Common/Common.pri)
-include(../../MusicLibrary/Core/MusicLibraryCore.pri)
+include(../../Core/CoreHeaders.pri)
+include (../../Plugins/QML/QmlPluginHeaders.pri)
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Core/release/ -lPhoenixPlayer
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Core/debug/ -lPhoenixPlayer
+else:unix: LIBS += -L$$OUT_PWD/../../Core/ -lPhoenixPlayer
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Plugins/QML/release/ -lqmlplugins
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Plugins/QML/debug/ -lqmlplugins
+else:unix: LIBS += -L$$OUT_PWD/../../Plugins/QML/ -lqmlplugins
+

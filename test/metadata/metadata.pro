@@ -15,9 +15,10 @@ CONFIG += c++11
 
 SOURCES += main.cpp
 
-include(../../Common/Common.pri)
-include(../../MusicLibrary/Core/MusicLibraryCore.pri)
-include(../../Player/Player.pri)
-include (../../MetadataLookup/Core/MetadataLookupCore.pri)
-include (../../Plugins/QML/qml.pri)
+include(../../Core/CoreHeaders.pri)
+#include (../../Plugins/QML/QmlPluginHeaders.pri)
 
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Core/release/ -lPhoenixPlayer
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Core/debug/ -lPhoenixPlayer
+else:unix: LIBS += -L$$OUT_PWD/../../Core/ -lPhoenixPlayer

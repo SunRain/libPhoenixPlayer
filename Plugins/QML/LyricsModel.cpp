@@ -1,12 +1,10 @@
 
-#include <QDebug>
-
 #include "LyricsModel.h"
-#include "LyricsParser.h"
+
+#include <QDebug>
 
 namespace PhoenixPlayer {
 namespace QmlPlugin {
-
 
 LyricsModel::LyricsModel(QObject *parent)
     : QAbstractListModel(parent)

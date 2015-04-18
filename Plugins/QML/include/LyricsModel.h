@@ -2,7 +2,7 @@
 #define LYRICSMODEL_H
 
 #include <QAbstractListModel>
-#include "LyricsParser.h"
+#include "MetadataLookup/LyricsParser.h"
 
 namespace PhoenixPlayer {
 namespace QmlPlugin {
@@ -39,8 +39,6 @@ signals:
 private:
     MetadataLookup::QLyricsList mLyricsList;
     int mCurrentIndex;
-
-
 };
 
 } //QmlPlugin

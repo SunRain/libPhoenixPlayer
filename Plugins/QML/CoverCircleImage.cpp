@@ -3,7 +3,7 @@
 
 #include <QUrl>
 
-#include "MusicLibraryManager.h"
+#include "MusicLibrary/MusicLibraryManager.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;

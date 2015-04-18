@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QDebug>
 
-#include "MusicLibraryManager.h"
+#include "MusicLibrary/MusicLibraryManager.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;

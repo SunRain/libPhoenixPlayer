@@ -9,7 +9,7 @@
 
 #include <QDebug>
 #include "Settings.h"
-#include "MusicLibraryManager.h"
+#include "MusicLibrary/MusicLibraryManager.h"
 #include "SingletonPointer.h"
 
 using namespace PhoenixPlayer;
