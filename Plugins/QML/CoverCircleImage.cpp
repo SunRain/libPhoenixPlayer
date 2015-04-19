@@ -3,6 +3,7 @@
 
 #include <QUrl>
 
+#include "SingletonPointer.h"
 #include "MusicLibrary/MusicLibraryManager.h"
 
 namespace PhoenixPlayer {
@@ -14,6 +15,8 @@ CoverCircleImage::CoverCircleImage(CircleImage *parent)
 {
 #ifdef SAILFISH_OS
     mMusicLibraryManager = MusicLibraryManager::instance();
+#else
+    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
 #endif
 
     mAutoChange = false;

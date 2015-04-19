@@ -9,6 +9,7 @@
 #include "Common.h"
 #include "Util.h"
 #include "Player/Player.h"
+#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;
@@ -23,7 +24,11 @@ MusicLibraryListModel::MusicLibraryListModel(QAbstractListModel *parent) :
 #ifdef SAILFISH_OS
     mMusicLibraryManager = MusicLibraryManager::instance();
     mPlayer = Player::instance ();
+#else
+    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
+    mPlayer = SingletonPointer<Player>::instance ();
 #endif
+
     mLimitNum = -1;
     mAutoFetchMetadata = false;
 }
