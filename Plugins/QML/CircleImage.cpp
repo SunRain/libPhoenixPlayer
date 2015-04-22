@@ -11,6 +11,7 @@
 #include <QNetworkReply>
 #include <QFile>
 
+#include "SingletonPointer.h"
 #include "Settings.h"
 #include "Util.h"
 
@@ -29,8 +30,10 @@ CircleImage::CircleImage(QQuickPaintedItem *parent)
     mRequestAborted = false;
     mCache = true;
     mByteArray = QByteArray();
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mSettings = Settings::instance ();
+#else
+    mSettings = SingletonPointer<Settings>::instance ();
 #endif
 }
 

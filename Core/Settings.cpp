@@ -58,7 +58,7 @@ Settings::~Settings()
     mSettings->deleteLater ();
 }
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 Settings *Settings::instance()
 {
     qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";

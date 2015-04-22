@@ -56,7 +56,7 @@ PluginLoader::~PluginLoader()
         mPluginPath.clear ();
 }
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 PluginLoader *PluginLoader::instance()
 {
     qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";

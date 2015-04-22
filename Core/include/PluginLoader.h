@@ -40,7 +40,7 @@ public:
     explicit PluginLoader(QObject *parent = 0);
     virtual ~PluginLoader();
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     static PluginLoader *instance();
 #endif
 

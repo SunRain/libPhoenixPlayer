@@ -25,7 +25,7 @@ TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
 {
     mCurrentIndex = -1;
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mPluginLoader = PluginLoader::instance();
 #else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();

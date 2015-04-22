@@ -19,7 +19,7 @@ using namespace PhoenixPlayer;
 
 MetadataLookupManager::MetadataLookupManager(QObject *parent) : QObject(parent)
 {
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mPluginLoader = PluginLoader::instance();
 #else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();

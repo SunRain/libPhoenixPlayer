@@ -29,7 +29,7 @@ Player::Player(QObject *parent)
 {
     mPlayBackend = 0;
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mPluginLoader = PluginLoader::instance();
     mSettings = Settings::instance();
     mMusicLibraryManager = MusicLibraryManager::instance();
@@ -55,7 +55,7 @@ Player::~Player()
     qDebug()<<"[Player] after "<<__FUNCTION__;
 }
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 Player *Player::instance()
 {
     qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";

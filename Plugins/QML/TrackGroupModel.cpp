@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QDebug>
 
+#include "SingletonPointer.h"
 #include "MusicLibrary/MusicLibraryManager.h"
 
 namespace PhoenixPlayer {
@@ -15,8 +16,10 @@ namespace QmlPlugin {
 TrackGroupModel::TrackGroupModel(QAbstractListModel *parent)
     : QAbstractListModel(parent)
 {
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mMusicLibraryManager = MusicLibraryManager::instance();
+#else
+    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
 #endif
 }
 

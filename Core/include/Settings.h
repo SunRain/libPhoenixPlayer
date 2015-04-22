@@ -17,7 +17,7 @@ public:
 //    static Settings *getInstance();
     virtual ~Settings();
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     static Settings *instance();
 #endif
 

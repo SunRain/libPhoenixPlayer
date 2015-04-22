@@ -10,7 +10,7 @@ class Util : public QObject
 {
     Q_OBJECT
 public:
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     static Util *instance();
 #endif
     explicit Util(QObject *parent = 0);

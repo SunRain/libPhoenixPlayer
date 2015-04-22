@@ -13,7 +13,7 @@ namespace QmlPlugin {
 CoverCircleImage::CoverCircleImage(CircleImage *parent)
     :CircleImage(parent)
 {
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mMusicLibraryManager = MusicLibraryManager::instance();
 #else
     mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();

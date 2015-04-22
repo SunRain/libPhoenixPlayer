@@ -16,7 +16,7 @@ Util::Util(QObject *parent) : QObject(parent)
 
 }
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 Util *Util::instance()
 {
     qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";

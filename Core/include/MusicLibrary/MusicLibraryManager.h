@@ -26,7 +26,7 @@ public:
     explicit MusicLibraryManager(QObject *parent = 0);
     virtual ~MusicLibraryManager();
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     static MusicLibraryManager *instance();
 #endif
     ///

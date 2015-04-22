@@ -37,7 +37,7 @@ public:
     explicit Player(QObject *parent = 0);
     virtual ~Player();
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     static Player *instance();
 #endif
 

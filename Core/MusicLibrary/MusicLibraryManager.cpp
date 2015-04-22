@@ -29,7 +29,7 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     mTagParserManager = nullptr;
     mTagParserThread = nullptr;
 
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mSettings = Settings::instance();
     mPluginLoader = PluginLoader::instance();
 #else
@@ -76,7 +76,7 @@ MusicLibraryManager::~MusicLibraryManager()
 
     qDebug()<<">>>>>>>> after "<< __FUNCTION__ <<" <<<<<<<<<<<<<<<<";
 }
-#ifdef SAILFISH_OS
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 MusicLibraryManager *MusicLibraryManager::instance()
 {
     qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
