@@ -100,8 +100,11 @@ bool TagParserPro::parserTag(SongMetaData *targetMetaDate)
     //get cover image
     QImage image = getImage ();
     if (!image.isNull ()) {
-//        SingletonPointer<Settings> s;
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+        Settings *s = Settings::instance ();
+#else
         Settings *s = SingletonPointer<Settings>::instance ();
+#endif
         QString imagePath = s->getMusicImageCachePath ();
         QString tmp = name;
         tmp = tmp.mid (0, tmp.lastIndexOf ("."));
