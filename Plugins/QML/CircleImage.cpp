@@ -129,7 +129,7 @@ void CircleImage::setSource(const QUrl &source)
 
     this->setStatus (Status::Loading);
 
-    if (str.startsWith (("http"))) { //url
+    if (str.toLower ().startsWith (("http"))) { //url
         downloadFile (mSource);
         return;
     }
