@@ -24,9 +24,13 @@ Settings::Settings(QObject *parent) : QObject(parent)
     mSettings = new QSettings(qApp->organizationName(), qApp->applicationName(),
                               parent);
 
+#ifdef UBUNTU_TOUCH
+    QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
+    mDefaultMusicDir = QString("%1/Music").arg (dataPath);
+#else
     mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
-
+#endif
     mDefaultMusicImageDir = QString("%1/Images")
             .arg (QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
 
@@ -187,6 +191,20 @@ bool Settings::setTraceLog(bool trace)
 bool Settings::traceLog()
 {
     return mSettings->value(KEY_TRACE_LOG, false).toBool();
+}
+
+bool Settings::addConfig(const QString &key, const QString &value)
+{
+    if (key.isEmpty () || value.isEmpty ())
+        return false;
+    mSettings->setValue (key, value);
+    mSettings->sync ();
+    return true;
+}
+
+QString Settings::getConfig(const QString &key, const QString &defaultValue)
+{
+    return mSettings->value (key, defaultValue).toString ();
 }
 
 bool Settings::autoFetchMetaData()
