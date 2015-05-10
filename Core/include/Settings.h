@@ -41,7 +41,7 @@ public:
     Q_INVOKABLE bool setTraceLog(bool trace);
     Q_INVOKABLE bool traceLog();
 
-    Q_INVOKABLE bool addConfig(const QString &key, const QString &value);
+    Q_INVOKABLE bool setConfig(const QString &key, const QString &value);
     Q_INVOKABLE QString getConfig(const QString &key, const QString &defaultValue = QString());
 
     bool autoFetchMetaData();

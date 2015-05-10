@@ -25,8 +25,11 @@ Settings::Settings(QObject *parent) : QObject(parent)
                               parent);
 
 #ifdef UBUNTU_TOUCH
-    QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
-    mDefaultMusicDir = QString("%1/Music").arg (dataPath);
+    QString dataPath = QStandardPaths::writableLocation (QStandardPaths::CacheLocation);
+    QDir d(dataPath);
+    d.cdUp ();
+    dataPath = d.absolutePath ();
+    mDefaultMusicDir = QString("%1/HubIncoming").arg (dataPath);
 #else
     mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
@@ -193,7 +196,7 @@ bool Settings::traceLog()
     return mSettings->value(KEY_TRACE_LOG, false).toBool();
 }
 
-bool Settings::addConfig(const QString &key, const QString &value)
+bool Settings::setConfig(const QString &key, const QString &value)
 {
     if (key.isEmpty () || value.isEmpty ())
         return false;
