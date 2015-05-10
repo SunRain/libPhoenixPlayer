@@ -470,50 +470,52 @@ bool SQLite3DAO::updatePlayList(Common::PlayListElement targetColumn,
             || hash.isEmpty () || newValue.isEmpty ())
         return false;
 
-    QString targeValue = newValue;
+    QString targetValue = newValue;
     //hash1||hash2||hash3
     if (targetColumn == Common::PlayListSongHashes) {
-        if (appendNewValues) {
-            //转换为list
-            QStringList list //得到播放数据的list
-                    = queryPlayList (targetColumn, Common::PlayListHash, hash);
-
+        if (appendNewValues) { //转换为list
+            //得到播放数据的list
+            QStringList list = queryPlayList (targetColumn, Common::PlayListHash, hash);
             if (!list.isEmpty ()) {
-                targeValue = QString(); //重置空
+                targetValue = QString(); //重置空
                 if (list.size () == 1) {
-                    targeValue = QString("%1||%2").arg (list.first ()).arg (newValue);
+                    targetValue = QString("%1||%2").arg (list.first ()).arg (newValue);
                 } else {
                     for (int i=0; i<list.size () -1; ++i) {
-                        targeValue += QString("%1||").arg (list.at (i));
+                        targetValue += QString("%1||").arg (list.at (i));
                     }
-                    targeValue += newValue;
+                    targetValue += newValue;
                 }
             }
         } else {
-            QStringList list //得到播放数据的list
-                    = queryPlayList (targetColumn, Common::PlayListHash, hash);
+            //得到播放数据的list
+            QStringList list = queryPlayList (targetColumn, Common::PlayListHash, hash);
 
-            if (!list.isEmpty () && list.removeOne (targeValue)) {
-                targeValue = QString(); //重置空
+            if (!list.isEmpty () && list.removeOne (targetValue)) {
+                targetValue = QString(); //重置空
                 if (!list.isEmpty ()) { //因为删除了一个数据,所以再次检测列表是否为空
                     if (list.size () == 1) {
-                        targeValue = list.first ();
+                        targetValue = list.first ();
                     } else {
                         for (int i=0; i<list.size () -2; ++i) {
-                            targeValue += QString("%1||").arg (list.at (i));
+                            targetValue += QString("%1||").arg (list.at (i));
                         }
-                        targeValue += list.last ();
+                        targetValue += list.last ();
                     }
                 }
             }
         }
     }
 
+    //dirty hack, why a "||" at the first of new value
+    if (targetValue.startsWith ("||")) {
+        targetValue = targetValue.mid (2);
+    }
     QString str = "update ";
     str += PLAYLIST_TABLE_TAG;
-    str += "set ";
+    str += " set ";
     str += mCommon.enumToStr ("PlayListElement", (int)targetColumn);
-    str += QString(" = \"%1\" ").arg (targeValue);
+    str += QString(" = \"%1\" ").arg (targetValue);
     str += QString("where %1 = \"%2\"")
             .arg (mCommon.enumToStr ("PlayListElement", (int)Common::PlayListHash))
             .arg (hash);
@@ -582,7 +584,7 @@ bool SQLite3DAO::insertPlayList(const QString &playListName)
     str += "(";
     str += QString("%1, ").arg (mCommon.enumToStr ("PlayListElement", Common::PlayListHash));
     str += QString("%1, ").arg (mCommon.enumToStr ("PlayListElement", Common::PlayListName));
-    str += QString("%1, ").arg (mCommon.enumToStr ("PlayListElement", Common::PlayListSongHashes));
+    str += QString("%1").arg (mCommon.enumToStr ("PlayListElement", Common::PlayListSongHashes));
     str += ")";
     str += " values(";
     str += QString("\"%1\", ").arg (hash);

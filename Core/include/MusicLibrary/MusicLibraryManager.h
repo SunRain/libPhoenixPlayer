@@ -41,10 +41,13 @@ public:
     /// \return
     ///
     Q_INVOKABLE bool changePlayList(const QString &playListHash);
-
     Q_INVOKABLE bool createPlayList(const QString &playListName);
-
     Q_INVOKABLE bool deletePlayList(const QString &playListHash);
+    ///
+    /// \brief getCurrentPlayListHash 返回当前播放列表的hash值
+    /// \return 不存在则返回空
+    ///
+    Q_INVOKABLE QString getCurrentPlayListHash();
 
     ///
     /// \brief playingSong 返回当前播放的歌曲hash,
@@ -64,17 +67,19 @@ public:
     QString lastSongHash();
 
     ///
-    /// \brief nextSong 当前播放列表的下一首歌曲,如果在末尾则返回第一首歌
+    /// \brief nextSong 返回当前播放列表的下一首歌曲,如果在末尾则返回第一首歌
+    /// \param jumpToNextSong 是否同时自动跳转到nextSong,这会发送 playingSongChanged 信号
+    /// \return 当前播放列表的下一首歌曲
     ///
-    Q_INVOKABLE void nextSong();
+    QString nextSong(bool jumpToNextSong = true);
     ///
     /// \brief preSong 当前播放列表的上一首歌曲,如果在第一首,则返回最后一首
     ///
-    Q_INVOKABLE void preSong();
+    Q_INVOKABLE QString preSong(bool jumpToPreSong = true);
     ///
     /// \brief randomSong 转到随机的一首歌曲
     ///
-    Q_INVOKABLE void randomSong();
+    Q_INVOKABLE QString randomSong(bool jumpToRandomSong = true);
 
     ///
     /// \brief querySongTitle 按照SongTitle=>FileName的顺序返回歌曲信息

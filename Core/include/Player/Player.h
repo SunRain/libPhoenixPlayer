@@ -54,6 +54,9 @@ public:
     Common::PlayBackendState getPlayBackendState();
     int getPlayBackendStateInt();
 
+    Q_INVOKABLE void playFromLibrary(const QString &songHash);
+    Q_INVOKABLE void addToQueue(const QString &songHash);
+
     ///
     /// \brief lookupLyric 搜索lyrics歌词
     /// \param songHash 需要搜索的歌曲hash, 空值为当前播放的歌曲
@@ -133,6 +136,18 @@ public slots:
     void pause();
     void setVolume(int vol = 0);
     void setPosition(qreal pos = 0, bool isPercent = true);
+    ///
+    /// \brief skipForward 跳到下一首歌曲
+    ///
+    void skipForward();
+    ///
+    /// \brief skipBackward 跳到上一首歌曲
+    ///
+    void skipBackward();
+    ///
+    /// \brief skipShuffle 播放随即歌曲
+    ///
+    void skipShuffle();
 
 private:
     void init();
@@ -164,6 +179,8 @@ private:
     quint64 mCurrentSongLength;
     quint64 mCurrentPlayPos;
 
+    //临时播放器队列
+    QStringList mPlayQueue;
 };
 
 } //PhoenixPlayer

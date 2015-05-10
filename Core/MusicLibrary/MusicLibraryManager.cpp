@@ -186,6 +186,11 @@ bool MusicLibraryManager::deletePlayList(const QString &playListHash)
     return mPlayListDAO.data()->deletePlayList (playListHash);
 }
 
+QString MusicLibraryManager::getCurrentPlayListHash()
+{
+    return mCurrentPlayListHash;
+}
+
 QString MusicLibraryManager::playingSongHash()
 {
     if (mCurrentSongHash.isEmpty ()) {
@@ -226,17 +231,20 @@ QString MusicLibraryManager::lastSongHash()
     return mCurrentSongHash;
 }
 
-void MusicLibraryManager::nextSong()
+QString MusicLibraryManager::nextSong(bool jumpToNextSong)
 {
     QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
     int index = list.indexOf (mCurrentSongHash) +1;
     if (index >= list.size ())
         index = 0;
-    mCurrentSongHash = list.at (index);
-    emit playingSongChanged ();
+    if (jumpToNextSong) {
+        mCurrentSongHash = list.at (index);
+        emit playingSongChanged ();
+    }
+    return list.at (index);
 }
 
-void MusicLibraryManager::preSong()
+QString MusicLibraryManager::preSong(bool jumpToPreSong)
 {
     QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
     int index = list.indexOf (mCurrentSongHash);
@@ -247,18 +255,25 @@ void MusicLibraryManager::preSong()
     } else {
         index --;
     }
-    mCurrentSongHash = list.at (index);
-    emit playingSongChanged ();
+    if (jumpToPreSong) {
+        mCurrentSongHash = list.at (index);
+        emit playingSongChanged ();
+    }
+    return list.at (index);
 }
 
-void MusicLibraryManager::randomSong()
+QString MusicLibraryManager::randomSong(bool jumpToRandomSong)
 {
+    QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
     QTime time = QTime::currentTime ();
     qsrand(time.second () * 1000 + time.msec ());
     int n = qrand ();
-    n = n % mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).size ();
-    mCurrentSongHash = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).at (n);
-    emit playingSongChanged ();
+    n = n % list.size ();
+    if (jumpToRandomSong) {
+        mCurrentSongHash = list.at (n);
+        emit playingSongChanged ();
+    }
+    return list.at (n);
 }
 
 QString MusicLibraryManager::queryOneByIndex(const QString &hash, int tag, bool skipDuplicates)
@@ -356,11 +371,10 @@ bool MusicLibraryManager::insertToPlayList(const QString &playListHash,
         qDebug()<<"playListHash or newSongHash is empty";
         return false;
     }
-    return mPlayListDAO.data()
-            ->updatePlayList (Common::PlayListSongHashes,
-                              playListHash,
-                              newSongHash,
-                              true);
+    return mPlayListDAO.data()->updatePlayList (Common::PlayListSongHashes,
+                                                playListHash,
+                                                newSongHash,
+                                                true);
 }
 
 bool MusicLibraryManager::deleteFromPlayList(

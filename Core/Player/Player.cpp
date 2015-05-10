@@ -40,7 +40,7 @@ Player::Player(QObject *parent)
 #endif
 
     mMetaLookupManager = nullptr;//new MetadataLookupManager(this);
-
+    mPlayQueue = QStringList();
     mPlayMode = Common::PlayModeOrder;
 
     if (!isInit)
@@ -200,6 +200,8 @@ void Player::setMusicLibraryManager()
         }
         QString playingHash = mMusicLibraryManager->playingSongHash ();
         mCurrentSongLength = getSongLength (playingHash);
+        if (!mPlayQueue.contains (playingHash))
+            mPlayQueue.append (playingHash);
 
         PlayBackend::BaseMediaObject obj;
         obj.setFileName (mMusicLibraryManager->queryOne(playingHash, Common::E_FileName));
@@ -314,6 +316,17 @@ Common::PlayBackendState Player::getPlayBackendState()
 int Player::getPlayBackendStateInt()
 {
     return (int)getPlayBackendState();
+}
+
+void Player::playFromLibrary(const QString &songHash)
+{
+    mMusicLibraryManager->setPlayingSongHash (songHash);
+}
+
+void Player::addToQueue(const QString &songHash)
+{
+    if (!songHash.isEmpty ())
+        mPlayQueue.append (songHash);
 }
 
 void Player::lookupLyric(const QString &songHash)
@@ -435,6 +448,48 @@ void Player::setPosition(qreal pos, bool isPercent)
         mPlayBackend.data ()->setPosition (mCurrentSongLength * pos/100);
     } else {
         mPlayBackend.data ()->setPosition (pos);
+    }
+}
+
+void Player::skipForward()
+{
+    if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
+        int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ()) +1;
+        if (index >= mPlayQueue.size ())
+            index = 0;
+        this->playFromLibrary (mPlayQueue.at (index));
+    } else {
+        mMusicLibraryManager->nextSong ();
+    }
+}
+
+void Player::skipBackward()
+{
+    if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
+        int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ());
+        if (index == -1) { //no hash found
+            index = 0;
+        } else if (index == 0) { //hash is the first song
+            index = mPlayQueue.size () -1; //jump to last song
+        } else {
+            index --;
+        }
+        this->playFromLibrary (mPlayQueue.at (index));
+    } else {
+        mMusicLibraryManager->preSong ();
+    }
+}
+
+void Player::skipShuffle()
+{
+    if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
+        QTime time = QTime::currentTime ();
+        qsrand(time.second () * 1000 + time.msec ());
+        int n = qrand ();
+        n = n % mPlayQueue.size ();
+        this->playFromLibrary (mPlayQueue.at (n));
+    } else {
+        mMusicLibraryManager->randomSong ();
     }
 }
 
