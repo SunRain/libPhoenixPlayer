@@ -329,6 +329,11 @@ void Player::addToQueue(const QString &songHash)
         mPlayQueue.append (songHash);
 }
 
+QStringList Player::getPlayQueue()
+{
+    return mPlayQueue;
+}
+
 void Player::lookupLyric(const QString &songHash)
 {
     doMetadataLookup (songHash, IMetadataLookup::TypeLyrics);

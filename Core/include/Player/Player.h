@@ -55,7 +55,9 @@ public:
     int getPlayBackendStateInt();
 
     Q_INVOKABLE void playFromLibrary(const QString &songHash);
+
     Q_INVOKABLE void addToQueue(const QString &songHash);
+    Q_INVOKABLE QStringList getPlayQueue();
 
     ///
     /// \brief lookupLyric 搜索lyrics歌词
