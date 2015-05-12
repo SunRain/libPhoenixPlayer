@@ -35,6 +35,8 @@ public:
     void setModelType(ModelType type);
     ModelType getModelType();
 
+    Q_INVOKABLE QStringList trackHashListFromGroup(ModelType tragetType, const QString &groupName);
+
 public:
     enum ModelRoles {
         RoleGroupName = Qt::UserRole + 1,

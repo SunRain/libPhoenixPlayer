@@ -43,6 +43,33 @@ TrackGroupModel::ModelType TrackGroupModel::getModelType()
     return mModelType;
 }
 
+QStringList TrackGroupModel::trackHashListFromGroup(TrackGroupModel::ModelType tragetType, const QString &groupName)
+{
+    Common::SongMetaTags regColum;
+    switch (tragetType) {
+    case ModelType::TypeAlbum:
+    default:
+        regColum = Common::E_AlbumName;
+        break;
+    case ModelType::TypeArtist:
+        regColum = Common::E_ArtistName;
+        break;
+    case ModelType::TypeFolders:
+        regColum = Common::E_FilePath;
+        break;
+    case ModelType::TypeGenre:
+        regColum = Common::E_Genre;
+        break;
+    case ModelType::TypeMediaType:
+        regColum = Common::E_MediaType;
+        break;
+    case ModelType::TypeUserRating:
+        regColum = Common::E_UserRating;
+        break;
+    }
+    return mMusicLibraryManager->queryMusicLibrary (Common::E_Hash, regColum, groupName);
+}
+
 int TrackGroupModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
