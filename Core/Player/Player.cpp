@@ -82,7 +82,7 @@ void Player::setPluginLoader()
         mPlayBackend = mPluginLoader->getCurrentPlayBackend ();
         if (!PointerValid (EPointer::PPlaybackend))
             return;
-        qDebug()<<"[Player] user playbackend "<<mPlayBackend->getBackendName ();
+        qDebug()<<"[Player] user playbackend "<<mPlayBackend->getPluginName ();
         mPlayBackend->init ();
         mPlayBackend->stop ();
     }
@@ -97,7 +97,7 @@ void Player::setPluginLoader()
             mPlayBackend = mPluginLoader->getCurrentPlayBackend ();
             if (!PointerValid (EPointer::PPlaybackend))
                 return;
-            qDebug()<<"change playbackend to"<<mPlayBackend->getBackendName ();
+            qDebug()<<"change playbackend to"<<mPlayBackend->getPluginName ();
             mPlayBackend->init ();
             mPlayBackend->stop ();
         }

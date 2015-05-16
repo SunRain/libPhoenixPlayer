@@ -20,12 +20,12 @@ QString FakeBackend::getDescription()
     return QString("Fake PlayBackend");
 }
 
-QString FakeBackend::getBackendName()
+QString FakeBackend::getPluginName()
 {
     return QString(BACKEND_NAME);
 }
 
-QString FakeBackend::getBackendVersion()
+QString FakeBackend::getPluginVersion()
 {
     return QString(BACKEND_VERSION);
 }

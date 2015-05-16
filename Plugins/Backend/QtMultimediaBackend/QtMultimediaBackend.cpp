@@ -39,12 +39,12 @@ Common::PlayBackendState QtMultimediaBackend::getPlayBackendState()
     return mPlayBackendState;
 }
 
-QString QtMultimediaBackend::getBackendName()
+QString QtMultimediaBackend::getPluginName()
 {
     return QString(BACKEND_NAME);
 }
 
-QString QtMultimediaBackend::getBackendVersion()
+QString QtMultimediaBackend::getPluginVersion()
 {
     return  QString(BACKEND_VERSION);
 }

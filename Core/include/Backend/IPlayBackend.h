@@ -17,8 +17,8 @@ public:
 
     //    Q_INVOKABLE virtual void 	load_equalizer(vector<EQ_Setting>&)=0;
     virtual Common::PlayBackendState  getPlayBackendState() = 0;
-    virtual QString	getBackendName() = 0;
-    virtual QString getBackendVersion() = 0;
+    virtual QString	getPluginName() = 0;
+    virtual QString getPluginVersion() = 0;
     virtual QString getDescription() = 0;
     virtual void	init() = 0;
 signals:

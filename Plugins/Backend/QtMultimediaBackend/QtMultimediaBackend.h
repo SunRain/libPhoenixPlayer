@@ -25,8 +25,8 @@ public:
     // IPlayBackend interface
 public:
     Common::PlayBackendState getPlayBackendState();
-    QString getBackendName();
-    QString getBackendVersion();
+    QString getPluginName();
+    QString getPluginVersion();
     QString getDescription();
     void init();
 

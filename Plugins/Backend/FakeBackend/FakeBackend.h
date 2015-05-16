@@ -18,8 +18,8 @@ public:
 
     PhoenixPlayer::Common::PlayBackendState getPlayBackendState();
     QString getDescription();
-    QString	getBackendName();
-    QString getBackendVersion();
+    QString	getPluginName();
+    QString getPluginVersion();
     void	init();
 
 public slots:
