@@ -286,8 +286,8 @@ void PluginLoader::initPlugins()
                     p.type = PluginType::TypePlayBackend;
                     p.description = obj->getDescription();
                     p.file = absFilePath;
-                    p.name = obj->getBackendName();
-                    p.version = obj->getBackendVersion();
+                    p.name = obj->getPluginName();
+                    p.version = obj->getPluginVersion();
 //                    mPluginList.append(p);
                 } else if (IMetadataLookup *obj = qobject_cast<IMetadataLookup*>(plugin)) {
 //                    PluginObject p;
@@ -352,7 +352,7 @@ void PluginLoader::setNewPlugin(PluginLoader::PluginType type, const QString &ne
 
     if (type == PluginType::TypePlayBackend) {
         if (mPlayBackend != nullptr
-                && newPluginName.toLower () == mPlayBackend->getBackendName ().toLower ()) {
+                && newPluginName.toLower () == mPlayBackend->getPluginName ().toLower ()) {
             return;
         }
 

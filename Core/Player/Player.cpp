@@ -334,6 +334,33 @@ QStringList Player::getPlayQueue()
     return mPlayQueue;
 }
 
+QString Player::forwardTrackHash()
+{
+    if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
+        int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ()) +1;
+        if (index >= mPlayQueue.size ())
+            index = 0;
+        return mPlayQueue.at (index);
+    }
+    return mMusicLibraryManager->nextSong (false);
+}
+
+QString Player::backwardTrackHash()
+{
+    if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
+        int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ());
+        if (index == -1) { //no hash found
+            index = 0;
+        } else if (index == 0) { //hash is the first song
+            index = mPlayQueue.size () -1; //jump to last song
+        } else {
+            index --;
+        }
+        return mPlayQueue.at (index);
+    }
+    return mMusicLibraryManager->preSong (false);
+}
+
 void Player::lookupLyric(const QString &songHash)
 {
     doMetadataLookup (songHash, IMetadataLookup::TypeLyrics);
@@ -458,31 +485,12 @@ void Player::setPosition(qreal pos, bool isPercent)
 
 void Player::skipForward()
 {
-    if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
-        int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ()) +1;
-        if (index >= mPlayQueue.size ())
-            index = 0;
-        this->playFromLibrary (mPlayQueue.at (index));
-    } else {
-        mMusicLibraryManager->nextSong ();
-    }
+    this->playFromLibrary (this->forwardTrackHash ());
 }
 
 void Player::skipBackward()
 {
-    if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
-        int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ());
-        if (index == -1) { //no hash found
-            index = 0;
-        } else if (index == 0) { //hash is the first song
-            index = mPlayQueue.size () -1; //jump to last song
-        } else {
-            index --;
-        }
-        this->playFromLibrary (mPlayQueue.at (index));
-    } else {
-        mMusicLibraryManager->preSong ();
-    }
+    this->playFromLibrary (this->backwardTrackHash ());
 }
 
 void Player::skipShuffle()

@@ -59,6 +59,9 @@ public:
     Q_INVOKABLE void addToQueue(const QString &songHash);
     Q_INVOKABLE QStringList getPlayQueue();
 
+    Q_INVOKABLE QString forwardTrackHash();
+    Q_INVOKABLE QString backwardTrackHash();
+
     ///
     /// \brief lookupLyric 搜索lyrics歌词
     /// \param songHash 需要搜索的歌曲hash, 空值为当前播放的歌曲

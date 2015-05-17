@@ -57,7 +57,7 @@ public:
     /// \param jumpToNextSong 是否同时自动跳转到nextSong,这会发送 playingSongChanged 信号
     /// \return 当前播放列表的下一首歌曲
     ///
-    QString nextSong(bool jumpToNextSong = true);
+    Q_INVOKABLE QString nextSong(bool jumpToNextSong = true);
     ///
     /// \brief preSong 当前播放列表的上一首歌曲,如果在第一首,则返回最后一首
     ///
