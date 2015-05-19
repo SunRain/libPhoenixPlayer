@@ -334,6 +334,18 @@ QStringList Player::getPlayQueue()
     return mPlayQueue;
 }
 
+bool Player::removeQueueItemAt(int index)
+{
+    if (index < 0)
+        return false;
+    if (index > mPlayQueue.length () -1)
+        return false;
+    if (mPlayQueue.isEmpty ())
+        return false;
+    mPlayQueue.removeAt (index);
+    return true;
+}
+
 QString Player::forwardTrackHash()
 {
     if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {

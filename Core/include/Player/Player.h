@@ -56,8 +56,10 @@ public:
 
     Q_INVOKABLE void playFromLibrary(const QString &songHash);
 
+    //播放队列相关操作
     Q_INVOKABLE void addToQueue(const QString &songHash);
     Q_INVOKABLE QStringList getPlayQueue();
+    Q_INVOKABLE bool removeQueueItemAt(int index = -1);
 
     Q_INVOKABLE QString forwardTrackHash();
     Q_INVOKABLE QString backwardTrackHash();
