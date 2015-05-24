@@ -79,16 +79,14 @@ MusicLibraryManager::~MusicLibraryManager()
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 MusicLibraryManager *MusicLibraryManager::instance()
 {
-    qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
     static QMutex mutex;
     static QScopedPointer<MusicLibraryManager> scp;
     if (Q_UNLIKELY(scp.isNull())) {
-        qDebug()<<">>>>>>>> statr new";
+        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
         mutex.lock();
         scp.reset(new MusicLibraryManager(0));
         mutex.unlock();
     }
-    qDebug()<<">>>>>>>> return "<<scp.data()->metaObject()->className();;
     return scp.data();
 }
 #endif
@@ -234,46 +232,55 @@ QString MusicLibraryManager::lastSongHash()
 QString MusicLibraryManager::nextSong(bool jumpToNextSong)
 {
     QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
-    int index = list.indexOf (mCurrentSongHash) +1;
-    if (index >= list.size ())
-        index = 0;
-    if (jumpToNextSong) {
-        mCurrentSongHash = list.at (index);
-        emit playingSongChanged ();
+    if (!list.isEmpty ()) {
+        int index = list.indexOf (mCurrentSongHash) +1;
+        if (index >= list.size ())
+            index = 0;
+        if (jumpToNextSong) {
+            mCurrentSongHash = list.at (index);
+            emit playingSongChanged ();
+        }
+        return list.at (index);
     }
-    return list.at (index);
+    return QString();
 }
 
 QString MusicLibraryManager::preSong(bool jumpToPreSong)
 {
     QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
-    int index = list.indexOf (mCurrentSongHash);
-    if (index == -1) { //no hash found
-        index = 0;
-    } else if (index == 0) { //hash is the first song
-        index = list.size () -1; //jump to last song
-    } else {
-        index --;
+    if (!list.isEmpty ()) {
+        int index = list.indexOf (mCurrentSongHash);
+        if (index == -1) { //no hash found
+            index = 0;
+        } else if (index == 0) { //hash is the first song
+            index = list.size () -1; //jump to last song
+        } else {
+            index --;
+        }
+        if (jumpToPreSong) {
+            mCurrentSongHash = list.at (index);
+            emit playingSongChanged ();
+        }
+        return list.at (index);
     }
-    if (jumpToPreSong) {
-        mCurrentSongHash = list.at (index);
-        emit playingSongChanged ();
-    }
-    return list.at (index);
+    return QString();
 }
 
 QString MusicLibraryManager::randomSong(bool jumpToRandomSong)
 {
     QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
-    QTime time = QTime::currentTime ();
-    qsrand(time.second () * 1000 + time.msec ());
-    int n = qrand ();
-    n = n % list.size ();
-    if (jumpToRandomSong) {
-        mCurrentSongHash = list.at (n);
-        emit playingSongChanged ();
+    if (!list.isEmpty ()) {
+        QTime time = QTime::currentTime ();
+        qsrand(time.second () * 1000 + time.msec ());
+        int n = qrand ();
+        n = n % list.size ();
+        if (jumpToRandomSong) {
+            mCurrentSongHash = list.at (n);
+            emit playingSongChanged ();
+        }
+        return list.at (n);
     }
-    return list.at (n);
+    return QString();
 }
 
 QString MusicLibraryManager::queryOneByIndex(const QString &hash, int tag, bool skipDuplicates)
