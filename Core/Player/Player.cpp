@@ -315,10 +315,13 @@ void Player::playFromLibrary(const QString &songHash)
     mMusicLibraryManager->setPlayingSongHash (songHash);
 }
 
-void Player::addToQueue(const QString &songHash)
+void Player::addToQueue(const QString &songHash, bool skipDuplicates)
 {
-    if (!songHash.isEmpty ())
+    if (!songHash.isEmpty ()) {
+        if (skipDuplicates && mPlayQueue.contains (songHash))
+            return;
         mPlayQueue.append (songHash);
+    }
 }
 
 QStringList Player::getPlayQueue()
