@@ -66,9 +66,7 @@ void TagParserManager::setPluginLoader()
     }
     if (!mPluginHashList.isEmpty ()) {
         foreach (QString str, mPluginHashList) {
-            mPluginLoader->setNewPlugin (Common::PluginType::PluginMusicTagParser,
-                                    str);
-
+            mPluginLoader->setNewPlugin (Common::PluginType::PluginMusicTagParser, str);
         }
     }
     connect (mPluginLoader,
