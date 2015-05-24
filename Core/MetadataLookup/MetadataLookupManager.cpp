@@ -286,8 +286,7 @@ void MetadataLookupManager::doLookupSucceed(const QByteArray &result)
     qDebug()<<Q_FUNC_INFO<<mLookup->getPluginName ()<<" lookupSucceed";
 
     if (mCurrentNode.data) {
-        QString hash = mCurrentNode.data
-                ->getMeta (Common::SongMetaTags::E_Hash).toString ();
+        QString hash = mCurrentNode.data->getMeta (Common::SongMetaTags::E_Hash).toString ();
         emit lookupSucceed (hash, result, mLookup->currentLookupFlag ());
     }
     this->processNext ();

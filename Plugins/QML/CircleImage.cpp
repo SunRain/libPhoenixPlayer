@@ -167,8 +167,6 @@ void CircleImage::setCache(bool cache)
 
 void CircleImage::downloadFile(const QUrl &url)
 {
-    qDebug()<<__FUNCTION__;
-
     if (url.isEmpty ()) {
         this->setStatus (Status::Error);
         return;

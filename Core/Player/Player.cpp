@@ -263,8 +263,7 @@ void Player::setMetaLookupManager()
             }
             //TODO 也许通过MusicLibraryManager来管理会更好
             if (PointerValid (EPointer::PPluginLoader)) {
-                MusicLibrary::IPlayListDAO *dao =
-                        mPluginLoader->getCurrentPlayListDAO ();
+                MusicLibrary::IPlayListDAO *dao = mPluginLoader->getCurrentPlayListDAO ();
                 if (dao)
                     dao->updateMetaData (&meta, true);
             }
@@ -272,11 +271,6 @@ void Player::setMetaLookupManager()
         });
     }
 }
-
-//void Player::setSettings()
-//{
-//    mSettings = SingletonPointer<Settings>::getInstance ();
-//}
 
 void Player::setPlayMode(Common::PlayMode mode)
 {
