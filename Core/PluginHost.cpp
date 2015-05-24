@@ -114,8 +114,16 @@ void PluginHost::unLoad()
     if (mPluginLoader->isLoaded ()) {
         if (!mPluginLoader->unload ()) {
             qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<mPluginLoader->errorString ();
+            if (mPluginObject) {
+                delete mPluginObject;
+                mPluginObject = 0;
+            }
         }
     }
+//    if (mPluginObject) {
+//        delete mPluginObject;
+//        mPluginObject = 0;
+//    }
     delete mPluginLoader;
     mPluginLoader = 0;
 }
@@ -129,7 +137,15 @@ QObject *PluginHost::instance()
 {
     if (!this->isLoaded ()) {
         mPluginObject = mPluginLoader->instance ();
+    } else {
+        if (!mPluginObject) {
+            this->unLoad ();
+            if (!mPluginLoader)
+                mPluginLoader = new QPluginLoader(mLibraryFile, this);
+            mPluginObject = mPluginLoader->instance ();
+        }
     }
+    qDebug()<<Q_FUNC_INFO<<" here mPluginObject is "<<(mPluginObject == 0);
     return mPluginObject;
 }
 
