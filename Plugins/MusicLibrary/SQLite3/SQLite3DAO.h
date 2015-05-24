@@ -15,18 +15,14 @@ class Common;
 namespace MusicLibrary {
 namespace SQLite3 {
 
-#define DAO_NAME "SQLite3"
-#define VERSION "0.1"
-#define DESCRIPTION "Save music library by SQLite3"
-
-#define DATABASE_NAME "PhoenixPlayer_sqlite3.sql"
+#define DATABASE_NAME "PhoenixPlayer_sqlite3"
 #define LIBRARY_TABLE_TAG "LIBRARY"
 #define PLAYLIST_TABLE_TAG "PLAYLIST"
 
 class SQLite3DAO : public IPlayListDAO
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PhoenixPlayer.MusicLibrary.SQLite3DAO" FILE "playlistsqlite3plugin.json")
+    Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayListDAO.SQLite3DAO" FILE "playlistsqlite3plugin.json")
     Q_INTERFACES(PhoenixPlayer::MusicLibrary::IPlayListDAO)
 public:
     explicit SQLite3DAO(QObject *parent = 0);
@@ -35,9 +31,6 @@ public:
 
     // IPlayListDAO interface
 public:
-    QString getPluginName();
-    QString getPluginVersion();
-    QString getDescription();
     bool initDataBase();
     bool openDataBase();
 

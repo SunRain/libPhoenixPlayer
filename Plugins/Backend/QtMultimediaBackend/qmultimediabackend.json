@@ -1,5 +1,6 @@
 {
-      "name" : "qmultimediabackend",
+      "name" : "QMultiMediaBackend",
       "version" : "0.0.1",
-      "dependencies" : []
+      "dependencies" : [],
+      "description" : "QtMultimedia play backend"
 } 

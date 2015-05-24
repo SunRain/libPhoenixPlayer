@@ -1,5 +1,6 @@
 {
-      "name" : "tagparserpro",
+      "name" : "LibTag-TagParser",
       "version" : "0.0.1",
-      "dependencies" : []
+      "dependencies" : [],
+      "description" : "Parser music tag by taglib"
 } 

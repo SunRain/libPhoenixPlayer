@@ -17,6 +17,7 @@
 
 #include "SongMetaData.h"
 #include "SingletonPointer.h"
+#include "PluginHost.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
@@ -39,8 +40,8 @@ TagParserManager::~TagParserManager()
     qDebug()<<__FUNCTION__;
     emit parserQueueFinished ();
 
-    if (!mPluginNameList.isEmpty ())
-        mPluginNameList.clear ();
+    if (!mPluginHashList.isEmpty ())
+        mPluginHashList.clear ();
 
     qDeleteAll(mMetaList);
     if (mMetaList.isEmpty ()) {
@@ -50,29 +51,30 @@ TagParserManager::~TagParserManager()
 
 void TagParserManager::setPluginLoader()
 {
-    mPluginNameList = mPluginLoader->getPluginNames (PluginLoader::PluginType::TypeMusicTagParser);
+    mPluginHashList = mPluginLoader->getPluginHostHashList (Common::PluginType::PluginMusicTagParser);
 
     //因为PluginLoader默认会返回第一个插件,
     //并且更改插件名字的时候,如果目标插件名和当前使用插件名相同,则不会发送更改的信号
     //所以先从插件列表里面取出当前使用的插件
-    if (!mPluginNameList.isEmpty ()) {
+    if (!mPluginHashList.isEmpty ()) {
         IMusicTagParser *parser = mPluginLoader->getCurrentMusicTagParser ();
-        if (parser != nullptr) {
+        if (parser) {
             mPluginList.append (parser);
-            mPluginNameList.removeOne (parser->getPluginName ());
+            PluginHost *p = mPluginLoader->getCurrentPluginHost (Common::PluginMusicTagParser);
+            mPluginHashList.removeOne (p->hash ());
         }
     }
-    if (!mPluginNameList.isEmpty ()) {
-        foreach (QString str, mPluginNameList) {
-            mPluginLoader->setNewPlugin (PluginLoader::PluginType::TypeMusicTagParser,
+    if (!mPluginHashList.isEmpty ()) {
+        foreach (QString str, mPluginHashList) {
+            mPluginLoader->setNewPlugin (Common::PluginType::PluginMusicTagParser,
                                     str);
 
         }
     }
     connect (mPluginLoader,
              &PluginLoader::signalPluginChanged,
-             [this] (PluginLoader::PluginType type) {
-        if (type == PluginLoader::PluginType::TypeMusicTagParser) {
+             [this] (Common::PluginType type) {
+        if (type == Common::PluginType::PluginMusicTagParser) {
             IMusicTagParser *parser = mPluginLoader->getCurrentMusicTagParser ();
             mPluginList.append (parser);
         }

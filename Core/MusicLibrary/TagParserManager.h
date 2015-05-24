@@ -44,7 +44,7 @@ private:
     PluginLoader *mPluginLoader;
     QList<IMusicTagParser *> mPluginList;
     QString mPluginPath;
-    QStringList mPluginNameList;
+    QStringList mPluginHashList;
     int mCurrentIndex;
 };
 

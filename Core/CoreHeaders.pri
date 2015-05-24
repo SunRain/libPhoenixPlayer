@@ -19,4 +19,5 @@ HEADERS += \
     $$PWD/include/Player/Player.h \
     $$PWD/include/SingletonPointer_p.h \
     $$PWD/include/SingletonPointer_sf.h \
-    $$PWD/include/SingletonPointer.h
+    $$PWD/include/SingletonPointer.h \
+    $$PWD/include/PluginHost.h

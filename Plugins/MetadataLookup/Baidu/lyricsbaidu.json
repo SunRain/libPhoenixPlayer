@@ -1,5 +1,6 @@
 {
-      "name" : "lyricsbaidu",
+      "name" : "BaiduLyricsLookup",
       "version" : "0.0.1",
-      "dependencies" : []
+      "dependencies" : [],
+      "description" : "Lookup lyrics from baidu mp3 server"
 } 

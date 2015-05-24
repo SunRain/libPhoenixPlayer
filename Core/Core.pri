@@ -22,7 +22,8 @@ HEADERS += \
     $$PWD/include/MusicLibrary/MusicLibraryManager.h \
     $$PWD/include/Player/Player.h \
     $$PWD/MusicLibrary/DiskLookup.h \
-    $$PWD/MusicLibrary/TagParserManager.h
+    $$PWD/MusicLibrary/TagParserManager.h \
+    $$PWD/include/PluginHost.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
@@ -39,7 +40,8 @@ SOURCES += \
     $$PWD/PluginLoader.cpp \
     $$PWD/Settings.cpp \
     $$PWD/SongMetaData.cpp \
-    $$PWD/Util.cpp
+    $$PWD/Util.cpp \
+    $$PWD/PluginHost.cpp
 
 
 

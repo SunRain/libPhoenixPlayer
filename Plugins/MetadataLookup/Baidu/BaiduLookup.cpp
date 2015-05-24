@@ -126,11 +126,6 @@ QString BaiduLookup::getPluginName()
     return QString(PLUGIN_NAME);
 }
 
-QString BaiduLookup::getPluginVersion()
-{
-    return QString(PLUGIN_VERSION);
-}
-
 void BaiduLookup::lookup(SongMetaData *meta)
 {
     if (meta == nullptr) {
@@ -159,11 +154,6 @@ bool BaiduLookup::supportLookup(IMetadataLookup::LookupType type)
     default:
         return false;
     }
-}
-
-QString BaiduLookup::getDescription()
-{
-    return QString(DESCRIPTION);
 }
 
 } //BaiduLookup

@@ -15,10 +15,8 @@ class BaseNetworkLookup;
 namespace LastFmLookup {
 
 #define PLUGIN_NAME "LastFmMetadataLookup"
-#define PLUGIN_VERSION "0.1"
-#define DESCRIPTION "Lookup track metadata from last.fm"
-#define LASTFMAPIKEY "48570d887cca45f05f8094dca4f79c0d"
 
+#define LASTFMAPIKEY "48570d887cca45f05f8094dca4f79c0d"
 #define API_BASE "http://ws.audioscrobbler.com/2.0"
 #define API_KEY "625fd47b3b685af19315cc3a1aa5920a"
 
@@ -47,8 +45,6 @@ public:
     // IMetadataLookup interface
 public:
     QString getPluginName();
-    QString getPluginVersion();
-    QString getDescription();
     bool supportLookup(LookupType type);
     void lookup(SongMetaData *meta);
 

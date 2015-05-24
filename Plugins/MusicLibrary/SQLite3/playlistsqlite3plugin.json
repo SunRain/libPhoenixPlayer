@@ -1,5 +1,6 @@
 {
-      "name" : "playlistsqlite3plugin",
+      "name" : "SQLite3",
       "version" : "0.0.1",
-      "dependencies" : []
+      "dependencies" : [],
+      "description" : "Save music library by SQLite3"
 } 

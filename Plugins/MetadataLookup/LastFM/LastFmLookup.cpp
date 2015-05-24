@@ -72,16 +72,6 @@ QString LastFmLookup::getPluginName()
     return QString(PLUGIN_NAME);
 }
 
-QString LastFmLookup::getPluginVersion()
-{
-    return QString(PLUGIN_VERSION);
-}
-
-QString LastFmLookup::getDescription()
-{
-    return QString(DESCRIPTION);
-}
-
 bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
 {
     switch (type) {

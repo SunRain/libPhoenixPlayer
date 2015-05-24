@@ -17,10 +17,6 @@ public:
         mList.clear ();
     }
 
-    virtual QString getPluginName() = 0;
-    virtual QString getPluginVersion() = 0;
-    virtual QString getDescription() = 0;
-
     ///
     /// \brief parserTag 解析文件tag
     /// \param targetMetaDate
@@ -40,7 +36,7 @@ private:
 } //MusicLibrary
 } //PhoenixPlayer
 
-Q_DECLARE_INTERFACE(PhoenixPlayer::MusicLibrary::IMusicTagParser, "PhoenixPlayer.MusicLibrary.IMusicTagParser/1.0")
+Q_DECLARE_INTERFACE(PhoenixPlayer::MusicLibrary::IMusicTagParser, "PhoenixPlayer.MusicTagParser.IMusicTagParser/1.0")
 
 #endif // IMUSICTAGPARSER
 

@@ -22,14 +22,10 @@ namespace MusicLibrary {
 
 namespace TagParserPro {
 
-#define PLUGIN_NAME "LibTag-TagParser"
-#define PLUGIN_VERSION "0.1"
-#define DESCRIPTION "Parser music tag by taglib"
-
 class TagParserPro : public IMusicTagParser
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PhoenixPlayer.MusicLibrary.TagParserPro" FILE "tagparserpro.json")
+    Q_PLUGIN_METADATA(IID "PhoenixPlayer.MusicTagParser.TagParserPro" FILE "tagparserpro.json")
     Q_INTERFACES(PhoenixPlayer::MusicLibrary::IMusicTagParser)
 
 public:
@@ -39,9 +35,6 @@ public:
     // IMusicTagParser interface
 public:
     bool parserTag(SongMetaData *targetMetaDate);
-    QString getPluginName();
-    QString getPluginVersion();
-    QString getDescription();
 
 protected:
     QImage getImage();

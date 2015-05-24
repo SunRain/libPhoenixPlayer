@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QHash>
 #include <QList>
+#include "Common.h"
 
 class QPluginLoader;
-
 namespace PhoenixPlayer {
 
 namespace PlayBackend {
@@ -21,22 +21,12 @@ class IMusicTagParser;
 namespace MetadataLookup {
 class IMetadataLookup;
 }
+
+class PluginHost;
 class PluginLoader : public QObject
 {
     Q_OBJECT
-    Q_ENUMS(PluginType)
 public:
-    //不使用强类型枚举,因为QHash不支持强类型枚举
-    enum /*class*/ PluginType {
-        TypeAll = 0x0,
-        //为保证后续兼容,TypePlayBackend必须为第二个项
-        TypePlayBackend,            //播放后端
-        TypePlayListDAO,            //音乐库存储后端
-        TypeMusicTagParser,         //音乐Tag解析
-        TypeMetadataLookup,           //metadata查询
-        TypeLastFlag                //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
-    };
-//    static PluginLoader *getInstance();
     explicit PluginLoader(QObject *parent = 0);
     virtual ~PluginLoader();
 
@@ -44,7 +34,7 @@ public:
     static PluginLoader *instance();
 #endif
 
-    void setPluginPath(PluginType type, const QString &path);
+    void setPluginPath(Common::PluginType type, const QString &path);
 
     ///
     /// \brief getCurrentPlayBackend
@@ -77,35 +67,20 @@ public:
     /// \param type
     /// \return
     ///
-    QStringList getPluginNames(PluginType type);
+    QStringList getPluginHostHashList(Common::PluginType type);
 
-    QList<QObject *> getPluginList(PluginType type);
+    PluginHost *getCurrentPluginHost(Common::PluginType type);
+
+    QList<PluginHost *> getPluginHostList(Common::PluginType type);
 
 protected:
     void initPlugins();
-
-    class PluginObject {
-    public:
-        PluginType type;
-        QString name;
-        QString version;
-        QString description;
-        QString file;
-        bool operator == (const PluginObject &other) {
-            return this->type == other.type
-                    && this->name == other.name
-                    && this->version == other.version
-                    && this->description == other.description
-                    && this->file == other.file;
-        }
-    };
-
 signals:
     ///
     /// \brief signalPluginChanged setNewPlugin后如果新插件名和当前使用的插件名不同,则发送此信号
     /// \param type
     ///
-    void signalPluginChanged(PluginType type);
+    void signalPluginChanged(Common::PluginType type);
 
 public slots:
     ///
@@ -113,32 +88,12 @@ public slots:
     /// \param type
     /// \param newPluginName
     ///
-     void setNewPlugin(PluginType type, const QString &newPluginName);
-
-private:
-//     void initPlayBackendPlugin();
-//     void initPlayListDaoPlugin();
-//     void initMusicTagParserPlugin();
-//     void initMetadataLookupPlugin();
+     void setNewPlugin(Common::PluginType type, const QString &newPluginHash);
 private:
      bool isInit;
-//      QList <PlayBackend::IPlayBackend*> mPlayBackendList;
-//      QList <MusicLibrary::IPlayListDAO*> mPlayListDAOList;
-//      QList <MusicLibrary::IMusicTagParser*> mMusicTagParserList;
-//      QList <MetadataLookup::IMetadataLookup*> mMetaLookupList;
-     PlayBackend::IPlayBackend *mPlayBackend;
-     MusicLibrary::IPlayListDAO *mDao;
-     MusicLibrary::IMusicTagParser *mTagParser;
-     MetadataLookup::IMetadataLookup *mMetaLookup;
-
-     QPluginLoader *mPlayBackendLoader;
-     QPluginLoader *mDaoLoader;
-     QPluginLoader *mTagParserLoader;
-     QPluginLoader *mMetaLookupLoader;
-     QList<PluginObject> mPluginList;
-//     QHash<PluginType, int> mCurrentPluginIndex;
-//     QHash<PluginType, QString> mCurrentPluginName;
-     QHash<PluginType, QString> mPluginPath;
+     QList<PluginHost *> mPluginHostList;
+     QHash<Common::PluginType, PluginHost*> mCurrentPluginHost;
+     QHash<Common::PluginType, QString> mPluginPath;
 };
 
 } //PhoenixPlayer

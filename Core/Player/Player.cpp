@@ -58,16 +58,14 @@ Player::~Player()
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 Player *Player::instance()
 {
-    qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
     static QMutex mutex;
     static QScopedPointer<Player> scp;
     if (Q_UNLIKELY(scp.isNull())) {
-        qDebug()<<">>>>>>>> statr new";
+        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
         mutex.lock();
         scp.reset(new Player(0));
         mutex.unlock();
     }
-    qDebug()<<">>>>>>>> return "<<scp.data()->metaObject()->className();;
     return scp.data();
 }
 #endif
@@ -82,14 +80,14 @@ void Player::setPluginLoader()
         mPlayBackend = mPluginLoader->getCurrentPlayBackend ();
         if (!PointerValid (EPointer::PPlaybackend))
             return;
-        qDebug()<<"[Player] user playbackend "<<mPlayBackend->getPluginName ();
+//        qDebug()<<"[Player] user playbackend "<<mPlayBackend->getPluginName ();
         mPlayBackend->init ();
         mPlayBackend->stop ();
     }
     connect (mPluginLoader,
              &PluginLoader::signalPluginChanged,
-             [this](PluginLoader::PluginType type) {
-        if (type == PluginLoader::TypePlayBackend) {
+             [this](Common::PluginType type) {
+        if (type == Common::PluginPlayBackend) {
             if (mPlayBackend) {
                 mPlayBackend->stop ();
                 mPlayBackend.data ()->deleteLater ();
@@ -97,7 +95,7 @@ void Player::setPluginLoader()
             mPlayBackend = mPluginLoader->getCurrentPlayBackend ();
             if (!PointerValid (EPointer::PPlaybackend))
                 return;
-            qDebug()<<"change playbackend to"<<mPlayBackend->getPluginName ();
+//            qDebug()<<"change playbackend to"<<mPlayBackend->getPluginName ();
             mPlayBackend->init ();
             mPlayBackend->stop ();
         }

@@ -21,10 +21,6 @@ public:
     explicit IPlayListDAO(QObject *parent = 0);
     virtual ~IPlayListDAO();
 
-    virtual QString getPluginName() = 0;
-    virtual QString getPluginVersion() = 0;
-    virtual QString getDescription() = 0;
-
     virtual bool initDataBase() = 0;
 
     virtual bool insertMetaData(SongMetaData *metaData = 0, bool skipDuplicates = true) = 0;
@@ -94,7 +90,7 @@ public slots:
 } //MusicLibrary
 } //PhoenixPlayer
 
-Q_DECLARE_INTERFACE(PhoenixPlayer::MusicLibrary::IPlayListDAO, "PhoenixPlayer.MusicLibrary.IPlayListDAO/1.0")
+Q_DECLARE_INTERFACE(PhoenixPlayer::MusicLibrary::IPlayListDAO, "PhoenixPlayer.PlayListDAO.IPlayListDAO/1.0")
 
 
 #endif // IPLAYLISTDAO_H

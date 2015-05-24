@@ -109,58 +109,7 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
         connect (mReply, &QNetworkReply::finished,
                  this, &BaseNetworkLookup::readReplyData);
     }
-//    if (mReply) {
-//        //请求成功
-//        connect (mReply,
-//                 &QNetworkReply::finished,
-//                 [=]() {
-//            qDebug()<<"===  BaseNetworkLookup  finished";
-
-//            mTimer->stop ();
-
-//            QNetworkReply::NetworkError error = mReply->error ();
-//            if (error != QNetworkReply::NetworkError::NoError) {
-//                if (!mFailEmitted) {
-//                    mFailEmitted = true;
-//                    emit failed (QUrl(), mReply->errorString ());
-//                }
-//                mReply->deleteLater ();
-//                mReply = 0;
-//                return;
-//            }
-//            qDebug()<<"===  BaseNetworkLookup  succeed";
-
-//            QByteArray qba = mReply->readAll ();
-//            QUrl url(mReply->request ().url ());
-//            mReply->deleteLater ();
-//            mReply = 0;
-//            emit succeed (url, qba);
-//        });
-
-//        //请求失败
-//        connect (mReply,
-//                 //解决信号和方法函数重载问题
-//                 static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-//                 [=](QNetworkReply::NetworkError error) {
-//            Q_UNUSED(error)
-
-//            mTimer->stop ();
-
-//            QUrl url = mReply->request ().url ();
-//            QString errorStr = mReply->errorString ();
-
-//            qDebug()<<"===  BaseNetworkLookup  error "<<errorStr;
-
-//            mReply->deleteLater ();
-//            mReply = 0;
-//            if (!mFailEmitted) {
-//                mFailEmitted = true;
-//                emit failed (url, errorStr);
-//            }
-//        });
-//        return true;
-//    }
-    //    return false;
+    return true;
 }
 
 void BaseNetworkLookup::readReplyData()

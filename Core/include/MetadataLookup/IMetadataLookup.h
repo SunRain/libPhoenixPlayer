@@ -28,8 +28,6 @@ public:
     virtual ~IMetadataLookup();
 
     virtual QString getPluginName() = 0;
-    virtual QString getPluginVersion() = 0;
-    virtual QString getDescription() = 0;
 
     ///
     /// \brief supportLookup 查询当前插件是否支持某一个枚举类的查询

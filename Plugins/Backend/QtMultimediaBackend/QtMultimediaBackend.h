@@ -9,10 +9,6 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace QtMultimediaBackend {
 
-#define BACKEND_NAME "QtMultimediaBackend"
-#define BACKEND_VERSION "0.1"
-#define DESCRIPTION "QtMultimedia play backend"
-
 class QtMultimediaBackend : public IPlayBackend
 {
     Q_OBJECT
@@ -25,9 +21,6 @@ public:
     // IPlayBackend interface
 public:
     Common::PlayBackendState getPlayBackendState();
-    QString getPluginName();
-    QString getPluginVersion();
-    QString getDescription();
     void init();
 
 public slots:

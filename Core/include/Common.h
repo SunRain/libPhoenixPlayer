@@ -77,6 +77,17 @@ public:
         E_LastFlag
     };
 
+    //系统插件
+    enum PluginType {
+        PluginTypeAll = 0x100,
+        //为保证后续兼容,TypePlayBackend必须为第二个项
+        PluginPlayBackend,            //播放后端
+        PluginPlayListDAO,            //音乐库存储后端
+        PluginMusicTagParser,         //音乐Tag解析
+        PluginMetadataLookup,           //metadata查询
+        PluginTypeUndefined                //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
+    };
+
     QString enumToStr(const QString &enumName, int enumValue)
     {
         int index  = metaObject ()->indexOfEnumerator (enumName.toLocal8Bit ());

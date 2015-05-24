@@ -141,21 +141,6 @@ bool TagParserPro::parserTag(SongMetaData *targetMetaDate)
     return true;
 }
 
-QString TagParserPro::getPluginName()
-{
-    return QString(PLUGIN_NAME);
-}
-
-QString TagParserPro::getPluginVersion()
-{
-    return QString(PLUGIN_VERSION);
-}
-
-QString TagParserPro::getDescription()
-{
-    return QString(DESCRIPTION);
-}
-
 QImage TagParserPro::getImage()
 {
     QImage image;

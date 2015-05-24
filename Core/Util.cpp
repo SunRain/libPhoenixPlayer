@@ -5,8 +5,6 @@
 #include <QLocale>
 #include <QMutex>
 
-#include <iostream>
-
 #include "Util.h"
 
 namespace PhoenixPlayer {
@@ -19,17 +17,15 @@ Util::Util(QObject *parent) : QObject(parent)
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 Util *Util::instance()
 {
-    qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
     static QMutex mutex;
     static QScopedPointer<Util> scp;
 
     if (Q_UNLIKELY(scp.isNull())) {
-        qDebug()<<">>>>>>>> statr new";
+        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
         mutex.lock();
         scp.reset(new Util(0));
         mutex.unlock();
     }
-    qDebug()<<">>>>>>>> return "<<scp.data()->metaObject()->className();;
     return scp.data();
 }
 #endif

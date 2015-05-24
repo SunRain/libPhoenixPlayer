@@ -68,17 +68,15 @@ Settings::~Settings()
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
 Settings *Settings::instance()
 {
-    qDebug()<<">>>>>>>>"<<__FUNCTION__<<"<<<<<<<<<<<<<<";
     static QMutex mutex;
     static QScopedPointer<Settings> scp;
 
     if (Q_UNLIKELY(scp.isNull())) {
-        qDebug()<<">>>>>>>> statr new";
+        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
         mutex.lock();
         scp.reset(new Settings(0));
         mutex.unlock();
     }
-    qDebug()<<">>>>>>>> return "<<scp.data()->metaObject()->className();;
     return scp.data();
 }
 #endif
@@ -142,6 +140,7 @@ bool Settings::setLastPlayedSong(const QString &songHash)
 {
     mSettings->setValue (KEY_LAST_SONG, songHash);
     mSettings->sync ();
+    return true;
 }
 
 bool Settings::setCurrentPlayListHash(const QString &hash)

@@ -43,21 +43,6 @@ SQLite3DAO::~SQLite3DAO()
     qDebug()<<"after "<<__FUNCTION__;
 }
 
-QString SQLite3DAO::getPluginName()
-{
-    return DAO_NAME;
-}
-
-QString SQLite3DAO::getPluginVersion()
-{
-    return VERSION;
-}
-
-QString SQLite3DAO::getDescription()
-{
-    return QString(DESCRIPTION);
-}
-
 bool SQLite3DAO::initDataBase()
 {
     qDebug()<<">>>>>>>>>>>>>> "<<__FUNCTION__<<" <<<<<<<<<<<<<<<<<<<<<<";
