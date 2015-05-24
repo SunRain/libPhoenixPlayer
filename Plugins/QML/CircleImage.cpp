@@ -237,8 +237,6 @@ void CircleImage::downloadFile(const QUrl &url)
 
 bool CircleImage::fillImage(const QString &imagePath)
 {
-    qDebug()<<__FUNCTION__;
-
     if (imagePath.isEmpty ()) {
         this->setStatus (Status::Error);
         return false;
