@@ -104,7 +104,7 @@ QStringList Util::getAddonDirList()
 #ifdef UBUNTU_TOUCH
     QDir dir(qApp->applicationDirPath ());
     dir.cdUp ();
-    list.append (QString("%/addon").arg (dir.absolutePath ()));
+    list.append (QString("%1/addon").arg (dir.absolutePath ()));
 #endif
     QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
     list.append (QString("%1/addon").arg (dataPath));

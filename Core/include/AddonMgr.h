@@ -2,6 +2,7 @@
 #define ADDONMGR_H
 
 #include <QObject>
+#include <QList>
 
 namespace PhoenixPlayer {
 
@@ -12,7 +13,22 @@ public:
     explicit AddonMgr(QObject *parent = 0);
     virtual ~AddonMgr();
 
+    struct Addon {
+        QString hash;
+        QString basePath;
+        QString indexFile;
+        QString name;
+        QString icon;
+        QString version;
+        QString description;
+        QString maintainer;
+    };
 
+    QList<Addon *> getAddonList();
+protected:
+    void initList();
+private:
+    QList<Addon *> mAddonList;
 };
 } //PhoenixPlayer
 #endif // ADDONMGR_H
