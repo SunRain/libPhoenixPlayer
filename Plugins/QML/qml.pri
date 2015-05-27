@@ -7,7 +7,8 @@ HEADERS += \
     $$PWD/include/CircleImage.h \
     $$PWD/include/CoverCircleImage.h \
     $$PWD/include/TrackGroupModel.h \
-    $$PWD/include/PathListModel.h
+    $$PWD/include/PathListModel.h \
+    $$PWD/include/AddonListModel.h
 
 SOURCES += \
     $$PWD/LyricsModel.cpp \
@@ -15,7 +16,8 @@ SOURCES += \
     $$PWD/CircleImage.cpp \
     $$PWD/CoverCircleImage.cpp \
     $$PWD/TrackGroupModel.cpp \
-    $$PWD/PathListModel.cpp
+    $$PWD/PathListModel.cpp \
+    $$PWD/AddonListModel.cpp
 
 
 
