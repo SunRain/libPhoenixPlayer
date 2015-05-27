@@ -4,6 +4,9 @@
 #include <QTextCodec>
 #include <QLocale>
 #include <QMutex>
+#include <QDir>
+#include <QCoreApplication>
+#include <QStandardPaths>
 
 #include "Util.h"
 
@@ -93,6 +96,19 @@ QString Util::formateFileSize(int size)
         str = QString("%1 MB").arg(QString::number(((float)size)/1024/1024, 'f', 2));
     }
     return str;
+}
+
+QStringList Util::getAddonDirList()
+{
+    QStringList list;
+#ifdef UBUNTU_TOUCH
+    QDir dir(qApp->applicationDirPath ());
+    dir.cdUp ();
+    list.append (QString("%/addon").arg (dir.absolutePath ()));
+#endif
+    QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
+    list.append (QString("%1/addon").arg (dataPath));
+    return list;
 }
 
 } //PhoenixPlayer

@@ -23,6 +23,8 @@ public:
     Q_INVOKABLE static QString formateSongDuration(int time);
     Q_INVOKABLE static QString formateFileSize(int size);
 
+    static QStringList getAddonDirList();
+
 signals:
 
 public slots:
