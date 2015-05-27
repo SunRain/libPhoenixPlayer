@@ -8,7 +8,8 @@ HEADERS += \
     $$PWD/include/CoverCircleImage.h \
     $$PWD/include/MusicLibraryListModel.h \
     $$PWD/include/PathListModel.h \
-    $$PWD/include/TrackGroupModel.h
+    $$PWD/include/TrackGroupModel.h \
+    $$PWD/include/AddonListModel.h
 
 
 

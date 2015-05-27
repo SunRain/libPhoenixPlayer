@@ -43,7 +43,7 @@ SOURCES += \
     $$PWD/SongMetaData.cpp \
     $$PWD/Util.cpp \
     $$PWD/PluginHost.cpp \
-    PhoenixPlayerCore/Core/AddonMgr.cpp
+    $$PWD/AddonMgr.cpp
 
 
 
