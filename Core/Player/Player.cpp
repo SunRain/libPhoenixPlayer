@@ -26,8 +26,10 @@ using namespace PlayBackend;
 Player::Player(QObject *parent)
     : QObject(parent)
     ,isInit(false)
+    ,mAutoSkipForward(true)
 {
     mPlayBackend = 0;
+
 
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mPluginLoader = PluginLoader::instance();
@@ -118,56 +120,68 @@ void Player::setPluginLoader()
     connect (mPlayBackend.data (),
              &IPlayBackend::finished,
              [this] {
-        if (PointerValid (EPointer::PMusicLibraryManager)) {
-            switch (mPlayMode) {
-            case Common::PlayModeOrder: { //顺序播放
-                if (mMusicLibraryManager->lastSongHash ()
-                        == mMusicLibraryManager->playingSongHash ()) {
-                    mPlayBackend.data ()->stop ();
-                } else {
-                    mMusicLibraryManager->nextSong ();
-                }
-                break;
-            }
-            case Common::PlayModeRepeatCurrent: { //单曲播放
-                QString playingHash = mMusicLibraryManager->playingSongHash ();
-                PlayBackend::BaseMediaObject obj;
+        emit playTrackFinished ();
+        if (mAutoSkipForward)
+            doPlayByPlayMode ();
+//        if (PointerValid (EPointer::PMusicLibraryManager)) {
+//            switch (mPlayMode) {
+//            case Common::PlayModeOrder: { //顺序播放
+////                if (mMusicLibraryManager->lastSongHash () == mMusicLibraryManager->playingSongHash ()) {
+////                    mPlayBackend.data ()->stop ();
+////                } else {
+////                    mMusicLibraryManager->nextSong ();
+////                }
+//                if (this->forwardTrackHash (false).isEmpty ())
+//                    mPlayBackend.data ()->stop ();
+//                else
+//                    this->skipForward ();
+//                break;
+//            }
+//            case Common::PlayModeRepeatCurrent: { //单曲播放
+//                QString playingHash = mMusicLibraryManager->playingSongHash ();
+//                PlayBackend::BaseMediaObject obj;
 
-                QStringList list = mMusicLibraryManager
-                        ->querySongMetaElement (Common::E_FileName, playingHash);
-                if (!list.isEmpty ())
-                    obj.setFileName (list.first ());
+//                QStringList list = mMusicLibraryManager
+//                        ->querySongMetaElement (Common::E_FileName, playingHash);
+//                if (!list.isEmpty ())
+//                    obj.setFileName (list.first ());
 
-                list = mMusicLibraryManager
-                        ->querySongMetaElement (Common::E_FilePath, playingHash);
-                if (!list.isEmpty ())
-                    obj.setFilePath (list.first ());
+//                list = mMusicLibraryManager
+//                        ->querySongMetaElement (Common::E_FilePath, playingHash);
+//                if (!list.isEmpty ())
+//                    obj.setFilePath (list.first ());
 
-                obj.setMediaType (Common::MediaTypeLocalFile);
-                mPlayBackend.data ()->changeMedia (&obj, 0, true);
-                break;
-            }
-            case Common::PlayModeRepeatAll:  { //循环播放
-                mMusicLibraryManager->nextSong ();
-                break;
-            }
-            case Common::PlayModeShuffle: { //随机播放
-                mMusicLibraryManager->randomSong ();
-                break;
-            }
-            default:
-                break;
-            }
-        }
+//                obj.setMediaType (Common::MediaTypeLocalFile);
+//                mPlayBackend.data ()->changeMedia (&obj, 0, true);
+//                break;
+//            }
+//            case Common::PlayModeRepeatAll:  { //循环播放
+////                mMusicLibraryManager->nextSong ();
+//                this->skipForward ();
+//                break;
+//            }
+//            case Common::PlayModeShuffle: { //随机播放
+////                mMusicLibraryManager->randomSong ();
+//                this->skipShuffle ();
+//                break;
+//            }
+//            default:
+//                break;
+//            }
+//        }
     });
 
     //播放失败
     connect (mPlayBackend.data (),
              &IPlayBackend::failed,
              [this]() {
-        if (PointerValid (EPointer::PMusicLibraryManager)) {
-            mMusicLibraryManager->nextSong ();
-        }
+//        if (PointerValid (EPointer::PMusicLibraryManager)) {
+////            mMusicLibraryManager->nextSong ();
+//            this->skipForward ();
+//        }
+        emit playTrackFailed ();
+        if (mAutoSkipForward)
+            doPlayByPlayMode ();
     });
 
     //tick
@@ -310,6 +324,19 @@ int Player::getPlayBackendStateInt()
     return (int)getPlayBackendState();
 }
 
+void Player::setAutoSkipForward(bool autoSkipForward)
+{
+    if (mAutoSkipForward == autoSkipForward)
+        return;
+    mAutoSkipForward = autoSkipForward;
+    emit autoSkipForwardChanged ();
+}
+
+bool Player::getAutoSkipForward()
+{
+    return mAutoSkipForward;
+}
+
 void Player::playFromLibrary(const QString &songHash)
 {
     mMusicLibraryManager->setPlayingSongHash (songHash);
@@ -341,30 +368,40 @@ bool Player::removeQueueItemAt(int index)
     return true;
 }
 
-QString Player::forwardTrackHash()
+QString Player::forwardTrackHash(bool jumpToFirst)
 {
     if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
         int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ()) +1;
-        if (index >= mPlayQueue.size ())
-            index = 0;
+        if (index >= mPlayQueue.size () || mPlayQueue.size () == 1) {
+             if (jumpToFirst) index = 0;
+             else return QString();
+        }
         return mPlayQueue.at (index);
     }
+    if (!jumpToFirst  && (mMusicLibraryManager->playingSongHash () == mMusicLibraryManager->lastSongHash ()))
+        return QString();
     return mMusicLibraryManager->nextSong (false);
 }
 
-QString Player::backwardTrackHash()
+QString Player::backwardTrackHash(bool jumpToLast)
 {
     if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
         int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ());
         if (index == -1) { //no hash found
-            index = 0;
+            if (jumpToLast)
+                index = 0;
+            else return  QString();
         } else if (index == 0) { //hash is the first song
-            index = mPlayQueue.size () -1; //jump to last song
+            if (jumpToLast)
+                index = mPlayQueue.size () -1; //jump to last song
+            else return QString();
         } else {
             index --;
         }
         return mPlayQueue.at (index);
     }
+    if (!jumpToLast && (mMusicLibraryManager->lastSongHash () == mMusicLibraryManager->playingSongHash ()))
+        return QString();
     return mMusicLibraryManager->preSong (false);
 }
 
@@ -646,6 +683,56 @@ void Player::emitMetadataLookupResult(IMetadataLookup::LookupType type, const QS
             emit metadataLookupFailed (hash);
         break;
     }
+    }
+}
+
+void Player::doPlayByPlayMode()
+{
+    if (PointerValid (EPointer::PMusicLibraryManager) && PointerValid (EPointer::PPlaybackend)) {
+        switch (mPlayMode) {
+        case Common::PlayModeOrder: { //顺序播放
+//                if (mMusicLibraryManager->lastSongHash () == mMusicLibraryManager->playingSongHash ()) {
+//                    mPlayBackend.data ()->stop ();
+//                } else {
+//                    mMusicLibraryManager->nextSong ();
+//                }
+            if (this->forwardTrackHash (false).isEmpty ())
+                mPlayBackend.data ()->stop ();
+            else
+                this->skipForward ();
+            break;
+        }
+        case Common::PlayModeRepeatCurrent: { //单曲播放
+            QString playingHash = mMusicLibraryManager->playingSongHash ();
+            PlayBackend::BaseMediaObject obj;
+
+            QStringList list = mMusicLibraryManager
+                    ->querySongMetaElement (Common::E_FileName, playingHash);
+            if (!list.isEmpty ())
+                obj.setFileName (list.first ());
+
+            list = mMusicLibraryManager
+                    ->querySongMetaElement (Common::E_FilePath, playingHash);
+            if (!list.isEmpty ())
+                obj.setFilePath (list.first ());
+
+            obj.setMediaType (Common::MediaTypeLocalFile);
+            mPlayBackend.data ()->changeMedia (&obj, 0, true);
+            break;
+        }
+        case Common::PlayModeRepeatAll:  { //循环播放
+//                mMusicLibraryManager->nextSong ();
+            this->skipForward ();
+            break;
+        }
+        case Common::PlayModeShuffle: { //随机播放
+//                mMusicLibraryManager->randomSong ();
+            this->skipShuffle ();
+            break;
+        }
+        default:
+            break;
+        }
     }
 }
 

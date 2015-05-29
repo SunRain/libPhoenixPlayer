@@ -33,6 +33,7 @@ class Player : public QObject
     Q_OBJECT
     Q_PROPERTY(int playMode READ getPlayModeInt WRITE setPlayMode NOTIFY playModeChanged)
     Q_PROPERTY(int playBackendState READ getPlayBackendStateInt NOTIFY playBackendStateChanged)
+    Q_PROPERTY(bool autoSkipForwad READ getAutoSkipForward WRITE setAutoSkipForward NOTIFY autoSkipForwardChanged)
 public:
     explicit Player(QObject *parent = 0);
     virtual ~Player();
@@ -54,6 +55,13 @@ public:
     Common::PlayBackendState getPlayBackendState();
     int getPlayBackendStateInt();
 
+    ///
+    /// \brief setAutoSkipForward 是否在播放结束或者播放失败后自动跳转到下一首歌曲，跳转的歌曲由Common::PlayMode决定
+    /// \param autoSkipForward 是否跳转
+    ///
+    void setAutoSkipForward(bool autoSkipForward = true);
+    bool getAutoSkipForward();
+
     Q_INVOKABLE void playFromLibrary(const QString &songHash);
 
     //播放队列相关操作
@@ -61,8 +69,18 @@ public:
     Q_INVOKABLE QStringList getPlayQueue();
     Q_INVOKABLE bool removeQueueItemAt(int index = -1);
 
-    Q_INVOKABLE QString forwardTrackHash();
-    Q_INVOKABLE QString backwardTrackHash();
+    ///
+    /// \brief forwardTrackHash 返回下一曲的hash值
+    /// \param jumpToFirst 如果是最后一曲，是否最动跳转到第一首曲目
+    /// \return
+    ///
+    Q_INVOKABLE QString forwardTrackHash(bool jumpToFirst = true);
+    ///
+    /// \brief backwardTrackHash 返回上一曲的hash值
+    /// \param jumpToLast 如果是第一首，是否自动跳转到最后一曲
+    /// \return
+    ///
+    Q_INVOKABLE QString backwardTrackHash(bool jumpToLast = true);
 
     ///
     /// \brief lookupLyric 搜索lyrics歌词
@@ -113,6 +131,8 @@ signals:
 
     void metadataLookupFailed(QString songHash);
 
+    void playTrackFinished();
+    void playTrackFailed();
     ///
     /// \brief playTickActual 播放实际时间
     /// \param sec 实际时间
@@ -123,6 +143,8 @@ signals:
     /// \param percent 0~100的播放时间百分比
     ///
     void playTickPercent(int percent);
+
+    void autoSkipForwardChanged();
 
     //IPlayBackend的信号
 //    void positionChanged(quint64 posMs = 0);
@@ -173,6 +195,8 @@ private:
                                   const QString &hash,
                                   bool succeed);
 
+    void doPlayByPlayMode();
+
 private:
     bool isInit;
     Settings *mSettings;
@@ -188,6 +212,8 @@ private:
 
     //临时播放器队列
     QStringList mPlayQueue;
+
+    bool mAutoSkipForward;
 };
 
 } //PhoenixPlayer
