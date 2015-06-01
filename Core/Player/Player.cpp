@@ -212,8 +212,12 @@ void Player::setMusicLibraryManager()
         }
         QString playingHash = mMusicLibraryManager->playingSongHash ();
         mCurrentSongLength = getSongLength (playingHash);
-        if (!mPlayQueue.contains (playingHash))
+        if (!mPlayQueue.contains (playingHash)) {
             mPlayQueue.append (playingHash);
+            qDebug()<<Q_FUNC_INFO<<">>>> append hash to queue "<<playingHash<<" queue size "<<mPlayQueue.size ();
+        }
+
+        emit trackChanged ();
 
         PlayBackend::BaseMediaObject obj;
         obj.setFileName (mMusicLibraryManager->queryOne(playingHash, Common::E_FileName));
@@ -372,6 +376,7 @@ QString Player::forwardTrackHash(bool jumpToFirst)
 {
     if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
         int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ()) +1;
+//        qDebug()<<Q_FUNC_INFO<<">>>>>>> next index is "<<index<<" queue size "<<mPlayQueue.size ();
         if (index >= mPlayQueue.size () || mPlayQueue.size () == 1) {
              if (jumpToFirst) index = 0;
              else return QString();
@@ -387,6 +392,7 @@ QString Player::backwardTrackHash(bool jumpToLast)
 {
     if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
         int index = mPlayQueue.indexOf (mMusicLibraryManager->playingSongHash ());
+//        qDebug()<<Q_FUNC_INFO<<">>>>>>> pre index is "<<index<<" queue size "<<mPlayQueue.size ();
         if (index == -1) { //no hash found
             if (jumpToLast)
                 index = 0;
@@ -706,13 +712,11 @@ void Player::doPlayByPlayMode()
             QString playingHash = mMusicLibraryManager->playingSongHash ();
             PlayBackend::BaseMediaObject obj;
 
-            QStringList list = mMusicLibraryManager
-                    ->querySongMetaElement (Common::E_FileName, playingHash);
+            QStringList list = mMusicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
             if (!list.isEmpty ())
                 obj.setFileName (list.first ());
 
-            list = mMusicLibraryManager
-                    ->querySongMetaElement (Common::E_FilePath, playingHash);
+            list = mMusicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
             if (!list.isEmpty ())
                 obj.setFilePath (list.first ());
 

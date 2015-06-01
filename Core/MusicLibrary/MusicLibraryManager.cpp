@@ -212,7 +212,7 @@ void MusicLibraryManager::setPlayingSongHash(const QString &newHash)
         return;
     if (mCurrentSongHash == newHash)
         return;
-    qDebug()<<__FUNCTION__<<"change current song hash from "<<mCurrentSongHash<<" to "<<newHash;
+    qDebug()<<Q_FUNC_INFO<<"change current song hash from "<<mCurrentSongHash<<" to "<<newHash;
     mCurrentSongHash = newHash;
     emit playingSongChanged ();
 }

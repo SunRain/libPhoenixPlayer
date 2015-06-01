@@ -131,6 +131,10 @@ signals:
 
     void metadataLookupFailed(QString songHash);
 
+    ///
+    /// \brief trackChanged 当切换歌曲的时候发送此信号，慢于MusicLibraryManager的playingSongChanged信号
+    ///
+    void trackChanged();
     void playTrackFinished();
     void playTrackFailed();
     ///
