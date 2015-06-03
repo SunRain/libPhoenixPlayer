@@ -63,6 +63,7 @@ public:
     bool getAutoSkipForward();
 
     Q_INVOKABLE void playFromLibrary(const QString &songHash);
+    Q_INVOKABLE void playFromNetwork(const QUrl &url);
 
     //播放队列相关操作
     Q_INVOKABLE void addToQueue(const QString &songHash, bool skipDuplicates = true);

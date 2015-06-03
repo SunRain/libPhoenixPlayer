@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QMutex>
 #include <QScopedPointer>
+#include <QUrl>
 
 #include "Common.h"
 #include "Settings.h"
@@ -346,6 +347,18 @@ void Player::playFromLibrary(const QString &songHash)
     mMusicLibraryManager->setPlayingSongHash (songHash);
 }
 
+void Player::playFromNetwork(const QUrl &url)
+{
+    if (!PointerValid (EPointer::PPlaybackend) || url.isEmpty () || !url.isValid ())
+        return;
+    qDebug()<<Q_FUNC_INFO<<url;
+
+    PlayBackend::BaseMediaObject obj;
+    obj.setFilePath (url.toString ());
+    obj.setMediaType (Common::MediaTypeUrl);
+    mPlayBackend.data ()->changeMedia (&obj, 0, true);
+}
+
 void Player::addToQueue(const QString &songHash, bool skipDuplicates)
 {
     if (!songHash.isEmpty ()) {
@@ -459,7 +472,7 @@ void Player::togglePlayPause()
         mPlayBackend.data ()->play (mCurrentPlayPos);
         break;
     case Common::PlayBackendStopped: {
-        if (PointerValid (EPointer::PMusicLibraryManager)) {
+        if (PointerValid (EPointer::PMusicLibraryManager) && mAutoSkipForward) {
             qDebug()<<__FUNCTION__<<"playbackend stopped";
             QString playingHash = mMusicLibraryManager->playingSongHash ();
 
