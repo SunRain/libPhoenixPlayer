@@ -455,6 +455,7 @@ bool SQLite3DAO::updatePlayList(Common::PlayListElement targetColumn,
             || hash.isEmpty () || newValue.isEmpty ())
         return false;
 
+    /// appendNewValues 是否为添加到播放列表，否为从播放列表删除
     QString targetValue = newValue;
     //hash1||hash2||hash3
     if (targetColumn == Common::PlayListSongHashes) {
@@ -466,7 +467,7 @@ bool SQLite3DAO::updatePlayList(Common::PlayListElement targetColumn,
                 if (list.size () == 1) {
                     targetValue = QString("%1||%2").arg (list.first ()).arg (newValue);
                 } else {
-                    for (int i=0; i<list.size () -1; ++i) {
+                    for (int i=0; i<list.size (); ++i) {
                         targetValue += QString("%1||").arg (list.at (i));
                     }
                     targetValue += newValue;
@@ -475,14 +476,13 @@ bool SQLite3DAO::updatePlayList(Common::PlayListElement targetColumn,
         } else {
             //得到播放数据的list
             QStringList list = queryPlayList (targetColumn, Common::PlayListHash, hash);
-
             if (!list.isEmpty () && list.removeOne (targetValue)) {
                 targetValue = QString(); //重置空
                 if (!list.isEmpty ()) { //因为删除了一个数据,所以再次检测列表是否为空
                     if (list.size () == 1) {
                         targetValue = list.first ();
                     } else {
-                        for (int i=0; i<list.size () -2; ++i) {
+                        for (int i=0; i<list.size () -1; ++i) {
                             targetValue += QString("%1||").arg (list.at (i));
                         }
                         targetValue += list.last ();
@@ -504,6 +504,8 @@ bool SQLite3DAO::updatePlayList(Common::PlayListElement targetColumn,
     str += QString("where %1 = \"%2\"")
             .arg (mCommon.enumToStr ("PlayListElement", (int)Common::PlayListHash))
             .arg (hash);
+
+    qDebug()<<Q_FUNC_INFO<<" run sql "<<str;
 
     QSqlQuery q(str, mDatabase);
     if (q.exec ()) {

@@ -69,6 +69,7 @@ public:
     Q_INVOKABLE void addToQueue(const QString &songHash, bool skipDuplicates = true);
     Q_INVOKABLE QStringList getPlayQueue();
     Q_INVOKABLE bool removeQueueItemAt(int index = -1);
+    Q_INVOKABLE void removeAllQueueItem();
 
     ///
     /// \brief forwardTrackHash 返回下一曲的hash值

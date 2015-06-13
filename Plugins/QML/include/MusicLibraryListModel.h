@@ -35,6 +35,7 @@ public:
     Q_INVOKABLE void showMediaTypeTracks(const QString &mediaType, int limitNum = -1);
     Q_INVOKABLE void showUserRatingTracks(const QString &rating, int limitNum = -1);
     Q_INVOKABLE void showFolderTracks(const QString &folder, int limitNum = -1);
+    Q_INVOKABLE void showPlayListItems(const QString &playListHash, int limitNum = -1);
 
     void setAutoFetchMetadata(bool autoFetch);
     bool autoFetchMetadata();

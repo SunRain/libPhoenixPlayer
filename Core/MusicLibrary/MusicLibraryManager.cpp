@@ -176,12 +176,20 @@ bool MusicLibraryManager::changePlayList(const QString &playListHash)
 
 bool MusicLibraryManager::createPlayList(const QString &playListName)
 {
-    return mPlayListDAO.data()->insertPlayList (playListName);
+    if (mPlayListDAO.data()->insertPlayList (playListName)) {
+        emit playListCreated ();
+        return true;
+    }
+    return false;
 }
 
 bool MusicLibraryManager::deletePlayList(const QString &playListHash)
 {
-    return mPlayListDAO.data()->deletePlayList (playListHash);
+    if (mPlayListDAO.data()->deletePlayList (playListHash)) {
+        emit playListDeleted ();
+        return true;
+    }
+    return false;
 }
 
 QString MusicLibraryManager::getCurrentPlayListHash()
@@ -353,13 +361,9 @@ QStringList MusicLibraryManager::queryPlayListElement(
 {
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO.data()
-                ->queryPlayList (targetColumn,
-                                 Common::PlayListFirstFlag,
-                                 QString());
+        list = mPlayListDAO.data()->queryPlayList (targetColumn, Common::PlayListFirstFlag, QString());
     } else {
-        list = mPlayListDAO.data()
-                ->queryPlayList (targetColumn, Common::PlayListHash, hash);
+        list = mPlayListDAO.data()->queryPlayList (targetColumn, Common::PlayListHash, hash);
     }
 
     qDebug()<<" query result "<< list;
@@ -378,10 +382,13 @@ bool MusicLibraryManager::insertToPlayList(const QString &playListHash,
         qDebug()<<"playListHash or newSongHash is empty";
         return false;
     }
-    return mPlayListDAO.data()->updatePlayList (Common::PlayListSongHashes,
-                                                playListHash,
-                                                newSongHash,
-                                                true);
+    bool ret = mPlayListDAO.data()->updatePlayList (Common::PlayListSongHashes,
+                                                    playListHash,
+                                                    newSongHash,
+                                                    true);
+    if (ret)
+        emit playListTrackChanged ();
+    return ret;
 }
 
 bool MusicLibraryManager::deleteFromPlayList(
@@ -394,11 +401,13 @@ bool MusicLibraryManager::deleteFromPlayList(
         return false;
     }
     //TODO: 需要添加从本地删除的功能
-    return mPlayListDAO.data()
-            ->updatePlayList (Common::PlayListSongHashes,
-                              playListHash,
-                              songHash,
-                              false);
+    bool ret = mPlayListDAO.data()->updatePlayList (Common::PlayListSongHashes,
+                                                    playListHash,
+                                                    songHash,
+                                                    false);
+    if (ret)
+        emit playListTrackChanged ();
+    return ret;
 }
 
 bool MusicLibraryManager::init()

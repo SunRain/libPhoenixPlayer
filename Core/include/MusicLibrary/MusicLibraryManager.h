@@ -126,7 +126,9 @@ public:
     Q_INVOKABLE bool deletePlayList(const QString &playListHash);
     Q_INVOKABLE bool insertToPlayList(const QString &playListHash,
                                       const QString &newSongHash);
-
+    Q_INVOKABLE bool deleteFromPlayList(const QString &playListHash,
+                                        const QString &songHash,
+                                        bool deleteFromStorage = false);
     ///
     /// \brief getCurrentPlayListHash 返回当前播放列表的hash值
     /// \return 不存在则返回空
@@ -143,17 +145,13 @@ public:
                                      const QString &hash);
 
     ///
-    /// \brief queryPlayListElement 由于qml不支持直接和cpp代码传递enum值,所以用int代替
-    /// \param targetColumn 需要搜索的列
+    /// \brief queryPlayListElementByIndex 由于qml不支持直接和cpp代码传递enum值,所以用int代替
+    /// \param index 需要搜索的列
     /// \param hash 条件hash值
     /// \return
     ///
     Q_INVOKABLE QStringList queryPlayListElementByIndex(int index,
                                                         const QString &hash );
-
-    Q_INVOKABLE bool deleteFromPlayList(const QString &playListHash,
-                                        const QString &songHash,
-                                        bool deleteFromStorage = false);
 
     QString queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates = true);
     Q_INVOKABLE QString queryOneByIndex(const QString &hash, int tag, bool skipDuplicates = true);
@@ -165,6 +163,9 @@ signals:
     void searchingFinished();
     void playingSongChanged();
     void playListChanged();
+    void playListCreated();
+    void playListDeleted();
+    void playListTrackChanged();
 public slots:
 //    void fileFound (QString path, QString file, qint64 size);
 

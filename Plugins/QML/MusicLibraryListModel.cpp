@@ -69,6 +69,15 @@ void MusicLibraryListModel::showFolderTracks(const QString &folder, int limitNum
     appendToModel(limitNum);
 }
 
+void MusicLibraryListModel::showPlayListItems(const QString &playListHash, int limitNum)
+{
+    mLimitNum = limitNum;
+    clear();
+    mSongHashList = mMusicLibraryManager
+            ->queryPlayListElement (Common::PlayListSongHashes, playListHash);
+    appendToModel (limitNum);
+}
+
 void MusicLibraryListModel::showUserRatingTracks(const QString &rating, int limitNum)
 {
     mLimitNum = limitNum;
@@ -109,7 +118,8 @@ void MusicLibraryListModel::showArtistTracks(const QString &artistName, int limi
 {
     mLimitNum = limitNum;
     clear();
-    mSongHashList = mMusicLibraryManager->queryMusicLibrary(Common::E_Hash, Common::E_ArtistName, artistName);
+    mSongHashList = mMusicLibraryManager
+            ->queryMusicLibrary(Common::E_Hash, Common::E_ArtistName, artistName);
     appendToModel(limitNum);
 }
 

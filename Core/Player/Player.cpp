@@ -385,6 +385,11 @@ bool Player::removeQueueItemAt(int index)
     return true;
 }
 
+void Player::removeAllQueueItem()
+{
+    mPlayQueue.clear ();
+}
+
 QString Player::forwardTrackHash(bool jumpToFirst)
 {
     if (mMusicLibraryManager->getCurrentPlayListHash ().isEmpty () && !mPlayQueue.isEmpty ()) {
