@@ -428,7 +428,7 @@ QStringList SQLite3DAO::queryPlayList(Common::PlayListElement targetColumn,
         str += QString(" = \"%1\"").arg (regValue);
     }
 
-    qDebug()<<"try to run sql "<<str;
+    qDebug()<<Q_FUNC_INFO<<"try to run sql "<<str;
 
     QSqlQuery q(str, mDatabase);
     QStringList list;
@@ -437,7 +437,7 @@ QStringList SQLite3DAO::queryPlayList(Common::PlayListElement targetColumn,
                      .toString ());
     }
     if (targetColumn == Common::PlayListSongHashes) {
-        list = list.first ().split ("||");
+        list = list.first ().split ("||", QString::SkipEmptyParts);
     }
     return list;
 }
