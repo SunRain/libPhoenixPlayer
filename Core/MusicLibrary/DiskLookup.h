@@ -16,14 +16,15 @@ class DiskLookup : public QObject
     Q_OBJECT
 public:
     explicit DiskLookup(QObject *parent = 0);
-//    static DiskLookup *getInstance();
     virtual ~DiskLookup();
 
     ///
     /// \brief lookup 开始搜索目录，当未setDir的时候使用默认系统音乐目录搜索
     /// \return
     ///
-    bool startLookup();
+    void startLookup();
+
+    bool isRunning();
 
     ///
     /// \brief stopLookup 停止搜索目录
@@ -35,15 +36,16 @@ public:
 protected:
     void scanDir(const QString &path);
 signals:
-    void fileFound(QString path, QString file, qint64 size);
+    void fileFound(const QString &path, const QString &file, const qint64 &size);
     void pending();
     void finished();
 
 private:
     QStringList mPathList;
-//    bool mLookupLock;
     bool mStopLookupFlag;
+    bool mIsRunning;
     QMimeDatabase mQMimeDatabase;
+    int mCount;
 };
 
 } //MusicLibrary

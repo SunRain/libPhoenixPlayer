@@ -23,6 +23,9 @@ public:
     virtual ~TagParserManager();
 
     void addItem(SongMetaData *data = 0, bool startImmediately = false);
+    void parserImmediately(const QList<SongMetaData *> &list);
+    void parserImmediately(QList<SongMetaData *> *list);
+
     bool startParserLoop();
 
 protected:

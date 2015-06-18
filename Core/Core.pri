@@ -24,7 +24,10 @@ HEADERS += \
     $$PWD/MusicLibrary/DiskLookup.h \
     $$PWD/MusicLibrary/TagParserManager.h \
     $$PWD/include/PluginHost.h \
-    $$PWD/include/AddonMgr.h
+    $$PWD/include/AddonMgr.h \
+    $$PWD/MusicLibrary/AsyncDiskLookup.h \
+    $$PWD/MusicLibrary/AsyncTagParserMgrWrapper.h \
+    $$PWD/include/MusicLibrary/LocalMusicSacnner.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
@@ -43,7 +46,10 @@ SOURCES += \
     $$PWD/SongMetaData.cpp \
     $$PWD/Util.cpp \
     $$PWD/PluginHost.cpp \
-    $$PWD/AddonMgr.cpp
+    $$PWD/AddonMgr.cpp \
+    $$PWD/MusicLibrary/AsyncDiskLookup.cpp \
+    $$PWD/MusicLibrary/AsyncTagParserMgrWrapper.cpp \
+    $$PWD/MusicLibrary/LocalMusicSacnner.cpp
 
 
 

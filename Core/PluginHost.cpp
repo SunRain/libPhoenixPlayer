@@ -145,7 +145,7 @@ QObject *PluginHost::instance()
             mPluginObject = mPluginLoader->instance ();
         }
     }
-    qDebug()<<Q_FUNC_INFO<<" here mPluginObject is "<<(mPluginObject == 0);
+    qDebug()<<Q_FUNC_INFO<<" here mPluginObject is nullptr "<<(mPluginObject == 0);
     return mPluginObject;
 }
 

@@ -80,6 +80,7 @@ private:
     QSqlDatabase mDatabase;
     QStringList mExistSongHashes;
     Common mCommon;
+    bool mTransaction;
 };
 
 } //SQLite3

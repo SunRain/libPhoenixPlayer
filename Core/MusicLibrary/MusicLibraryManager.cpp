@@ -15,6 +15,8 @@
 #include "TagParserManager.h"
 #include "PluginLoader.h"
 #include "SingletonPointer.h"
+#include "AsyncDiskLookup.h"
+#include "AsyncTagParserMgrWrapper.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
@@ -23,11 +25,9 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     : QObject(parent)
     ,isInit(false)
 {
-    mDiskLooKupThread = nullptr;
-    mDiskLooKup = nullptr;
+    mAsyncDiskLookup = nullptr;
+    mTagParserWrapper = nullptr;
     mPlayListDAO = 0;
-    mTagParserManager = nullptr;
-    mTagParserThread = nullptr;
 
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mSettings = Settings::instance();
@@ -52,25 +52,6 @@ MusicLibraryManager::~MusicLibraryManager()
         mSettings->setLastPlayedSong (mCurrentSongHash);
     }
 
-    if (mDiskLooKup != nullptr) {
-        mDiskLooKup->stopLookup ();
-    }
-
-    if (mDiskLooKupThread != nullptr) {
-        qDebug()<<"wait for DiskLooKupThread";
-        mDiskLooKupThread->wait (3 * 60 * 1000);
-        mDiskLooKupThread->quit();
-    }
-    mDiskLooKupThread->deleteLater ();
-
-    if (mTagParserThread != nullptr) {
-        qDebug()<<"wait for TagParserThread";
-        mTagParserThread->wait (3 * 60 * 1000);
-        mTagParserThread->quit();
-    }
-
-    qDebug()<<"after delete thread";
-
     if (!mPlayListDAO.isNull())
         mPlayListDAO.data()->deleteLater ();
 
@@ -90,77 +71,6 @@ MusicLibraryManager *MusicLibraryManager::instance()
     return scp.data();
 }
 #endif
-
-bool MusicLibraryManager::scanLocalMusic()
-{
-    qDebug()<<__FUNCTION__;
-    //本地歌曲扫描线程
-    if (mDiskLooKupThread == nullptr) {
-        qDebug()<<__FUNCTION__<<" new mDiskLooKupThread";
-        mDiskLooKupThread = new QThread(0);
-    }
-    if (mDiskLooKup == nullptr) {
-        qDebug()<<__FUNCTION__<<" new mDiskLooKup";
-
-        mDiskLooKup = new DiskLookup(0);
-        mDiskLooKup->moveToThread (mDiskLooKupThread);
-
-        connect (mDiskLooKupThread, &QThread::started, [this] {
-            qDebug()<<__FUNCTION__<<" Thread start, we'll start lookup now";
-            mDiskLooKup->startLookup();
-        });
-
-//        //use Transaction in Sailfish OS will make app hang when trying to write large data
-//#ifndef SAILFISH_OS
-        connect (mDiskLooKup, &DiskLookup::pending,
-                 mPlayListDAO.data(), &IPlayListDAO::beginTransaction);
-//#endif
-
-        connect (mDiskLooKup, &DiskLookup::finished,
-                 [this] {
-            qDebug()<<__FUNCTION__<<" DiskLookup finished, we'll try to finish thread";
-            mDiskLooKupThread->quit();
-
-            if (mTagParserManager == nullptr || mTagParserThread == nullptr)
-                initTagParserManager();
-            mTagParserThread->start();
-//            emit searchingFinished ();
-        });
-
-        connect (mDiskLooKupThread, &QThread::finished, [this] {
-            qDebug()<<__FUNCTION__<<" mDiskLooKupThread finished, we'll try to deleteLater";
-            mDiskLooKup->deleteLater();
-            mDiskLooKupThread->deleteLater();
-        });
-
-        connect (mDiskLooKup, &DiskLookup::fileFound,
-                 [this]
-                 (const QString &path, const QString &file, const qint64 &size) {
-            QString hash = Util::calculateHash (path.toLocal8Bit ()
-                                                + file.toLocal8Bit ()
-                                                + QString::number (size));
-
-            qDebug()<<"=== find file "<<path<<" "<<file<<" hash "<<hash;
-
-            emit searching (path, file, size);
-
-            PhoenixPlayer::SongMetaData *data = new PhoenixPlayer::SongMetaData(0);
-            data->setMeta (Common::SongMetaTags::E_FileName, file);
-            data->setMeta (Common::SongMetaTags::E_FilePath, path);
-            data->setMeta (Common::SongMetaTags::E_Hash, hash);
-            data->setMeta (Common::SongMetaTags::E_FileSize, size);
-            if (mTagParserManager == nullptr || mTagParserThread == nullptr)
-                initTagParserManager();
-            mTagParserManager->addItem (data, false);
-        });
-    }
-    foreach (QString s, mSettings->getMusicDirs ()) {
-        mDiskLooKup->addLookupDir (s, false);
-    }
-    //return mDiskLooKup.data ()->startLookup ();
-    mDiskLooKupThread->start();
-    return true;
-}
 
 bool MusicLibraryManager::changePlayList(const QString &playListHash)
 {
@@ -207,7 +117,7 @@ QString MusicLibraryManager::playingSongHash()
             qDebug()<<"try playingSongHash from first from library";
             mCurrentSongHash = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).first ();
         } else {
-            qDebug()<<__FUNCTION__<<"get some error";
+            qDebug()<<Q_FUNC_INFO<<"get some error";
         }
     }
     qDebug()<<"playingSongHash is "<<mCurrentSongHash;
@@ -429,42 +339,6 @@ bool MusicLibraryManager::init()
     isInit = true;
 
     return true;
-}
-
-void MusicLibraryManager::initTagParserManager()
-{
-    //歌曲tag读取线程
-    if (mTagParserThread == nullptr)
-        mTagParserThread = new QThread(0);
-    if (mTagParserManager == nullptr) {
-        mTagParserManager = new TagParserManager(0);
-        mTagParserManager->moveToThread (mTagParserThread);
-
-        connect (mTagParserManager, &TagParserManager::parserPending, [] {
-            qDebug()<<"********************* parserPending";
-        });
-
-        connect (mTagParserThread, &QThread::started, [this] () {
-            qDebug()<<__FUNCTION__<<" mTagParserThread started, start parser tag";
-            mTagParserManager->startParserLoop();
-        });
-
-        connect (mTagParserManager, &TagParserManager::parserQueueFinished, [this] () {
-            qDebug()<<__FUNCTION__<<" mTagParserManager finished, stop thread";
-            mTagParserThread->quit();
-//            //use Transaction in Sailfish OS will make app hang when trying to write large data
-//#ifndef SAILFISH_OS
-            mPlayListDAO.data()->commitTransaction ();
-//#endif
-            emit searchingFinished ();
-        });
-
-        connect (mTagParserThread, &QThread::finished, [this] {
-            qDebug()<<__FUNCTION__<<" mTagParserThread finished, we'll try to deleteLater";
-            mTagParserManager->deleteLater();
-            mTagParserThread->deleteLater();
-        });
-    }
 }
 
 QString MusicLibraryManager::queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates)

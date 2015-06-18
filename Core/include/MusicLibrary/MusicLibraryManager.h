@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QStringList>
+#include <QList>
 
 //#include "Settings.h"
 #include "Common.h"
@@ -13,12 +14,15 @@ class QThread;
 namespace PhoenixPlayer {
 class Settings;
 class PluginLoader;
+class SongMetaData;
 namespace MusicLibrary {
 
 class IPlayListDAO;
 class DiskLookup;
 //class PlayListDAOLoader;
 class TagParserManager;
+class AsyncDiskLookup;
+class AsyncTagParserMgrWrapper;
 class MusicLibraryManager : public QObject
 {
     Q_OBJECT
@@ -29,11 +33,6 @@ public:
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     static MusicLibraryManager *instance();
 #endif
-    ///
-    /// \brief scanLocalMusic 搜索本地音乐文件
-    /// \return
-    ///
-    Q_INVOKABLE bool scanLocalMusic();
 
     ///
     /// \brief playingSong 返回当前播放的歌曲hash,
@@ -155,35 +154,22 @@ public:
 
     QString queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates = true);
     Q_INVOKABLE QString queryOneByIndex(const QString &hash, int tag, bool skipDuplicates = true);
-//protected:
-//    bool init();
 
 signals:
-    void searching (QString path, QString file, qint64 size);
-    void searchingFinished();
     void playingSongChanged();
     void playListChanged();
     void playListCreated();
     void playListDeleted();
     void playListTrackChanged();
-public slots:
-//    void fileFound (QString path, QString file, qint64 size);
-
 private:
       bool init();
-      void initTagParserManager();
-//    void initSettings(/*Settings *settings = 0*/);
-//    void initPluginLoader(/*PluginLoader *loader = 0*/);
 private:
       bool isInit;
       QPointer<IPlayListDAO> mPlayListDAO;
       PluginLoader *mPluginLoader;
       Settings *mSettings;
-
-      QThread *mDiskLooKupThread;
-      QThread *mTagParserThread;
-      DiskLookup *mDiskLooKup;
-      TagParserManager *mTagParserManager;
+      AsyncDiskLookup *mAsyncDiskLookup;
+      AsyncTagParserMgrWrapper *mTagParserWrapper;
 
       QString mCurrentSongHash;
       QString mCurrentPlayListHash;

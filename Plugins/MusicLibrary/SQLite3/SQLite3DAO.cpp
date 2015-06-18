@@ -21,7 +21,7 @@ namespace SQLite3 {
 SQLite3DAO::SQLite3DAO(QObject *parent)
     :IPlayListDAO(parent)
 {
-
+    mTransaction = false;
 }
 
 //SQLite3DAO *SQLite3DAO::getInstance()
@@ -237,21 +237,29 @@ bool SQLite3DAO::updateMetaData(PhoenixPlayer::SongMetaData *metaData, bool skip
 
 bool SQLite3DAO::beginTransaction()
 {
+
+    qDebug()<<Q_FUNC_INFO<<"====";
+    if (mTransaction) {
+        qWarning()<<"Current in transaction state, will ignore this call";
+        return true;
+    }
     if (!checkDatabase ())
         return false;
 
-    qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<__FUNCTION__<<" <<<<<<<<<<<<<<<<<<<<<<";
+    qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<";
 
     calcExistSongs();
-    return mDatabase.transaction ();
+    mTransaction = mDatabase.transaction ();
+    return mTransaction;
 }
 
 bool SQLite3DAO::commitTransaction()
 {
+    mTransaction = false;
     if (!checkDatabase ())
         return false;
 
-    qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<__FUNCTION__<<" <<<<<<<<<<<<<<<<<<<<<<";
+    qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<";
 
     if (mDatabase.commit ()) {
         calcExistSongs ();

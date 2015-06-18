@@ -85,7 +85,7 @@ void PluginLoader::setPluginPath(Common::PluginType type, const QString &path)
 
 IPlayBackend *PluginLoader::getCurrentPlayBackend()
 {
-    IPlayBackend *p;
+    IPlayBackend *p = nullptr;
     if (!mCurrentPluginHost[Common::PluginPlayBackend]) {
         foreach (PluginHost *host, mPluginHostList) {
             if (host->type () == Common::PluginPlayBackend) {
@@ -110,7 +110,7 @@ IPlayBackend *PluginLoader::getCurrentPlayBackend()
 
 IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
 {
-    IPlayListDAO *p;
+    IPlayListDAO *p = nullptr;
     if (!mCurrentPluginHost[Common::PluginPlayListDAO]) {
         foreach (PluginHost *host, mPluginHostList) {
             if (host->type () == Common::PluginPlayListDAO) {
@@ -135,7 +135,7 @@ IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
 
 IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
 {
-    IMusicTagParser *p;
+    IMusicTagParser *p = nullptr;
     if (!mCurrentPluginHost[Common::PluginMusicTagParser]) {
         foreach (PluginHost *host, mPluginHostList) {
             if (host->type () == Common::PluginMusicTagParser) {
@@ -160,7 +160,7 @@ IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
 
 IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
 {
-    IMetadataLookup *p;
+    IMetadataLookup *p = nullptr;
     if (!mCurrentPluginHost[Common::PluginMetadataLookup]) {
         foreach (PluginHost *host, mPluginHostList) {
             if (host->type () == Common::PluginMetadataLookup) {

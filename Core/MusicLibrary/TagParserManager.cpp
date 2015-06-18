@@ -37,7 +37,7 @@ TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
 
 TagParserManager::~TagParserManager()
 {
-    qDebug()<<__FUNCTION__;
+    qDebug()<<Q_FUNC_INFO;
     emit parserQueueFinished ();
 
     if (!mPluginHashList.isEmpty ())
@@ -71,7 +71,7 @@ void TagParserManager::setPluginLoader()
     }
     connect (mPluginLoader,
              &PluginLoader::signalPluginChanged,
-             [this] (Common::PluginType type) {
+             [&] (Common::PluginType type) {
         if (type == Common::PluginType::PluginMusicTagParser) {
             IMusicTagParser *parser = mPluginLoader->getCurrentMusicTagParser ();
             mPluginList.append (parser);
@@ -87,10 +87,35 @@ void TagParserManager::setPlayListDAO()
 
 void TagParserManager::addItem(SongMetaData *data, bool startImmediately)
 {
+    qDebug()<<Q_FUNC_INFO <<" item info "<<data->toString ();
+
     SongMetaData *d = data ;
     mMetaList.append (d);
     if (startImmediately)
         startParserLoop ();
+}
+
+void TagParserManager::parserImmediately(const QList<SongMetaData *> &list)
+{
+    this->parserImmediately (list);
+}
+
+void TagParserManager::parserImmediately(QList<SongMetaData *> *list)
+{
+    qDebug()<<Q_FUNC_INFO;
+    emit parserPending ();
+    for (int i=0; i<list->size (); ++i) {
+        //如果没有解析插件,则直接将相关的meta信息存储到数据库
+        if (!mPluginList.isEmpty ()) {
+            //开始解析
+            foreach (IMusicTagParser *parser, mPluginList) {
+                if (parser->parserTag (list->at (i))) {
+                    break;
+                }
+            }
+        }
+    }
+    emit parserQueueFinished ();
 }
 
 bool TagParserManager::startParserLoop()
@@ -137,7 +162,7 @@ void TagParserManager::parserItem(SongMetaData *data)
         mPlayListDAO.data ()->insertMetaData (data);
         data->deleteLater ();
     } else {
-        qDebug()<<"Warning: "<<__FUNCTION__<<" mPlayListDAO is null";
+        qWarning()<<Q_FUNC_INFO<<" mPlayListDAO is null";
     }
 
     parserNextItem ();
