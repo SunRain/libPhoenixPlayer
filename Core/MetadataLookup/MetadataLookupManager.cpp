@@ -11,6 +11,8 @@
 #include "SongMetaData.h"
 #include "SingletonPointer.h"
 #include "PluginHost.h"
+#include "Settings.h"
+#include "Util.h"
 
 namespace PhoenixPlayer {
 
@@ -21,8 +23,12 @@ MetadataLookupManager::MetadataLookupManager(QObject *parent) : QObject(parent)
 {
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mPluginLoader = PluginLoader::instance();
+    mSettings = Settings::instance ();
+    mUtil = Util::instance ();
 #else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+    mSettings = SingletonPointer<Settings>::instance ();
+    mUtil = SingletonPointer<Util>::instance ();
 #endif
     mLookupStarted = false;
 //    mBackupLookup = nullptr;
@@ -69,6 +75,13 @@ void MetadataLookupManager::lookup(SongMetaData *data,
         emit lookupFailed (data->getMeta(Common::E_Hash).toString(), type);
         return;
     }
+    if (!mSettings->fetchMetaDataMobileNetwork ()
+            && (mUtil->getNetworkType () == Util::NetworkType::TypeMobile)) {
+        qWarning()<<"Current network type is mobile type and we disabled fetch metadata here";
+        mLookupStarted = false;
+        emit queueFinished ();
+        return;
+    }
 
     SongMetaData *d = new SongMetaData(this);
     for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
@@ -91,7 +104,7 @@ void MetadataLookupManager::lookup(SongMetaData *data,
     mMutex.unlock ();
 
     qDebug()<<Q_FUNC_INFO<<" add node "<<d->getMeta (Common::E_FileName).toString ()
-              <<" list sieze "<<mWorkQueue.size ();
+              <<" list size "<<mWorkQueue.size ();
     if (!mLookupStarted) {
         mMutex.lock ();
         mLookupStarted = true;

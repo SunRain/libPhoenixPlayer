@@ -12,6 +12,7 @@ class Settings : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool autoFetchMetaData READ autoFetchMetaData WRITE setAutoFetchMetaData NOTIFY autoFetchMetaDataChanged)
+    Q_PROPERTY(bool fetchMetaDataMobileNetwork READ fetchMetaDataMobileNetwork  WRITE setFetchMetaDataMobileNetwork  NOTIFY fetchMetaDataMobileNetworkChanged)
 public:
     explicit Settings(QObject *parent = 0);
 //    static Settings *getInstance();
@@ -47,8 +48,12 @@ public:
     bool autoFetchMetaData();
     void setAutoFetchMetaData(bool autoFetch);
 
+    bool fetchMetaDataMobileNetwork();
+    void setFetchMetaDataMobileNetwork(bool fetch);
+
 signals:
     void autoFetchMetaDataChanged();
+    void fetchMetaDataMobileNetworkChanged();
 public slots:
 
 private:
@@ -59,6 +64,7 @@ private:
     QString mDefaultMusicDir;
     QString mDefaultMusicImageDir;
     bool mAutoFetchMetadata;
+    bool mFetchMetaDataMobileNetwork;
 };
 } //PhoenixPlayer
 #endif // SETTINGS_H

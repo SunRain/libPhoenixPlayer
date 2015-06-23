@@ -1,3 +1,5 @@
+#include "Util.h"
+
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QByteArray>
@@ -7,14 +9,15 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
-
-#include "Util.h"
+#include <QQmlEngine>
+#include <QNetworkAccessManager>
+#include <QNetworkConfiguration>
 
 namespace PhoenixPlayer {
 
 Util::Util(QObject *parent) : QObject(parent)
 {
-
+    mQQmlEngine = nullptr;
 }
 
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
@@ -36,6 +39,11 @@ Util *Util::instance()
 Util::~Util()
 {
 
+}
+
+void Util::setQQmlEngine(QQmlEngine *engine)
+{
+    mQQmlEngine = engine;
 }
 
 QString Util::calculateHash(const QString &str)
@@ -109,6 +117,27 @@ QStringList Util::getAddonDirList()
     QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
     list.append (QString("%1/addon").arg (dataPath));
     return list;
+}
+
+Util::NetworkType Util::getNetworkType()
+{
+    if (!mQQmlEngine)
+        return Util::NetworkType::TypeUnknown;
+
+    QNetworkConfiguration::BearerType t = mQQmlEngine->networkAccessManager ()
+            ->activeConfiguration ().bearerType ();
+//    qDebug()<<Q_FUNC_INFO<<" BearerType is "<<t<<" str "<<mQQmlEngine->networkAccessManager ()->activeConfiguration ().bearerTypeName ();
+
+    switch (t) {
+    case QNetworkConfiguration::BearerEthernet:
+        return Util::NetworkType::TypeEthernet;
+    case QNetworkConfiguration::BearerUnknown:
+        return Util::NetworkType::TypeUnknown;
+    case QNetworkConfiguration::BearerWLAN:
+        return Util::NetworkType::TypeWLAN;
+    default:
+        return Util::NetworkType::TypeMobile;
+    }
 }
 
 } //PhoenixPlayer

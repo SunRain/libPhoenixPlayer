@@ -18,6 +18,7 @@ const char *KEY_PLAY_BACKEND = "CurrentPlayBackend";
 const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
 const char *KEY_TRACE_LOG = "TraceLog";
 const char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
+const char *KEY_FETCH_METADATA_MOBILE_NETWORK = "fetchMetaDataMobileNetwork";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
@@ -50,6 +51,7 @@ Settings::Settings(QObject *parent) : QObject(parent)
     }
 
     mAutoFetchMetadata = false;
+    mFetchMetaDataMobileNetwork = false;
     checkInit ();
 }
 
@@ -222,6 +224,21 @@ void Settings::setAutoFetchMetaData(bool autoFetch)
     mSettings->setValue (KEY_AUTO_FETCH_METADATA, autoFetch);
     mSettings->sync ();
     emit autoFetchMetaDataChanged ();
+}
+
+bool Settings::fetchMetaDataMobileNetwork()
+{
+    return mFetchMetaDataMobileNetwork;
+}
+
+void Settings::setFetchMetaDataMobileNetwork(bool fetch)
+{
+    if (mFetchMetaDataMobileNetwork == fetch)
+        return;
+    mFetchMetaDataMobileNetwork = fetch;
+    mSettings->setValue (KEY_FETCH_METADATA_MOBILE_NETWORK, mFetchMetaDataMobileNetwork);
+    mSettings->sync ();
+    emit fetchMetaDataMobileNetworkChanged ();
 }
 
 void Settings::checkInit()

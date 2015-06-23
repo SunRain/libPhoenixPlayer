@@ -12,6 +12,8 @@
 
 namespace PhoenixPlayer {
 class PluginLoader;
+class Settings;
+class Util;
 namespace MetadataLookup {
 class MetadataLookupManager : public QObject
 {
@@ -56,22 +58,18 @@ private:
     void emitFinish();
     void doLookupSucceed(const QByteArray &result);
 private:
-//    QPointer<PluginLoader> mPluginLoader;
     PluginLoader *mPluginLoader;
-    //QList<ILyricsLookup *> mPluginList;
-//    QPointer<IMetadataLookup> mLookup;
     IMetadataLookup *mLookup;
-//    IMetadataLookup *mBackupLookup;
-//    QString mPreConnection;
-//    QStringList mPluginNameList;
-    QStringList mConnectList;
-//    SongMetaData *mSongMeta;
-    int mCurrentIndex;
-//    IMetadataLookup::LookupType mCurLookupType;
+    Settings *mSettings;
+    Util *mUtil;
     QList<WorkNode> mWorkQueue;
     QList<IMetadataLookup *>mPluginList;
     WorkNode mCurrentNode;
     QMutex mMutex;
+
+    QStringList mConnectList;
+
+    int mCurrentIndex;
     bool mLookupStarted;
 };
 
