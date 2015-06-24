@@ -16,7 +16,7 @@ DiskLookup::DiskLookup(QObject *parent) : QObject(parent)
     qDebug()<<Q_FUNC_INFO;
     mStopLookupFlag = false;
     mIsRunning = false;
-    mCount = 0;
+//    mCount = 0;
 }
 
 DiskLookup::~DiskLookup()
@@ -88,15 +88,15 @@ void DiskLookup::scanDir(const QString &path)
     QFileInfoList list = dir.entryInfoList ();
     qDebug()<<Q_FUNC_INFO<<"=== scanDir ["<<path<<"], entryInfoList size "<<list.size ();
     foreach (QFileInfo info, list) {
-        qDebug()<<Q_FUNC_INFO<<" find file ["<<info.absoluteFilePath ()<<"]";
+//        qDebug()<<Q_FUNC_INFO<<" find file ["<<info.absoluteFilePath ()<<"]";
         if (info.isDir ()) {
             qDebug()<<Q_FUNC_INFO<<" current is dir, add to list "<<info.absolutePath ();
             mPathList.append (info.absolutePath ());
         } else {
             QMimeType type = mQMimeDatabase.mimeTypeForFile (info);
 
-            mCount++;
-            qDebug()<<Q_FUNC_INFO<<" find count "<<mCount;
+//            mCount++;
+//            qDebug()<<Q_FUNC_INFO<<" find count "<<mCount;
 
             //TODO 虽然建议使用inherits方法来检测,但是此处我们需要所有音频文件,
             //所以直接检测mimetype 生成的字符串

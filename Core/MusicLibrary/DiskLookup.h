@@ -45,7 +45,7 @@ private:
     bool mStopLookupFlag;
     bool mIsRunning;
     QMimeDatabase mQMimeDatabase;
-    int mCount;
+//    int mCount;
 };
 
 } //MusicLibrary

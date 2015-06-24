@@ -56,7 +56,7 @@ void LocalMusicSacnner::scanLocalMusic()
 
             mDao->beginTransaction ();
             for (int i=0; i<mMetaDataList.size (); ++i) {
-                qDebug()<<Q_FUNC_INFO<<" insert ("<<i<<") ["<<mMetaDataList.at (i)->toString ()<<"]";
+//                qDebug()<<Q_FUNC_INFO<<" insert ("<<i<<") ["<<mMetaDataList.at (i)->toString ()<<"]";
                 mDao->insertMetaData (mMetaDataList.at (i));
             }
             mDao->commitTransaction ();
