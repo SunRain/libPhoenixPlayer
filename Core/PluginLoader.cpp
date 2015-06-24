@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QMutex>
+#include <QDate>
 
 #include "PluginLoader.h"
 #include "Backend/IPlayBackend.h"
