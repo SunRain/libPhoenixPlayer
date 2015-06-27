@@ -67,11 +67,6 @@ LastFmLookup::~LastFmLookup()
     qDebug()<<__FUNCTION__;
 }
 
-QString LastFmLookup::getPluginName()
-{
-    return QString(PLUGIN_NAME);
-}
-
 bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
 {
     switch (type) {
@@ -91,7 +86,7 @@ bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
 //http://ws.audioscrobbler.com/2.0/?method=album.search&album=F.I.R&api_key=625fd47b3b685af19315cc3a1aa5920a&format=json
 void LastFmLookup::lookup(SongMetaData *meta)
 {
-    qDebug()<<"====> "<<__FUNCTION__<<" <====";
+    qDebug()<<"====> "<<Q_FUNC_INFO<<" <====";
 
 #if 0
     emit lookupFailed ();

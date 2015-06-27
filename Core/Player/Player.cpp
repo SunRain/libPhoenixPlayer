@@ -12,7 +12,8 @@
 #include "Backend/IPlayBackend.h"
 #include "PluginLoader.h"
 #include "MetadataLookup/IMetadataLookup.h"
-#include "MetadataLookup/MetadataLookupManager.h"
+//#include "MetadataLookup/MetadataLookupManager.h"
+#include "MetadataLookup/MetadataLookupMgr.h"
 #include "SongMetaData.h"
 #include "MusicLibrary/IPlayListDAO.h"
 
@@ -42,7 +43,7 @@ Player::Player(QObject *parent)
     mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
 #endif
 
-    mMetaLookupManager = nullptr;//new MetadataLookupManager(this);
+//    mMetaLookupManager = nullptr;//new MetadataLookupManager(this);
     mPlayQueue = QStringList();
     mPlayMode = Common::PlayModeOrder;
 
@@ -52,10 +53,10 @@ Player::Player(QObject *parent)
 
 Player::~Player()
 {
-    qDebug()<<"[Player]"<<__FUNCTION__;
-    if (mMetaLookupManager)
-        delete mMetaLookupManager;
-    qDebug()<<"[Player] after "<<__FUNCTION__;
+//    qDebug()<<"[Player]"<<__FUNCTION__;
+//    if (mMetaLookupManager)
+//        delete mMetaLookupManager;
+//    qDebug()<<"[Player] after "<<__FUNCTION__;
 }
 
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
@@ -229,67 +230,70 @@ void Player::setMusicLibraryManager()
     });
 }
 
-void Player::setMetaLookupManager()
-{
-    if (mMetaLookupManager == nullptr) {
-        mMetaLookupManager = new MetadataLookupManager(this);
-        connect (mMetaLookupManager,
-                 &MetadataLookupManager::queueFinished,
-                 [this] {
-            qDebug()<<"========>>> queueFinished <<<<========";
-            delete mMetaLookupManager;
-            mMetaLookupManager = nullptr;
-        });
+//void Player::setMetaLookupManager()
+//{
+//    if (mMetaLookupManager == nullptr) {
+//        mMetaLookupManager = new MetadataLookupMgr(this);//new MetadataLookupManager(this);
+//        connect (mMetaLookupManager,
+////                 &MetadataLookupManager::queueFinished,
+//                 &MetadataLookupMgr::queueFinished,
+//                 [this] {
+//            qDebug()<<"========>>> queueFinished <<<<========";
+//            delete mMetaLookupManager;
+//            mMetaLookupManager = nullptr;
+//        });
 
-        connect (mMetaLookupManager,
-                 &MetadataLookupManager::lookupFailed,
-                 [this] (const QString &songHash, IMetadataLookup::LookupType type){
-            emitMetadataLookupResult (type, songHash, false);
-        });
+//        connect (mMetaLookupManager,
+////                 &MetadataLookupManager::lookupFailed,
+//                 &MetadataLookupMgr::lookupFailed,
+//                 [this] (const QString &songHash, IMetadataLookup::LookupType type){
+//            emitMetadataLookupResult (type, songHash, false);
+//        });
 
-        connect (mMetaLookupManager,
-                 &MetadataLookupManager::lookupSucceed,
-                 [this]
-                 (QString songHash,
-                 QByteArray result,
-                 IMetadataLookup::LookupType type) {
-            SongMetaData meta;
-            meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
-            switch (type) {
-            case IMetadataLookup::TypeAlbumDate:
-                meta.setMeta (Common::E_AlbumYear, result);
-                break;
-            case IMetadataLookup::TypeAlbumDescription:
-                meta.setMeta (Common::E_AlbumDescription, result);
-                break;
-            case IMetadataLookup::TypeAlbumImage:
-                meta.setMeta (Common::E_AlbumImageUrl, result);
-                break;
-            case  IMetadataLookup::TypeArtistDescription:
-                meta.setMeta (Common::E_ArtistDescription, result);
-                break;
-            case IMetadataLookup::TypeArtistImage:
-                meta.setMeta (Common::E_ArtistImageUri, result);
-                break;
-            case IMetadataLookup::TypeLyrics:
-                meta.setMeta (Common::E_Lyrics, result);
-                break;
-            case IMetadataLookup::TypeTrackDescription:
-                meta.setMeta (Common::E_SongDescription, result);
-                break;
-            default:
-                break;
-            }
-            //TODO 也许通过MusicLibraryManager来管理会更好
-            if (PointerValid (EPointer::PPluginLoader)) {
-                MusicLibrary::IPlayListDAO *dao = mPluginLoader->getCurrentPlayListDAO ();
-                if (dao)
-                    dao->updateMetaData (&meta, true);
-            }
-            emitMetadataLookupResult (type, songHash, true);
-        });
-    }
-}
+//        connect (mMetaLookupManager,
+////                 &MetadataLookupManager::lookupSucceed,
+//                 &MetadataLookupMgr::lookupSucceed,
+//                 [this]
+//                 (QString songHash,
+//                 QByteArray result,
+//                 IMetadataLookup::LookupType type) {
+//            SongMetaData meta;
+//            meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
+//            switch (type) {
+//            case IMetadataLookup::TypeAlbumDate:
+//                meta.setMeta (Common::E_AlbumYear, result);
+//                break;
+//            case IMetadataLookup::TypeAlbumDescription:
+//                meta.setMeta (Common::E_AlbumDescription, result);
+//                break;
+//            case IMetadataLookup::TypeAlbumImage:
+//                meta.setMeta (Common::E_AlbumImageUrl, result);
+//                break;
+//            case  IMetadataLookup::TypeArtistDescription:
+//                meta.setMeta (Common::E_ArtistDescription, result);
+//                break;
+//            case IMetadataLookup::TypeArtistImage:
+//                meta.setMeta (Common::E_ArtistImageUri, result);
+//                break;
+//            case IMetadataLookup::TypeLyrics:
+//                meta.setMeta (Common::E_Lyrics, result);
+//                break;
+//            case IMetadataLookup::TypeTrackDescription:
+//                meta.setMeta (Common::E_SongDescription, result);
+//                break;
+//            default:
+//                break;
+//            }
+//            //TODO 也许通过MusicLibraryManager来管理会更好
+//            if (PointerValid (EPointer::PPluginLoader)) {
+//                MusicLibrary::IPlayListDAO *dao = mPluginLoader->getCurrentPlayListDAO ();
+//                if (dao)
+//                    dao->updateMetaData (&meta, true);
+//            }
+//            emitMetadataLookupResult (type, songHash, true);
+//        });
+//    }
+//}
 
 void Player::setPlayMode(Common::PlayMode mode)
 {
@@ -429,40 +433,40 @@ QString Player::backwardTrackHash(bool jumpToLast)
     return mMusicLibraryManager->preSong (false);
 }
 
-void Player::lookupLyric(const QString &songHash)
-{
-    doMetadataLookup (songHash, IMetadataLookup::TypeLyrics);
-}
+//void Player::lookupLyric(const QString &songHash)
+//{
+//    doMetadataLookup (songHash, IMetadataLookup::TypeLyrics);
+//}
 
-void Player::lookupAlbumImage(const QString &songHash)
-{
-    doMetadataLookup (songHash, IMetadataLookup::TypeAlbumImage);
-}
+//void Player::lookupAlbumImage(const QString &songHash)
+//{
+//    doMetadataLookup (songHash, IMetadataLookup::TypeAlbumImage);
+//}
 
-void Player::lookupAlbumDescription(const QString &songHash)
-{
-    doMetadataLookup (songHash, IMetadataLookup::TypeAlbumDescription);
-}
+//void Player::lookupAlbumDescription(const QString &songHash)
+//{
+//    doMetadataLookup (songHash, IMetadataLookup::TypeAlbumDescription);
+//}
 
-void Player::lookupAlbumDate(const QString &songHash)
-{
-    doMetadataLookup (songHash, IMetadataLookup::TypeAlbumDate);
-}
+//void Player::lookupAlbumDate(const QString &songHash)
+//{
+//    doMetadataLookup (songHash, IMetadataLookup::TypeAlbumDate);
+//}
 
-void Player::lookupArtistImage(const QString &songHash)
-{
-    doMetadataLookup (songHash, IMetadataLookup::TypeArtistImage);
-}
+//void Player::lookupArtistImage(const QString &songHash)
+//{
+//    doMetadataLookup (songHash, IMetadataLookup::TypeArtistImage);
+//}
 
-void Player::lookupArtistDescription(const QString &songHash)
-{
-    doMetadataLookup (songHash, IMetadataLookup::TypeArtistDescription);
-}
+//void Player::lookupArtistDescription(const QString &songHash)
+//{
+//    doMetadataLookup (songHash, IMetadataLookup::TypeArtistDescription);
+//}
 
-void Player::lookupTrackDescription(const QString &songHash)
-{
-    doMetadataLookup (songHash, IMetadataLookup::TypeTrackDescription);
-}
+//void Player::lookupTrackDescription(const QString &songHash)
+//{
+//    doMetadataLookup (songHash, IMetadataLookup::TypeTrackDescription);
+//}
 
 void Player::togglePlayPause()
 {
@@ -597,9 +601,9 @@ bool Player::PointerValid(Player::EPointer pointer)
     case EPointer::PMusicLibraryManager:
         valid = (mMusicLibraryManager != nullptr);
         break;
-    case EPointer::PPLyricsManager:
-        valid = (mMetaLookupManager != nullptr);
-        break;
+//    case EPointer::PPLyricsManager:
+//        valid = (mMetaLookupManager != nullptr);
+//        break;
     default:
         break;
     }
@@ -623,92 +627,92 @@ int Player::getSongLength(const QString &hash)
     return 0;
 }
 
-void Player::doMetadataLookup(const QString &songHash,
-                            IMetadataLookup::LookupType type)
-{
-    setMetaLookupManager ();
+//void Player::doMetadataLookup(const QString &songHash,
+//                            IMetadataLookup::LookupType type)
+//{
+//    setMetaLookupManager ();
 
-    SongMetaData data;
-    QString hash = songHash;
-    if (hash.isEmpty ()) {
-        qDebug()<<__FUNCTION__<<"hash is empty";
-        hash = mMusicLibraryManager->playingSongHash ();
-    }
+//    SongMetaData data;
+//    QString hash = songHash;
+//    if (hash.isEmpty ()) {
+//        qDebug()<<__FUNCTION__<<"hash is empty";
+//        hash = mMusicLibraryManager->playingSongHash ();
+//    }
 
-    for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
-         i < (int)Common::SongMetaTags::E_LastFlag;
-         ++i) {
-        QString str = mMusicLibraryManager->queryOne(hash, Common::SongMetaTags(i), true);
-        if (str.isEmpty())
-            data.setMeta (Common::SongMetaTags(i), QVariant());
-        else
-            data.setMeta (Common::SongMetaTags(i), str);
+//    for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
+//         i < (int)Common::SongMetaTags::E_LastFlag;
+//         ++i) {
+//        QString str = mMusicLibraryManager->queryOne(hash, Common::SongMetaTags(i), true);
+//        if (str.isEmpty())
+//            data.setMeta (Common::SongMetaTags(i), QVariant());
+//        else
+//            data.setMeta (Common::SongMetaTags(i), str);
 
-    }
-    mMetaLookupManager->lookup (&data, type);
-}
+//    }
+//    mMetaLookupManager->lookup (&data, type);
+//}
 
-void Player::emitMetadataLookupResult(IMetadataLookup::LookupType type, const QString &hash, bool succeed)
-{
-    //TODO 添加其他类型的emit
-    switch (type) {
-    case IMetadataLookup::TypeLyrics: {
-        if (succeed)
-            emit lookupLyricSucceed (hash);
-        else
-            emit lookupLyricFailed (hash);
-        break;
-    }
-    case IMetadataLookup::TypeAlbumDescription: {
-        if (succeed)
-            emit lookupAlbumDescriptionSucceed (hash);
-        else
-            emit lookupAlbumDescriptionFailed (hash);
-        break;
-    }
-    case IMetadataLookup::TypeAlbumImage: {
-        if (succeed)
-            emit lookupAlbumImageSucceed (hash);
-        else
-            emit lookupAlbumImageFailed (hash);
-        break;
-    }
-    case IMetadataLookup::TypeAlbumDate: {
-        if (succeed)
-            emit lookupAlbumDateSucceed (hash);
-        else
-            emit lookupAlbumDateFailed (hash);
-        break;
-    }
-    case IMetadataLookup::TypeArtistDescription: {
-        if (succeed)
-            emit lookupArtistDescriptionSucceed (hash);
-        else
-            emit lookupArtistDescriptionFailed (hash);
-        break;
-    }
-    case IMetadataLookup::TypeArtistImage: {
-        if (succeed)
-            emit lookupArtistImageSucceed (hash);
-        else
-            emit lookupArtistImageFailed (hash);
-        break;
-    }
-    case IMetadataLookup::TypeTrackDescription: {
-        if (succeed)
-            emit lookupTrackDescriptionSucceed (hash);
-        else
-            emit lookupTrackDescriptionFailed (hash);
-        break;
-    }
-    case IMetadataLookup::TypeUndefined:
-    default: {
-        if (!succeed)
-            emit metadataLookupFailed (hash);
-        break;
-    }
-    }
-}
+//void Player::emitMetadataLookupResult(IMetadataLookup::LookupType type, const QString &hash, bool succeed)
+//{
+//    //TODO 添加其他类型的emit
+//    switch (type) {
+//    case IMetadataLookup::TypeLyrics: {
+//        if (succeed)
+//            emit lookupLyricSucceed (hash);
+//        else
+//            emit lookupLyricFailed (hash);
+//        break;
+//    }
+//    case IMetadataLookup::TypeAlbumDescription: {
+//        if (succeed)
+//            emit lookupAlbumDescriptionSucceed (hash);
+//        else
+//            emit lookupAlbumDescriptionFailed (hash);
+//        break;
+//    }
+//    case IMetadataLookup::TypeAlbumImage: {
+//        if (succeed)
+//            emit lookupAlbumImageSucceed (hash);
+//        else
+//            emit lookupAlbumImageFailed (hash);
+//        break;
+//    }
+//    case IMetadataLookup::TypeAlbumDate: {
+//        if (succeed)
+//            emit lookupAlbumDateSucceed (hash);
+//        else
+//            emit lookupAlbumDateFailed (hash);
+//        break;
+//    }
+//    case IMetadataLookup::TypeArtistDescription: {
+//        if (succeed)
+//            emit lookupArtistDescriptionSucceed (hash);
+//        else
+//            emit lookupArtistDescriptionFailed (hash);
+//        break;
+//    }
+//    case IMetadataLookup::TypeArtistImage: {
+//        if (succeed)
+//            emit lookupArtistImageSucceed (hash);
+//        else
+//            emit lookupArtistImageFailed (hash);
+//        break;
+//    }
+//    case IMetadataLookup::TypeTrackDescription: {
+//        if (succeed)
+//            emit lookupTrackDescriptionSucceed (hash);
+//        else
+//            emit lookupTrackDescriptionFailed (hash);
+//        break;
+//    }
+//    case IMetadataLookup::TypeUndefined:
+//    default: {
+//        if (!succeed)
+//            emit metadataLookupFailed (hash);
+//        break;
+//    }
+//    }
+//}
 
 void Player::doPlayByPlayMode()
 {

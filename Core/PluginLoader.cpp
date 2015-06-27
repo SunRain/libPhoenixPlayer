@@ -250,6 +250,7 @@ QList<PluginHost *> PluginLoader::getPluginHostList(Common::PluginType type)
             list.append (host);
         }
     }
+    qDebug()<<Q_FUNC_INFO<<QString("Host num of type [%1] is [%2]").arg (type).arg (list.size ());
     return list;
 }
 

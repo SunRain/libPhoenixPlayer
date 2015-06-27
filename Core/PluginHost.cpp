@@ -109,6 +109,7 @@ bool PluginHost::isLoaded()
 
 void PluginHost::unLoad()
 {
+    qDebug()<<Q_FUNC_INFO;
     if (!mPluginLoader)
         mPluginLoader = new QPluginLoader(mLibraryFile, this);
     if (mPluginLoader->isLoaded ()) {
@@ -135,6 +136,7 @@ bool PluginHost::isValid()
 
 QObject *PluginHost::instance()
 {
+    qDebug()<<Q_FUNC_INFO;
     if (!this->isLoaded ()) {
         mPluginObject = mPluginLoader->instance ();
     } else {

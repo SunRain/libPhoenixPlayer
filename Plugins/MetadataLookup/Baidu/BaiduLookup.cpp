@@ -121,11 +121,6 @@ QString BaiduLookup::getUrl()
    return url.toString ();
 }
 
-QString BaiduLookup::getPluginName()
-{
-    return QString(PLUGIN_NAME);
-}
-
 void BaiduLookup::lookup(SongMetaData *meta)
 {
     if (meta == nullptr) {

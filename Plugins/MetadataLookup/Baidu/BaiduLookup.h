@@ -12,8 +12,6 @@ namespace MetadataLookup {
 class BaseNetworkLookup;
 namespace BaiduLookup {
 
-#define PLUGIN_NAME "BaiduLyricsLookup"
-
 class BaiduLookup : public IMetadataLookup
 {
     Q_OBJECT
@@ -28,7 +26,6 @@ protected:
 
      // ILyricsLookup interface
 public:
-    QString getPluginName();
     void lookup(SongMetaData *meta);
     bool supportLookup(LookupType type);
 private:

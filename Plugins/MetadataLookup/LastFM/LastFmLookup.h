@@ -44,7 +44,6 @@ public:
 
     // IMetadataLookup interface
 public:
-    QString getPluginName();
     bool supportLookup(LookupType type);
     void lookup(SongMetaData *meta);
 
@@ -62,7 +61,6 @@ private:
     QString formatStr(const QString &in);
 private:
     BaseNetworkLookup *mNetworkLookup;
-//    SongMetaData *mSongMeta;
 };
 
 } //LastFmLookup

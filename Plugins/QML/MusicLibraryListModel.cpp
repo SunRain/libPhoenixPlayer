@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include "MusicLibrary/MusicLibraryManager.h"
+#include "MetadataLookup/MetadataLookupMgrWrapper.h"
 #include "Common.h"
 #include "Util.h"
 #include "Player/Player.h"
@@ -13,6 +14,7 @@
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;
+using namespace MetadataLookup;
 
 namespace QmlPlugin {
 
@@ -23,12 +25,11 @@ MusicLibraryListModel::MusicLibraryListModel(QAbstractListModel *parent) :
 {
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mMusicLibraryManager = MusicLibraryManager::instance();
-    mPlayer = Player::instance ();
+    mLookupMgr = MetadataLookupMgrWrapper::instance ();
 #else
     mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
-    mPlayer = SingletonPointer<Player>::instance ();
+    mLookupMgr = SingletonPointer<MetadataLookupMgrWrapper>::instance ();
 #endif
-
     mLimitNum = -1;
     mAutoFetchMetadata = false;
 }
@@ -142,7 +143,7 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     case ModelRoles::RoleAlbumImageUrl: {
         str = mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl, true);
         if (str.isEmpty () && mAutoFetchMetadata)
-            mPlayer->lookupAlbumImage (hash);
+            mLookupMgr->lookupAlbumImage (hash);
         return str;
     }
     case ModelRoles::RoleAlbumName: {
@@ -151,7 +152,7 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     case ModelRoles::RoleArtistImageUri: {
         str = mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri, true);
         if (str.isEmpty () && mAutoFetchMetadata)
-            mPlayer->lookupArtistImage (hash);
+            mLookupMgr->lookupArtistImage (hash);
         return str;
     }
     case ModelRoles::RoleArtistName:
@@ -192,8 +193,8 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     case ModelRoles::RoleTrackImageUri: {
         str = mMusicLibraryManager->querySongImageUri(hash);
         if (str.isEmpty () && mAutoFetchMetadata) {
-            mPlayer->lookupAlbumImage (hash);
-            mPlayer->lookupArtistImage (hash);
+            mLookupMgr->lookupAlbumImage (hash);
+            mLookupMgr->lookupArtistImage (hash);
         }
         return str;
     }
@@ -235,7 +236,7 @@ void MusicLibraryListModel::clear()
 void MusicLibraryListModel::appendToModel(int limitNum)
 {
     if (mSongHashList.isEmpty()) {
-        qDebug()<<__FUNCTION__<<" hash list is empty";
+        qDebug()<<Q_FUNC_INFO<<" hash list is empty";
         return;
     }
 

@@ -25,7 +25,8 @@ class MusicLibraryManager;
 }
 
 namespace MetadataLookup {
-class MetadataLookupManager;
+//class MetadataLookupManager;
+class MetadataLookupMgr;
 }
 
 class Player : public QObject
@@ -84,24 +85,24 @@ public:
     ///
     Q_INVOKABLE QString backwardTrackHash(bool jumpToLast = true);
 
-    ///
-    /// \brief lookupLyric 搜索lyrics歌词
-    /// \param songHash 需要搜索的歌曲hash, 空值为当前播放的歌曲
-    ///
-    Q_INVOKABLE void lookupLyric(const QString &songHash);
-    Q_INVOKABLE void lookupAlbumImage(const QString &songHash);
-    Q_INVOKABLE void lookupAlbumDescription(const QString &songHash);
-    Q_INVOKABLE void lookupAlbumDate(const QString &songHash);
-    Q_INVOKABLE void lookupArtistImage(const QString &songHash);
-    Q_INVOKABLE void lookupArtistDescription(const QString &songHash);
-    Q_INVOKABLE void lookupTrackDescription(const QString &songHash);
+//    ///
+//    /// \brief lookupLyric 搜索lyrics歌词
+//    /// \param songHash 需要搜索的歌曲hash, 空值为当前播放的歌曲
+//    ///
+//    Q_INVOKABLE void lookupLyric(const QString &songHash);
+//    Q_INVOKABLE void lookupAlbumImage(const QString &songHash);
+//    Q_INVOKABLE void lookupAlbumDescription(const QString &songHash);
+//    Q_INVOKABLE void lookupAlbumDate(const QString &songHash);
+//    Q_INVOKABLE void lookupArtistImage(const QString &songHash);
+//    Q_INVOKABLE void lookupArtistDescription(const QString &songHash);
+//    Q_INVOKABLE void lookupTrackDescription(const QString &songHash);
 
 protected:
     enum EPointer {
         PNULL = 0x0,
         PPluginLoader,
         PPlaybackend,
-        PPLyricsManager,
+//        PPLyricsManager,
         PMusicLibraryManager
     };
 signals:
@@ -110,28 +111,28 @@ signals:
     void playModeChanged(Common::PlayMode mode);
     void playModeChanged (int mode);
 
-    void lookupLyricSucceed(QString songHash);
-    void lookupLyricFailed(QString songHash);
+//    void lookupLyricSucceed(QString songHash);
+//    void lookupLyricFailed(QString songHash);
 
-    void lookupAlbumImageSucceed(QString songHash);
-    void lookupAlbumImageFailed(QString songHash);
+//    void lookupAlbumImageSucceed(QString songHash);
+//    void lookupAlbumImageFailed(QString songHash);
 
-    void lookupAlbumDescriptionSucceed(QString songHash);
-    void lookupAlbumDescriptionFailed(QString songHash);
+//    void lookupAlbumDescriptionSucceed(QString songHash);
+//    void lookupAlbumDescriptionFailed(QString songHash);
 
-    void lookupAlbumDateSucceed(QString songHash);
-    void lookupAlbumDateFailed(QString songHash);
+//    void lookupAlbumDateSucceed(QString songHash);
+//    void lookupAlbumDateFailed(QString songHash);
 
-    void lookupArtistImageSucceed(QString songHash);
-    void lookupArtistImageFailed(QString songHash);
+//    void lookupArtistImageSucceed(QString songHash);
+//    void lookupArtistImageFailed(QString songHash);
 
-    void lookupArtistDescriptionSucceed(QString songHash);
-    void lookupArtistDescriptionFailed(QString songHash);
+//    void lookupArtistDescriptionSucceed(QString songHash);
+//    void lookupArtistDescriptionFailed(QString songHash);
 
-    void lookupTrackDescriptionSucceed(QString songHash);
-    void lookupTrackDescriptionFailed(QString songHash);
+//    void lookupTrackDescriptionSucceed(QString songHash);
+//    void lookupTrackDescriptionFailed(QString songHash);
 
-    void metadataLookupFailed(QString songHash);
+//    void metadataLookupFailed(QString songHash);
 
     ///
     /// \brief trackChanged 当切换歌曲的时候发送此信号，慢于MusicLibraryManager的playingSongChanged信号
@@ -189,17 +190,17 @@ private:
 
     void setPluginLoader();
     void setMusicLibraryManager();
-    void setMetaLookupManager();
+//    void setMetaLookupManager();
 
     bool PointerValid(EPointer pointer = EPointer::PNULL);
 
     int getSongLength(const QString &hash);
 
-    void doMetadataLookup(const QString &songHash,
-                        MetadataLookup::IMetadataLookup::LookupType type);
-    void emitMetadataLookupResult(MetadataLookup::IMetadataLookup::LookupType type,
-                                  const QString &hash,
-                                  bool succeed);
+//    void doMetadataLookup(const QString &songHash,
+//                        MetadataLookup::IMetadataLookup::LookupType type);
+//    void emitMetadataLookupResult(MetadataLookup::IMetadataLookup::LookupType type,
+//                                  const QString &hash,
+//                                  bool succeed);
 
     void doPlayByPlayMode();
 
@@ -208,7 +209,8 @@ private:
     Settings *mSettings;
     PluginLoader *mPluginLoader;
     MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
-    MetadataLookup::MetadataLookupManager *mMetaLookupManager;
+//    MetadataLookup::MetadataLookupManager *mMetaLookupManager;
+//    MetadataLookup::MetadataLookupMgr *mMetaLookupManager;
 
     QPointer<PlayBackend::IPlayBackend> mPlayBackend;
 

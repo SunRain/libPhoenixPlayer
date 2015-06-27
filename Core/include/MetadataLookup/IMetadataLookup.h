@@ -27,8 +27,6 @@ public:
 
     virtual ~IMetadataLookup();
 
-    virtual QString getPluginName() = 0;
-
     ///
     /// \brief supportLookup 查询当前插件是否支持某一个枚举类的查询
     /// \param type

@@ -13,6 +13,9 @@ class Player;
 namespace MusicLibrary {
 class MusicLibraryManager;
 }
+namespace MetadataLookup {
+class MetadataLookupMgrWrapper;
+}
 
 namespace QmlPlugin {
 
@@ -88,7 +91,8 @@ private:
 private:
     QStringList mSongHashList;
     MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
-    Player *mPlayer;
+//    Player *mPlayer;
+    MetadataLookup::MetadataLookupMgrWrapper *mLookupMgr;
     int mLimitNum;
     bool mAutoFetchMetadata;
 };
