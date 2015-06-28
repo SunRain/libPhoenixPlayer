@@ -24,20 +24,20 @@ LastFmLookup::LastFmLookup(QObject *parent)
     mNetworkLookup = new BaseNetworkLookup(this);
 
     connect (mNetworkLookup, &BaseNetworkLookup::failed,
-             [this](const QUrl &requestedUrl, const QString &error) {
+             [&](const QUrl &requestedUrl, const QString &error) {
         Q_UNUSED(requestedUrl);
-        qDebug()<<__FUNCTION__<<"lookup failed "<<error;
+        qDebug()<<Q_FUNC_INFO<<"lookup failed "<<error;
         emit lookupFailed ();
     });
 
     connect (mNetworkLookup, &BaseNetworkLookup::succeed,
-             [this](const QUrl &requestedUrl, const QByteArray &replyData) {
+             [&](const QUrl &requestedUrl, const QByteArray &replyData) {
         Q_UNUSED(requestedUrl);
 
-        qDebug()<<replyData;
+        qDebug()<<Q_FUNC_INFO<<replyData;
 
         if (replyData.isEmpty ()) {
-            qDebug()<<__FUNCTION__<<"replyData is empty ";
+            qDebug()<<Q_FUNC_INFO<<"replyData is empty ";
             emit lookupFailed ();
             return;
         }
@@ -64,7 +64,7 @@ LastFmLookup::LastFmLookup(QObject *parent)
 
 LastFmLookup::~LastFmLookup()
 {
-    qDebug()<<__FUNCTION__;
+    qDebug()<<Q_FUNC_INFO;
 }
 
 bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
@@ -77,6 +77,7 @@ bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
     case LookupType::TypeArtistImage:
     case LookupType::TypeTrackDescription:
     case LookupType::TypeUndefined:
+    case LookupType::TypeLyrics:
         return true;
     default:
         return false;
@@ -148,11 +149,11 @@ void LastFmLookup::lookup(SongMetaData *meta)
     }
     default:
         emit lookupFailed ();
-        break;
+        return;
     }
     url.setQuery (query);
 
-    qDebug()<<__FUNCTION__<<" URL "<<url <<" network is null "<<(mNetworkLookup == nullptr);
+    qDebug()<<Q_FUNC_INFO<<" URL "<<url <<" network is null "<<(mNetworkLookup == nullptr);
 
     mNetworkLookup->setUrl (url.toString ());
     mNetworkLookup->setRequestType (BaseNetworkLookup::RequestGet);
@@ -278,8 +279,6 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
         else
             emit lookupFailed ();
     }
-
-
 }
 
 void LastFmLookup::parseArtisData(const QByteArray &qba)
@@ -379,7 +378,6 @@ QString LastFmLookup::formatStr(const QString &in)
     s = s.replace(' ',"+");
     return s;
 }
-
 
 } //LastFmLookup
 } //MetadataLookup

@@ -32,6 +32,8 @@ signals:
     void failed(const QUrl &requestedUrl, const QString &error);
 public slots:
 
+private slots:
+    void doTimeout();
 private:
     void readReplyData();
 private:

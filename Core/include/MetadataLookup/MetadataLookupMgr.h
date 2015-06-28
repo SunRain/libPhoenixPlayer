@@ -44,6 +44,7 @@ public slots:
 private slots:
     void nextLookupPlugin();
     void doLookupSucceed(const QByteArray &result);
+    void doLookupFailed();
     void destructor();
 private:
     //在destructorState里面使用一个事件循环，来判断是否处在卸载插件的状态
@@ -62,7 +63,7 @@ private:
     WorkNode mCurrentNode;
 
     QList<IMetadataLookup *> mLookupList;
-    QList<PluginHost *> mHostList;
+//    QList<PluginHost *> mHostList;
 
     QMutex mWorkQueueLock;
     QMutex mStartLookupLock;

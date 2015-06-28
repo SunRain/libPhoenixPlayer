@@ -18,11 +18,9 @@ MetadataLookupMgrWrapper::MetadataLookupMgrWrapper(QObject *parent) :
 {
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mPluginLoader = PluginLoader::instance();
-//    mSettings = Settings::instance();
     mMusicLibraryManager = MusicLibraryManager::instance();
 #else
     mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-//    mSettings = SingletonPointer<Settings>::instance ();
     mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
 #endif
 
@@ -33,59 +31,11 @@ MetadataLookupMgrWrapper::MetadataLookupMgrWrapper(QObject *parent) :
     connect (mLookupMgr, &MetadataLookupMgr::lookupSucceed,
              this, &MetadataLookupMgrWrapper::doLookupSucceed);
 
-//    connect (mLookupMgr,
-//             &MetadataLookupMgr::queueFinished,
-//             [this] {
-//        qDebug()<<Q_FUNC_INFO<<"========>>> queueFinished <<<<========";
-////        delete mLookupMgr;
-////        mLookupMgr = nullptr;
-//    });
-
-//    connect (mLookupMgr, &MetadataLookupMgr::lookupFailed,
-//             [&] (const QString &songHash, IMetadataLookup::LookupType type){
-////        emitMetadataLookupResult (type, songHash, false);
-//    });
-
-//    connect (mLookupMgr, &MetadataLookupMgr::lookupSucceed,
-//             [&]
-//             (const QString &songHash,
-//             const QByteArray &result,
-//             const IMetadataLookup::LookupType &type) {
-//        SongMetaData meta;
-//        meta.setMeta (Common::SongMetaTags::E_Hash, songHash);
-//        switch (type) {
-//        case IMetadataLookup::TypeAlbumDate:
-//            meta.setMeta (Common::E_AlbumYear, result);
-//            break;
-//        case IMetadataLookup::TypeAlbumDescription:
-//            meta.setMeta (Common::E_AlbumDescription, result);
-//            break;
-//        case IMetadataLookup::TypeAlbumImage:
-//            meta.setMeta (Common::E_AlbumImageUrl, result);
-//            break;
-//        case  IMetadataLookup::TypeArtistDescription:
-//            meta.setMeta (Common::E_ArtistDescription, result);
-//            break;
-//        case IMetadataLookup::TypeArtistImage:
-//            meta.setMeta (Common::E_ArtistImageUri, result);
-//            break;
-//        case IMetadataLookup::TypeLyrics:
-//            meta.setMeta (Common::E_Lyrics, result);
-//            break;
-//        case IMetadataLookup::TypeTrackDescription:
-//            meta.setMeta (Common::E_SongDescription, result);
-//            break;
-//        default:
-//            break;
-//        }
-//        //TODO 也许通过MusicLibraryManager来管理会更好
-//        if (PointerValid (EPointer::PPluginLoader)) {
-//            MusicLibrary::IPlayListDAO *dao = mPluginLoader->getCurrentPlayListDAO ();
-//            if (dao)
-//                dao->updateMetaData (&meta, true);
-//        }
-//        emitMetadataLookupResult (type, songHash, true);
-//    });
+    connect (mLookupMgr,
+             &MetadataLookupMgr::queueFinished,
+             [&] {
+        qDebug()<<Q_FUNC_INFO<<"========>>> queueFinished <<<<========";
+    });
 }
 
 MetadataLookupMgrWrapper::~MetadataLookupMgrWrapper()
@@ -100,11 +50,14 @@ MetadataLookupMgrWrapper *MetadataLookupMgrWrapper::instance()
     static QScopedPointer<MetadataLookupMgrWrapper> scp;
     if (Q_UNLIKELY(scp.isNull())) {
         mutex.lock();
+        qDebug()<<Q_FUNC_INFO<<"==== start new";
         scp.reset(new MetadataLookupMgrWrapper(0));
         mutex.unlock();
     }
+    qDebug()<<Q_FUNC_INFO<<"==== return old";
     return scp.data();
 }
+#endif
 
 void MetadataLookupMgrWrapper::lookupLyric(const QString &songHash)
 {
@@ -192,6 +145,8 @@ void MetadataLookupMgrWrapper::doLookupFailed(const QString &songHash,
 void MetadataLookupMgrWrapper::doLookupSucceed(const QString &songHash, const QByteArray &result,
                                                const IMetadataLookup::LookupType &type)
 {
+    qDebug()<<Q_FUNC_INFO;
+
     SongMetaData d;
     d.setMeta (Common::SongMetaTags::E_Hash, songHash);
 
@@ -222,6 +177,7 @@ void MetadataLookupMgrWrapper::doLookupSucceed(const QString &songHash, const QB
     }
 
     if (mPluginLoader) {
+        qDebug()<<Q_FUNC_INFO<<"had mPluginLoader";
         IPlayListDAO *dao = mPluginLoader->getCurrentPlayListDAO ();
         if (dao)
             dao->updateMetaData (&d, true);
@@ -271,6 +227,7 @@ void MetadataLookupMgrWrapper::doLookupByDetail(const QString &uuid, const QStri
 void MetadataLookupMgrWrapper::emitResult(MetadataLookup::IMetadataLookup::LookupType type,
                                           const QString &hash, const QString &result, bool succeed)
 {
+    qDebug()<<Q_FUNC_INFO;
     //TODO 添加其他类型的emit
     switch (type) {
     case IMetadataLookup::TypeLyrics: {
@@ -330,17 +287,5 @@ void MetadataLookupMgrWrapper::emitResult(MetadataLookup::IMetadataLookup::Looku
     }
     }
 }
-
-
-
-
-
-
-
-#endif
-
-
-
-
 } //MetadataLookup
 } //PhoenixPlayer

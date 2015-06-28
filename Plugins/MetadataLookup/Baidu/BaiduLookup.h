@@ -6,6 +6,7 @@
 #include "MetadataLookup/IMetadataLookup.h"
 
 class QTextCodec;
+class QByteArray;
 namespace PhoenixPlayer{
 class SongMetaData;
 namespace MetadataLookup {
@@ -21,18 +22,18 @@ public:
     BaiduLookup(QObject *parent = 0);
     virtual ~BaiduLookup();
 
-protected:
-    QString getUrl();
-
      // ILyricsLookup interface
 public:
     void lookup(SongMetaData *meta);
     bool supportLookup(LookupType type);
+private slots:
+    void dlFailed(const QUrl &requestedUrl, const QString &error);
+    void dlSucceed(const QUrl &requestedUrl, const QByteArray &replyData);
+    QString formatStr(const QString &in);
 private:
     QTextCodec *mGBKCodec;
-    SongMetaData *mMeta;
-    BaseNetworkLookup *mLrcidDL;
-    BaseNetworkLookup *mLyricsDL;
+    BaseNetworkLookup *mNDL;
+    bool mIsLrcidDL;
 };
 
 } //BaiduLookup

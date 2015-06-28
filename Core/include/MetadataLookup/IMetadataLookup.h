@@ -50,7 +50,7 @@ public:
 
 signals:
     void lookupFailed();
-    void lookupSucceed(QByteArray result);
+    void lookupSucceed(const QByteArray &result);
 
 private:
     LookupType mType;

@@ -16,23 +16,24 @@ namespace MetadataLookup {
 BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
 {
     mNetwork = new QNetworkAccessManager(this);
-    mReply = 0;
+    mReply = nullptr;
     mInterval = 10000;
     mFailEmitted = false;
     mRequestAborted = false;
 
     mTimer = new QTimer(this);
     mTimer->setSingleShot (true);
-    connect (mTimer, &QTimer::timeout, [this] () {
-        mRequestAborted = true;
-        if (mReply)
-            mReply->abort ();
-    });
+    connect (mTimer, &QTimer::timeout,
+             this, &BaseNetworkLookup::doTimeout);
 }
 
 BaseNetworkLookup::~BaseNetworkLookup()
 {
-    qDebug()<<__FUNCTION__;
+    qDebug()<<Q_FUNC_INFO;
+
+    if (mTimer->isActive ())
+        mTimer->stop ();
+    mTimer->deleteLater ();
 
     if (mReply) {
         mReply->abort ();
@@ -42,7 +43,7 @@ BaseNetworkLookup::~BaseNetworkLookup()
     if (mNetwork)
         mNetwork->deleteLater ();
 
-     qDebug()<<"after"<<__FUNCTION__;
+     qDebug()<<"after"<<Q_FUNC_INFO;
 }
 
 void BaseNetworkLookup::setUrl(const QString &url)
@@ -62,7 +63,7 @@ void BaseNetworkLookup::setInterval(int msec)
 
 bool BaseNetworkLookup::startLookup(bool watchTimeout)
 {
-    qDebug()<<__FUNCTION__;
+    qDebug()<<Q_FUNC_INFO;
     if (mUrl.isEmpty ())
         return false;
 
@@ -112,13 +113,22 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
     return true;
 }
 
+void BaseNetworkLookup::doTimeout()
+{
+    mRequestAborted = true;
+    if (mReply)
+        mReply->abort ();
+}
+
 void BaseNetworkLookup::readReplyData()
 {
-    mTimer->stop ();
+    if (mTimer->isActive ())
+        mTimer->stop ();
+
     QUrl url = mReply->request ().url ();
     if (mRequestAborted) {
         mReply->deleteLater ();
-        mReply = 0;
+        mReply = nullptr;
         if (!mFailEmitted) {
             mFailEmitted = true;
             emit failed (url, QString("Aborted du to time out"));
@@ -129,18 +139,20 @@ void BaseNetworkLookup::readReplyData()
     if (error != QNetworkReply::NetworkError::NoError) {
         QString errorStr = mReply->errorString ();
         mReply->deleteLater ();
-        mReply = 0;
+        mReply = nullptr;
         if (!mFailEmitted) {
             mFailEmitted = true;
             emit failed (url, errorStr);
         }
         return;
     }
-    qDebug()<<"===  BaseNetworkLookup  succeed";
 
     QByteArray qba = mReply->readAll ();
     mReply->deleteLater ();
-    mReply = 0;
+    mReply = nullptr;
+
+    qDebug()<<Q_FUNC_INFO<<"===  BaseNetworkLookup  succeed with result "<<qba;
+
     emit succeed (url, qba);
 }
 } //Lyrics
