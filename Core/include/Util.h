@@ -28,7 +28,7 @@ public:
     virtual ~Util();
     void setQQmlEngine(QQmlEngine *engine = 0);
 
-    static QString calculateHash(const QString &str);
+    Q_INVOKABLE static QString calculateHash(const QString &str);
 
     static QTextCodec *localeDefaultCodec();
 
