@@ -29,6 +29,11 @@ MetadataLookupMgr::MetadataLookupMgr(QObject *parent) :
     mLookupStarted = false;
     mCurrentLookup = nullptr;
     mDestructorState = false;
+    mDestructorTimer = new QTimer(this);
+    mDestructorTimer->setSingleShot (true);
+    mDestructorTimer->setInterval (500);
+    connect (mDestructorTimer, &QTimer::timeout,
+             this, &MetadataLookupMgr::destructor);
 }
 
 MetadataLookupMgr::~MetadataLookupMgr()
@@ -51,6 +56,9 @@ MetadataLookupMgr::~MetadataLookupMgr()
 
 void MetadataLookupMgr::lookup(SongMetaData *data, IMetadataLookup::LookupType type)
 {
+    if (mDestructorTimer->isActive ())
+        mDestructorTimer->stop ();
+
     if (!mSettings->fetchMetaDataMobileNetwork ()
             && (mUtil->getNetworkType () == Util::NetworkType::TypeMobile)) {
         qWarning()<<"Current network type is mobile type and we disabled fetch metadata here";
@@ -338,7 +346,8 @@ void MetadataLookupMgr::emitFinish()
         mStartLookupLock.unlock ();
 
         qDebug()<<Q_FUNC_INFO<<"try to destructor";
-        QTimer::singleShot (1000, this, &MetadataLookupMgr::destructor);
+//        QTimer::singleShot (1000, this, &MetadataLookupMgr::destructor);
+        mDestructorTimer->start ();
     }
     emit queueFinished ();
 }

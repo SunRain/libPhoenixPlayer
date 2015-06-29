@@ -8,6 +8,7 @@
 #include "SongMetaData.h"
 #include "MetadataLookup/IMetadataLookup.h"
 
+class QTimer;
 namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
@@ -65,6 +66,7 @@ private:
     QList<IMetadataLookup *> mLookupList;
 //    QList<PluginHost *> mHostList;
 
+    QTimer *mDestructorTimer;
     QMutex mWorkQueueLock;
     QMutex mStartLookupLock;
     QMutex mDestructorLock;
