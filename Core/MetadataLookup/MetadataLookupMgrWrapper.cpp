@@ -186,12 +186,27 @@ void MetadataLookupMgrWrapper::doLookupSucceed(const QString &songHash, const QB
     this->emitResult (type, songHash, QString(result), true);
 }
 
-void MetadataLookupMgrWrapper::doLookupByHash(const QString &songHash, MetadataLookup::IMetadataLookup::LookupType type)
+void MetadataLookupMgrWrapper::doLookupByHash(const QString &songHash,
+                                              MetadataLookup::IMetadataLookup::LookupType type)
 {
     if (songHash.isEmpty ()) {
         qWarning()<<Q_FUNC_INFO<<"We can't lookup with empty song hash";
         return;
     }
+    bool skip = false;
+    foreach (FailNode node, mFailList) {
+        if ((node.hash == songHash) && (node.type == type)) {
+            qDebug()<<Q_FUNC_INFO<<QString("Current hash [%1] with type [%2] has in fail list")
+                      .arg(songHash).arg(type);
+            skip = true;
+            break;
+        }
+    }
+    if (skip) {
+        this->emitResult (type, songHash, QString("Had failed in previous queue,ignore it."), false);
+        return;
+    }
+
     SongMetaData d;
     for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
          i < (int)Common::SongMetaTags::E_LastFlag;
@@ -228,6 +243,13 @@ void MetadataLookupMgrWrapper::emitResult(MetadataLookup::IMetadataLookup::Looku
                                           const QString &hash, const QString &result, bool succeed)
 {
     qDebug()<<Q_FUNC_INFO;
+    if (!succeed) {
+        FailNode node;
+        node.hash = hash;
+        node.type = type;
+        if (!mFailList.contains(node))
+            mFailList.append(node);
+    }
     //TODO 添加其他类型的emit
     switch (type) {
     case IMetadataLookup::TypeLyrics: {

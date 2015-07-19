@@ -56,6 +56,14 @@ public:
     Q_INVOKABLE void lookupTrackDescription(const QString &uuid,
                                             const QString &title, const QString &artist, const QString &album);
 
+protected:
+    struct FailNode {
+        QString hash;
+        IMetadataLookup::LookupType type;
+        bool operator ==(const FailNode &other) const {
+            return (this->hash == other.hash) && (this->type == other.type);
+        }
+    };
 signals:
     void lookupLyricSucceed(const QString &hash, const QString &result);
     void lookupLyricFailed(const QString &hash);
@@ -98,6 +106,7 @@ private:
                     const QString &result,
                     bool succeed);
 private:
+    QList<FailNode> mFailList;
     MetadataLookupMgr *mLookupMgr;
     PluginLoader *mPluginLoader;
     MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
