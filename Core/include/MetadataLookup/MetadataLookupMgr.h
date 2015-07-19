@@ -33,13 +33,6 @@ protected:
                     && (this->type == other.type));
         }
     };
-    struct FailNode {
-        QString hash;
-        IMetadataLookup::LookupType type;
-        bool operator ==(const FailNode &other) const {
-            return (this->hash == other.hash) && (this->type == other.type);
-        }
-    };
 
 signals:
     void lookupSucceed(const QString &songHash,
@@ -71,7 +64,6 @@ private:
     WorkNode mCurrentNode;
 
     QList<IMetadataLookup *> mLookupList;
-    QList<FailNode> mFailList;
 //    QList<PluginHost *> mHostList;
 
     QTimer *mDestructorTimer;

@@ -50,8 +50,6 @@ MetadataLookupMgr::~MetadataLookupMgr()
         }
         mWorkQueue.clear ();
     }
-    if (!mFailList.isEmpty())
-        mFailList.clear();
 
 //    destructor ();
 }
@@ -83,39 +81,31 @@ void MetadataLookupMgr::lookup(SongMetaData *data, IMetadataLookup::LookupType t
         emit lookupFailed (data->getMeta(Common::E_Hash).toString(), type);
         return;
     }
-    FailNode f;
-    f.hash = data->getMeta(Common::SongMetaTags::E_Hash).toString();
-    f.type = type;
-    if (!mFailList.contains(f)) {
-        SongMetaData *d = new SongMetaData(this);
-        for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
-             i < (int)Common::SongMetaTags::E_LastFlag;
-             ++ i) {
-            d->setMeta (Common::SongMetaTags(i),
-                        data->getMeta (Common::SongMetaTags(i)));
-        }
-        WorkNode node;
-        node.data = d;
-        node.type = type;
 
-        if (mWorkQueueLock.tryLock (300)) {
-            if (!mWorkQueue.contains (node)) {
-                mWorkQueue.append (node);
-            } else {
-                delete node.data;
-                node.data = nullptr;
-            }
-            mWorkQueueLock.unlock ();
-        }
-        qDebug()<<Q_FUNC_INFO<<QString("add node [%1], list size is [%2]")
-                  .arg (d->getMeta (Common::E_FileName).toString ())
-                  .arg (mWorkQueue.size ());
-    } else {
-        qDebug()<<Q_FUNC_INFO
-               <<QString("current node [%1] had failed to fetch type [%2] in previous queue")
-                 .arg(data->getMeta(Common::SongMetaTags::E_FileName).toString())
-                 .arg(type);
+    SongMetaData *d = new SongMetaData(this);
+    for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
+         i < (int)Common::SongMetaTags::E_LastFlag;
+         ++ i) {
+        d->setMeta (Common::SongMetaTags(i),
+                            data->getMeta (Common::SongMetaTags(i)));
     }
+    WorkNode node;
+    node.data = d;
+    node.type = type;
+
+    if (mWorkQueueLock.tryLock (300)) {
+        if (!mWorkQueue.contains (node)) {
+            mWorkQueue.append (node);
+        } else {
+            delete node.data;
+            node.data = 0;
+        }
+        mWorkQueueLock.unlock ();
+    }
+    qDebug()<<Q_FUNC_INFO<<QString("add node [%1], list size is [%2]")
+              .arg (d->getMeta (Common::E_FileName).toString ())
+              .arg (mWorkQueue.size ());
+
     if (!mLookupStarted) {
         if (mStartLookupLock.tryLock (300)) {
             if (!mLookupStarted)
@@ -132,10 +122,6 @@ void MetadataLookupMgr::nextLookupPlugin()
         //所有插件都使用过了
         QString hash = mCurrentNode.data->getMeta (Common::SongMetaTags::E_Hash).toString ();
         qDebug()<<Q_FUNC_INFO<<" all plugin used ===> failed for hash "<<hash;
-        FailNode node;
-        node.hash = hash;
-        node.type = mCurrentLookup->currentLookupFlag();
-        mFailList.append(node);
         emit lookupFailed (hash, mCurrentLookup->currentLookupFlag ());
         this->processNext ();
     } else {
