@@ -32,6 +32,14 @@ MusicLibraryListModel::MusicLibraryListModel(QAbstractListModel *parent) :
 #endif
     mLimitNum = -1;
     mAutoFetchMetadata = false;
+    connect (mLookupMgr, &MetadataLookupMgrWrapper::lookupAlbumImageSucceed,
+             [&](const QString &hash, const QString &result) {
+        emit trackImageFetched (hash);
+    });
+    connect (mLookupMgr, &MetadataLookupMgrWrapper::lookupArtistImageSucceed,
+             [&](const QString &hash, const QString &result){
+        emit trackImageFetched (hash);
+    });
 }
 
 MusicLibraryListModel::~MusicLibraryListModel()
@@ -59,6 +67,18 @@ void MusicLibraryListModel::setAutoFetchMetadata(bool autoFetch)
 bool MusicLibraryListModel::autoFetchMetadata()
 {
     return mAutoFetchMetadata;
+}
+
+void MusicLibraryListModel::fetchTrackImage(const QString &hash)
+{
+    if (hash.isEmpty ())
+        return;
+    QString str = mMusicLibraryManager->queryOne(hash, Common::E_AlbumImageUrl, true);
+    if (str.isEmpty ())
+        mLookupMgr->lookupAlbumImage (hash);
+    str = mMusicLibraryManager->queryOne(hash, Common::E_ArtistImageUri, true);
+    if (str.isEmpty ())
+        mLookupMgr->lookupArtistImage (hash);
 }
 
 void MusicLibraryListModel::showFolderTracks(const QString &folder, int limitNum)

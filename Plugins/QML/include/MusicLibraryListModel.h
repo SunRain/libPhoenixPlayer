@@ -43,6 +43,8 @@ public:
     void setAutoFetchMetadata(bool autoFetch);
     bool autoFetchMetadata();
 
+    Q_INVOKABLE void fetchTrackImage(const QString &hash);
+
     // QAbstractItemModel interface
 public:
     int rowCount(const QModelIndex &parent) const;
@@ -80,6 +82,7 @@ public:
 
 signals:
     void autoFetchMetadataChanged();
+    void trackImageFetched(const QString &hash);
 public slots:
     void clear();
 
