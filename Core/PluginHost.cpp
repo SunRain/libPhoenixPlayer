@@ -3,6 +3,7 @@
 #include <QPluginLoader>
 #include <QJsonObject>
 #include <QDebug>
+#include <QFileInfo>
 
 #include "Util.h"
 
@@ -16,6 +17,8 @@ PluginHost::PluginHost(const QString &libraryFile, QObject *parent)
     mValid = false;
     mPluginType = Common::PluginType::PluginTypeUndefined;
     mPluginLoader = new QPluginLoader(libraryFile, this);
+    QFileInfo f(libraryFile);
+    QString libraryPath = f.absolutePath ();
 
     QJsonObject obj = mPluginLoader->metaData ();
     if (!obj.isEmpty ()) {
@@ -39,6 +42,11 @@ PluginHost::PluginHost(const QString &libraryFile, QObject *parent)
             mVersion = md.value ("version").toString ();
             mDescription = md.value ("description").toString ();
             mHash = Util::calculateHash (libraryFile);
+            mConfigFile = md.value ("configFile").toString ();
+            if (!mConfigFile.isEmpty ()) {
+                mConfigFile = QString("%1/%2")
+                        .arg (libraryPath).arg (mConfigFile);
+            }
         } else {
             mValid = false;
         }
@@ -96,6 +104,11 @@ QString PluginHost::description() const
 QString PluginHost::libraryFile() const
 {
     return mLibraryFile;
+}
+
+QString PluginHost::configFile() const
+{
+    return mConfigFile;
 }
 
 bool PluginHost::isLoaded()

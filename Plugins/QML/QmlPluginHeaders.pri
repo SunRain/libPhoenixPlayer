@@ -9,7 +9,8 @@ HEADERS += \
     $$PWD/include/MusicLibraryListModel.h \
     $$PWD/include/PathListModel.h \
     $$PWD/include/TrackGroupModel.h \
-    $$PWD/include/AddonListModel.h
+    $$PWD/include/AddonListModel.h \
+    $$PWD/include/PluginListModel.h
 
 
 

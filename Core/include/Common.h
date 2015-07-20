@@ -12,6 +12,7 @@ class Common : public QObject
     Q_ENUMS(PlayMode)
     Q_ENUMS(SongMetaTags)
     Q_ENUMS(PlayListElement)
+    Q_ENUMS(PluginType)
 public:
     enum PlayBackendState {
         PlayBackendStopped = 0x0,  //播放停止

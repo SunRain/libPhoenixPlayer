@@ -69,6 +69,8 @@ public:
     ///
     QStringList getPluginHostHashList(Common::PluginType type);
 
+    int getPluginHostSize(Common::PluginType type);
+
     PluginHost *getCurrentPluginHost(Common::PluginType type);
 
     QList<PluginHost *> getPluginHostList(Common::PluginType type);

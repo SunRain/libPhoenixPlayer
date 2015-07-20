@@ -233,6 +233,24 @@ QStringList PluginLoader::getPluginHostHashList(Common::PluginType type)
     return list;
 }
 
+int PluginLoader::getPluginHostSize(Common::PluginType type)
+{
+    if (mPluginHostList.isEmpty()) {
+        qDebug()<<Q_FUNC_INFO<<" Can't find plugins";
+        return 0;
+    }
+    int count = 0;
+    if (type == Common::PluginTypeAll) {
+        count = mPluginHostList.size ();
+    } else {
+        foreach (PluginHost *h, mPluginHostList) {
+            if (h->type () == type)
+                count ++;
+        }
+    }
+    return count;
+}
+
 PluginHost *PluginLoader::getCurrentPluginHost(Common::PluginType type)
 {
     if (type == Common::PluginTypeUndefined || type == Common::PluginTypeAll)
@@ -242,8 +260,10 @@ PluginHost *PluginLoader::getCurrentPluginHost(Common::PluginType type)
 
 QList<PluginHost *> PluginLoader::getPluginHostList(Common::PluginType type)
 {
+    if (type == Common::PluginTypeAll)
+        return mPluginHostList;
     QList<PluginHost *> list;
-    if (mPluginHostList.isEmpty ())
+    if (mPluginHostList.isEmpty () || type == Common::PluginTypeUndefined)
         return list;
     foreach (PluginHost *host, mPluginHostList) {
         if (host->type () == type) {

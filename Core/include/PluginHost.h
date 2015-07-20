@@ -25,6 +25,7 @@ public:
     QString version() const;
     QString description() const;
     QString libraryFile() const;
+    QString configFile() const;
     bool isLoaded();
     void unLoad();
     bool isValid();
@@ -39,6 +40,7 @@ private:
     QString mName;
     QString mVersion;
     QString mDescription;
+    QString mConfigFile;
     bool mValid;
     QPluginLoader *mPluginLoader;
     QObject *mPluginObject;
