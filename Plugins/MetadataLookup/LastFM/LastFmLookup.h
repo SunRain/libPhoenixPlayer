@@ -14,8 +14,6 @@ class BaseNetworkLookup;
 
 namespace LastFmLookup {
 
-#define PLUGIN_NAME "LastFmMetadataLookup"
-
 #define LASTFMAPIKEY "48570d887cca45f05f8094dca4f79c0d"
 #define API_BASE "http://ws.audioscrobbler.com/2.0"
 #define API_KEY "625fd47b3b685af19315cc3a1aa5920a"
@@ -30,6 +28,8 @@ namespace LastFmLookup {
 #define IMAGE_SIZE_REGEXP_SMALL "small"
 #define IMAGE_SIZE_REGEXP_EXTRA_LARGE "extralarge"
 #define IMAGE_SIZE_REGEXP_MEGA "mega"
+
+#define CONFIG_KEY "LastFM_Image_Size"
 
 #define DEFAULT_IMAGE_SIZE_REGEXP IMAGE_SIZE_REGEXP_MEDIA
 
@@ -61,6 +61,7 @@ private:
     QString formatStr(const QString &in);
 private:
     BaseNetworkLookup *mNetworkLookup;
+    QString mImageSizeValue;
 };
 
 } //LastFmLookup

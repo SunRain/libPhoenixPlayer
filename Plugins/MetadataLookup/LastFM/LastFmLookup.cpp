@@ -13,6 +13,7 @@
 #include "SongMetaData.h"
 #include "MetadataLookup/BaseNetworkLookup.h"
 #include "Common.h"
+#include "Settings.h"
 
 namespace PhoenixPlayer{
 namespace MetadataLookup {
@@ -22,6 +23,13 @@ LastFmLookup::LastFmLookup(QObject *parent)
     :IMetadataLookup(parent)
 {
     mNetworkLookup = new BaseNetworkLookup(this);
+    Settings *setting = nullptr;
+#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+    setting = Settings::instance();
+#else
+    setting = SingletonPointer<Settings>::instance ();
+#endif
+    mImageSizeValue = setting->getConfig (CONFIG_KEY, DEFAULT_IMAGE_SIZE_REGEXP);
 
     connect (mNetworkLookup, &BaseNetworkLookup::failed,
              [&](const QUrl &requestedUrl, const QString &error) {
@@ -263,13 +271,9 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
             QJsonObject o = value.toObject ();
             if (o.isEmpty ())
                 continue;
-            if (o.value (QString("size")).toString () == QString(DEFAULT_IMAGE_SIZE_REGEXP)) {
+            if (o.value (QString("size")).toString ()
+                    == /*QString(DEFAULT_IMAGE_SIZE_REGEXP)*/mImageSizeValue) {
                 str = o.value (QString("#text")).toString ();
-//                if (str.isEmpty ())
-//                    emit lookupFailed ();
-//                else
-//                    emit lookupSucceed (str.toLocal8Bit ());
-////                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
                 found = true;
                 break;
             }
@@ -333,7 +337,8 @@ void LastFmLookup::parseArtisData(const QByteArray &qba)
             QJsonObject o = value.toObject ();
             if (o.isEmpty ())
                 continue;
-            if (o.value (QString("size")).toString () == QString(DEFAULT_IMAGE_SIZE_REGEXP)) {
+            if (o.value (QString("size")).toString ()
+                    == /*QString(DEFAULT_IMAGE_SIZE_REGEXP)*/mImageSizeValue) {
                 str = o.value (QString("#text")).toString ();
 //                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
                 found = true;

@@ -2,5 +2,6 @@
       "name" : "LastFmMetadataLookup",
       "version" : "0.0.1",
       "dependencies" : [],
-      "description" : "Lookup track metadata from last.fm"
+      "description" : "Lookup track metadata from last.fm",
+      "configFile" : "LastFMConfigFile.qml"
 } 

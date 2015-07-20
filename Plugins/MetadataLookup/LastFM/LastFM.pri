@@ -1,6 +1,7 @@
 
 OTHER_FILES += \
-    $$PWD/lastfmlookup.json
+    $$PWD/lastfmlookup.json \
+    $$PWD/LastFMConfigFile.qml
 
 HEADERS += \
     $$PWD/LastFmLookup.h
