@@ -38,6 +38,14 @@ public:
     static QStringList getAddonDirList();
 
     NetworkType getNetworkType();
+
+    ///
+    /// \brief supportMDLookupTypeJson
+    /// 返回支持的metadata lookup类型，仅仅适用于metadata lookup插件
+    /// \param pluginHash
+    ///
+    Q_INVOKABLE QString supportMDLookupTypeJsonStr(const QString &pluginHash);
+
 signals:
 
 public slots:
