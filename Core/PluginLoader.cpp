@@ -258,6 +258,16 @@ PluginHost *PluginLoader::getCurrentPluginHost(Common::PluginType type)
     return mCurrentPluginHost[type];
 }
 
+PluginHost *PluginLoader::getPluginHostByHash(const QString &hostHash)
+{
+    if (hostHash.isEmpty ())
+        return nullptr;
+    foreach (PluginHost *h, mPluginHostList) {
+        if (h->hash () == hostHash)
+            return h;
+    }
+}
+
 QList<PluginHost *> PluginLoader::getPluginHostList(Common::PluginType type)
 {
     if (type == Common::PluginTypeAll)

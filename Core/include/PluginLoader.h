@@ -73,6 +73,8 @@ public:
 
     PluginHost *getCurrentPluginHost(Common::PluginType type);
 
+    PluginHost *getPluginHostByHash(const QString &hostHash);
+
     QList<PluginHost *> getPluginHostList(Common::PluginType type);
 
 protected:
