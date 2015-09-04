@@ -18,8 +18,7 @@ INCLUDEPATH += \
         $$PWD
 
 #DESTDIR = ../../../plugins
-
-
+QMAKE_LIBDIR += ../lib
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Core/release/ -lPhoenixPlayer
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Core/debug/ -lPhoenixPlayer

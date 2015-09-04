@@ -16,6 +16,8 @@ include (TagParserPro.pri)
 INCLUDEPATH += \
         $$PWD
 
+QMAKE_LIBDIR += ../lib
+
 unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += taglib

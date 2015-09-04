@@ -30,13 +30,13 @@ signals:
 public slots:
 
 private:
-    QThread *mThread;
-    TagParserManager *mTagParserManager;
-    QList<PhoenixPlayer::SongMetaData *> *mMetaDataList;
-    PluginLoader *mPluginLoader;
-    IPlayListDAO *mDao;
-    QMutex mListLocker;
-    QMutex mCommitLocker;
+    QThread *m_thread;
+    TagParserManager *m_tagParserManager;
+    QList<PhoenixPlayer::SongMetaData *> *m_metaDataList;
+    PluginLoader *m_pluginLoader;
+    IPlayListDAO *m_dao;
+    QMutex m_listLocker;
+    QMutex m_commitLocker;
 };
 
 

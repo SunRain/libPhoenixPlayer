@@ -24,28 +24,28 @@ AsyncTagParserMgrWrapper::AsyncTagParserMgrWrapper(QObject *parent) :
 
 //    mDao = mPluginLoader->getCurrentPlayListDAO ();
 
-    mMetaDataList = nullptr;
+    m_metaDataList = nullptr;
 
-    mThread = new QThread(0);
-    mTagParserManager = new TagParserManager(0);
-    mTagParserManager->moveToThread (mThread);
+    m_thread = new QThread(0);
+    m_tagParserManager = new TagParserManager(0);
+    m_tagParserManager->moveToThread (m_thread);
 
-    connect (mThread, &QThread::started, [&] {
+    connect (m_thread, &QThread::started, [&] {
         qDebug()<<Q_FUNC_INFO<<" Thread start, we'll start TagParser now";
         emit started ();
 
-        mTagParserManager->parserImmediately (mMetaDataList);
+        m_tagParserManager->parserImmediately (m_metaDataList);
     });
 
-    connect (mThread, &QThread::finished, [&] {
+    connect (m_thread, &QThread::finished, [&] {
         qDebug()<<Q_FUNC_INFO<<" mThread finished";
 
         emit finished ();
     });
-    connect (mTagParserManager, &TagParserManager::parserPending, [&] {
+    connect (m_tagParserManager, &TagParserManager::parserPending, [&] {
 
     });
-    connect (mTagParserManager, &TagParserManager::parserQueueFinished, [&] {
+    connect (m_tagParserManager, &TagParserManager::parserQueueFinished, [&] {
         qDebug()<<Q_FUNC_INFO<<" mTagParserManager finished, we'll try to finish thread";
 //        if (mDao) {
 //            mDao->beginTransaction ();
@@ -57,19 +57,19 @@ AsyncTagParserMgrWrapper::AsyncTagParserMgrWrapper(QObject *parent) :
 //            qDeleteAll(mMetaDataList);
 //            mMetaDataList.clear ();
 //        }
-        if (mThread != nullptr)
-            mThread->quit ();
+        if (m_thread != nullptr)
+            m_thread->quit ();
     });
 }
 
 AsyncTagParserMgrWrapper::~AsyncTagParserMgrWrapper()
 {
-    if (mThread->isRunning ()) {
-        mThread->quit ();
-        mThread->wait (3 * 60 * 1000);
+    if (m_thread->isRunning ()) {
+        m_thread->quit ();
+        m_thread->wait (3 * 60 * 1000);
     }
-    mThread->deleteLater ();
-    mTagParserManager->deleteLater ();
+    m_thread->deleteLater ();
+    m_tagParserManager->deleteLater ();
 
 //    if (!mMetaDataList.isEmpty ()) {
 //        qDeleteAll(mMetaDataList);
@@ -83,8 +83,8 @@ void AsyncTagParserMgrWrapper::parser(QList<SongMetaData *> *list)
         qWarning()<<Q_FUNC_INFO<<" list is nullptr, will ignore this function";
         return;
     }
-    mMetaDataList = list;
-    mThread->start ();
+    m_metaDataList = list;
+    m_thread->start ();
 }
 
 //void AsyncTagParserMgrWrapper::addFile(const QString &path, const QString &file, qint64 size)
@@ -118,7 +118,7 @@ void AsyncTagParserMgrWrapper::parser(QList<SongMetaData *> *list)
 
 bool AsyncTagParserMgrWrapper::isRunning()
 {
-    return mThread->isRunning ();
+    return m_thread->isRunning ();
 }
 
 } //MusicLibrary

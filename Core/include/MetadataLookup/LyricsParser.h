@@ -23,7 +23,7 @@ public:
     static QLyricsList parserLyrics(const QString &lyricsStr);
 private:
     explicit LyricParser(QObject *parent = 0);
-    ~LyricParser();
+    virtual ~LyricParser();
 };
 
 } //Lyrics

@@ -23,70 +23,73 @@ namespace MusicLibrary {
 
 MusicLibraryManager::MusicLibraryManager(QObject *parent)
     : QObject(parent)
-    ,isInit(false)
+    ,m_isInit(false)
 {
-    mAsyncDiskLookup = nullptr;
-    mTagParserWrapper = nullptr;
-    mPlayListDAO = 0;
+    m_asyncDiskLookup = nullptr;
+    m_tagParserWrapper = nullptr;
+    m_playListDAO = 0;
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    mSettings = Settings::instance();
-    mPluginLoader = PluginLoader::instance();
-#else
-    qDebug()<<"For other os";
-    mSettings = SingletonPointer<Settings>::instance ();
-    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-#endif
-    mCurrentSongHash = QString();
-    mCurrentPlayListHash = QString();
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    mSettings = Settings::instance();
+//    mPluginLoader = PluginLoader::instance();
+//#else
+//    qDebug()<<"For other os";
+//    mSettings = SingletonPointer<Settings>::instance ();
+//    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+//#endif
+    m_settings = Settings::instance ();
+    m_pluginLoader = PluginLoader::instance ();
 
-    if (!isInit)
+    m_currentSongHash = QString();
+    m_currentPlayListHash = QString();
+
+    if (!m_isInit)
         init ();
 }
 
 MusicLibraryManager::~MusicLibraryManager()
 {
     qDebug()<<">>>>>>>> "<< __FUNCTION__ <<" <<<<<<<<<<<<<<<<";
-    if (mSettings != nullptr) {
+    if (m_settings != nullptr) {
         qDebug()<<"save Settings";
-        mSettings->setLastPlayedSong (mCurrentSongHash);
+        m_settings->setLastPlayedSong (m_currentSongHash);
     }
 
-    if (!mPlayListDAO.isNull())
-        mPlayListDAO.data()->deleteLater ();
+    if (!m_playListDAO.isNull())
+        m_playListDAO.data()->deleteLater ();
 
     qDebug()<<">>>>>>>> after "<< __FUNCTION__ <<" <<<<<<<<<<<<<<<<";
 }
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-MusicLibraryManager *MusicLibraryManager::instance()
-{
-    static QMutex mutex;
-    static QScopedPointer<MusicLibraryManager> scp;
-    if (Q_UNLIKELY(scp.isNull())) {
-        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
-        mutex.lock();
-        scp.reset(new MusicLibraryManager(0));
-        mutex.unlock();
-    }
-    return scp.data();
-}
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//MusicLibraryManager *MusicLibraryManager::instance()
+//{
+//    static QMutex mutex;
+//    static QScopedPointer<MusicLibraryManager> scp;
+//    if (Q_UNLIKELY(scp.isNull())) {
+//        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
+//        mutex.lock();
+//        scp.reset(new MusicLibraryManager(0));
+//        mutex.unlock();
+//    }
+//    return scp.data();
+//}
+//#endif
 
 bool MusicLibraryManager::changePlayList(const QString &playListHash)
 {
-    if (mCurrentPlayListHash == playListHash) {
+    if (m_currentPlayListHash == playListHash) {
         qDebug()<<"Same playList, not changed";
         return false;
     }
-    mCurrentPlayListHash = playListHash;
-    mCurrentSongHash = QString();
+    m_currentPlayListHash = playListHash;
+    m_currentSongHash = QString();
     emit playListChanged ();
     return true;
 }
 
 bool MusicLibraryManager::createPlayList(const QString &playListName)
 {
-    if (mPlayListDAO.data()->insertPlayList (playListName)) {
+    if (m_playListDAO.data()->insertPlayList (playListName)) {
         emit playListCreated ();
         return true;
     }
@@ -95,7 +98,7 @@ bool MusicLibraryManager::createPlayList(const QString &playListName)
 
 bool MusicLibraryManager::deletePlayList(const QString &playListHash)
 {
-    if (mPlayListDAO.data()->deletePlayList (playListHash)) {
+    if (m_playListDAO.data()->deletePlayList (playListHash)) {
         emit playListDeleted ();
         return true;
     }
@@ -104,58 +107,58 @@ bool MusicLibraryManager::deletePlayList(const QString &playListHash)
 
 QString MusicLibraryManager::getCurrentPlayListHash()
 {
-    return mCurrentPlayListHash;
+    return m_currentPlayListHash;
 }
 
 QString MusicLibraryManager::playingSongHash()
 {
-    if (mCurrentSongHash.isEmpty ()) {
+    if (m_currentSongHash.isEmpty ()) {
         qDebug()<<"try playingSongHash from settings";
-        mCurrentSongHash = mSettings->getLastPlayedSong ();
-        if (mCurrentSongHash.isEmpty ()
-                && !mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).isEmpty ()) {
+        m_currentSongHash = m_settings->getLastPlayedSong ();
+        if (m_currentSongHash.isEmpty ()
+                && !m_playListDAO.data()->getSongHashList (m_currentPlayListHash).isEmpty ()) {
             qDebug()<<"try playingSongHash from first from library";
-            mCurrentSongHash = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).first ();
+            m_currentSongHash = m_playListDAO.data()->getSongHashList (m_currentPlayListHash).first ();
         } else {
             qDebug()<<Q_FUNC_INFO<<"get some error";
         }
     }
-    qDebug()<<"playingSongHash is "<<mCurrentSongHash;
-    return mCurrentSongHash;
+    qDebug()<<"playingSongHash is "<<m_currentSongHash;
+    return m_currentSongHash;
 }
 
 void MusicLibraryManager::setPlayingSongHash(const QString &newHash)
 {
     if (newHash.isEmpty ())
         return;
-    if (mCurrentSongHash == newHash)
+    if (m_currentSongHash == newHash)
         return;
-    qDebug()<<Q_FUNC_INFO<<"change current song hash from "<<mCurrentSongHash<<" to "<<newHash;
-    mCurrentSongHash = newHash;
+    qDebug()<<Q_FUNC_INFO<<"change current song hash from "<<m_currentSongHash<<" to "<<newHash;
+    m_currentSongHash = newHash;
     emit playingSongChanged ();
 }
 
 QString MusicLibraryManager::firstSongHash()
 {
-    mCurrentSongHash = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).first ();
-    return mCurrentSongHash;
+    m_currentSongHash = m_playListDAO.data()->getSongHashList (m_currentPlayListHash).first ();
+    return m_currentSongHash;
 }
 
 QString MusicLibraryManager::lastSongHash()
 {
-    mCurrentSongHash = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash).last ();
-    return mCurrentSongHash;
+    m_currentSongHash = m_playListDAO.data()->getSongHashList (m_currentPlayListHash).last ();
+    return m_currentSongHash;
 }
 
 QString MusicLibraryManager::nextSong(bool jumpToNextSong)
 {
-    QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
+    QStringList list = m_playListDAO.data()->getSongHashList (m_currentPlayListHash);
     if (!list.isEmpty ()) {
-        int index = list.indexOf (mCurrentSongHash) +1;
+        int index = list.indexOf (m_currentSongHash) +1;
         if (index >= list.size ())
             index = 0;
         if (jumpToNextSong) {
-            mCurrentSongHash = list.at (index);
+            m_currentSongHash = list.at (index);
             emit playingSongChanged ();
         }
         return list.at (index);
@@ -165,9 +168,9 @@ QString MusicLibraryManager::nextSong(bool jumpToNextSong)
 
 QString MusicLibraryManager::preSong(bool jumpToPreSong)
 {
-    QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
+    QStringList list = m_playListDAO.data()->getSongHashList (m_currentPlayListHash);
     if (!list.isEmpty ()) {
-        int index = list.indexOf (mCurrentSongHash);
+        int index = list.indexOf (m_currentSongHash);
         if (index == -1) { //no hash found
             index = 0;
         } else if (index == 0) { //hash is the first song
@@ -176,7 +179,7 @@ QString MusicLibraryManager::preSong(bool jumpToPreSong)
             index --;
         }
         if (jumpToPreSong) {
-            mCurrentSongHash = list.at (index);
+            m_currentSongHash = list.at (index);
             emit playingSongChanged ();
         }
         return list.at (index);
@@ -186,14 +189,14 @@ QString MusicLibraryManager::preSong(bool jumpToPreSong)
 
 QString MusicLibraryManager::randomSong(bool jumpToRandomSong)
 {
-    QStringList list = mPlayListDAO.data()->getSongHashList (mCurrentPlayListHash);
+    QStringList list = m_playListDAO.data()->getSongHashList (m_currentPlayListHash);
     if (!list.isEmpty ()) {
         QTime time = QTime::currentTime ();
         qsrand(time.second () * 1000 + time.msec ());
         int n = qrand ();
         n = n % list.size ();
         if (jumpToRandomSong) {
-            mCurrentSongHash = list.at (n);
+            m_currentSongHash = list.at (n);
             emit playingSongChanged ();
         }
         return list.at (n);
@@ -211,7 +214,7 @@ QStringList MusicLibraryManager::queryMusicLibrary(Common::SongMetaTags targetCo
                                                    const QString &regValue,
                                                    bool skipDuplicates)
 {
-    return mPlayListDAO.data()->queryMusicLibrary(targetColumn, regColumn, regValue, skipDuplicates);
+    return m_playListDAO.data()->queryMusicLibrary(targetColumn, regColumn, regValue, skipDuplicates);
 }
 
 QString MusicLibraryManager::querySongImageUri(const QString &hash)
@@ -245,13 +248,13 @@ QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targe
 {
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO.data()
+        list = m_playListDAO.data()
                 ->queryMusicLibrary (targetColumn,
                                      Common::SongMetaTags::E_FirstFlag, //UnUsed
                                      QString(),
                                      skipDuplicates);
     } else {
-        list = mPlayListDAO.data()
+        list = m_playListDAO.data()
                 ->queryMusicLibrary (targetColumn,
                                      Common::SongMetaTags::E_Hash,
                                      hash,
@@ -271,9 +274,9 @@ QStringList MusicLibraryManager::queryPlayListElement(
 {
     QStringList list;
     if (hash.isEmpty ()) {
-        list = mPlayListDAO.data()->queryPlayList (targetColumn, Common::PlayListFirstFlag, QString());
+        list = m_playListDAO.data()->queryPlayList (targetColumn, Common::PlayListFirstFlag, QString());
     } else {
-        list = mPlayListDAO.data()->queryPlayList (targetColumn, Common::PlayListHash, hash);
+        list = m_playListDAO.data()->queryPlayList (targetColumn, Common::PlayListHash, hash);
     }
 
     qDebug()<<" query result "<< list;
@@ -292,7 +295,7 @@ bool MusicLibraryManager::insertToPlayList(const QString &playListHash,
         qDebug()<<"playListHash or newSongHash is empty";
         return false;
     }
-    bool ret = mPlayListDAO.data()->updatePlayList (Common::PlayListSongHashes,
+    bool ret = m_playListDAO.data()->updatePlayList (Common::PlayListSongHashes,
                                                     playListHash,
                                                     newSongHash,
                                                     true);
@@ -311,7 +314,7 @@ bool MusicLibraryManager::deleteFromPlayList(
         return false;
     }
     //TODO: 需要添加从本地删除的功能
-    bool ret = mPlayListDAO.data()->updatePlayList (Common::PlayListSongHashes,
+    bool ret = m_playListDAO.data()->updatePlayList (Common::PlayListSongHashes,
                                                     playListHash,
                                                     songHash,
                                                     false);
@@ -324,19 +327,19 @@ bool MusicLibraryManager::init()
 {
     qDebug()<<__FUNCTION__;
 
-    mCurrentSongHash = mSettings->getLastPlayedSong ();
-    mCurrentPlayListHash = mSettings->getPlayListHash ();
+    m_currentSongHash = m_settings->getLastPlayedSong ();
+    m_currentPlayListHash = m_settings->getPlayListHash ();
 
-    if (mPlayListDAO.isNull())
-        mPlayListDAO = mPluginLoader->getCurrentPlayListDAO ();
-    if (!mPlayListDAO.isNull()) {
-        if (!mPlayListDAO.data()->initDataBase ()) {
+    if (m_playListDAO.isNull())
+        m_playListDAO = m_pluginLoader->getCurrentPlayListDAO ();
+    if (!m_playListDAO.isNull()) {
+        if (!m_playListDAO.data()->initDataBase ()) {
             qDebug()<<"initDataBase error";
         }
     } else {
         qDebug()<<"Can't find mPlayListDAO";
     }
-    isInit = true;
+    m_isInit = true;
 
     return true;
 }

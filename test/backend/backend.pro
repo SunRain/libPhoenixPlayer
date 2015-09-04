@@ -32,9 +32,15 @@ unix {
 #SOURCES += \
 #    main.cpp \
 
+#include (../../Core/Core.pri)
 include(../../Core/CoreHeaders.pri)
+
+#QMAKE_LIBDIR += lib
+QMAKE_RPATHDIR += $$OUT_PWD/lib
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Core/release/ -lPhoenixPlayer
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Core/debug/ -lPhoenixPlayer
 else:unix: LIBS += -L$$OUT_PWD/../../Core/ -lPhoenixPlayer
 
+INCLUDEPATH += $$PWD/../../Core
+DEPENDPATH += $$PWD/../../Core

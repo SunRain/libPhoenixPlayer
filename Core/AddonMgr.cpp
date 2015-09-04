@@ -27,15 +27,15 @@ AddonMgr::AddonMgr(QObject *parent)
 
 AddonMgr::~AddonMgr()
 {
-    if (!mAddonList.isEmpty ()) {
-        qDeleteAll(mAddonList);
-        mAddonList.clear ();
+    if (!m_addonList.isEmpty ()) {
+        qDeleteAll(m_addonList);
+        m_addonList.clear ();
     }
 }
 
 QList<AddonMgr::Addon *> AddonMgr::getAddonList()
 {
-    return mAddonList;
+    return m_addonList;
 }
 
 void AddonMgr::initList()
@@ -72,7 +72,7 @@ void AddonMgr::initList()
             a->name = o.value (KEY_NAME).toString (QString("UnKnow Addon"));
             a->version = o.value (KEY_VERSION).toString ();
             a->hash = Util::calculateHash (a->basePath + a->indexFile);
-            mAddonList.append (a);
+            m_addonList.append (a);
         }
     }
 }

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "IMetadataLookup.h"
+#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 class PluginLoader;
@@ -20,13 +21,13 @@ class MetadataLookupMgr;
 class MetadataLookupMgrWrapper : public QObject
 {
     Q_OBJECT
+    DECLARE_SINGLETON_POINTER(MetadataLookupMgrWrapper)
 public:
-    explicit MetadataLookupMgrWrapper(QObject *parent = 0);
     virtual ~MetadataLookupMgrWrapper();
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    static MetadataLookupMgrWrapper *instance();
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    static MetadataLookupMgrWrapper *instance();
+//#endif
 
     Q_INVOKABLE void lookupLyric(const QString &songHash);
     Q_INVOKABLE void lookupLyric(const QString &uuid,
@@ -57,6 +58,7 @@ public:
                                             const QString &title, const QString &artist, const QString &album);
 
 protected:
+//    explicit MetadataLookupMgrWrapper(QObject *parent = 0);
     struct FailNode {
         QString hash;
         IMetadataLookup::LookupType type;
@@ -106,10 +108,10 @@ private:
                     const QString &result,
                     bool succeed);
 private:
-    QList<FailNode> mFailList;
-    MetadataLookupMgr *mLookupMgr;
-    PluginLoader *mPluginLoader;
-    MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
+    QList<FailNode> m_failList;
+    MetadataLookupMgr *m_lookupMgr;
+    PluginLoader *m_pluginLoader;
+    MusicLibrary::MusicLibraryManager *m_musicLibraryManager;
 };
 } //MetadataLookup
 } //PhoenixPlayer

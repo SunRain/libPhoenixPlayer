@@ -1,1 +1,1 @@
-#PhoenixPlayer
+Core library for PhoenixPlayer

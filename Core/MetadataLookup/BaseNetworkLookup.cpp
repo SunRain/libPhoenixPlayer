@@ -15,15 +15,15 @@ namespace MetadataLookup {
 
 BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
 {
-    mNetwork = new QNetworkAccessManager(this);
-    mReply = nullptr;
-    mInterval = 10000;
-    mFailEmitted = false;
-    mRequestAborted = false;
+    m_network = new QNetworkAccessManager(this);
+    m_reply = nullptr;
+    m_interval = 10000;
+    m_failEmitted = false;
+    m_requestAborted = false;
 
-    mTimer = new QTimer(this);
-    mTimer->setSingleShot (true);
-    connect (mTimer, &QTimer::timeout,
+    m_timer = new QTimer(this);
+    m_timer->setSingleShot (true);
+    connect (m_timer, &QTimer::timeout,
              this, &BaseNetworkLookup::doTimeout);
 }
 
@@ -31,58 +31,58 @@ BaseNetworkLookup::~BaseNetworkLookup()
 {
     qDebug()<<Q_FUNC_INFO;
 
-    if (mTimer->isActive ())
-        mTimer->stop ();
-    mTimer->deleteLater ();
+    if (m_timer->isActive ())
+        m_timer->stop ();
+    m_timer->deleteLater ();
 
-    if (mReply) {
-        mReply->abort ();
-        mReply->deleteLater ();
+    if (m_reply) {
+        m_reply->abort ();
+        m_reply->deleteLater ();
     }
 
-    if (mNetwork)
-        mNetwork->deleteLater ();
+    if (m_network)
+        m_network->deleteLater ();
 
      qDebug()<<"after"<<Q_FUNC_INFO;
 }
 
 void BaseNetworkLookup::setUrl(const QString &url)
 {
-    mUrl = url;
+    m_url = url;
 }
 
 void BaseNetworkLookup::setRequestType(BaseNetworkLookup::RequestType type)
 {
-    mRequestType = type;
+    m_requestType = type;
 }
 
 void BaseNetworkLookup::setInterval(int msec)
 {
-    mInterval = msec;
+    m_interval = msec;
 }
 
 bool BaseNetworkLookup::startLookup(bool watchTimeout)
 {
     qDebug()<<Q_FUNC_INFO;
-    if (mUrl.isEmpty ())
+    if (m_url.isEmpty ())
         return false;
 
-    QUrl url(mUrl);
+    QUrl url(m_url);
     if (url.isEmpty ())
         return false;
 
-    if (mReply) {
-        mReply->abort ();
-        qDebug()<<"====== mReply is running "<<mReply->isRunning ();
-        mRequestAborted = true;
+    if (m_reply) {
+        m_reply->abort ();
+        qDebug()<<"====== mReply is running "<<m_reply->isRunning ();
+        m_requestAborted = true;
     }
-    mFailEmitted = false;
+    m_failEmitted = false;
 
-    switch (mRequestType) {
+    switch (m_requestType) {
     case RequestType::RequestGet: {
         qDebug()<<"Get "<< url.toString ();
         QNetworkRequest request(url);
-        mReply = mNetwork->get (request);
+        m_reply = m_network->get (request);
         break;
     }
     case RequestType::RequestPut: {
@@ -95,19 +95,19 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
         qDebug("post data [%s] to [%s]",
                qba.constData(),
                url.toString().toLocal8Bit().constData());
-        mReply = mNetwork->post (request, qba);
+        m_reply = m_network->post (request, qba);
         break;
     }
     default:
         break;
     }
     if (watchTimeout) {
-        mRequestAborted = false;
-        mTimer->start (mInterval);
+        m_requestAborted = false;
+        m_timer->start (m_interval);
     }
 
-    if (mReply) {
-        connect (mReply, &QNetworkReply::finished,
+    if (m_reply) {
+        connect (m_reply, &QNetworkReply::finished,
                  this, &BaseNetworkLookup::readReplyData);
     }
     return true;
@@ -115,41 +115,41 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
 
 void BaseNetworkLookup::doTimeout()
 {
-    mRequestAborted = true;
-    if (mReply)
-        mReply->abort ();
+    m_requestAborted = true;
+    if (m_reply)
+        m_reply->abort ();
 }
 
 void BaseNetworkLookup::readReplyData()
 {
-    if (mTimer->isActive ())
-        mTimer->stop ();
+    if (m_timer->isActive ())
+        m_timer->stop ();
 
-    QUrl url = mReply->request ().url ();
-    if (mRequestAborted) {
-        mReply->deleteLater ();
-        mReply = nullptr;
-        if (!mFailEmitted) {
-            mFailEmitted = true;
+    QUrl url = m_reply->request ().url ();
+    if (m_requestAborted) {
+        m_reply->deleteLater ();
+        m_reply = nullptr;
+        if (!m_failEmitted) {
+            m_failEmitted = true;
             emit failed (url, QString("Aborted du to time out"));
         }
         return;
     }
-    QNetworkReply::NetworkError error = mReply->error ();
+    QNetworkReply::NetworkError error = m_reply->error ();
     if (error != QNetworkReply::NetworkError::NoError) {
-        QString errorStr = mReply->errorString ();
-        mReply->deleteLater ();
-        mReply = nullptr;
-        if (!mFailEmitted) {
-            mFailEmitted = true;
+        QString errorStr = m_reply->errorString ();
+        m_reply->deleteLater ();
+        m_reply = nullptr;
+        if (!m_failEmitted) {
+            m_failEmitted = true;
             emit failed (url, errorStr);
         }
         return;
     }
 
-    QByteArray qba = mReply->readAll ();
-    mReply->deleteLater ();
-    mReply = nullptr;
+    QByteArray qba = m_reply->readAll ();
+    m_reply->deleteLater ();
+    m_reply = nullptr;
 
     qDebug()<<Q_FUNC_INFO<<"===  BaseNetworkLookup  succeed with result "<<qba;
 

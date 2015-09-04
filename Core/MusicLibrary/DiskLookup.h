@@ -41,10 +41,10 @@ signals:
     void finished();
 
 private:
-    QStringList mPathList;
-    bool mStopLookupFlag;
-    bool mIsRunning;
-    QMimeDatabase mQMimeDatabase;
+    QStringList m_pathList;
+    bool m_stopLookupFlag;
+    bool m_isRunning;
+    QMimeDatabase m_QMimeDatabase;
 //    int mCount;
 };
 

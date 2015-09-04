@@ -8,6 +8,7 @@
 
 //#include "Settings.h"
 #include "Common.h"
+#include "SingletonPointer.h"
 
 class QThread;
 
@@ -26,13 +27,13 @@ class AsyncTagParserMgrWrapper;
 class MusicLibraryManager : public QObject
 {
     Q_OBJECT
+    DECLARE_SINGLETON_POINTER(MusicLibraryManager)
 public:
-    explicit MusicLibraryManager(QObject *parent = 0);
     virtual ~MusicLibraryManager();
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    static MusicLibraryManager *instance();
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    static MusicLibraryManager *instance();
+//#endif
 
     ///
     /// \brief playingSong 返回当前播放的歌曲hash,
@@ -155,6 +156,8 @@ public:
     QString queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates = true);
     Q_INVOKABLE QString queryOneByIndex(const QString &hash, int tag, bool skipDuplicates = true);
 
+//protected:
+//    explicit MusicLibraryManager(QObject *parent = 0);
 signals:
     void playingSongChanged();
     void playListChanged();
@@ -164,15 +167,15 @@ signals:
 private:
       bool init();
 private:
-      bool isInit;
-      QPointer<IPlayListDAO> mPlayListDAO;
-      PluginLoader *mPluginLoader;
-      Settings *mSettings;
-      AsyncDiskLookup *mAsyncDiskLookup;
-      AsyncTagParserMgrWrapper *mTagParserWrapper;
+      bool m_isInit;
+      QPointer<IPlayListDAO> m_playListDAO;
+      PluginLoader *m_pluginLoader;
+      Settings *m_settings;
+      AsyncDiskLookup *m_asyncDiskLookup;
+      AsyncTagParserMgrWrapper *m_tagParserWrapper;
 
-      QString mCurrentSongHash;
-      QString mCurrentPlayListHash;
+      QString m_currentSongHash;
+      QString m_currentPlayListHash;
 };
 
 } //MusicLibrary

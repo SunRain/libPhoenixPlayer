@@ -53,7 +53,7 @@ signals:
     void lookupSucceed(const QByteArray &result);
 
 private:
-    LookupType mType;
+    LookupType m_type;
 };
 
 } //MetadataLookup

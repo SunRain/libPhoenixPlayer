@@ -16,22 +16,24 @@ using namespace PhoenixPlayer::MusicLibrary;
 MetadataLookupMgrWrapper::MetadataLookupMgrWrapper(QObject *parent) :
     QObject(parent)
 {
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    mPluginLoader = PluginLoader::instance();
-    mMusicLibraryManager = MusicLibraryManager::instance();
-#else
-    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    mPluginLoader = PluginLoader::instance();
+//    mMusicLibraryManager = MusicLibraryManager::instance();
+//#else
+//    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+//    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
+//#endif
+    m_pluginLoader = PluginLoader::instance ();
+    m_musicLibraryManager = MusicLibraryManager::instance ();
 
-    mLookupMgr = new MetadataLookupMgr(this);
+    m_lookupMgr = new MetadataLookupMgr(this);
 
-    connect (mLookupMgr, &MetadataLookupMgr::lookupFailed,
+    connect (m_lookupMgr, &MetadataLookupMgr::lookupFailed,
              this, &MetadataLookupMgrWrapper::doLookupFailed);
-    connect (mLookupMgr, &MetadataLookupMgr::lookupSucceed,
+    connect (m_lookupMgr, &MetadataLookupMgr::lookupSucceed,
              this, &MetadataLookupMgrWrapper::doLookupSucceed);
 
-    connect (mLookupMgr,
+    connect (m_lookupMgr,
              &MetadataLookupMgr::queueFinished,
              [&] {
         qDebug()<<Q_FUNC_INFO<<"========>>> queueFinished <<<<========";
@@ -43,21 +45,21 @@ MetadataLookupMgrWrapper::~MetadataLookupMgrWrapper()
 
 }
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-MetadataLookupMgrWrapper *MetadataLookupMgrWrapper::instance()
-{
-    static QMutex mutex;
-    static QScopedPointer<MetadataLookupMgrWrapper> scp;
-    if (Q_UNLIKELY(scp.isNull())) {
-        mutex.lock();
-        qDebug()<<Q_FUNC_INFO<<"==== start new";
-        scp.reset(new MetadataLookupMgrWrapper(0));
-        mutex.unlock();
-    }
-    qDebug()<<Q_FUNC_INFO<<"==== return old";
-    return scp.data();
-}
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//MetadataLookupMgrWrapper *MetadataLookupMgrWrapper::instance()
+//{
+//    static QMutex mutex;
+//    static QScopedPointer<MetadataLookupMgrWrapper> scp;
+//    if (Q_UNLIKELY(scp.isNull())) {
+//        mutex.lock();
+//        qDebug()<<Q_FUNC_INFO<<"==== start new";
+//        scp.reset(new MetadataLookupMgrWrapper(0));
+//        mutex.unlock();
+//    }
+//    qDebug()<<Q_FUNC_INFO<<"==== return old";
+//    return scp.data();
+//}
+//#endif
 
 void MetadataLookupMgrWrapper::lookupLyric(const QString &songHash)
 {
@@ -176,9 +178,9 @@ void MetadataLookupMgrWrapper::doLookupSucceed(const QString &songHash, const QB
         break;
     }
 
-    if (mPluginLoader) {
+    if (m_pluginLoader) {
         qDebug()<<Q_FUNC_INFO<<"had mPluginLoader";
-        IPlayListDAO *dao = mPluginLoader->getCurrentPlayListDAO ();
+        IPlayListDAO *dao = m_pluginLoader->getCurrentPlayListDAO ();
         if (dao)
             dao->updateMetaData (&d, true);
     }
@@ -194,7 +196,7 @@ void MetadataLookupMgrWrapper::doLookupByHash(const QString &songHash,
         return;
     }
     bool skip = false;
-    foreach (FailNode node, mFailList) {
+    foreach (FailNode node, m_failList) {
         if ((node.hash == songHash) && (node.type == type)) {
             qDebug()<<Q_FUNC_INFO<<QString("Current hash [%1] with type [%2] has in fail list")
                       .arg(songHash).arg(type);
@@ -211,11 +213,11 @@ void MetadataLookupMgrWrapper::doLookupByHash(const QString &songHash,
     for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
          i < (int)Common::SongMetaTags::E_LastFlag;
          ++i) {
-        QString str = mMusicLibraryManager->queryOne(songHash, Common::SongMetaTags(i), true);
+        QString str = m_musicLibraryManager->queryOne(songHash, Common::SongMetaTags(i), true);
         if (!str.isEmpty())
             d.setMeta (Common::SongMetaTags(i), str);
     }
-    mLookupMgr->lookup (&d, type);
+    m_lookupMgr->lookup (&d, type);
 }
 
 void MetadataLookupMgrWrapper::doLookupByDetail(const QString &uuid, const QString &title, const QString &artist, const QString &album, MetadataLookup::IMetadataLookup::LookupType type)
@@ -236,7 +238,7 @@ void MetadataLookupMgrWrapper::doLookupByDetail(const QString &uuid, const QStri
             d.setMeta (Common::SongMetaTags(i), album);
         }
     }
-    mLookupMgr->lookup (&d, type);
+    m_lookupMgr->lookup (&d, type);
 }
 
 void MetadataLookupMgrWrapper::emitResult(MetadataLookup::IMetadataLookup::LookupType type,
@@ -247,8 +249,8 @@ void MetadataLookupMgrWrapper::emitResult(MetadataLookup::IMetadataLookup::Looku
         FailNode node;
         node.hash = hash;
         node.type = type;
-        if (!mFailList.contains(node))
-            mFailList.append(node);
+        if (!m_failList.contains(node))
+            m_failList.append(node);
     }
     //TODO 添加其他类型的emit
     switch (type) {

@@ -3,9 +3,12 @@
 #include <QObject>
 #include <QMetaEnum>
 
+
+#include "BaseObject.h"
+
 namespace PhoenixPlayer {
 
-class Common : public QObject
+class Common : public BaseObject
 {
     Q_OBJECT
     Q_ENUMS(PlayBackendState)
@@ -82,19 +85,21 @@ public:
     enum PluginType {
         PluginTypeAll = 0x100,
         //为保证后续兼容,TypePlayBackend必须为第二个项
-        PluginPlayBackend,            //播放后端
-        PluginPlayListDAO,            //音乐库存储后端
-        PluginMusicTagParser,         //音乐Tag解析
+        PluginPlayBackend,              //播放后端
+        PluginPlayListDAO,              //音乐库存储后端
+        PluginMusicTagParser,           //音乐Tag解析
         PluginMetadataLookup,           //metadata查询
-        PluginTypeUndefined                //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
+        PluginDecoder,                  //解码插件
+        PluginOutPut,                   //输出插件
+        PluginTypeUndefined             //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
     };
 
-    QString enumToStr(const QString &enumName, int enumValue)
-    {
-        int index  = metaObject ()->indexOfEnumerator (enumName.toLocal8Bit ());
-        QMetaEnum m = metaObject ()->enumerator (index);
-        return m.valueToKey (enumValue);
-    }
+//    QString enumToStr(const QString &enumName, int enumValue)
+//    {
+//        int index  = metaObject ()->indexOfEnumerator (enumName.toLocal8Bit ());
+//        QMetaEnum m = metaObject ()->enumerator (index);
+//        return m.valueToKey (enumValue);
+//    }
 };
 }
 #endif // COMMON_H

@@ -14,16 +14,16 @@ namespace MusicLibrary {
 DiskLookup::DiskLookup(QObject *parent) : QObject(parent)
 {
     qDebug()<<Q_FUNC_INFO;
-    mStopLookupFlag = false;
-    mIsRunning = false;
+    m_stopLookupFlag = false;
+    m_isRunning = false;
 //    mCount = 0;
 }
 
 DiskLookup::~DiskLookup()
 {
     qDebug()<<Q_FUNC_INFO;
-    if (!mPathList.isEmpty ()) {
-        mPathList.clear ();
+    if (!m_pathList.isEmpty ()) {
+        m_pathList.clear ();
     }
 }
 
@@ -33,43 +33,43 @@ void DiskLookup::startLookup()
 
     emit pending ();
 
-    mStopLookupFlag = false;
-    mIsRunning = true;
+    m_stopLookupFlag = false;
+    m_isRunning = true;
 
-    if (mPathList.isEmpty ()) {
+    if (m_pathList.isEmpty ()) {
         QString tmp = QString("%1/%2").arg (QDir::homePath ())
                 .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 
         qDebug()<<"==== Lookup default dir "<<tmp;
         scanDir (tmp);
     } else {
-        while (!mPathList.isEmpty ()) {
-            if (mStopLookupFlag) {
-                mPathList.clear ();
+        while (!m_pathList.isEmpty ()) {
+            if (m_stopLookupFlag) {
+                m_pathList.clear ();
                 break;
             }
-            scanDir (mPathList.takeFirst ());
+            scanDir (m_pathList.takeFirst ());
         }
     }
-    mIsRunning = false;
+    m_isRunning = false;
     qDebug()<<Q_FUNC_INFO<<"=================== startLookup finish";
     emit finished ();
 }
 
 bool DiskLookup::isRunning()
 {
-    return mIsRunning;
+    return m_isRunning;
 }
 
 void DiskLookup::stopLookup()
 {
-    mStopLookupFlag = true;
+    m_stopLookupFlag = true;
 }
 
 void DiskLookup::addLookupDir(const QString &dirName, bool lookupImmediately)
 {
-    if (!mPathList.contains (dirName))
-        mPathList.append (dirName);
+    if (!m_pathList.contains (dirName))
+        m_pathList.append (dirName);
     if (lookupImmediately) {
         startLookup();
     }
@@ -77,7 +77,7 @@ void DiskLookup::addLookupDir(const QString &dirName, bool lookupImmediately)
 
 void DiskLookup::scanDir(const QString &path)
 {
-    if (mStopLookupFlag)
+    if (m_stopLookupFlag)
         return;
 
     QDir dir(path);
@@ -91,9 +91,9 @@ void DiskLookup::scanDir(const QString &path)
 //        qDebug()<<Q_FUNC_INFO<<" find file ["<<info.absoluteFilePath ()<<"]";
         if (info.isDir ()) {
             qDebug()<<Q_FUNC_INFO<<" current is dir, add to list "<<info.absolutePath ();
-            mPathList.append (info.absolutePath ());
+            m_pathList.append (info.absolutePath ());
         } else {
-            QMimeType type = mQMimeDatabase.mimeTypeForFile (info);
+            QMimeType type = m_QMimeDatabase.mimeTypeForFile (info);
 
 //            mCount++;
 //            qDebug()<<Q_FUNC_INFO<<" find count "<<mCount;

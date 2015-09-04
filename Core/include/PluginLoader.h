@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QList>
 #include "Common.h"
+#include "SingletonPointer.h"
 
 class QPluginLoader;
 namespace PhoenixPlayer {
@@ -22,17 +23,25 @@ namespace MetadataLookup {
 class IMetadataLookup;
 }
 
+namespace Decoder {
+class IDecoder;
+}
+
+namespace OutPut {
+class IOutPut;
+}
+
 class PluginHost;
 class PluginLoader : public QObject
 {
     Q_OBJECT
+    DECLARE_SINGLETON_POINTER(PluginLoader)
 public:
-    explicit PluginLoader(QObject *parent = 0);
     virtual ~PluginLoader();
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    static PluginLoader *instance();
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    static PluginLoader *instance();
+//#endif
 
     void setPluginPath(Common::PluginType type, const QString &path);
 
@@ -62,6 +71,11 @@ public:
     ///
     MetadataLookup::IMetadataLookup *getCurrentMetadataLookup();
 
+
+    Decoder::IDecoder *getCurrentDecoder();
+
+    OutPut::IOutPut *getCurrentOutPut();
+
     ///
     /// \brief getPluginNames 返回当前所有插件的名称列表
     /// \param type
@@ -79,6 +93,7 @@ public:
 
 protected:
     void initPlugins();
+//    explicit PluginLoader(QObject *parent = 0);
 signals:
     ///
     /// \brief signalPluginChanged setNewPlugin后如果新插件名和当前使用的插件名不同,则发送此信号
@@ -94,10 +109,10 @@ public slots:
     ///
      void setNewPlugin(Common::PluginType type, const QString &newPluginHash);
 private:
-     bool isInit;
-     QList<PluginHost *> mPluginHostList;
-     QHash<Common::PluginType, PluginHost*> mCurrentPluginHost;
-     QHash<Common::PluginType, QString> mPluginPath;
+     bool m_isInit;
+     QList<PluginHost *> m_pluginHostList;
+     QHash<Common::PluginType, PluginHost*> m_currentPluginHost;
+     QHash<Common::PluginType, QString> m_pluginPath;
 };
 
 } //PhoenixPlayer

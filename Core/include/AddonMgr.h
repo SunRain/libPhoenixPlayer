@@ -28,7 +28,7 @@ public:
 protected:
     void initList();
 private:
-    QList<Addon *> mAddonList;
+    QList<Addon *> m_addonList;
 };
 } //PhoenixPlayer
 #endif // ADDONMGR_H

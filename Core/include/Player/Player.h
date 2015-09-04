@@ -10,6 +10,7 @@
 //#include "IPlayBackend.h"
 //#include "MusicLibraryManager.h"
 #include "MetadataLookup/IMetadataLookup.h"
+#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 class Settings;
@@ -35,13 +36,14 @@ class Player : public QObject
     Q_PROPERTY(int playMode READ getPlayModeInt WRITE setPlayMode NOTIFY playModeChanged)
     Q_PROPERTY(int playBackendState READ getPlayBackendStateInt NOTIFY playBackendStateChanged)
     Q_PROPERTY(bool autoSkipForwad READ getAutoSkipForward WRITE setAutoSkipForward NOTIFY autoSkipForwardChanged)
+
+    DECLARE_SINGLETON_POINTER(Player)
 public:
-    explicit Player(QObject *parent = 0);
     virtual ~Player();
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    static Player *instance();
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    static Player *instance();
+//#endif
 
 //    void setPlayBackendLoader(PlayBackend::PlayBackendLoader *loader = 0);
 //    void setPluginLoader(PluginLoader *loader = 0);
@@ -98,6 +100,7 @@ public:
 //    Q_INVOKABLE void lookupTrackDescription(const QString &songHash);
 
 protected:
+//    explicit Player(QObject *parent = 0);
     enum EPointer {
         PNULL = 0x0,
         PPluginLoader,
@@ -170,7 +173,7 @@ public slots:
     void play();
     void stop();
     void pause();
-    void setVolume(int vol = 0);
+//    void setVolume(int vol = 0);
     void setPosition(qreal pos = 0, bool isPercent = true);
     ///
     /// \brief skipForward 跳到下一首歌曲
@@ -205,23 +208,23 @@ private:
     void doPlayByPlayMode();
 
 private:
-    bool isInit;
-    Settings *mSettings;
-    PluginLoader *mPluginLoader;
-    MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
+    bool m_isInit;
+    Settings *m_settings;
+    PluginLoader *m_pluginLoader;
+    MusicLibrary::MusicLibraryManager *m_musicLibraryManager;
 //    MetadataLookup::MetadataLookupManager *mMetaLookupManager;
 //    MetadataLookup::MetadataLookupMgr *mMetaLookupManager;
 
-    QPointer<PlayBackend::IPlayBackend> mPlayBackend;
+    QPointer<PlayBackend::IPlayBackend> m_playBackend;
 
-    Common::PlayMode mPlayMode;
-    quint64 mCurrentSongLength;
-    quint64 mCurrentPlayPos;
+    Common::PlayMode m_playMode;
+    quint64 m_currentSongLength;
+    quint64 m_currentPlayPos;
 
     //临时播放器队列
-    QStringList mPlayQueue;
+    QStringList m_playQueue;
 
-    bool mAutoSkipForward;
+    bool m_autoSkipForward;
 };
 
 } //PhoenixPlayer

@@ -8,14 +8,14 @@ SongMetaData::SongMetaData(QObject *parent) : QObject(parent)
 {
     for (int i = (int)Common::SongMetaTags::E_FirstFlag +1;
          i < (int)Common::SongMetaTags::E_LastFlag; ++i) {
-        mMetaHash.insert (Common::SongMetaTags(i), QVariant());
+        m_metaHash.insert (Common::SongMetaTags(i), QVariant());
     }
 }
 
 SongMetaData::~SongMetaData()
 {
-    if (!mMetaHash.isEmpty ())
-        mMetaHash.clear ();
+    if (!m_metaHash.isEmpty ())
+        m_metaHash.clear ();
 }
 
 void SongMetaData::setMeta(Common::SongMetaTags tagType, const QVariant &value)
@@ -24,7 +24,7 @@ void SongMetaData::setMeta(Common::SongMetaTags tagType, const QVariant &value)
             || tagType == Common::SongMetaTags::E_LastFlag) {
         qDebug()<<"Invalid SongMetaTag Type "<<tagType;
     }
-    mMetaHash[tagType] = value;
+    m_metaHash[tagType] = value;
 }
 
 QVariant SongMetaData::getMeta(Common::SongMetaTags tagType) const
@@ -33,7 +33,7 @@ QVariant SongMetaData::getMeta(Common::SongMetaTags tagType) const
             || tagType == Common::SongMetaTags::E_LastFlag) {
         qDebug()<<"Invalid SongMetaTag Type "<<tagType;
     }
-    return mMetaHash[tagType];
+    return m_metaHash[tagType];
 }
 
 QString SongMetaData::toString()
@@ -56,7 +56,7 @@ QString SongMetaData::toString()
 
 bool SongMetaData::operator ==(const SongMetaData &other) const
 {
-    return mMetaHash[Common::E_Hash].toString () == other.getMeta (Common::E_Hash).toString ();
+    return m_metaHash[Common::E_Hash].toString () == other.getMeta (Common::E_Hash).toString ();
 }
 
 }//PhoenixPlayer

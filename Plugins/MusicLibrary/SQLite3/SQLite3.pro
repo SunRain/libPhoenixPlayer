@@ -17,6 +17,7 @@ include(SQLite3.pri)
 INCLUDEPATH += \
         $$PWD
 
+QMAKE_LIBDIR += ../lib
 
 unix {
 #    CONFIG += link_pkgconfig

@@ -22,7 +22,7 @@ const char *KEY_FETCH_METADATA_MOBILE_NETWORK = "fetchMetaDataMobileNetwork";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
-    mSettings = new QSettings(qApp->organizationName(), qApp->applicationName(),
+    m_settings = new QSettings(qApp->organizationName(), qApp->applicationName(),
                               parent);
 
 #ifdef UBUNTU_TOUCH
@@ -32,26 +32,26 @@ Settings::Settings(QObject *parent) : QObject(parent)
 //    dataPath = d.absolutePath ();
     mDefaultMusicDir = QString("%1/Music").arg (dataPath);
 #else
-    mDefaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
+    m_defaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 #endif
-    mDefaultMusicImageDir = QString("%1/Images")
+    m_defaultMusicImageDir = QString("%1/Images")
             .arg (QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
 
-    QDir dir(mDefaultMusicImageDir);
+    QDir dir(m_defaultMusicImageDir);
     if (!dir.exists ()) {
-        if (!dir.mkpath (mDefaultMusicImageDir)) {
+        if (!dir.mkpath (m_defaultMusicImageDir)) {
             qDebug()<<"make music image dir fail";
         }
     }
-    dir.setPath(mDefaultMusicDir);
+    dir.setPath(m_defaultMusicDir);
     if (!dir.exists()) {
-        if (!dir.mkpath(mDefaultMusicDir))
+        if (!dir.mkpath(m_defaultMusicDir))
             qDebug()<<"make music default dir fail";
     }
 
-    mAutoFetchMetadata = false;
-    mFetchMetaDataMobileNetwork = false;
+    m_autoFetchMetadata = false;
+    m_fetchMetaDataMobileNetwork = false;
     checkInit ();
 }
 
@@ -63,25 +63,25 @@ Settings::Settings(QObject *parent) : QObject(parent)
 
 Settings::~Settings()
 {
-    mSettings->sync ();
-    mSettings->deleteLater ();
+    m_settings->sync ();
+    m_settings->deleteLater ();
 }
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-Settings *Settings::instance()
-{
-    static QMutex mutex;
-    static QScopedPointer<Settings> scp;
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//Settings *Settings::instance()
+//{
+//    static QMutex mutex;
+//    static QScopedPointer<Settings> scp;
 
-    if (Q_UNLIKELY(scp.isNull())) {
-        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
-        mutex.lock();
-        scp.reset(new Settings(0));
-        mutex.unlock();
-    }
-    return scp.data();
-}
-#endif
+//    if (Q_UNLIKELY(scp.isNull())) {
+//        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
+//        mutex.lock();
+//        scp.reset(new Settings(0));
+//        mutex.unlock();
+//    }
+//    return scp.data();
+//}
+//#endif
 
 bool Settings::setMusicDir(const QStringList &dirList)
 {
@@ -93,15 +93,15 @@ bool Settings::setMusicDir(const QStringList &dirList)
     QString last = list.takeLast ();
     //Only one dir in the list
     if (list.isEmpty ()) {
-        mSettings->setValue (KEY_MUSIC_DIR, last);
+        m_settings->setValue (KEY_MUSIC_DIR, last);
         return true;
     }
     QString tmp;
     foreach (QString s, list) {
         tmp += QString("%1||").arg (s);
     }
-    mSettings->setValue (KEY_MUSIC_DIR, QString("%1%2").arg (tmp).arg (last));
-    mSettings->sync ();
+    m_settings->setValue (KEY_MUSIC_DIR, QString("%1%2").arg (tmp).arg (last));
+    m_settings->sync ();
     return true;
 }
 
@@ -130,43 +130,43 @@ bool Settings::deleteMusicDir(const QString &target)
 
 QStringList Settings::getMusicDirs()
 {
-    return mSettings->value (KEY_MUSIC_DIR, mDefaultMusicDir).toString ().split ("||");
+    return m_settings->value (KEY_MUSIC_DIR, m_defaultMusicDir).toString ().split ("||");
 }
 
 QString Settings::getLastPlayedSong()
 {
-    return mSettings->value (KEY_LAST_SONG, QString()).toString ();
+    return m_settings->value (KEY_LAST_SONG, QString()).toString ();
 }
 
 bool Settings::setLastPlayedSong(const QString &songHash)
 {
-    mSettings->setValue (KEY_LAST_SONG, songHash);
-    mSettings->sync ();
+    m_settings->setValue (KEY_LAST_SONG, songHash);
+    m_settings->sync ();
     return true;
 }
 
 bool Settings::setCurrentPlayListHash(const QString &hash)
 {
-    mSettings->setValue (KEY_PLAY_LIST, hash);
-    mSettings->sync ();
+    m_settings->setValue (KEY_PLAY_LIST, hash);
+    m_settings->sync ();
     return true;
 }
 
 QString Settings::getPlayListHash()
 {
-    return mSettings->value (KEY_PLAY_LIST, QString()).toString ();
+    return m_settings->value (KEY_PLAY_LIST, QString()).toString ();
 }
 
 bool Settings::setPlayBackend(const QString &backendName)
 {
-    mSettings->setValue (KEY_PLAY_BACKEND, backendName);
-    mSettings->sync ();
+    m_settings->setValue (KEY_PLAY_BACKEND, backendName);
+    m_settings->sync ();
     return true;
 }
 
 QString Settings::getCurrentPlayBackend()
 {
-    return mSettings->value (KEY_PLAY_BACKEND, QString()).toString ();
+    return m_settings->value (KEY_PLAY_BACKEND, QString()).toString ();
 }
 
 bool Settings::setMusicImageCachePath(const QString &absolutePath)
@@ -175,80 +175,96 @@ bool Settings::setMusicImageCachePath(const QString &absolutePath)
     if (!dir.exists ())
         dir.mkpath (absolutePath);
 
-    mSettings->setValue (KEY_MUSIC_IMAGE_CACHE, absolutePath);
-    mSettings->sync ();
+    m_settings->setValue (KEY_MUSIC_IMAGE_CACHE, absolutePath);
+    m_settings->sync ();
     return true;
 }
 
 QString Settings::getMusicImageCachePath()
 {
-    return mSettings->value (KEY_MUSIC_IMAGE_CACHE, mDefaultMusicImageDir).toString ();
+    return m_settings->value (KEY_MUSIC_IMAGE_CACHE, m_defaultMusicImageDir).toString ();
 }
 
 bool Settings::setTraceLog(bool trace)
 {
-    mSettings->setValue(KEY_TRACE_LOG, trace);
-    mSettings->sync();
+    m_settings->setValue(KEY_TRACE_LOG, trace);
+    m_settings->sync();
     return true;
 }
 
 bool Settings::traceLog()
 {
-    return mSettings->value(KEY_TRACE_LOG, false).toBool();
+    return m_settings->value(KEY_TRACE_LOG, false).toBool();
 }
 
-bool Settings::setConfig(const QString &key, const QString &value)
+void Settings::setConfig(const QString &key, const QString &value)
 {
     if (key.isEmpty () || value.isEmpty ())
-        return false;
-    mSettings->setValue (key, value);
-    mSettings->sync ();
-    return true;
+        return;
+    m_settings->setValue (key, value);
+    m_settings->sync ();
 }
 
 QString Settings::getConfig(const QString &key, const QString &defaultValue)
 {
-    return mSettings->value (key, defaultValue).toString ();
+    if (key.isEmpty ())
+        return defaultValue;
+    return m_settings->value (key, defaultValue).toString ();
+}
+
+void Settings::setConfig(const QString &key, bool value)
+{
+    if (key.isEmpty ())
+        return;
+    m_settings->setValue (key, value);
+    m_settings->sync ();
+}
+
+bool Settings::getConfig(const QString &key, bool defaultValue)
+{
+    if (key.isEmpty ())
+        return defaultValue;
+    return m_settings->value (key, defaultValue).toBool ();
 }
 
 bool Settings::autoFetchMetaData()
 {
-    return mAutoFetchMetadata;
+    return m_autoFetchMetadata;
 }
 
 void Settings::setAutoFetchMetaData(bool autoFetch)
 {
-    if (mAutoFetchMetadata == autoFetch)
+    if (m_autoFetchMetadata == autoFetch)
         return;
-    mAutoFetchMetadata = autoFetch;
-    mSettings->setValue (KEY_AUTO_FETCH_METADATA, autoFetch);
-    mSettings->sync ();
+    m_autoFetchMetadata = autoFetch;
+    m_settings->setValue (KEY_AUTO_FETCH_METADATA, autoFetch);
+    m_settings->sync ();
     emit autoFetchMetaDataChanged ();
 }
 
 bool Settings::fetchMetaDataMobileNetwork()
 {
-    return mFetchMetaDataMobileNetwork;
+    return m_fetchMetaDataMobileNetwork;
 }
 
 void Settings::setFetchMetaDataMobileNetwork(bool fetch)
 {
-    if (mFetchMetaDataMobileNetwork == fetch)
+    if (m_fetchMetaDataMobileNetwork == fetch)
         return;
-    mFetchMetaDataMobileNetwork = fetch;
-    mSettings->setValue (KEY_FETCH_METADATA_MOBILE_NETWORK, mFetchMetaDataMobileNetwork);
-    mSettings->sync ();
+    m_fetchMetaDataMobileNetwork = fetch;
+    m_settings->setValue (KEY_FETCH_METADATA_MOBILE_NETWORK, m_fetchMetaDataMobileNetwork);
+    m_settings->sync ();
     emit fetchMetaDataMobileNetworkChanged ();
 }
 
 void Settings::checkInit()
 {
-    QStringList list = mSettings->allKeys ();
+    QStringList list = m_settings->allKeys ();
     if (!list.contains (KEY_MUSIC_DIR))
-        mSettings->setValue (KEY_MUSIC_DIR, mDefaultMusicDir);
+        m_settings->setValue (KEY_MUSIC_DIR, m_defaultMusicDir);
     if (!list.contains (KEY_MUSIC_IMAGE_CACHE))
-        mSettings->setValue (KEY_MUSIC_IMAGE_CACHE, mDefaultMusicImageDir);
+        m_settings->setValue (KEY_MUSIC_IMAGE_CACHE, m_defaultMusicImageDir);
 
-    mSettings->sync ();
+    m_settings->sync ();
 }
 } //PhoenixPlayer

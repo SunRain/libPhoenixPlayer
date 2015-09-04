@@ -14,7 +14,7 @@ class IMusicTagParser : public QObject
 public:
     explicit IMusicTagParser(QObject *parent = 0);
     virtual ~IMusicTagParser() {
-        mList.clear ();
+        m_list.clear ();
     }
 
     ///
@@ -25,13 +25,13 @@ public:
     virtual bool parserTag(SongMetaData *targetMetaDate) = 0;
 protected:
     inline QString indexToGenre(const int &index) {
-        return (index > 0 && index < mList.size ())
-                ? mList.at (index)
+        return (index > 0 && index < m_list.size ())
+                ? m_list.at (index)
                 : "Unknown";
     }
 
 private:
-    QStringList mList;
+    QStringList m_list;
 };
 } //MusicLibrary
 } //PhoenixPlayer

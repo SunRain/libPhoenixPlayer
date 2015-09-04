@@ -34,16 +34,16 @@ public:
 
     bool operator == (const PluginHost &other);
 private:
-    Common::PluginType mPluginType;
-    QString mLibraryFile;
-    QString mHash;
-    QString mName;
-    QString mVersion;
-    QString mDescription;
-    QString mConfigFile;
-    bool mValid;
-    QPluginLoader *mPluginLoader;
-    QObject *mPluginObject;
+    Common::PluginType m_pluginType;
+    QString m_libraryFile;
+    QString m_hash;
+    QString m_name;
+    QString m_version;
+    QString m_description;
+    QString m_configFile;
+    bool m_valid;
+    QPluginLoader *m_pluginLoader;
+    QObject *m_pluginObject;
 
 };
 } //PhoenixPlayer

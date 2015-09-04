@@ -23,4 +23,10 @@ HEADERS += \
     $$PWD/include/AddonMgr.h \
     $$PWD/include/MusicLibrary/LocalMusicSacnner.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgr.h \
-    $$PWD/include/MetadataLookup/MetadataLookupMgrWrapper.h
+    $$PWD/include/MetadataLookup/MetadataLookupMgrWrapper.h \
+    $$PWD/include/Buffer.h \
+    $$PWD/include/AudioParameters.h \
+    $$PWD/include/Decoder/IDecoder.h \
+    $$PWD/include/OutPut/IOutPut.h \
+    $$PWD//include/Backend/SoftVolume.h \
+    $$PWD//include/Backend/BaseVolume.h

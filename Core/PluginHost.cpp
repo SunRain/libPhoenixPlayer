@@ -11,111 +11,115 @@ namespace PhoenixPlayer {
 
 PluginHost::PluginHost(const QString &libraryFile, QObject *parent)
     : QObject(parent),
-      mLibraryFile(libraryFile),
-      mPluginObject(0)
+      m_libraryFile(libraryFile),
+      m_pluginObject(0)
 {
-    mValid = false;
-    mPluginType = Common::PluginType::PluginTypeUndefined;
-    mPluginLoader = new QPluginLoader(libraryFile, this);
+    m_valid = false;
+    m_pluginType = Common::PluginType::PluginTypeUndefined;
+    m_pluginLoader = new QPluginLoader(libraryFile, this);
     QFileInfo f(libraryFile);
     QString libraryPath = f.absolutePath ();
 
-    QJsonObject obj = mPluginLoader->metaData ();
+    QJsonObject obj = m_pluginLoader->metaData ();
     if (!obj.isEmpty ()) {
         QString iid = obj.value ("IID").toString ();
-        mValid = true;
+        m_valid = true;
         if (iid.startsWith ("PhoenixPlayer.PlayBackend")) {
-            mPluginType = Common::PluginPlayBackend;
+            m_pluginType = Common::PluginPlayBackend;
         } else if (iid.startsWith ("PhoenixPlayer.MetadataLookup")) {
-            mPluginType = Common::PluginMetadataLookup;
+            m_pluginType = Common::PluginMetadataLookup;
         } else if (iid.startsWith ("PhoenixPlayer.MusicTagParser")) {
-            mPluginType = Common::PluginMusicTagParser;
+            m_pluginType = Common::PluginMusicTagParser;
         } else if (iid.startsWith ("PhoenixPlayer.PlayListDAO")) {
-            mPluginType = Common::PluginPlayListDAO;
+            m_pluginType = Common::PluginPlayListDAO;
+        } else if (iid.startsWith ("PhoenixPlayer.Decoder")) {
+            m_pluginType = Common::PluginDecoder;
+        } else if (iid.startsWith ("PhoenixPlayer.OutPut")) {
+            m_pluginType = Common::PluginOutPut;
         } else {
-            mPluginType = Common::PluginTypeUndefined;
-            mValid = false;
+            m_pluginType = Common::PluginTypeUndefined;
+            m_valid = false;
         }
         QJsonObject md = obj.value ("MetaData").toObject ();
         if (!md.isEmpty ()) {
-            mName = md.value ("name").toString ();
-            mVersion = md.value ("version").toString ();
-            mDescription = md.value ("description").toString ();
-            mHash = Util::calculateHash (libraryFile);
-            mConfigFile = md.value ("configFile").toString ();
-            if (!mConfigFile.isEmpty ()) {
-                mConfigFile = QString("%1/%2")
-                        .arg (libraryPath).arg (mConfigFile);
+            m_name = md.value ("name").toString ();
+            m_version = md.value ("version").toString ();
+            m_description = md.value ("description").toString ();
+            m_hash = Util::calculateHash (libraryFile);
+            m_configFile = md.value ("configFile").toString ();
+            if (!m_configFile.isEmpty ()) {
+                m_configFile = QString("%1/%2")
+                        .arg (libraryPath).arg (m_configFile);
             }
         } else {
-            mValid = false;
+            m_valid = false;
         }
     } else {
-        qDebug()<<Q_FUNC_INFO<<" get metadata error for plugin ["<<mLibraryFile
-               <<"] error is ["<<mPluginLoader->errorString ()<<"]";
+        qDebug()<<Q_FUNC_INFO<<" get metadata error for plugin ["<<m_libraryFile
+               <<"] error is ["<<m_pluginLoader->errorString ()<<"]";
     }
-    if (mPluginLoader->isLoaded ()) {
-        if (!mPluginLoader->unload ())
-            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<mPluginLoader->errorString ();
+    if (m_pluginLoader->isLoaded ()) {
+        if (!m_pluginLoader->unload ())
+            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
     }
-    delete mPluginLoader;
-    mPluginLoader = 0;
+    delete m_pluginLoader;
+    m_pluginLoader = 0;
 }
 
 PluginHost::~PluginHost()
 {
-    if (mPluginLoader) {
-        if (mPluginLoader->isLoaded ())
-            mPluginLoader->unload ();
-        delete mPluginLoader;
-        mPluginLoader = 0;
+    if (m_pluginLoader) {
+        if (m_pluginLoader->isLoaded ())
+            m_pluginLoader->unload ();
+        delete m_pluginLoader;
+        m_pluginLoader = 0;
     }
-    if (mPluginObject) {
-        delete mPluginObject;
-        mPluginObject = 0;
+    if (m_pluginObject) {
+        delete m_pluginObject;
+        m_pluginObject = 0;
     }
 }
 
 Common::PluginType PluginHost::type() const
 {
-    return mPluginType;
+    return m_pluginType;
 }
 
 QString PluginHost::hash() const
 {
-    return mHash;
+    return m_hash;
 }
 
 QString PluginHost::name() const
 {
-    return mName;
+    return m_name;
 }
 
 QString PluginHost::version() const
 {
-    return mVersion;
+    return m_version;
 }
 
 QString PluginHost::description() const
 {
-    return mDescription;
+    return m_description;
 }
 
 QString PluginHost::libraryFile() const
 {
-    return mLibraryFile;
+    return m_libraryFile;
 }
 
 QString PluginHost::configFile() const
 {
-    return mConfigFile;
+    return m_configFile;
 }
 
 bool PluginHost::isLoaded()
 {
-    if (!mPluginLoader)
-        mPluginLoader = new QPluginLoader(mLibraryFile, this);
-    if (mPluginLoader->isLoaded ())
+    if (!m_pluginLoader)
+        m_pluginLoader = new QPluginLoader(m_libraryFile, this);
+    if (m_pluginLoader->isLoaded ())
         return true;
     return false;
 }
@@ -123,14 +127,14 @@ bool PluginHost::isLoaded()
 void PluginHost::unLoad()
 {
     qDebug()<<Q_FUNC_INFO;
-    if (!mPluginLoader)
-        mPluginLoader = new QPluginLoader(mLibraryFile, this);
-    if (mPluginLoader->isLoaded ()) {
-        if (!mPluginLoader->unload ()) {
-            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<mPluginLoader->errorString ();
-            if (mPluginObject) {
-                delete mPluginObject;
-                mPluginObject = 0;
+    if (!m_pluginLoader)
+        m_pluginLoader = new QPluginLoader(m_libraryFile, this);
+    if (m_pluginLoader->isLoaded ()) {
+        if (!m_pluginLoader->unload ()) {
+            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
+            if (m_pluginObject) {
+                delete m_pluginObject;
+                m_pluginObject = 0;
             }
         }
     }
@@ -138,30 +142,30 @@ void PluginHost::unLoad()
 //        delete mPluginObject;
 //        mPluginObject = 0;
 //    }
-    delete mPluginLoader;
-    mPluginLoader = 0;
+    delete m_pluginLoader;
+    m_pluginLoader = 0;
 }
 
 bool PluginHost::isValid()
 {
-    return mValid;
+    return m_valid;
 }
 
 QObject *PluginHost::instance()
 {
     qDebug()<<Q_FUNC_INFO;
     if (!this->isLoaded ()) {
-        mPluginObject = mPluginLoader->instance ();
+        m_pluginObject = m_pluginLoader->instance ();
     } else {
-        if (!mPluginObject) {
+        if (!m_pluginObject) {
             this->unLoad ();
-            if (!mPluginLoader)
-                mPluginLoader = new QPluginLoader(mLibraryFile, this);
-            mPluginObject = mPluginLoader->instance ();
+            if (!m_pluginLoader)
+                m_pluginLoader = new QPluginLoader(m_libraryFile, this);
+            m_pluginObject = m_pluginLoader->instance ();
         }
     }
-    qDebug()<<Q_FUNC_INFO<<" here mPluginObject is nullptr "<<(mPluginObject == 0);
-    return mPluginObject;
+    qDebug()<<Q_FUNC_INFO<<" here mPluginObject is nullptr "<<(m_pluginObject == 0);
+    return m_pluginObject;
 }
 
 bool PluginHost::operator ==(const PluginHost &other)

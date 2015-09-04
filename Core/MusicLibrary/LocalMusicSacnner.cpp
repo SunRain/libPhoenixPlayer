@@ -19,63 +19,63 @@ namespace MusicLibrary {
 LocalMusicSacnner::LocalMusicSacnner(QObject *parent) :
     QObject(parent)
 {
-    mTagParserWrapper = nullptr;
-    mAsyncDiskLookup = nullptr;
+    m_tagParserWrapper = nullptr;
+    m_asyncDiskLookup = nullptr;
 
 #if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
     mSettings = Settings::instance();
     mPluginLoader = PluginLoader::instance();
 #else
     qDebug()<<"For other os";
-    mSettings = SingletonPointer<Settings>::instance ();
-    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
+    m_settings = SingletonPointer<Settings>::instance ();
+    m_pluginLoader = SingletonPointer<PluginLoader>::instance ();
 #endif
-    mDao = mPluginLoader->getCurrentPlayListDAO ();
+    m_dao = m_pluginLoader->getCurrentPlayListDAO ();
 }
 
 LocalMusicSacnner::~LocalMusicSacnner()
 {
-    if (mTagParserWrapper) {
-        mTagParserWrapper->deleteLater ();
+    if (m_tagParserWrapper) {
+        m_tagParserWrapper->deleteLater ();
     }
-    if (mAsyncDiskLookup) {
-        mAsyncDiskLookup->deleteLater ();
+    if (m_asyncDiskLookup) {
+        m_asyncDiskLookup->deleteLater ();
     }
 }
 
 void LocalMusicSacnner::scanLocalMusic()
 {
-    if (mTagParserWrapper == nullptr) {
-        mTagParserWrapper = new AsyncTagParserMgrWrapper(this);
-        connect (mTagParserWrapper, &AsyncTagParserMgrWrapper::started, [&] {
+    if (m_tagParserWrapper == nullptr) {
+        m_tagParserWrapper = new AsyncTagParserMgrWrapper(this);
+        connect (m_tagParserWrapper, &AsyncTagParserMgrWrapper::started, [&] {
             qDebug()<<Q_FUNC_INFO<<" mTagParserWrapper started";
         });
 
-        connect (mTagParserWrapper, &AsyncTagParserMgrWrapper::finished, [&] {
+        connect (m_tagParserWrapper, &AsyncTagParserMgrWrapper::finished, [&] {
             qDebug()<<Q_FUNC_INFO<<" mTagParserWrapper finished";
 
-            mDao->beginTransaction ();
-            for (int i=0; i<mMetaDataList.size (); ++i) {
+            m_dao->beginTransaction ();
+            for (int i=0; i<m_metaDataList.size (); ++i) {
 //                qDebug()<<Q_FUNC_INFO<<" insert ("<<i<<") ["<<mMetaDataList.at (i)->toString ()<<"]";
-                mDao->insertMetaData (mMetaDataList.at (i));
+                m_dao->insertMetaData (m_metaDataList.at (i));
             }
-            mDao->commitTransaction ();
+            m_dao->commitTransaction ();
 
-            mTagParserWrapper->deleteLater ();
-            mTagParserWrapper = nullptr;
+            m_tagParserWrapper->deleteLater ();
+            m_tagParserWrapper = nullptr;
 
             emit searchingFinished ();
         });
     }
 
-    if (mAsyncDiskLookup == nullptr) {
-        mAsyncDiskLookup = new AsyncDiskLookup(this);
+    if (m_asyncDiskLookup == nullptr) {
+        m_asyncDiskLookup = new AsyncDiskLookup(this);
 
-        connect (mAsyncDiskLookup, &AsyncDiskLookup::started, [&] {
+        connect (m_asyncDiskLookup, &AsyncDiskLookup::started, [&] {
             qDebug()<<Q_FUNC_INFO<<" AsyncDiskLookup::started";
         });
 
-        connect (mAsyncDiskLookup, &AsyncDiskLookup::finished,
+        connect (m_asyncDiskLookup, &AsyncDiskLookup::finished,
                  [&] (const QList<SongMetaData *> &list){
             qDebug()<<Q_FUNC_INFO<<" AsyncDiskLookup::finished , result list size "<<list.size();
             foreach (SongMetaData *d, list) {
@@ -85,22 +85,22 @@ void LocalMusicSacnner::scanLocalMusic()
                      ++i) {
                     data->setMeta (Common::SongMetaTags(i), d->getMeta (Common::SongMetaTags(i)));
                 }
-                mMetaDataList.append (data);
+                m_metaDataList.append (data);
             }
 
-            mAsyncDiskLookup->deleteLater ();
-            mAsyncDiskLookup = nullptr;
-            mTagParserWrapper->parser (&mMetaDataList);
+            m_asyncDiskLookup->deleteLater ();
+            m_asyncDiskLookup = nullptr;
+            m_tagParserWrapper->parser (&m_metaDataList);
         });
     }
 
-    if (mTagParserWrapper != nullptr && mTagParserWrapper->isRunning ()) {
+    if (m_tagParserWrapper != nullptr && m_tagParserWrapper->isRunning ()) {
         qWarning()<<Q_FUNC_INFO<<" Parser track tags, can't scan local music atm";
         return;
     }
 
-    mAsyncDiskLookup->setLookupDirs (mSettings->getMusicDirs ());
-    mAsyncDiskLookup->startLookup ();
+    m_asyncDiskLookup->setLookupDirs (m_settings->getMusicDirs ());
+    m_asyncDiskLookup->startLookup ();
 }
 
 } //MusicLibrary

@@ -41,14 +41,13 @@ private:
     void setPluginLoader();
     void setPlayListDAO();
 private:
-    QList<SongMetaData*> mMetaList;
-    QPointer<IPlayListDAO> mPlayListDAO;
-//    QPointer<PluginLoader> mPluginLoader;
-    PluginLoader *mPluginLoader;
-    QList<IMusicTagParser *> mPluginList;
-    QString mPluginPath;
-    QStringList mPluginHashList;
-    int mCurrentIndex;
+    QList<SongMetaData*> m_metaList;
+    QPointer<IPlayListDAO> m_playListDAO;
+    PluginLoader *m_pluginLoader;
+    QList<IMusicTagParser *> m_pluginList;
+    QString m_pluginPath;
+    QStringList m_pluginHashList;
+    int m_currentIndex;
 };
 
 } //MusicLibrary

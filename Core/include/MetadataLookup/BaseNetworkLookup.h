@@ -37,14 +37,14 @@ private slots:
 private:
     void readReplyData();
 private:
-    QNetworkAccessManager *mNetwork;
-    QNetworkReply *mReply;
-    QString mUrl;
-    RequestType mRequestType;
-    QTimer *mTimer;
-    int mInterval;
-    bool mFailEmitted;
-    bool mRequestAborted;
+    QNetworkAccessManager *m_network;
+    QNetworkReply *m_reply;
+    QString m_url;
+    RequestType m_requestType;
+    QTimer *m_timer;
+    int m_interval;
+    bool m_failEmitted;
+    bool m_requestAborted;
 };
 } //Lyrics
 } //PhoenixPlayer

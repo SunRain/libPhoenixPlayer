@@ -38,7 +38,7 @@ inline static void qCallOnce_p(Function func, QBasicAtomicInt& flag)
     int protectFlag = flag.fetchAndStoreAcquire(flag.load());
 #endif
 
-   qDebug()<<"protectFlag is "<<protectFlag;
+//   qDebug()<<"protectFlag is "<<protectFlag;
 
     if (protectFlag == CO_Finished)
         return;

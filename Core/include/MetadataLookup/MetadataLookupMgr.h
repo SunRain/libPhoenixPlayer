@@ -55,24 +55,23 @@ private:
     void doLookup();
     void emitFinish();
 private:
-    PluginLoader *mPluginLoader;
-    IMetadataLookup *mCurrentLookup;
-    Settings *mSettings;
-    Util *mUtil;
+    PluginLoader *m_pluginLoader;
+    IMetadataLookup *m_currentLookup;
+    Settings *m_settings;
+    Util *m_util;
 
-    QList<WorkNode> mWorkQueue;
-    WorkNode mCurrentNode;
+    QList<WorkNode> m_workQueue;
+    WorkNode m_currentNode;
 
-    QList<IMetadataLookup *> mLookupList;
-//    QList<PluginHost *> mHostList;
+    QList<IMetadataLookup *> m_lookupList;
 
-    QTimer *mDestructorTimer;
-    QMutex mWorkQueueLock;
-    QMutex mStartLookupLock;
-    QMutex mDestructorLock;
-    int mCurrentLookupIndex;
-    bool mLookupStarted;
-    bool mDestructorState;
+    QTimer *m_destructorTimer;
+    QMutex m_workQueueLock;
+    QMutex m_startLookupLock;
+    QMutex m_destructorLock;
+    int m_currentLookupIndex;
+    bool m_lookupStarted;
+    bool m_destructorState;
 };
 
 } //MetadataLookup

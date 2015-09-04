@@ -35,12 +35,12 @@ private slots:
 //    void parserTag(const QList<SongMetaData *> &list);
 
 private:
-    AsyncDiskLookup *mAsyncDiskLookup;
-    AsyncTagParserMgrWrapper *mTagParserWrapper;
-    QList<PhoenixPlayer::SongMetaData *> mMetaDataList;
-    Settings *mSettings;
-    PluginLoader *mPluginLoader;
-    IPlayListDAO *mDao;
+    AsyncDiskLookup *m_asyncDiskLookup;
+    AsyncTagParserMgrWrapper *m_tagParserWrapper;
+    QList<PhoenixPlayer::SongMetaData *> m_metaDataList;
+    Settings *m_settings;
+    PluginLoader *m_pluginLoader;
+    IPlayListDAO *m_dao;
 
 };
 } //MusicLibrary

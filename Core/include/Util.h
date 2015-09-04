@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTextCodec>
+#include "SingletonPointer.h"
 
 class QQmlEngine;
 namespace PhoenixPlayer {
@@ -12,6 +13,8 @@ class Util : public QObject
     Q_OBJECT
     Q_ENUMS(NetworkType)
     Q_PROPERTY(NetworkType networkType READ getNetworkType)
+
+    DECLARE_SINGLETON_POINTER(Util)
 public:
     enum NetworkType {
         TypeUnknown = 0x00,
@@ -21,10 +24,10 @@ public:
     };
 
 public:
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    static Util *instance();
-#endif
-    explicit Util(QObject *parent = 0);
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    static Util *instance();
+//#endif
+//    explicit Util(QObject *parent = 0);
     virtual ~Util();
     void setQQmlEngine(QQmlEngine *engine = 0);
 
@@ -51,7 +54,7 @@ signals:
 public slots:
 
 private:
-    QQmlEngine *mQQmlEngine;
+    QQmlEngine *m_QQmlEngine;
 };
 } //PhoenixPlayer
 #endif // UTIL_H

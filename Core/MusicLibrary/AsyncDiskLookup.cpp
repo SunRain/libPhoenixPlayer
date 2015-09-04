@@ -16,29 +16,29 @@ AsyncDiskLookup::AsyncDiskLookup(QObject *parent) :
     QObject(parent)
 {
     qDebug()<<Q_FUNC_INFO<<" ====== ";
-    mDiskLookupThread = new QThread(0);
-    mDiskLookup = new DiskLookup(0);
-    mDiskLookup->moveToThread (mDiskLookupThread);
+    m_diskLookupThread = new QThread(0);
+    m_diskLookup = new DiskLookup(0);
+    m_diskLookup->moveToThread (m_diskLookupThread);
 
 
-    connect (mDiskLookupThread, &QThread::started, [&] {
+    connect (m_diskLookupThread, &QThread::started, [&] {
         qDebug()<<Q_FUNC_INFO<<" Thread start, we'll start lookup now";
         emit started ();
-        mDiskLookup->startLookup ();
+        m_diskLookup->startLookup ();
     });
-    connect (mDiskLookupThread, &QThread::finished, [&] {
+    connect (m_diskLookupThread, &QThread::finished, [&] {
         qDebug()<<Q_FUNC_INFO<<" mDiskLookupThread finished";
-        if (mDiskLookup->isRunning ())
-            mDiskLookup->stopLookup ();
-        emit finished (mMetaDataList);
+        if (m_diskLookup->isRunning ())
+            m_diskLookup->stopLookup ();
+        emit finished (m_metaDataList);
     });
-    connect (mDiskLookup, &DiskLookup::finished, [&] {
+    connect (m_diskLookup, &DiskLookup::finished, [&] {
         qDebug()<<Q_FUNC_INFO<<" DiskLookup finished, we'll try to finish thread";
 
-        if (mDiskLookupThread != nullptr)
-            mDiskLookupThread->quit();
+        if (m_diskLookupThread != nullptr)
+            m_diskLookupThread->quit();
     });
-    connect (mDiskLookup, &DiskLookup::fileFound,
+    connect (m_diskLookup, &DiskLookup::fileFound,
              this, &AsyncDiskLookup::found,
              Qt::BlockingQueuedConnection);
 }
@@ -47,38 +47,38 @@ AsyncDiskLookup::~AsyncDiskLookup()
 {
     qDebug()<<Q_FUNC_INFO<<">>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<";
 
-    if (mDiskLookup->isRunning ())
-        mDiskLookup->stopLookup ();
-    if (mDiskLookupThread->isRunning ()) {
-        mDiskLookupThread->quit ();
-        mDiskLookupThread->wait (3 * 60 * 1000);
+    if (m_diskLookup->isRunning ())
+        m_diskLookup->stopLookup ();
+    if (m_diskLookupThread->isRunning ()) {
+        m_diskLookupThread->quit ();
+        m_diskLookupThread->wait (3 * 60 * 1000);
     }
-    mDiskLookup->deleteLater ();
-    mDiskLookupThread->deleteLater ();
-    if (!mMetaDataList.isEmpty ()) {
-        qDeleteAll(mMetaDataList);
-        mMetaDataList.clear ();
+    m_diskLookup->deleteLater ();
+    m_diskLookupThread->deleteLater ();
+    if (!m_metaDataList.isEmpty ()) {
+        qDeleteAll(m_metaDataList);
+        m_metaDataList.clear ();
     }
 }
 
 void AsyncDiskLookup::setLookupDirs(const QStringList &dirList, bool lookupImmediately)
 {
-    if (mDiskLookup->isRunning ()) {
+    if (m_diskLookup->isRunning ()) {
         qWarning()<<Q_FUNC_INFO<<" DiskLookup is running, will ignore this function";
         return;
     }
     foreach (QString s, dirList) {
-        mDiskLookup->addLookupDir (s, lookupImmediately);
+        m_diskLookup->addLookupDir (s, lookupImmediately);
     }
 }
 
 void AsyncDiskLookup::startLookup()
 {
-    if (mDiskLookup->isRunning ()) {
+    if (m_diskLookup->isRunning ()) {
         qWarning()<<Q_FUNC_INFO<<" DiskLookup is running, will ignore this function";
         return;
     }
-    mDiskLookupThread->start (QThread::HighestPriority);
+    m_diskLookupThread->start (QThread::HighestPriority);
 }
 
 void AsyncDiskLookup::found(const QString &path, const QString &file, const qint64 &size)
@@ -93,7 +93,7 @@ void AsyncDiskLookup::found(const QString &path, const QString &file, const qint
     data->setMeta (Common::SongMetaTags::E_FilePath, path);
     data->setMeta (Common::SongMetaTags::E_Hash, hash);
     data->setMeta (Common::SongMetaTags::E_FileSize, size);
-    mMetaDataList.append (data);
+    m_metaDataList.append (data);
 }
 
 } //MusicLibrary

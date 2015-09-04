@@ -22,7 +22,7 @@ public:
     QString toString();
     bool operator == (const SongMetaData &other) const;
 private:
-    QHash<Common::SongMetaTags, QVariant> mMetaHash;
+    QHash<Common::SongMetaTags, QVariant> m_metaHash;
 };
 
 } //PhoenixPlayer

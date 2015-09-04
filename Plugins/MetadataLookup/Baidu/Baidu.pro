@@ -24,6 +24,8 @@ unix {
 
 #DESTDIR = ../../../plugins
 
+QMAKE_LIBDIR += ../lib
+
 win32 {
         INCLUDEPATH += $(TAGLIB_DIR)/include
         LIBS += -L$(TAGLIB_DIR)/lib -ltag

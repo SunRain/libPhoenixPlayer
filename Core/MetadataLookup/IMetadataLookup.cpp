@@ -9,7 +9,7 @@ namespace MetadataLookup {
 IMetadataLookup::IMetadataLookup(QObject *parent)
     : QObject(parent)
 {
-    mType = LookupType::TypeUndefined;
+    m_type = LookupType::TypeUndefined;
 }
 
 IMetadataLookup::~IMetadataLookup()
@@ -18,11 +18,11 @@ IMetadataLookup::~IMetadataLookup()
 }
 
 void IMetadataLookup::setCurrentLookupFlag(IMetadataLookup::LookupType type) {
-    mType = type;
+    m_type = type;
 }
 
 IMetadataLookup::LookupType IMetadataLookup::currentLookupFlag() {
-    return mType;
+    return m_type;
 }
 
 } //MetadataLookup

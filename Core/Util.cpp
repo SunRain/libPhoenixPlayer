@@ -16,29 +16,30 @@
 #include "PluginLoader.h"
 #include "PluginHost.h"
 #include "MetadataLookup/IMetadataLookup.h"
+#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 
 Util::Util(QObject *parent) : QObject(parent)
 {
-    mQQmlEngine = nullptr;
+    m_QQmlEngine = nullptr;
 }
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-Util *Util::instance()
-{
-    static QMutex mutex;
-    static QScopedPointer<Util> scp;
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//Util *Util::instance()
+//{
+//    static QMutex mutex;
+//    static QScopedPointer<Util> scp;
 
-    if (Q_UNLIKELY(scp.isNull())) {
-        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
-        mutex.lock();
-        scp.reset(new Util(0));
-        mutex.unlock();
-    }
-    return scp.data();
-}
-#endif
+//    if (Q_UNLIKELY(scp.isNull())) {
+//        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
+//        mutex.lock();
+//        scp.reset(new Util(0));
+//        mutex.unlock();
+//    }
+//    return scp.data();
+//}
+//#endif
 
 Util::~Util()
 {
@@ -47,7 +48,7 @@ Util::~Util()
 
 void Util::setQQmlEngine(QQmlEngine *engine)
 {
-    mQQmlEngine = engine;
+    m_QQmlEngine = engine;
 }
 
 QString Util::calculateHash(const QString &str)
@@ -125,10 +126,10 @@ QStringList Util::getAddonDirList()
 
 Util::NetworkType Util::getNetworkType()
 {
-    if (!mQQmlEngine)
+    if (!m_QQmlEngine)
         return Util::NetworkType::TypeUnknown;
 
-    QNetworkConfiguration::BearerType t = mQQmlEngine->networkAccessManager ()
+    QNetworkConfiguration::BearerType t = m_QQmlEngine->networkAccessManager ()
             ->activeConfiguration ().bearerType ();
 //    qDebug()<<Q_FUNC_INFO<<" BearerType is "<<t<<" str "<<mQQmlEngine->networkAccessManager ()->activeConfiguration ().bearerTypeName ();
 

@@ -2,6 +2,10 @@
 INCLUDEPATH += $$PWD/include
 DEPENDPATH += $$PWD/include
 
+QT += qml
+#Enable c++11
+CONFIG += c++11
+
 HEADERS += \
     $$PWD/include/Common.h \
     $$PWD/include/PluginLoader.h \
@@ -28,7 +32,17 @@ HEADERS += \
     $$PWD/MusicLibrary/AsyncTagParserMgrWrapper.h \
     $$PWD/include/MusicLibrary/LocalMusicSacnner.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgr.h \
-    $$PWD/include/MetadataLookup/MetadataLookupMgrWrapper.h
+    $$PWD/include/MetadataLookup/MetadataLookupMgrWrapper.h \
+    $$PWD/include/Decoder/IDecoder.h \
+    $$PWD/include/Buffer.h \
+    $$PWD/include/AudioParameters.h \
+    $$PWD/include/OutPut/IOutPut.h \
+    $$PWD/include/Backend/BaseVolume.h \
+    $$PWD/include/Player/VolumeControl.h \
+    $$PWD/include/Backend/SoftVolume.h \
+    $$PWD/include/BaseObject.h \
+    $$PWD/include/Backend/BaseVisual.h \
+    $$PWD/include/EqualizerMgr.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
@@ -51,7 +65,21 @@ SOURCES += \
     $$PWD/MusicLibrary/AsyncTagParserMgrWrapper.cpp \
     $$PWD/MusicLibrary/LocalMusicSacnner.cpp \
     $$PWD/MetadataLookup/MetadataLookupMgr.cpp \
-    $$PWD/MetadataLookup/MetadataLookupMgrWrapper.cpp
+    $$PWD/MetadataLookup/MetadataLookupMgrWrapper.cpp \
+    $$PWD/Decoder/IDecoder.cpp \
+    $$PWD/AudioParameters.cpp \
+    $$PWD/OutPut/IOutPut.cpp \
+    $$PWD/include/Backend/BaseVolume.cpp \
+    $$PWD/Player/VolumeControl.cpp \
+    $$PWD/include/Backend/SoftVolume.cpp \
+    $$PWD/EqualizerMgr.cpp
+
+
+
+
+
+
+
 
 
 

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
+#include "SingletonPointer.h"
 
 class QSettings;
 
@@ -13,14 +14,15 @@ class Settings : public QObject
     Q_OBJECT
     Q_PROPERTY(bool autoFetchMetaData READ autoFetchMetaData WRITE setAutoFetchMetaData NOTIFY autoFetchMetaDataChanged)
     Q_PROPERTY(bool fetchMetaDataMobileNetwork READ fetchMetaDataMobileNetwork  WRITE setFetchMetaDataMobileNetwork  NOTIFY fetchMetaDataMobileNetworkChanged)
+
+    DECLARE_SINGLETON_POINTER(Settings)
 public:
-    explicit Settings(QObject *parent = 0);
 //    static Settings *getInstance();
     virtual ~Settings();
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    static Settings *instance();
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    static Settings *instance();
+//#endif
 
     Q_INVOKABLE bool setMusicDir(const QStringList &dirList);
     Q_INVOKABLE bool addMusicDir(const QString &dir);
@@ -42,8 +44,11 @@ public:
     Q_INVOKABLE bool setTraceLog(bool trace);
     Q_INVOKABLE bool traceLog();
 
-    Q_INVOKABLE bool setConfig(const QString &key, const QString &value);
+    Q_INVOKABLE void setConfig(const QString &key, const QString &value);
     Q_INVOKABLE QString getConfig(const QString &key, const QString &defaultValue = QString());
+
+    Q_INVOKABLE void setConfig (const QString &key, bool value);
+    Q_INVOKABLE bool getConfig (const QString &key, bool defaultValue);
 
     bool autoFetchMetaData();
     void setAutoFetchMetaData(bool autoFetch);
@@ -51,6 +56,8 @@ public:
     bool fetchMetaDataMobileNetwork();
     void setFetchMetaDataMobileNetwork(bool fetch);
 
+//protected:
+//    explicit Settings(QObject *parent = 0);
 signals:
     void autoFetchMetaDataChanged();
     void fetchMetaDataMobileNetworkChanged();
@@ -59,12 +66,12 @@ public slots:
 private:
     void checkInit();
 private:
-    QSettings *mSettings;
+    QSettings *m_settings;
 
-    QString mDefaultMusicDir;
-    QString mDefaultMusicImageDir;
-    bool mAutoFetchMetadata;
-    bool mFetchMetaDataMobileNetwork;
+    QString m_defaultMusicDir;
+    QString m_defaultMusicImageDir;
+    bool m_autoFetchMetadata;
+    bool m_fetchMetaDataMobileNetwork;
 };
 } //PhoenixPlayer
 #endif // SETTINGS_H
