@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QMimeDatabase>
+#include <QMutex>
 
 class QStringList;
 class QMimeDatabase;
@@ -45,6 +46,7 @@ private:
     bool m_stopLookupFlag;
     bool m_isRunning;
     QMimeDatabase m_QMimeDatabase;
+    QMutex m_mutex;
 //    int mCount;
 };
 

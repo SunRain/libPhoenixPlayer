@@ -26,11 +26,8 @@ TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
 {
     m_currentIndex = -1;
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    mPluginLoader = PluginLoader::instance();
-#else
-    m_pluginLoader = SingletonPointer<PluginLoader>::instance ();
-#endif
+    m_pluginLoader = PluginLoader::instance ();
+
     setPluginLoader ();
     setPlayListDAO ();
 }
@@ -43,8 +40,8 @@ TagParserManager::~TagParserManager()
     if (!m_pluginHashList.isEmpty ())
         m_pluginHashList.clear ();
 
-    qDeleteAll(m_metaList);
     if (m_metaList.isEmpty ()) {
+        qDeleteAll(m_metaList);
         m_metaList.clear ();
     }
 }
@@ -89,16 +86,19 @@ void TagParserManager::addItem(SongMetaData *data, bool startImmediately)
 {
     qDebug()<<Q_FUNC_INFO <<" item info "<<data->toString ();
 
-    SongMetaData *d = data ;
+    m_mutex.lock ();
+    SongMetaData *d = new SongMetaData(data, 0);
     m_metaList.append (d);
+    m_mutex.unlock ();
+
     if (startImmediately)
         startParserLoop ();
 }
 
-void TagParserManager::parserImmediately(const QList<SongMetaData *> &list)
-{
-    this->parserImmediately (list);
-}
+//void TagParserManager::parserImmediately(const QList<SongMetaData *> &list)
+//{
+//    this->parserImmediately (list);
+//}
 
 void TagParserManager::parserImmediately(QList<SongMetaData *> *list)
 {
@@ -127,9 +127,13 @@ bool TagParserManager::startParserLoop()
         emit parserQueueFinished ();
         return false;
     }
-
-    SongMetaData *data = m_metaList.takeFirst ();
-    parserItem (data);
+    m_mutex.lock ();
+    SongMetaData *d = nullptr;
+    if (!m_metaList.isEmpty ())
+        d = m_metaList.takeFirst ();
+    m_mutex.unlock ();
+    if (d)
+        parserItem (d);
     return true;
 }
 
@@ -140,13 +144,15 @@ void TagParserManager::parserNextItem()
         emit parserQueueFinished ();
         return;
     }
+    m_mutex.lock ();
     SongMetaData *data = m_metaList.takeFirst ();
+    m_mutex.unlock ();
     parserItem (data);
 }
 
 void TagParserManager::parserItem(SongMetaData *data)
 {
-    if (data == 0) {
+    if (!data) {
         return;
     }
     //如果没有解析插件,则直接将相关的meta信息存储到数据库
@@ -161,6 +167,7 @@ void TagParserManager::parserItem(SongMetaData *data)
     if (!m_playListDAO.isNull ()) {
         m_playListDAO.data ()->insertMetaData (data);
         data->deleteLater ();
+        data = nullptr;
     } else {
         qWarning()<<Q_FUNC_INFO<<" mPlayListDAO is null";
     }

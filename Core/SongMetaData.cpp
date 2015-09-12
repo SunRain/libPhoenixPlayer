@@ -4,11 +4,21 @@
 
 namespace PhoenixPlayer {
 
-SongMetaData::SongMetaData(QObject *parent) : QObject(parent)
+SongMetaData::SongMetaData(QObject *parent)
+    : QObject(parent)
 {
     for (int i = (int)Common::SongMetaTags::E_FirstFlag +1;
          i < (int)Common::SongMetaTags::E_LastFlag; ++i) {
         m_metaHash.insert (Common::SongMetaTags(i), QVariant());
+    }
+}
+
+SongMetaData::SongMetaData(SongMetaData *other, QObject *parent)
+    : QObject(parent)
+{
+    for (int i = (int)Common::SongMetaTags::E_FirstFlag +1;
+         i < (int)Common::SongMetaTags::E_LastFlag; ++i) {
+        m_metaHash.insert (Common::SongMetaTags(i), other->getMeta (Common::SongMetaTags(i)));
     }
 }
 
@@ -24,7 +34,7 @@ void SongMetaData::setMeta(Common::SongMetaTags tagType, const QVariant &value)
             || tagType == Common::SongMetaTags::E_LastFlag) {
         qDebug()<<"Invalid SongMetaTag Type "<<tagType;
     }
-    m_metaHash[tagType] = value;
+    m_metaHash.insert (tagType, value);
 }
 
 QVariant SongMetaData::getMeta(Common::SongMetaTags tagType) const
@@ -33,7 +43,7 @@ QVariant SongMetaData::getMeta(Common::SongMetaTags tagType) const
             || tagType == Common::SongMetaTags::E_LastFlag) {
         qDebug()<<"Invalid SongMetaTag Type "<<tagType;
     }
-    return m_metaHash[tagType];
+    return m_metaHash.value (tagType);
 }
 
 QString SongMetaData::toString()

@@ -16,14 +16,6 @@ namespace MusicLibrary {
 AsyncTagParserMgrWrapper::AsyncTagParserMgrWrapper(QObject *parent) :
     QObject(parent)
 {
-//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-//    mPluginLoader = PluginLoader::instance();
-//#else
-//    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-//#endif
-
-//    mDao = mPluginLoader->getCurrentPlayListDAO ();
-
     m_metaDataList = nullptr;
 
     m_thread = new QThread(0);
@@ -57,7 +49,7 @@ AsyncTagParserMgrWrapper::AsyncTagParserMgrWrapper(QObject *parent) :
 //            qDeleteAll(mMetaDataList);
 //            mMetaDataList.clear ();
 //        }
-        if (m_thread != nullptr)
+        if (m_thread)
             m_thread->quit ();
     });
 }

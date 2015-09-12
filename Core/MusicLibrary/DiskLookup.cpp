@@ -13,15 +13,12 @@ namespace PhoenixPlayer {
 namespace MusicLibrary {
 DiskLookup::DiskLookup(QObject *parent) : QObject(parent)
 {
-    qDebug()<<Q_FUNC_INFO;
     m_stopLookupFlag = false;
     m_isRunning = false;
-//    mCount = 0;
 }
 
 DiskLookup::~DiskLookup()
 {
-    qDebug()<<Q_FUNC_INFO;
     if (!m_pathList.isEmpty ()) {
         m_pathList.clear ();
     }
@@ -40,15 +37,19 @@ void DiskLookup::startLookup()
         QString tmp = QString("%1/%2").arg (QDir::homePath ())
                 .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 
-        qDebug()<<"==== Lookup default dir "<<tmp;
+        qDebug()<<"Lookup default dir "<<tmp;
         scanDir (tmp);
     } else {
         while (!m_pathList.isEmpty ()) {
+            m_mutex.lock ();
             if (m_stopLookupFlag) {
                 m_pathList.clear ();
+                m_mutex.unlock ();
                 break;
             }
-            scanDir (m_pathList.takeFirst ());
+            QString p = m_pathList.takeFirst ();
+            m_mutex.unlock ();
+            scanDir (p);
         }
     }
     m_isRunning = false;
@@ -68,8 +69,10 @@ void DiskLookup::stopLookup()
 
 void DiskLookup::addLookupDir(const QString &dirName, bool lookupImmediately)
 {
+    m_mutex.lock ();
     if (!m_pathList.contains (dirName))
         m_pathList.append (dirName);
+    m_mutex.unlock ();
     if (lookupImmediately) {
         startLookup();
     }
@@ -86,17 +89,16 @@ void DiskLookup::scanDir(const QString &path)
 
     dir.setFilter (QDir::Dirs | QDir::Files | /*QDir::NoSymLinks |*/ QDir::NoDotAndDotDot);
     QFileInfoList list = dir.entryInfoList ();
-    qDebug()<<Q_FUNC_INFO<<"=== scanDir ["<<path<<"], entryInfoList size "<<list.size ();
+    qDebug()<<Q_FUNC_INFO<<QString("scanDir [%1], entryInfoList size = %2").arg (path).arg (list.size ());
     foreach (QFileInfo info, list) {
-//        qDebug()<<Q_FUNC_INFO<<" find file ["<<info.absoluteFilePath ()<<"]";
         if (info.isDir ()) {
-            qDebug()<<Q_FUNC_INFO<<" current is dir, add to list "<<info.absolutePath ();
-            m_pathList.append (info.absolutePath ());
+            m_mutex.lock ();
+            qDebug()<<Q_FUNC_INFO<<QString("current item [%1] is dir, add [%2] to list")
+                      .arg (info.baseName ()).arg (info.absoluteFilePath ());
+            m_pathList.append (info.absoluteFilePath ());
+            m_mutex.unlock ();
         } else {
             QMimeType type = m_QMimeDatabase.mimeTypeForFile (info);
-
-//            mCount++;
-//            qDebug()<<Q_FUNC_INFO<<" find count "<<mCount;
 
             //TODO 虽然建议使用inherits方法来检测,但是此处我们需要所有音频文件,
             //所以直接检测mimetype 生成的字符串

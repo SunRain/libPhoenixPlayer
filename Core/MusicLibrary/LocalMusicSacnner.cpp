@@ -22,14 +22,9 @@ LocalMusicSacnner::LocalMusicSacnner(QObject *parent) :
     m_tagParserWrapper = nullptr;
     m_asyncDiskLookup = nullptr;
 
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    mSettings = Settings::instance();
-    mPluginLoader = PluginLoader::instance();
-#else
-    qDebug()<<"For other os";
-    m_settings = SingletonPointer<Settings>::instance ();
-    m_pluginLoader = SingletonPointer<PluginLoader>::instance ();
-#endif
+    m_settings = Settings::instance ();
+    m_pluginLoader = PluginLoader::instance ();
+
     m_dao = m_pluginLoader->getCurrentPlayListDAO ();
 }
 
@@ -45,7 +40,7 @@ LocalMusicSacnner::~LocalMusicSacnner()
 
 void LocalMusicSacnner::scanLocalMusic()
 {
-    if (m_tagParserWrapper == nullptr) {
+    if (!m_tagParserWrapper) {
         m_tagParserWrapper = new AsyncTagParserMgrWrapper(this);
         connect (m_tagParserWrapper, &AsyncTagParserMgrWrapper::started, [&] {
             qDebug()<<Q_FUNC_INFO<<" mTagParserWrapper started";
@@ -56,10 +51,15 @@ void LocalMusicSacnner::scanLocalMusic()
 
             m_dao->beginTransaction ();
             for (int i=0; i<m_metaDataList.size (); ++i) {
-//                qDebug()<<Q_FUNC_INFO<<" insert ("<<i<<") ["<<mMetaDataList.at (i)->toString ()<<"]";
                 m_dao->insertMetaData (m_metaDataList.at (i));
             }
             m_dao->commitTransaction ();
+
+            //delete all items in the list
+            if (!m_metaDataList.isEmpty ()) {
+                qDeleteAll(m_metaDataList);
+                m_metaDataList.clear ();
+            }
 
             m_tagParserWrapper->deleteLater ();
             m_tagParserWrapper = nullptr;
@@ -68,7 +68,7 @@ void LocalMusicSacnner::scanLocalMusic()
         });
     }
 
-    if (m_asyncDiskLookup == nullptr) {
+    if (!m_asyncDiskLookup) {
         m_asyncDiskLookup = new AsyncDiskLookup(this);
 
         connect (m_asyncDiskLookup, &AsyncDiskLookup::started, [&] {
@@ -79,12 +79,13 @@ void LocalMusicSacnner::scanLocalMusic()
                  [&] (const QList<SongMetaData *> &list){
             qDebug()<<Q_FUNC_INFO<<" AsyncDiskLookup::finished , result list size "<<list.size();
             foreach (SongMetaData *d, list) {
-                SongMetaData *data = new SongMetaData(0);
-                for (int i = (int)(Common::SongMetaTags::E_FirstFlag) +1;
-                     i < (int)Common::SongMetaTags::E_LastFlag;
-                     ++i) {
-                    data->setMeta (Common::SongMetaTags(i), d->getMeta (Common::SongMetaTags(i)));
-                }
+//                SongMetaData *data = new SongMetaData(0);
+//                for (int i = (int)(Common::SongMetaTags::E_FirstFlag) +1;
+//                     i < (int)Common::SongMetaTags::E_LastFlag;
+//                     ++i) {
+//                    data->setMeta (Common::SongMetaTags(i), d->getMeta (Common::SongMetaTags(i)));
+//                }
+                SongMetaData *data = new SongMetaData(d, 0);
                 m_metaDataList.append (data);
             }
 
@@ -94,7 +95,7 @@ void LocalMusicSacnner::scanLocalMusic()
         });
     }
 
-    if (m_tagParserWrapper != nullptr && m_tagParserWrapper->isRunning ()) {
+    if (m_tagParserWrapper && m_tagParserWrapper->isRunning ()) {
         qWarning()<<Q_FUNC_INFO<<" Parser track tags, can't scan local music atm";
         return;
     }

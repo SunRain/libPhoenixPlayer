@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QList>
 #include <QStringList>
+#include <QMutex>
 
 namespace PhoenixPlayer {
 
@@ -23,7 +24,7 @@ public:
     virtual ~TagParserManager();
 
     void addItem(SongMetaData *data = 0, bool startImmediately = false);
-    void parserImmediately(const QList<SongMetaData *> &list);
+//    void parserImmediately(const QList<SongMetaData *> &list);
     void parserImmediately(QList<SongMetaData *> *list);
 
     bool startParserLoop();
@@ -34,8 +35,6 @@ protected:
 signals:
     void parserPending();
     void parserQueueFinished();
-
-public slots:
 
 private:
     void setPluginLoader();
@@ -48,6 +47,7 @@ private:
     QString m_pluginPath;
     QStringList m_pluginHashList;
     int m_currentIndex;
+    QMutex m_mutex;
 };
 
 } //MusicLibrary

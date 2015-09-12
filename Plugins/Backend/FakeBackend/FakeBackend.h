@@ -17,6 +17,7 @@ public:
     FakeBackend(QObject *parent = 0);
 
     PhoenixPlayer::Common::PlayBackendState getPlayBackendState();
+    BaseVolume *baseVolume();
     QString getDescription();
     QString	getPluginName();
     QString getPluginVersion();

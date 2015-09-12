@@ -15,10 +15,12 @@ class SongMetaData : public QObject
     Q_OBJECT
 public:
     explicit SongMetaData(QObject *parent = 0);
+    explicit SongMetaData(SongMetaData *other, QObject *parent = 0);
     virtual ~SongMetaData();
 
     void setMeta(Common::SongMetaTags tagType, const QVariant &value);
     QVariant getMeta(Common::SongMetaTags tagType) const;
+
     QString toString();
     bool operator == (const SongMetaData &other) const;
 private:

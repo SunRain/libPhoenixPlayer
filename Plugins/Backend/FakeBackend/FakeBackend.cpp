@@ -15,6 +15,11 @@ PhoenixPlayer::Common::PlayBackendState FakeBackend::getPlayBackendState()
     return PhoenixPlayer::Common::PlayBackendStopped;
 }
 
+BaseVolume *FakeBackend::baseVolume()
+{
+    return nullptr;
+}
+
 QString FakeBackend::getDescription()
 {
     return QString("Fake PlayBackend");

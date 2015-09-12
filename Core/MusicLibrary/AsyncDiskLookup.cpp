@@ -15,7 +15,6 @@ namespace MusicLibrary {
 AsyncDiskLookup::AsyncDiskLookup(QObject *parent) :
     QObject(parent)
 {
-    qDebug()<<Q_FUNC_INFO<<" ====== ";
     m_diskLookupThread = new QThread(0);
     m_diskLookup = new DiskLookup(0);
     m_diskLookup->moveToThread (m_diskLookupThread);
@@ -35,7 +34,7 @@ AsyncDiskLookup::AsyncDiskLookup(QObject *parent) :
     connect (m_diskLookup, &DiskLookup::finished, [&] {
         qDebug()<<Q_FUNC_INFO<<" DiskLookup finished, we'll try to finish thread";
 
-        if (m_diskLookupThread != nullptr)
+        if (m_diskLookupThread)
             m_diskLookupThread->quit();
     });
     connect (m_diskLookup, &DiskLookup::fileFound,
@@ -83,7 +82,7 @@ void AsyncDiskLookup::startLookup()
 
 void AsyncDiskLookup::found(const QString &path, const QString &file, const qint64 &size)
 {
-    qDebug()<<Q_FUNC_INFO<<"=== find file "<<path<<" "<<file;
+    qDebug()<<Q_FUNC_INFO<<QString("find file [%1] in path [%2]").arg (file).arg (path);
     QString hash = Util::calculateHash (path.toLocal8Bit ()
                                         + file.toLocal8Bit ()
                                         + QString::number (size));
