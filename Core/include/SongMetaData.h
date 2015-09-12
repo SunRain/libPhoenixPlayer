@@ -15,7 +15,7 @@ class SongMetaData : public QObject
     Q_OBJECT
 public:
     explicit SongMetaData(QObject *parent = 0);
-    explicit SongMetaData(SongMetaData *other, QObject *parent = 0);
+    explicit SongMetaData(SongMetaData *other, QObject *parent);
     virtual ~SongMetaData();
 
     void setMeta(Common::SongMetaTags tagType, const QVariant &value);
