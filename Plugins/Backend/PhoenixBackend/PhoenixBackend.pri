@@ -1,6 +1,4 @@
 
-
-
 OTHER_FILES += \
     $$PWD/PhoenixBackend.json
 

@@ -2,8 +2,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-
-common.file = ../../Core/Core.pro
+common.file = ../../libPhoenixPlayer.pro
 
 sqlite3.file = SQLite3/SQLite3.pro
 sqlite3.depends = common

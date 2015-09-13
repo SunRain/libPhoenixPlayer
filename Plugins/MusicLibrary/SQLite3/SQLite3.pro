@@ -1,16 +1,11 @@
+include (../../plugins.pri)
+
 TEMPLATE = lib
 CONFIG += plugin
 
 QT += sql
 
-TARGET = SQLite3DAO
-
-#Enable c++11
-CONFIG += c++11
-
-#TODO 暂时链接库文件
-#include(../../../Core/Core.pri)
-include (../../../Core/CoreHeaders.pri)
+TARGET = $$PLUGINS_PREFIX/SQLite3DAO
 
 include(SQLite3.pri)
 
@@ -19,42 +14,25 @@ INCLUDEPATH += \
 
 QMAKE_LIBDIR += ../lib
 
-unix {
-#    CONFIG += link_pkgconfig
-#    PKGCONFIG += gstreamer-0.10
+#TODO For Ubuntu touch, need test
+load(ubuntu-click)
 
-#    INCLUDEPATH += \
-#        /usr/include/gstreamer-0.10 \
+isEmpty (LIB_DIR){
+    LIB_DIR = /opt/PhoenixPlayer
 }
 
-#DESTDIR = ../../../plugins
+QMAKE_LIBDIR += ../../../target/lib
+LIBS += -lPhoenixPlayer
 
-#PlayBackend
-win32 {
-#	INCLUDEPATH +=  $(OSSBUILD_GSTREAMER_SDK_DIR)/include \
-#	                $(OSSBUILD_GSTREAMER_SDK_DIR)/include/gstreamer-0.10 \
-#	                $(OSSBUILD_GSTREAMER_SDK_DIR)/include/glib-2.0 \
-#	                $(OSSBUILD_GSTREAMER_SDK_DIR)/include/libxml2
+json.files = $${OTHER_FILES}
 
-#	LIBS +=         -L$(OSSBUILD_GSTREAMER_SDK_DIR)/lib \
-#	                -lgstreamer-0.10 \
-#	                -lglib-2.0 \
-#	                -liconv \
-#	                -lxml2 \
-#	                -lgobject-2.0
-
-#	DEFINES += LIBXML_STATIC
+!isEmpty(UBUNTU_MANIFEST_FILE){
+    DEFINES += UBUNTU_TOUCH
+    target.path = $${UBUNTU_CLICK_PLUGIN_PATH}/lib
+    json.path = $${UBUNTU_CLICK_PLUGIN_PATH}/lib
+} else {
+    target.path = $$LIB_DIR/plugins
+    json.path = $$LIB_DIR/plugins
 }
 
-
-#gstreamer-tagreader {
-#	unix:PKGCONFIG += gstreamer-pbutils-0.10
-#	DEFINES += _N_GSTREAMER_TAGREADER_PLUGIN_
-#} else {
-#	HEADERS -= tagReaderGstreamer.h
-#	SOURCES -= tagReaderGstreamer.cpp
-#}
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Core/release/ -lPhoenixPlayer
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Core/debug/ -lPhoenixPlayer
-else:unix: LIBS += -L$$OUT_PWD/../../../Core/ -lPhoenixPlayer
+INSTALLS += target json

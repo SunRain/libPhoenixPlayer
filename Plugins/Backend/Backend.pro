@@ -2,7 +2,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-common.file = ../../Core/Core.pro
+common.file = ../../libPhoenixPlayer.pro
 
 #!win32 {
 #gstreamer.file = GStreamerBackend/GStreamerBackend.pro

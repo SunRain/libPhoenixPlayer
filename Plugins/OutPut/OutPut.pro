@@ -2,7 +2,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-common.file = ../../Core/Core.pro
+common.file = ../../libPhoenixPlayer.pro
 
 pulseaudio.file = pulseaudio/pulseaudio.pro
 pulseaudio.depends = common

@@ -1,3 +1,4 @@
+include (../../plugins.pri)
 
 TEMPLATE = lib
 CONFIG += \
@@ -6,23 +7,34 @@ CONFIG += \
         warn_on \
         link_pkgconfig
 
-TARGET = pulseaudio
+TARGET = $$PLUGINS_PREFIX/pulseaudio
 
-#Enable c++11
-CONFIG += c++11
-
-#TODO 暂时链接库文件
-#include(../../../Core/Core.pri)
-include (../../../Core/CoreHeaders.pri)
 include(pulseaudio.pri)
-
-QMAKE_LIBDIR += ../lib
 
 PKGCONFIG += libpulse-simple
 
 INCLUDEPATH += \
         $$PWD
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Core/release/ -lPhoenixPlayer
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Core/debug/ -lPhoenixPlayer
-else:unix: LIBS += -L$$OUT_PWD/../../../Core/ -lPhoenixPlayer
+#TODO For Ubuntu touch, need test
+load(ubuntu-click)
+
+isEmpty (LIB_DIR){
+    LIB_DIR = /opt/PhoenixPlayer
+}
+
+QMAKE_LIBDIR += ../../../target/lib
+LIBS += -lPhoenixPlayer
+
+json.files = $${OTHER_FILES}
+
+!isEmpty(UBUNTU_MANIFEST_FILE){
+    DEFINES += UBUNTU_TOUCH
+    target.path = $${UBUNTU_CLICK_PLUGIN_PATH}/lib
+    json.path = $${UBUNTU_CLICK_PLUGIN_PATH}/lib
+} else {
+    target.path = $$LIB_DIR/plugins
+    json.path = $$LIB_DIR/plugins
+}
+
+INSTALLS += target json

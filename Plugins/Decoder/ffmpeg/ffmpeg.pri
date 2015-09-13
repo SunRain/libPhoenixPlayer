@@ -1,5 +1,3 @@
-
-
 OTHER_FILES += \
     $$PWD/ffmpeg_decoder.json
 

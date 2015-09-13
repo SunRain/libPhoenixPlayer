@@ -2,7 +2,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-common.file = ../../Core/Core.pro
+common.file = ../../libPhoenixPlayer.pro
 
 ffmpeg.file = ffmpeg/ffmpeg.pro
 ffmpeg.depends = common

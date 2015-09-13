@@ -2,7 +2,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-common.file = ../../Core/Core.pro
+common.file = ../../libPhoenixPlayer.pro
 
 baidu.file = Baidu/Baidu.pro
 baidu.depends = common

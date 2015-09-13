@@ -2,9 +2,9 @@
 INCLUDEPATH += $$PWD/include
 DEPENDPATH += $$PWD/include
 
-QT += qml
-#Enable c++11
-CONFIG += c++11
+#QT += network core
+##Enable c++11
+#CONFIG += c++11
 
 HEADERS += \
     $$PWD/include/Common.h \

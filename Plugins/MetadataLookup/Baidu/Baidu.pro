@@ -1,39 +1,36 @@
+include (../../plugins.pri)
+
 TEMPLATE = lib
 CONFIG += plugin
 
 QT += network
 
-TARGET = LyricsBaidu
-
-#Enable c++11
-CONFIG += c++11
-
-#TODO 暂时链接库文件
-#include(../../../Core/Core.pri)
-include (../../../Core/CoreHeaders.pri)
+TARGET = $$PLUGINS_PREFIX/LyricsBaidu
 
 include (Baidu.pri)
 
 INCLUDEPATH += \
         $$PWD
 
-unix {
-    CONFIG += link_pkgconfig
-    PKGCONFIG += taglib
+#TODO For Ubuntu touch, need test
+load(ubuntu-click)
+
+isEmpty (LIB_DIR){
+    LIB_DIR = /opt/PhoenixPlayer
 }
 
-#DESTDIR = ../../../plugins
+QMAKE_LIBDIR += ../../../target/lib
+LIBS += -lPhoenixPlayer
 
-QMAKE_LIBDIR += ../lib
+json.files = $${OTHER_FILES}
 
-win32 {
-        INCLUDEPATH += $(TAGLIB_DIR)/include
-        LIBS += -L$(TAGLIB_DIR)/lib -ltag
-        DEFINES += TAGLIB_STATIC
+!isEmpty(UBUNTU_MANIFEST_FILE){
+    DEFINES += UBUNTU_TOUCH
+    target.path = $${UBUNTU_CLICK_PLUGIN_PATH}/lib
+    json.path = $${UBUNTU_CLICK_PLUGIN_PATH}/lib
+} else {
+    target.path = $$LIB_DIR/plugins
+    json.path = $$LIB_DIR/plugins
 }
 
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../Core/release/ -lPhoenixPlayer
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../Core/debug/ -lPhoenixPlayer
-else:unix: LIBS += -L$$OUT_PWD/../../../Core/ -lPhoenixPlayer
-
+INSTALLS += target json
