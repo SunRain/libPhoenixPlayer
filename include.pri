@@ -38,13 +38,13 @@ contains (CONFIG, WITH_QML_LIB) {
     INCLUDEPATH += $$PWD/libPhoenixPlayer/QtQuick/include
     DEPENDPATH += $$PWD/libPhoenixPlayer/QtQuick/include
 
-HEADERS += \
-    $$PWD/libPhoenixPlayer/QtQuick/include/LyricsModel.h \
-    $$PWD/libPhoenixPlayer/QtQuick/include/CircleImage.h \
-    $$PWD/libPhoenixPlayer/QtQuick/include/CoverCircleImage.h \
-    $$PWD/libPhoenixPlayer/QtQuick/include/MusicLibraryListModel.h \
-    $$PWD/libPhoenixPlayer/QtQuick/include/PathListModel.h \
-    $$PWD/libPhoenixPlayer/QtQuick/include/TrackGroupModel.h \
-    $$PWD/libPhoenixPlayer/QtQuick/include/AddonListModel.h \
-    $$PWD/libPhoenixPlayer/QtQuick/include/PluginListModel.h
+    HEADERS += \
+        $$PWD/libPhoenixPlayer/QtQuick/include/LyricsModel.h \
+        $$PWD/libPhoenixPlayer/QtQuick/include/CircleImage.h \
+        $$PWD/libPhoenixPlayer/QtQuick/include/CoverCircleImage.h \
+        $$PWD/libPhoenixPlayer/QtQuick/include/MusicLibraryListModel.h \
+        $$PWD/libPhoenixPlayer/QtQuick/include/PathListModel.h \
+        $$PWD/libPhoenixPlayer/QtQuick/include/TrackGroupModel.h \
+        $$PWD/libPhoenixPlayer/QtQuick/include/AddonListModel.h \
+        $$PWD/libPhoenixPlayer/QtQuick/include/PluginListModel.h
 }

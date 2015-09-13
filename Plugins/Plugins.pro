@@ -5,6 +5,5 @@ SUBDIRS += \
     Backend \
     MetadataLookup \
     MusicLibrary \
-    QML \
     Decoder \
     OutPut
