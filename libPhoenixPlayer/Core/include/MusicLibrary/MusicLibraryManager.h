@@ -31,10 +31,6 @@ class MusicLibraryManager : public QObject
 public:
     virtual ~MusicLibraryManager();
 
-//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-//    static MusicLibraryManager *instance();
-//#endif
-
     ///
     /// \brief playingSong 返回当前播放的歌曲hash,
     /// 如果当前未播放,则返回数据库中的第一首歌曲,或者播放器上次播放的歌曲
@@ -168,7 +164,8 @@ private:
       bool init();
 private:
       bool m_isInit;
-      QPointer<IPlayListDAO> m_playListDAO;
+//      QPointer<IPlayListDAO> m_playListDAO;
+      IPlayListDAO *m_playListDAO;
       PluginLoader *m_pluginLoader;
       Settings *m_settings;
       AsyncDiskLookup *m_asyncDiskLookup;
