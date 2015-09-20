@@ -20,7 +20,7 @@ AudioParameters::AudioParameters(quint32 srate, int chan, AudioFormat f, QObject
     m_format = f;
 }
 
-AudioParameters::AudioParameters(AudioParameters *other, QObject *parent)
+AudioParameters::AudioParameters(const AudioParameters *other, QObject *parent)
     :BaseObject(parent)
 {
     m_srate = other->sampleRate ();
@@ -58,7 +58,7 @@ AudioParameters::AudioFormat AudioParameters::format() const
 //    m_format = f;
 //}
 
-bool AudioParameters::equals(AudioParameters *other)
+bool AudioParameters::equals(const AudioParameters *other)
 {
     return m_srate == other->sampleRate ()
             && m_chan == other->channels ()

@@ -58,17 +58,17 @@ private:
     void httpFinished();
     void httpReadyRead();
 private:
-    QUrl mSource;
-    Status mStatus;
-    QNetworkAccessManager *mNetworkAccessManager;
-    QNetworkReply *mReply;
-    QImage *mImage;
-    QMutex mLock;
-    QFile *mFile;
-    Settings *mSettings;
-    QByteArray mByteArray;
-    bool mRequestAborted;
-    bool mCache;
+    QUrl m_source;
+    Status m_status;
+    QNetworkAccessManager *m_networkAccessManager;
+    QNetworkReply *m_reply;
+    QImage *m_image;
+    QMutex m_lock;
+    QFile *m_file;
+    Settings *m_settings;
+    QByteArray m_byteArray;
+    bool m_requestAborted;
+    bool m_cache;
 
 };
 } //QmlPlugin

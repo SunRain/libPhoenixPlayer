@@ -24,7 +24,7 @@ public:
 public:
     explicit AudioParameters(QObject *parent = 0);
     explicit AudioParameters(quint32 srate, int chan, AudioFormat f, QObject *parent = 0);
-    explicit AudioParameters(AudioParameters *other, QObject *parent = 0);
+    explicit AudioParameters(const AudioParameters *other, QObject *parent = 0);
 
     quint32 sampleRate() const;
 //    void setSampleRate(quint32 srate);
@@ -35,7 +35,7 @@ public:
     AudioFormat format() const;
 //    void setFormat(AudioFormat f);
 
-    bool equals(AudioParameters *other);
+    bool equals(const AudioParameters *other);
 
 //    void operator = (const AudioParameters &p);
 //    bool operator ==(const AudioParameters &p);

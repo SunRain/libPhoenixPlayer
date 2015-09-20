@@ -23,7 +23,7 @@ public:
     }
 
     //    Q_INVOKABLE virtual void 	load_equalizer(vector<EQ_Setting>&)=0;
-    virtual Common::PlayBackendState  getPlayBackendState() = 0;
+    virtual Common::PlayBackendState  playBackendState() = 0;
     virtual void init() = 0;
     // 返回不同playbackend的BaseVolume以供外部调用
     virtual BaseVolume *baseVolume() = 0;

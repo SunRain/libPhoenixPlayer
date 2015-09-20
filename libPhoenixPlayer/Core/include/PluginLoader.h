@@ -11,26 +11,29 @@ class QPluginLoader;
 namespace PhoenixPlayer {
 
 namespace PlayBackend {
-class IPlayBackend;
+//class IPlayBackend;
+class BackendHost;
 }
 
 namespace MusicLibrary {
-class IPlayListDAO;
-class IMusicTagParser;
+class MusicLibraryDAOHost;
 }
 
-namespace MetadataLookup {
-class IMetadataLookup;
-}
+//namespace MetadataLookup {
+////class IMetadataLookup;
+//}
 
-namespace Decoder {
-class IDecoder;
-}
+//namespace Decoder {
+////class IDecoder;
+//class DecoderHost;
+//}
 
 namespace OutPut {
-class IOutPut;
+//class IOutPut;
+class OutPutHost;
 }
 
+class Settings;
 class PluginHost;
 class PluginLoader : public QObject
 {
@@ -43,63 +46,79 @@ public:
 //    static PluginLoader *instance();
 //#endif
 
-    void setPluginPath(Common::PluginType type, const QString &path);
+//    void setPluginPath(Common::PluginType type, const QString &path);
+    void addPluginPath(const QString &path);
 
     ///
     /// \brief getCurrentPlayBackend
     /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
     /// \return
     ///
-    PlayBackend::IPlayBackend *getCurrentPlayBackend();
+//    PlayBackend::IPlayBackend *getCurrentPlayBackend();
+
+    PlayBackend::BackendHost *curBackendHost();
     ///
     /// \brief getCurrentPlayListDAO
     /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
     /// \return
     ///
-    MusicLibrary::IPlayListDAO *getCurrentPlayListDAO();
+//    MusicLibrary::IMusicLibraryDAO *getCurrentLibraryDAO();
+
+    OutPut::OutPutHost *curOutPutHost();
+
     ///
     /// \brief getCurrentMusicTagParser
     /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
     /// \return
     ///
-    MusicLibrary::IMusicTagParser *getCurrentMusicTagParser();
+//    MusicLibrary::IMusicTagParser *getCurrentMusicTagParser();
+
+    MusicLibrary::MusicLibraryDAOHost *curDAOHost();
 
     ///
     /// \brief getCurrentMetadataLookup
     /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
     /// \return
     ///
-    MetadataLookup::IMetadataLookup *getCurrentMetadataLookup();
+//    MetadataLookup::IMetadataLookup *getCurrentMetadataLookup();
 
 
-    Decoder::IDecoder *getCurrentDecoder();
+//    Decoder::IDecoder *getCurrentDecoder();
 
-    OutPut::IOutPut *getCurrentOutPut();
+//    OutPut::IOutPut *getCurrentOutPut();
 
     ///
     /// \brief getPluginNames 返回当前所有插件的名称列表
     /// \param type
     /// \return
     ///
-    QStringList getPluginHostHashList(Common::PluginType type);
+//    QStringList getPluginHostHashList(Common::PluginType type);
 
-    int getPluginHostSize(Common::PluginType type);
+    ///
+    /// \brief pluginLibraries
+    /// \param type
+    /// \return 某一个插件类型的所有插件文件地址
+    ///
+    QStringList pluginLibraries(Common::PluginType type);
 
-    PluginHost *getCurrentPluginHost(Common::PluginType type);
+//    int getPluginHostSize(Common::PluginType type);
 
-    PluginHost *getPluginHostByHash(const QString &hostHash);
+//    PluginHost *getCurrentPluginHost(Common::PluginType type);
 
-    QList<PluginHost *> getPluginHostList(Common::PluginType type);
+//    PluginHost *getPluginHostByHash(const QString &hostHash);
+
+//    QList<PluginHost *> getPluginHostList(Common::PluginType type);
 
 protected:
-    void initPlugins();
+    void initPluginByPath(const QString &path);
+//    void initPluginByPath(const QString &path);
 //    explicit PluginLoader(QObject *parent = 0);
 signals:
     ///
     /// \brief signalPluginChanged setNewPlugin后如果新插件名和当前使用的插件名不同,则发送此信号
     /// \param type
     ///
-    void signalPluginChanged(Common::PluginType type);
+//    void signalPluginChanged(Common::PluginType type);
 
 public slots:
     ///
@@ -107,12 +126,20 @@ public slots:
     /// \param type
     /// \param newPluginName
     ///
-     void setNewPlugin(Common::PluginType type, const QString &newPluginHash);
+//     void setNewPlugin(Common::PluginType type, const QString &newPluginHash);
 private:
-     bool m_isInit;
-     QList<PluginHost *> m_pluginHostList;
-     QHash<Common::PluginType, PluginHost*> m_currentPluginHost;
-     QHash<Common::PluginType, QString> m_pluginPath;
+//     bool m_isInit;
+//     QList<PluginHost *> m_pluginHostList;
+//     QHash<Common::PluginType, PluginHost*> m_currentPluginHost;
+//     QHash<Common::PluginType, QString> m_pluginPath;
+     Settings *m_settings;
+     PlayBackend::BackendHost *m_curBackendHost;
+     OutPut::OutPutHost *m_curOutPutHost;
+     MusicLibrary::MusicLibraryDAOHost *m_curDAOHost;
+
+     QStringList m_pluginPaths;
+     QHash<Common::PluginType, QString> m_libraries;
+
 };
 
 } //PhoenixPlayer

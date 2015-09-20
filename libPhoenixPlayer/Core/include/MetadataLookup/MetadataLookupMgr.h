@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QThread>
 
 #include "Common.h"
 #include "SongMetaData.h"
@@ -14,64 +15,86 @@ class PluginLoader;
 class PluginHost;
 class Settings;
 class Util;
+
 namespace MetadataLookup {
-class MetadataLookupMgr : public QObject
+
+class MetadataLookupHost;
+class MetadataLookupMgr : public QThread
 {
     Q_OBJECT
 public:
     explicit MetadataLookupMgr(QObject *parent = 0);
     virtual ~MetadataLookupMgr();
-    void lookup(SongMetaData *data, IMetadataLookup::LookupType type);
+    void lookup(SongMetaData **data, IMetadataLookup::LookupType type);
 
 protected:
     struct WorkNode {
-        SongMetaData *data;
+        SongMetaData **data;
         IMetadataLookup::LookupType type;
         bool operator == (const WorkNode &other) const {
-            return ((this->data->getMeta (Common::E_Hash).toString ()
-                         == other.data->getMeta (Common::E_Hash).toString ())
+            return ((*(this->data))->hash () == (*(other.data))->hash ()
                     && (this->type == other.type));
         }
     };
+    struct HostNode {
+        IMetadataLookup **lookup;
+        MetadataLookupHost *host;
+    };
+
+    // QThread interface
+protected:
+    void run();
 
 signals:
-    void lookupSucceed(const QString &songHash,
-                       const QByteArray &result,
-                       const IMetadataLookup::LookupType &type);
-    void lookupFailed(const QString &songHash, const IMetadataLookup::LookupType &type);
+//    void lookupSucceed(const QString &songHash,
+//                       const QByteArray &result,
+//                       const IMetadataLookup::LookupType &type);
+    void lookupSucceed(SongMetaData **data, const IMetadataLookup::LookupType &type);
+//    void lookupFailed(const QString &songHash, const IMetadataLookup::LookupType &type);
+    void lookupFailed(SongMetaData **data, const IMetadataLookup::LookupType &type);
     void queueFinished();
 public slots:
 
 private slots:
-    void nextLookupPlugin();
+//    void nextLookupPlugin();
     void doLookupSucceed(const QByteArray &result);
     void doLookupFailed();
-    void destructor();
+//    void destructor();
 private:
     //在destructorState里面使用一个事件循环，来判断是否处在卸载插件的状态
-    bool destructorState();
+//    bool destructorState();
     void initPluginObject();
-    void processNext();
-    void doLookup();
+//    void processNext();
+//    void doLookup();
     void emitFinish();
 private:
     PluginLoader *m_pluginLoader;
-    IMetadataLookup *m_currentLookup;
+//    IMetadataLookup *m_currentLookup;
     Settings *m_settings;
     Util *m_util;
 
     QList<WorkNode> m_workQueue;
-    WorkNode m_currentNode;
+    WorkNode m_currentWork;
 
-    QList<IMetadataLookup *> m_lookupList;
+//    QList<IMetadataLookup *> m_lookupList;
+    QList<HostNode> m_hostList;
+//    QList<HostNode>::const_iterator m_currentHost;
+    HostNode m_currentHost;
+//    int m_currentHostIndex;
+//    IMetadataLookup **m_currentLookup;
 
-    QTimer *m_destructorTimer;
-    QMutex m_workQueueLock;
-    QMutex m_startLookupLock;
-    QMutex m_destructorLock;
-    int m_currentLookupIndex;
-    bool m_lookupStarted;
-    bool m_destructorState;
+    QMutex m_mutex;
+    QMutex m_lookupMutex;
+    bool m_finish;
+    bool m_doInternalLoop;
+    bool m_useNextHost;
+//    QTimer *m_destructorTimer;
+//    QMutex m_workQueueLock;
+//    QMutex m_startLookupLock;
+//    QMutex m_destructorLock;
+//    int m_currentLookupIndex;
+//    bool m_lookupStarted;
+//    bool m_destructorState;
 };
 
 } //MetadataLookup

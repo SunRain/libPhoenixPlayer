@@ -6,6 +6,7 @@
 
 class QUrl;
 namespace PhoenixPlayer {
+class PlayerCore;
 namespace MusicLibrary {
 class MusicLibraryManager;
 }
@@ -16,7 +17,7 @@ class CoverCircleImage : public CircleImage
     Q_OBJECT
     Q_PROPERTY(QUrl defaultSource READ defaultSource WRITE setDefaultSource)
     Q_PROPERTY(bool autoChange READ autoChange WRITE setAutoChange)
-    Q_PROPERTY(QString songHash READ songHash WRITE setSongHash)
+//    Q_PROPERTY(QString songHash READ songHash WRITE setSongHash)
 public:
     explicit CoverCircleImage(CircleImage *parent = 0);
     virtual ~CoverCircleImage();
@@ -33,12 +34,10 @@ public:
     ///
     bool autoChange() const;
 
-    QString songHash() const;
-
 public slots:
-    void setDefaultSource(const QUrl &source);
-    void setAutoChange(bool autoChange);
-    void setSongHash(const QString &hash);
+    void setDefaultSource(QUrl arg);
+    void setAutoChange(bool arg);
+
 private slots:
     void drawImage();
 
@@ -46,12 +45,15 @@ private:
 //    QUrl queryOne(const QString &hash,
 //                     Common::SongMetaTags tag,
 //                     bool skipDuplicates = true);
-    void setImage(const QString &hash);
+    void setImage(const QUrl &url);
 private:
-    MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
-    QUrl mDefaultSource;
-    bool mAutoChange;
-    QString mSongHash;
+//    MusicLibrary::MusicLibraryManager *m_musicLibraryManager;
+    PlayerCore *m_playCore;
+//    QUrl mDefaultSource;
+//    bool mAutoChange;
+    //    QString mSongHash;
+    QUrl m_defaultSource;
+    bool m_autoChange;
 };
 
 

@@ -3,8 +3,23 @@
 
 #include <QObject>
 #include <QMetaEnum>
+#include <QMetaProperty>
 
 namespace PhoenixPlayer {
+
+#define DECLARE_STATIC_PROPERTY_LIST(Class) \
+    public: \
+    static QStringList staticPropertyList() { \
+        QStringList list; \
+        int count = Class::staticMetaObject.propertyCount (); \
+        for (int i=0; i<count; ++i) { \
+            QMetaProperty prop = Class::staticMetaObject.property (i); \
+            const char *name = prop.name (); \
+            list.append (name); \
+        } \
+        return list; \
+    } \
+    private: \
 
 class BaseObject : public QObject
 {
@@ -18,6 +33,16 @@ public:
         QMetaEnum m = metaObject ()->enumerator (index);
         return m.valueToKey (enumValue);
     }
+    QStringList propertyList() const {
+        QStringList list;
+        int count = metaObject ()->propertyCount ();
+        for (int i=0; i<count; ++i) {
+            QMetaProperty prop = metaObject ()->property (i);
+            const char *name = prop.name ();
+            list.append (name);
+        }
+        return list;
+    }   
 };
 
 }

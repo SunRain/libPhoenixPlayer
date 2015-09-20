@@ -30,8 +30,8 @@ public:
     };
     enum MediaType {
         MediaTypeLocalFile = 0x20,        //本地文件
-        MediaTypeUrl,                    //网络文件
-        MediaTypeStream                  //媒体文件
+        MediaTypeUrl                     //网络文件
+//        MediaTypeStream                  //媒体文件
     };
 
     enum PlayListElement {
@@ -55,14 +55,14 @@ public:
         E_AlbumName,
         E_AlbumImageUrl,
         E_AlbumDescription,
-        E_AlbumYear,
+        E_AlbumDate,
         E_CoverArtSmall,
         E_CoverArtLarge,
         E_CoverArtMiddle,
         E_MediaType,
-        E_SongLength,
-        E_SongTitle,
-        E_SongDescription,
+        E_TrackLength,
+        E_TrackTitle,
+        E_TrackDescription,
         E_Category,
         E_Year,
         E_Date,
@@ -71,7 +71,8 @@ public:
         E_Language,
         E_Publisher,
         E_Copyright,
-        E_Lyrics,
+        E_LyricsData,
+        E_LyricsUri,
         E_Mood,
         E_Composer,
         E_Conductor	,
@@ -86,7 +87,7 @@ public:
         PluginTypeAll = 0x100,
         //为保证后续兼容,TypePlayBackend必须为第二个项
         PluginPlayBackend,              //播放后端
-        PluginPlayListDAO,              //音乐库存储后端
+        PluginMusicLibraryDAO,              //音乐库存储后端
         PluginMusicTagParser,           //音乐Tag解析
         PluginMetadataLookup,           //metadata查询
         PluginDecoder,                  //解码插件

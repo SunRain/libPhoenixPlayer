@@ -4,6 +4,8 @@
 #include <QEventLoop>
 #include <QMutex>
 #include <QTimer>
+#include <QList>
+#include <QCoreApplication>
 
 #include "Settings.h"
 #include "Util.h"
@@ -11,347 +13,411 @@
 #include "PluginHost.h"
 #include "SingletonPointer.h"
 #include "SongMetaData.h"
+#include "MetadataLookup/MetadataLookupHost.h"
 
 namespace PhoenixPlayer {
 namespace MetadataLookup {
 MetadataLookupMgr::MetadataLookupMgr(QObject *parent) :
-    QObject(parent)
+    QThread(parent)
 {
-//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-//    mPluginLoader = PluginLoader::instance();
-//    mSettings = Settings::instance ();
-//    mUtil = Util::instance ();
-//#else
-//    mPluginLoader = SingletonPointer<PluginLoader>::instance ();
-//    mSettings = SingletonPointer<Settings>::instance ();
-//    mUtil = SingletonPointer<Util>::instance ();
-//#endif
     m_pluginLoader = PluginLoader::instance ();
     m_settings = Settings::instance ();
     m_util = Util::instance ();
-
-    m_lookupStarted = false;
-    m_currentLookup = nullptr;
-    m_destructorState = false;
-    m_destructorTimer = new QTimer(this);
-    m_destructorTimer->setSingleShot (true);
-    m_destructorTimer->setInterval (500);
-    connect (m_destructorTimer, &QTimer::timeout,
-             this, &MetadataLookupMgr::destructor);
+    m_finish = true;
+    m_doInternalLoop = true;
+    m_useNextHost = true;
+    initPluginObject ();
 }
 
 MetadataLookupMgr::~MetadataLookupMgr()
 {
-    qDebug()<<Q_FUNC_INFO;
-
-    if (!m_workQueue.isEmpty ()) {
-        qDebug()<<"Delete work queue";
-        foreach (WorkNode node, m_workQueue) {
-            if (node.data) {
-                delete node.data;
-                node.data = 0;
+    if (this->isRunning ()) {
+        this->quit ();
+        this->wait (3*1000);
+    }
+    if (!m_hostList.isEmpty ()) {
+        foreach (HostNode node, m_hostList) {
+            if (*node.lookup)
+                *node.lookup = nullptr;
+            node.lookup = nullptr;
+            if (node.host->isLoaded ()) {
+                if (!node.host->unLoad ())
+                    node.host->forceUnload ();
+                node.host->deleteLater ();
+                node.host = nullptr;
             }
+        }
+        m_hostList.clear ();
+    }
+    if (!m_workQueue.isEmpty ()) {
+        foreach (WorkNode node, m_workQueue) {
+            node.data = nullptr;
         }
         m_workQueue.clear ();
     }
-
-//    destructor ();
 }
 
-void MetadataLookupMgr::lookup(SongMetaData *data, IMetadataLookup::LookupType type)
+void MetadataLookupMgr::lookup(SongMetaData **data, IMetadataLookup::LookupType type)
 {
-    if (m_destructorTimer->isActive ())
-        m_destructorTimer->stop ();
-
-    if (!m_settings->fetchMetaDataMobileNetwork ()
+    if (!m_settings->fetchMetadataOnMobileNetwork ()
             && (m_util->getNetworkType () == Util::NetworkType::TypeMobile)) {
         qWarning()<<"Current network type is mobile type and we disabled fetch metadata here";
-        m_lookupStarted = false;
         this->emitFinish ();
         return;
     }
-    if (!m_currentLookup) {
-        if (!m_destructorState) {
-            this->initPluginObject ();
-        } else {
-            if (!destructorState ()) {
-                this->initPluginObject ();
-            }
-        }
-    }
 
-    if (!m_currentLookup){
-        qDebug()<<Q_FUNC_INFO<<"MetadataLookupManager we can't found any lookup plugin now";
-        emit lookupFailed (data->getMeta(Common::E_Hash).toString(), type);
-        return;
-    }
-
-    SongMetaData *d = new SongMetaData(this);
-    for (int i = (int)Common::SongMetaTags::E_FirstFlag + 1;
-         i < (int)Common::SongMetaTags::E_LastFlag;
-         ++ i) {
-        d->setMeta (Common::SongMetaTags(i),
-                            data->getMeta (Common::SongMetaTags(i)));
-    }
     WorkNode node;
-    node.data = d;
+    node.data = data;
     node.type = type;
 
-    if (m_workQueueLock.tryLock (300)) {
-        if (!m_workQueue.contains (node)) {
-            m_workQueue.append (node);
-        } else {
-            delete node.data;
-            node.data = 0;
-        }
-        m_workQueueLock.unlock ();
-    }
+    m_mutex.lock ();
+    if (!m_workQueue.contains (node))
+        m_workQueue.append (node);
+    else
+        node.data = nullptr;
+    m_mutex.unlock ();
+
     qDebug()<<Q_FUNC_INFO<<QString("add node [%1], list size is [%2]")
-              .arg (d->getMeta (Common::E_FileName).toString ())
-              .arg (m_workQueue.size ());
+              .arg ((*data)->path () + (*data)->name ()).arg (m_workQueue.size ());
 
-    if (!m_lookupStarted) {
-        if (m_startLookupLock.tryLock (300)) {
-            if (!m_lookupStarted)
-                m_lookupStarted = true;
-            m_startLookupLock.unlock ();
-        }
-        processNext ();
-    }
+    if (!this->isRunning ())
+        this->start ();
 }
 
-void MetadataLookupMgr::nextLookupPlugin()
+void MetadataLookupMgr::run()
 {
-    if (m_lookupList.size () == 1 || m_currentLookupIndex == -1) { //only one plugin or no plugin
-        //所有插件都使用过了
-        QString hash = m_currentNode.data->getMeta (Common::SongMetaTags::E_Hash).toString ();
-        qDebug()<<Q_FUNC_INFO<<" all plugin used ===> failed for hash "<<hash;
-        emit lookupFailed (hash, m_currentLookup->currentLookupFlag ());
-        this->processNext ();
-    } else {
-        if (m_currentLookupIndex < m_lookupList.size ()-1) { //防止溢出
-            //指向下一个插件
-            m_currentLookupIndex++;
-            m_currentLookup = nullptr;
-            m_currentLookup = m_lookupList.at (m_currentLookupIndex);
-            qDebug()<<Q_FUNC_INFO<<QString("use new plugin [%1] at index [%2] for lookup type [%3], with track [%4]")
-                      .arg (m_currentLookup->metaObject ()->className ())
-                      .arg (m_currentLookupIndex)
-                      .arg (m_currentNode.type)
-                      .arg (m_currentNode.data->getMeta (Common::E_FileName).toString ());
-
-            if (m_currentLookup) {
-                this->doLookup ();
+    while (!m_finish && !m_hostList.isEmpty ()) {
+        if (m_workQueue.isEmpty ())
+            break;
+        m_mutex.lock ();
+        m_currentWork = m_workQueue.takeFirst ();
+        m_mutex.unlock ();
+        for(int i=0; i<m_hostList.size (); ++i) {
+//            m_currentHost = m_hostList.first ();
+//            m_currentHostIndex = 0;
+            if (i == m_hostList.size () -1) {
+                emit lookupFailed (m_currentWork.data, (*m_currentHost.lookup)->currentLookupFlag ());
+                break;
             }
-        } else {
-            QString hash = m_currentNode.data->getMeta (Common::SongMetaTags::E_Hash).toString ();
-            qDebug()<<Q_FUNC_INFO<<" all plugin used ===> failed for hash "<<hash;
-            emit lookupFailed (hash, m_currentLookup->currentLookupFlag ());
-            this->processNext ();
+            if (!m_useNextHost)
+                break;
+            m_doInternalLoop = true;
+            m_useNextHost = true;
+            m_currentHost = m_hostList.at (i);
+//            在外部设置LookupFlag，防止当在nextLookupPlugin里面没有任何一个插件支持当前的flag的时候，在发送失败信号的时候无法得到LookupFlag
+//            if (m_currentLookup->supportLookup (m_currentNode.type)) {
+//                qDebug()<<Q_FUNC_INFO<<QString("Use lookup plugin [%1] for lookup type [%2], with track [%3]")
+//                          .arg (m_currentLookup->metaObject ()->className ())
+//                          .arg (m_currentNode.type)
+//                          .arg (m_currentNode.data->getMeta (Common::E_FileName).toString ());
+
+//                m_currentLookup->lookup (m_currentNode.data);
+//            } else {
+//                this->nextLookupPlugin ();
+//            }
+            if ((*m_currentHost.lookup)->supportLookup (m_currentWork.type)) {
+                qDebug()<<Q_FUNC_INFO<<QString("Use lookup plugin [%1] for lookup type [%2], with track [%3]")
+                          .arg ((*m_currentHost.lookup)->metaObject ()->className ())
+                          .arg (m_currentWork.type)
+                          .arg ((*m_currentWork.data)->path () +"/" +(*m_currentWork.data)->name ());
+                (*m_currentHost.lookup)->lookup (m_currentWork.data);
+            } else {
+                continue;
+            }
+            //使用一个内部的QEventLoop来等待lookup成功活在失败
+            QScopedPointer<QTimer> timer(new QTimer(this));
+            QEventLoop eventLoop;
+            connect (timer.data (), &QTimer::timeout,[&] {
+                if (!m_doInternalLoop) {
+                    timer.data ()->stop ();
+                    eventLoop.quit ();
+                }
+            });
+            timer.data ()->setSingleShot (false);
+            timer.data ()->start (30);
+            eventLoop.exec ();
+//            emit lookupSucceed (m_currentWork.data, (*m_currentHost.lookup)->currentLookupFlag ());
         }
     }
+    emitFinish ();
 }
+
+//void MetadataLookupMgr::nextLookupPlugin()
+//{
+//    if (m_hostList.size () == 1 || m_currentLookupIndex == -1) { //only one plugin or no plugin
+//        //所有插件都使用过了
+//        QString hash = m_currentWork.data->getMeta (Common::SongMetaTags::E_Hash).toString ();
+//        qDebug()<<Q_FUNC_INFO<<" all plugin used ===> failed for hash "<<hash;
+//        emit lookupFailed (hash, m_currentLookup->currentLookupFlag ());
+//        this->processNext ();
+//    } else {
+//        if (m_currentLookupIndex < m_hostList.size ()-1) { //防止溢出
+//            //指向下一个插件
+//            m_currentLookupIndex++;
+//            m_currentLookup = nullptr;
+//            m_currentLookup = m_hostList.at (m_currentLookupIndex);
+//            qDebug()<<Q_FUNC_INFO<<QString("use new plugin [%1] at index [%2] for lookup type [%3], with track [%4]")
+//                      .arg (m_currentLookup->metaObject ()->className ())
+//                      .arg (m_currentLookupIndex)
+//                      .arg (m_currentWork.type)
+//                      .arg (m_currentWork.data->getMeta (Common::E_FileName).toString ());
+
+//            if (m_currentLookup) {
+//                this->doLookup ();
+//            }
+//        } else {
+//            QString hash = m_currentWork.data->getMeta (Common::SongMetaTags::E_Hash).toString ();
+//            qDebug()<<Q_FUNC_INFO<<" all plugin used ===> failed for hash "<<hash;
+//            emit lookupFailed (hash, m_currentLookup->currentLookupFlag ());
+//            this->processNext ();
+//        }
+//    }
+//}
 
 void MetadataLookupMgr::doLookupSucceed(const QByteArray &result)
 {
     qDebug()<<Q_FUNC_INFO<<QString("Lookup succeed with plugin [%1]")
-              .arg (m_currentLookup->metaObject ()->className ());
+              .arg ((*m_currentHost.lookup)->metaObject ()->className ());
 
-    if (m_currentNode.data) {
-        QString hash = m_currentNode.data->getMeta (Common::SongMetaTags::E_Hash).toString ();
-        emit lookupSucceed (hash, result, m_currentLookup->currentLookupFlag ());
+    if ((*m_currentWork.data) && !result.isEmpty ()) {
+        IMetadataLookup::LookupType type =  (*m_currentHost.lookup)->currentLookupFlag ();
+        switch (type) {
+        case IMetadataLookup::TypeAlbumDate:
+            (*m_currentWork.data)->albumMeta ()->setDate (QString(result));
+            break;
+        case IMetadataLookup::TypeAlbumDescription:
+            (*m_currentWork.data)->albumMeta ()->setDescription (QString(result));
+            break;
+        case IMetadataLookup::TypeAlbumImage:
+            (*m_currentWork.data)->albumMeta ()->setImgUri (QString(result));
+            break;
+        case IMetadataLookup::TypeArtistDescription:
+            (*m_currentWork.data)->artistMeta ()->setDescription (QString(result));
+            break;
+        case IMetadataLookup::TypeArtistImage:
+            (*m_currentWork.data)->artistMeta ()->setImgUri (QString(result));
+            break;
+            //TODO 分离lyrics路径或者数据
+        case IMetadataLookup::TypeLyrics:
+            (*m_currentWork.data)->setLyricsData (QString(result));
+            (*m_currentWork.data)->setLyricsUri (QString(result));
+            break;
+        case IMetadataLookup::TypeTrackDescription:
+            (*m_currentWork.data)->trackMeta ()->setDescription (QString(result));
+            break;
+        default:
+            break;
+        }
+        emit lookupSucceed (m_currentWork.data, (*m_currentHost.lookup)->currentLookupFlag ());
     }
-    this->processNext ();
+    m_useNextHost = false;
+    m_doInternalLoop = false;
 }
 
 void MetadataLookupMgr::doLookupFailed()
 {
     qDebug()<<Q_FUNC_INFO;
-    this->nextLookupPlugin ();
+    m_useNextHost = true;
+    m_doInternalLoop = false;
 }
 
-void MetadataLookupMgr::destructor()
-{
-    qDebug()<<Q_FUNC_INFO;
+//void MetadataLookupMgr::destructor()
+//{
+//    qDebug()<<Q_FUNC_INFO;
 
-    m_destructorState = true;
+//    m_destructorState = true;
 
-    m_currentLookup = nullptr;
-    m_currentLookupIndex = -1;
+//    m_currentLookup = nullptr;
+//    m_currentLookupIndex = -1;
 
-    if (!m_lookupList.isEmpty ()) {
-        qDebug()<<Q_FUNC_INFO<<"mLookupList is not clear, clear it";
-        foreach (IMetadataLookup *d, m_lookupList) {
-            bool ret = QObject::disconnect (d, &IMetadataLookup::lookupFailed,
-                                            this, &MetadataLookupMgr::doLookupFailed);
+//    if (!m_hostList.isEmpty ()) {
+//        qDebug()<<Q_FUNC_INFO<<"mLookupList is not clear, clear it";
+//        foreach (IMetadataLookup *d, m_hostList) {
+//            bool ret = QObject::disconnect (d, &IMetadataLookup::lookupFailed,
+//                                            this, &MetadataLookupMgr::doLookupFailed);
 
-            qDebug()<<Q_FUNC_INFO<<QString("DIS Connect signal [lookupFailed] for plugin [%1] with ret [%2]")
-                      .arg (d->metaObject ()->className ()).arg (ret);
+//            qDebug()<<Q_FUNC_INFO<<QString("DIS Connect signal [lookupFailed] for plugin [%1] with ret [%2]")
+//                      .arg (d->metaObject ()->className ()).arg (ret);
 
-            ret = QObject::disconnect (d, &IMetadataLookup::lookupSucceed,
-                                       this, &MetadataLookupMgr::doLookupSucceed);
+//            ret = QObject::disconnect (d, &IMetadataLookup::lookupSucceed,
+//                                       this, &MetadataLookupMgr::doLookupSucceed);
 
-            qDebug()<<Q_FUNC_INFO<<QString("DIS Connect signal [lookupSucceed] for plugin [%1] with ret [%2]")
-                      .arg (d->metaObject ()->className ()).arg (ret);
-        }
-        m_lookupList.clear ();
-    }
+//            qDebug()<<Q_FUNC_INFO<<QString("DIS Connect signal [lookupSucceed] for plugin [%1] with ret [%2]")
+//                      .arg (d->metaObject ()->className ()).arg (ret);
+//        }
+//        m_hostList.clear ();
+//    }
 
-    foreach (PluginHost *h, m_pluginLoader->getPluginHostList (Common::PluginMetadataLookup)) {
-        h->unLoad ();
-    }
+//    foreach (PluginHost *h, m_pluginLoader->getPluginHostList (Common::PluginMetadataLookup)) {
+//        h->unLoad ();
+//    }
 
-    m_destructorState = false;
-}
+//    m_destructorState = false;
+//}
 
-bool MetadataLookupMgr::destructorState()
-{
-    qDebug()<<Q_FUNC_INFO<<"=======";
+//bool MetadataLookupMgr::destructorState()
+//{
+//    qDebug()<<Q_FUNC_INFO<<"=======";
 
-    QScopedPointer<QTimer> timer(new QTimer(this));
-    QEventLoop eventLoop;
-    connect (timer.data (), &QTimer::timeout,[&] {
-        if (!m_destructorState) {
-            timer.data ()->stop ();
-            eventLoop.quit ();
-        }
-    });
-    timer.data ()->setSingleShot (false);
-    timer.data ()->start (30);
-    eventLoop.exec ();
-    return false;
-}
+//    QScopedPointer<QTimer> timer(new QTimer(this));
+//    QEventLoop eventLoop;
+//    connect (timer.data (), &QTimer::timeout,[&] {
+//        if (!m_destructorState) {
+//            timer.data ()->stop ();
+//            eventLoop.quit ();
+//        }
+//    });
+//    timer.data ()->setSingleShot (false);
+//    timer.data ()->start (30);
+//    eventLoop.exec ();
+//    return false;
+//}
 
 void MetadataLookupMgr::initPluginObject()
 {
-    if (!m_lookupList.isEmpty ()) {
+    if (!m_hostList.isEmpty ()) {
         qDebug()<<Q_FUNC_INFO<<QString("Current we have %1 lookup plugin pointer in tmp list, clear them")
-                  .arg (m_lookupList.size ());
+                  .arg (m_hostList.size ());
 
-        foreach (IMetadataLookup *d, m_lookupList) {
-            bool ret = QObject::disconnect (d, &IMetadataLookup::lookupFailed,
+        foreach (HostNode node, m_hostList) {
+
+            bool ret = QObject::disconnect (*(node.lookup), &IMetadataLookup::lookupFailed,
                                             this, &MetadataLookupMgr::doLookupFailed);
 
             qDebug()<<Q_FUNC_INFO<<QString("DIS Connect signal [lookupFailed] for plugin [%1] with ret [%2]")
-                      .arg (d->metaObject ()->className ()).arg (ret);
+                      .arg ((*(node.lookup))->metaObject ()->className ()).arg (ret);
 
-            ret = QObject::disconnect (d, &IMetadataLookup::lookupSucceed,
+            ret = QObject::disconnect (*(node.lookup), &IMetadataLookup::lookupSucceed,
                                        this, &MetadataLookupMgr::doLookupSucceed);
 
             qDebug()<<Q_FUNC_INFO<<QString("DIS Connect signal [lookupSucceed] for plugin [%1] with ret [%2]")
-                      .arg (d->metaObject ()->className ()).arg (ret);
-        }
-        m_lookupList.clear ();
-    }
-    foreach (PluginHost *host, m_pluginLoader->getPluginHostList (Common::PluginMetadataLookup)) {
-        if (host->isLoaded ()) {
-            qWarning()<<Q_FUNC_INFO<<"here  host is loaded, try to unload before instance";
-            host->unLoad ();
-        }
-        QObject *o = host->instance ();
-        if (o) {
-            IMetadataLookup *p = qobject_cast<IMetadataLookup *>(o);
-            if (p) {
-                qDebug()<<" append "<<host->name ();
-                m_lookupList.append (p);
-            } else {
-                host->unLoad ();
-            }
-        } else {
-            host->unLoad ();
-        }
+                      .arg ((*(node.lookup))->metaObject ()->className ()).arg (ret);
 
+            node.lookup = nullptr;
+            if (node.host->isLoaded ()) {
+                if (!node.host->unLoad ())
+                    node.host->forceUnload ();
+            }
+            node.host->deleteLater ();
+            node.host = nullptr;
+        }
+        m_hostList.clear ();
     }
-    if (m_lookupList.isEmpty ()) {
-        m_currentLookupIndex = -1;
-        m_currentLookup = nullptr;
-    } else {
-        m_currentLookup = m_lookupList.first ();
-        m_currentLookupIndex = 0;
+
+    QStringList libs = m_settings->metadataLookupLibraries ();
+    foreach (QString s, libs) {
+        MetadataLookupHost *host = new MetadataLookupHost(s, this);
+        if (host->isValid ()) {
+            IMetadataLookup *lookup = host->instance<IMetadataLookup>();
+            if (lookup) {
+                HostNode node;
+                node.lookup = &lookup;
+                node.host = host;
+                m_hostList.append (node);
+                continue;
+            }
+            if (host->isLoaded ()) {
+                if (!host->unLoad ())
+                    host->forceUnload ();
+            }
+        }
+        host->deleteLater ();
+        host = nullptr;
     }
-    if (!m_lookupList.isEmpty ()) {
-        foreach (IMetadataLookup *d, m_lookupList) {
-            bool ret = QObject::connect (d, &IMetadataLookup::lookupFailed,
+//    m_currentHostIndex = -1;
+    if (!m_hostList.isEmpty ()) {
+//        m_currentHost = m_hostList.first ();
+//        m_currentHostIndex = 0;
+        foreach (HostNode node, m_hostList) {
+            bool ret = QObject::connect (*(node.lookup), &IMetadataLookup::lookupFailed,
                                          this, &MetadataLookupMgr::doLookupFailed,
                                          Qt::UniqueConnection);
 
             qDebug()<<Q_FUNC_INFO<<QString("connet signal [lookupFailed] for plugin [%1] with ret [%2]")
-                      .arg (d->metaObject ()->className ()).arg (ret);
+                      .arg ((*(node.lookup))->metaObject ()->className ()).arg (ret);
 
-            ret = QObject::connect (d, &IMetadataLookup::lookupSucceed,
+            ret = QObject::connect (*(node.lookup), &IMetadataLookup::lookupSucceed,
                                     this, &MetadataLookupMgr::doLookupSucceed,
                                     Qt::UniqueConnection);
 
             qDebug()<<Q_FUNC_INFO<<QString("connet signal [lookupSucceed] for plugin [%1] with ret [%2]")
-                      .arg (d->metaObject ()->className ()).arg (ret);
+                      .arg ((*(node.lookup))->metaObject ()->className ()).arg (ret);
         }
     }
 }
 
-void MetadataLookupMgr::processNext()
-{
-    qDebug()<<Q_FUNC_INFO<<"queue size is "<<m_workQueue.size ();
+//void MetadataLookupMgr::processNext()
+//{
+//    qDebug()<<Q_FUNC_INFO<<"queue size is "<<m_workQueue.size ();
 
-    if (!m_currentLookup) {
-        qDebug()<<Q_FUNC_INFO<<"[Fatal error] mCurrentLookup not find ,we got some logic error on getting lookup plugin";
-        emitFinish ();
-        return;
-    }
+//    if (!m_currentLookup) {
+//        qDebug()<<Q_FUNC_INFO<<"[Fatal error] mCurrentLookup not find ,we got some logic error on getting lookup plugin";
+//        emitFinish ();
+//        return;
+//    }
 
-    if (m_workQueue.isEmpty ()) {
-        emitFinish ();
-        return;
-    }
+//    if (m_workQueue.isEmpty ()) {
+//        emitFinish ();
+//        return;
+//    }
 
-    //将插件指向列表第一个
-    m_currentLookupIndex = 0;
-    m_currentLookup = m_lookupList.first ();
+//    //将插件指向列表第一个
+//    m_currentLookupIndex = 0;
+//    m_currentLookup = m_hostList.first ();
 
-    qDebug()<<Q_FUNC_INFO<<" do work by plugin "<<m_currentLookup->metaObject ()->className ();
+//    qDebug()<<Q_FUNC_INFO<<" do work by plugin "<<m_currentLookup->metaObject ()->className ();
 
-    bool haveNode = false;
-    if (m_workQueueLock.tryLock (300)) {
-        if (!m_workQueue.isEmpty ()) {
-            m_currentNode = m_workQueue.takeFirst ();
-            haveNode = true;
-            m_workQueueLock.unlock ();
-        }
-    }
-    if (haveNode)
-        this->doLookup ();
-}
+//    bool haveNode = false;
+//    if (m_workQueueLock.tryLock (300)) {
+//        if (!m_workQueue.isEmpty ()) {
+//            m_currentWork = m_workQueue.takeFirst ();
+//            haveNode = true;
+//            m_workQueueLock.unlock ();
+//        }
+//    }
+//    if (haveNode)
+//        this->doLookup ();
+//}
 
-void MetadataLookupMgr::doLookup()
-{
-    qDebug()<<Q_FUNC_INFO;
-    if (!m_currentLookup) {
-        qDebug()<<"Fatal error, current lookup plugin is nulllptr, we got some logic error on getting lookup plugin";
-        emitFinish ();
-        return;
-    }
-    //在外部设置LookupFlag，防止当在nextLookupPlugin里面没有任何一个插件支持当前的flag的时候，在发送失败信号的时候无法得到LookupFlag
-    m_currentLookup->setCurrentLookupFlag (m_currentNode.type);
-    if (m_currentLookup->supportLookup (m_currentNode.type)) {
-        qDebug()<<Q_FUNC_INFO<<QString("Use lookup plugin [%1] for lookup type [%2], with track [%3]")
-                  .arg (m_currentLookup->metaObject ()->className ())
-                  .arg (m_currentNode.type)
-                  .arg (m_currentNode.data->getMeta (Common::E_FileName).toString ());
+//void MetadataLookupMgr::doLookup()
+//{
+//    qDebug()<<Q_FUNC_INFO;
+//    if (!m_currentLookup) {
+//        qDebug()<<"Fatal error, current lookup plugin is nulllptr, we got some logic error on getting lookup plugin";
+//        emitFinish ();
+//        return;
+//    }
+//    //在外部设置LookupFlag，防止当在nextLookupPlugin里面没有任何一个插件支持当前的flag的时候，在发送失败信号的时候无法得到LookupFlag
+//    m_currentLookup->setCurrentLookupFlag (m_currentWork.type);
+//    if (m_currentLookup->supportLookup (m_currentWork.type)) {
+//        qDebug()<<Q_FUNC_INFO<<QString("Use lookup plugin [%1] for lookup type [%2], with track [%3]")
+//                  .arg (m_currentLookup->metaObject ()->className ())
+//                  .arg (m_currentWork.type)
+//                  .arg (m_currentWork.data->getMeta (Common::E_FileName).toString ());
 
-        m_currentLookup->lookup (m_currentNode.data);
-    } else {
-        this->nextLookupPlugin ();
-    }
-}
+//        m_currentLookup->lookup (m_currentWork.data);
+//    } else {
+//        this->nextLookupPlugin ();
+//    }
+//}
 
 void MetadataLookupMgr::emitFinish()
 {
-    if (m_startLookupLock.tryLock (300)) {
-        m_lookupStarted = false;
-        m_startLookupLock.unlock ();
+//    if (m_startLookupLock.tryLock (300)) {
+//        m_lookupStarted = false;
+//        m_startLookupLock.unlock ();
 
-        qDebug()<<Q_FUNC_INFO<<"try to destructor";
-//        QTimer::singleShot (1000, this, &MetadataLookupMgr::destructor);
-        m_destructorTimer->start ();
+//        qDebug()<<Q_FUNC_INFO<<"try to destructor";
+////        QTimer::singleShot (1000, this, &MetadataLookupMgr::destructor);
+//        m_destructorTimer->start ();
+//    }
+//    emit queueFinished ();
+    if (this->isRunning ()) {
+        m_mutex.lock ();
+        m_finish = true;
+        this->quit ();
+        this->wait (3*1000);
+        m_mutex.unlock ();
     }
     emit queueFinished ();
 }

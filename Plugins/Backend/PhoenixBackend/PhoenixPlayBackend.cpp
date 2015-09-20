@@ -67,7 +67,7 @@ bool PhoenixPlayBackend::event(QEvent *e)
     return true;
 }
 
-Common::PlayBackendState PhoenixPlayBackend::getPlayBackendState()
+Common::PlayBackendState PhoenixPlayBackend::playBackendState()
 {
 //    PlayBackendStopped = 0x0,  //播放停止
 //    PlayBackendPlaying,        //播放

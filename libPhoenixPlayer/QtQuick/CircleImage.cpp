@@ -21,20 +21,16 @@ namespace QmlPlugin {
 CircleImage::CircleImage(QQuickPaintedItem *parent)
     : QQuickPaintedItem(parent)
 {
-    mSource = QUrl();
-    mStatus = Status::Null;
-    mNetworkAccessManager = 0;
-    mReply = 0;
-    mImage = 0;
-    mFile = 0;
-    mRequestAborted = false;
-    mCache = true;
-    mByteArray = QByteArray();
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    mSettings = Settings::instance ();
-#else
-    mSettings = SingletonPointer<Settings>::instance ();
-#endif
+    m_source = QUrl();
+    m_status = Status::Null;
+    m_networkAccessManager = 0;
+    m_reply = 0;
+    m_image = 0;
+    m_file = 0;
+    m_requestAborted = false;
+    m_cache = true;
+    m_byteArray = QByteArray();
+    m_settings = Settings::instance ();
 }
 
 CircleImage::~CircleImage()
@@ -59,7 +55,7 @@ void CircleImage::paint(QPainter *painter)
 //        str = str.mid(3, str.length() - 3);
 
 //    QImage image(str);
-    if (mImage == 0 || mImage->isNull ()) {
+    if (m_image == 0 || m_image->isNull ()) {
         qDebug()<<__FUNCTION__<<" Image is null";
         this->setStatus (Status::Error);
         return;
@@ -68,11 +64,11 @@ void CircleImage::paint(QPainter *painter)
 //    this->setStatus (Status::Loading);
 
     //取得一个圆的最短长度
-    int width = mImage->width();
+    int width = m_image->width();
     int targetWidth = this->width();
-    int height = mImage->height();
+    int height = m_image->height();
     int targetHeight = this->height();
-    QImage img = mImage->scaled(targetWidth, targetHeight, Qt::KeepAspectRatioByExpanding);
+    QImage img = m_image->scaled(targetWidth, targetHeight, Qt::KeepAspectRatioByExpanding);
 
     width = img.width();
     height = img.height();
@@ -103,7 +99,7 @@ void CircleImage::paint(QPainter *painter)
 
 QUrl CircleImage::source() const
 {
-    return mSource;
+    return m_source;
 }
 
 void CircleImage::setSource(const QUrl &source)
@@ -111,17 +107,17 @@ void CircleImage::setSource(const QUrl &source)
 //    qDebug()<<__FUNCTION__<<" source set to "<<source
 //              <<" msource is "<<mSource;
 
-    if (mSource == source) {
+    if (m_source == source) {
         return;
     }
-    mSource = source;
-    if (mSource.isEmpty() || !mSource.isValid()) {
+    m_source = source;
+    if (m_source.isEmpty() || !m_source.isValid()) {
         this->setStatus (Status::Error);
         return;
     }
-    QString str = mSource.toLocalFile();
+    QString str = m_source.toLocalFile();
     if (str.isEmpty())
-        str = mSource.toString();
+        str = m_source.toString();
     if (str.isEmpty()) {
         this->setStatus (Status::Error);
         return;
@@ -130,7 +126,7 @@ void CircleImage::setSource(const QUrl &source)
     this->setStatus (Status::Loading);
 
     if (str.toLower ().startsWith (("http"))) { //url
-        downloadFile (mSource);
+        downloadFile (m_source);
         return;
     }
 
@@ -145,23 +141,23 @@ void CircleImage::setSource(const QUrl &source)
 
 CircleImage::Status CircleImage::status() const
 {
-    return mStatus;
+    return m_status;
 }
 
 void CircleImage::setStatus(const CircleImage::Status &stus)
 {
-    mStatus = stus;
-    emit statusChanged (mStatus);
+    m_status = stus;
+    emit statusChanged (m_status);
 }
 
 bool CircleImage::cache()
 {
-    return mCache;
+    return m_cache;
 }
 
 void CircleImage::setCache(bool cache)
 {
-    mCache = cache;
+    m_cache = cache;
     emit cacheChanged (cache);
 }
 
@@ -172,14 +168,14 @@ void CircleImage::downloadFile(const QUrl &url)
         return;
     }
 
-    QString path = mSettings->getMusicImageCachePath ();
+    QString path = m_settings->musicImageCachePath ();
     QString hash = Util::calculateHash (path + url.toString ());
     path = QString("%1/%2").arg (path).arg (hash);
 
     ///
     /// file exist in local cache path
     ///
-    if (mCache) { //using image cache
+    if (m_cache) { //using image cache
         if (QFile::exists (path)) {
             if (fillImage (path)) { //we have the saved image data, try to load it
                 this->update ();
@@ -191,44 +187,44 @@ void CircleImage::downloadFile(const QUrl &url)
         }
 
         // constructe a new file to save image data
-        if (mFile) {
-            mFile->close ();
-            mFile->remove ();
-            delete  mFile;
-            mFile = 0;
+        if (m_file) {
+            m_file->close ();
+            m_file->remove ();
+            delete  m_file;
+            m_file = 0;
         }
-        mFile = new QFile(path);
-        if (!mFile->open (QIODevice::WriteOnly)) {
-            delete mFile;
-            mFile = 0;
+        m_file = new QFile(path);
+        if (!m_file->open (QIODevice::WriteOnly)) {
+            delete m_file;
+            m_file = 0;
         }
     } else {
-        if (mFile) {
-            mFile->close ();
-            delete mFile;
-            mFile = 0;
+        if (m_file) {
+            m_file->close ();
+            delete m_file;
+            m_file = 0;
         }
     }
 
     ///
     /// download from network
     ///
-    if (!mNetworkAccessManager)
-        mNetworkAccessManager = new QNetworkAccessManager(this);
+    if (!m_networkAccessManager)
+        m_networkAccessManager = new QNetworkAccessManager(this);
 
-    if (mReply) {
-        mReply->abort ();
-        mRequestAborted = true;
+    if (m_reply) {
+        m_reply->abort ();
+        m_requestAborted = true;
     }
-    if (!mByteArray.isEmpty ())
-        mByteArray.clear ();
+    if (!m_byteArray.isEmpty ())
+        m_byteArray.clear ();
 
     QNetworkRequest request(url);
-    mReply = mNetworkAccessManager->get (request);
-    if (mReply) {
-        connect (mReply, &QNetworkReply::finished,
+    m_reply = m_networkAccessManager->get (request);
+    if (m_reply) {
+        connect (m_reply, &QNetworkReply::finished,
                  this, &CircleImage::httpFinished);
-        connect (mReply, &QNetworkReply::readyRead,
+        connect (m_reply, &QNetworkReply::readyRead,
                  this, &CircleImage::httpReadyRead);
     }
 }
@@ -241,22 +237,22 @@ bool CircleImage::fillImage(const QString &imagePath)
     }
     bool ret = false;
 
-    mLock.lock ();
-    if (mImage) {
-        delete mImage;
-        mImage = 0;
+    m_lock.lock ();
+    if (m_image) {
+        delete m_image;
+        m_image = 0;
     }
-    mImage = new QImage();
-    if (mImage->load (imagePath)) {
+    m_image = new QImage();
+    if (m_image->load (imagePath)) {
         ret = true;
     } else {
-        if (mImage) {
-            delete mImage;
-            mImage = 0;
+        if (m_image) {
+            delete m_image;
+            m_image = 0;
         }
         ret = false;
     }
-    mLock.unlock ();
+    m_lock.unlock ();
     return ret;
 }
 
@@ -267,66 +263,66 @@ bool CircleImage::fillImage(const QByteArray &qba)
         return false;
     }
     bool ret = false;
-    mLock.lock ();
-    if (mImage) {
-        delete mImage;
-        mImage = 0;
+    m_lock.lock ();
+    if (m_image) {
+        delete m_image;
+        m_image = 0;
     }
-    mImage = new QImage();
-    if (mImage->loadFromData (qba)) {
+    m_image = new QImage();
+    if (m_image->loadFromData (qba)) {
         ret = true;
     } else {
-        if (mImage) {
-            delete mImage;
-            mImage = 0;
+        if (m_image) {
+            delete m_image;
+            m_image = 0;
         }
         ret = false;
     }
-    mLock.unlock ();
+    m_lock.unlock ();
     return ret;
 }
 
 void CircleImage::httpFinished()
 {
-    if (mRequestAborted) {
-        mReply->deleteLater ();
-        mReply = 0;
-        if (mFile) {
-            mFile->close ();
-            mFile->remove ();
-            delete  mFile;
-            mFile = 0;
+    if (m_requestAborted) {
+        m_reply->deleteLater ();
+        m_reply = 0;
+        if (m_file) {
+            m_file->close ();
+            m_file->remove ();
+            delete  m_file;
+            m_file = 0;
         }
-        if (!mByteArray.isEmpty ())
-            mByteArray.clear ();
+        if (!m_byteArray.isEmpty ())
+            m_byteArray.clear ();
         return;
     }
 
-    if (mFile) { // if cache set to false, mFile will be 0
-        mFile->flush ();
-        mFile->close ();
+    if (m_file) { // if cache set to false, mFile will be 0
+        m_file->flush ();
+        m_file->close ();
     }
 
-    if (mReply->error () != QNetworkReply::NetworkError::NoError) {
-        qDebug()<<__FUNCTION__<<" download with error "<<mReply->errorString ();
-        if (mFile) {
-            mFile->remove ();
+    if (m_reply->error () != QNetworkReply::NetworkError::NoError) {
+        qDebug()<<__FUNCTION__<<" download with error "<<m_reply->errorString ();
+        if (m_file) {
+            m_file->remove ();
         }
-        mByteArray.clear ();
+        m_byteArray.clear ();
     }
-    mReply->deleteLater ();
-    mReply = 0;
-    if (mFile) {
-        if (fillImage (mFile->fileName ())) {
+    m_reply->deleteLater ();
+    m_reply = 0;
+    if (m_file) {
+        if (fillImage (m_file->fileName ())) {
             this->update ();
         } else {
             this->setStatus (Status::Error);
         }
-        delete mFile;
-        mFile = 0;
+        delete m_file;
+        m_file = 0;
         return;
     }
-    if (fillImage (mByteArray))
+    if (fillImage (m_byteArray))
         this->update ();
     else
         this->setStatus (Status::Error);
@@ -338,10 +334,10 @@ void CircleImage::httpReadyRead()
     // We read all of its new data and write it into the file.
     // That way we use less RAM than when reading it at the finished()
     // signal of the QNetworkReply
-    if (mFile) {
-        mFile->write (mReply->readAll ());
+    if (m_file) {
+        m_file->write (m_reply->readAll ());
     } else { // no local cache
-        mByteArray.append (mReply->readAll ());
+        m_byteArray.append (m_reply->readAll ());
     }
 }
 

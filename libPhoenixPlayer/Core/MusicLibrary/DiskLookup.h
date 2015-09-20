@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <QThread>
 
 class QStringList;
 class QMimeDatabase;
@@ -12,7 +13,7 @@ class QMimeDatabase;
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-class DiskLookup : public QObject
+class DiskLookup : public QThread
 {
     Q_OBJECT
 public:
@@ -23,9 +24,9 @@ public:
     /// \brief lookup 开始搜索目录，当未setDir的时候使用默认系统音乐目录搜索
     /// \return
     ///
-    void startLookup();
+//    void startLookup();
 
-    bool isRunning();
+//    bool isRunning();
 
     ///
     /// \brief stopLookup 停止搜索目录
@@ -34,17 +35,20 @@ public:
     void stopLookup();
     void addLookupDir(const QString &dirName, bool lookupImmediately = false);
 
+    // QThread interface
+protected:
+    void run();
 protected:
     void scanDir(const QString &path);
 signals:
     void fileFound(const QString &path, const QString &file, const qint64 &size);
-    void pending();
-    void finished();
+//    void pending();
+//    void finished();
 
 private:
     QStringList m_pathList;
     bool m_stopLookupFlag;
-    bool m_isRunning;
+//    bool m_isRunning;
     QMimeDatabase m_QMimeDatabase;
     QMutex m_mutex;
 //    int mCount;

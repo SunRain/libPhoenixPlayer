@@ -8,46 +8,59 @@
 #include <QScopedPointer>
 
 #include "Settings.h"
+#include "SongMetaData.h"
 
 namespace PhoenixPlayer {
 
 const char *KEY_MUSIC_DIR = "MusicDir";
 const char *KEY_LAST_SONG = "LastPlayedSongHash";
-const char *KEY_PLAY_LIST = "CurrentPlayListHash";
-const char *KEY_PLAY_BACKEND = "CurrentPlayBackend";
+const char *KEY_PLAY_LIST = "CurrentPlayList";
+const char *KEY_PLUGIN_PLAY_BACKEND = "Plugin/CurrentPlayBackend";
+const char *KEY_PLUGIN_MUSIC_LIBRARY_DAO = "Plugin/CurrentMusicLibraryDAO";
+const char *KEY_PLUGIN_OUTPUT = "Plugin/CurrentOutPut";
+const char *KEY_PLUGIN_DECODERS = "Plugin/Decoders";
+const char *KEY_PLUGIN_METADATA_LOOKUP = "Plugin/MetadataLookup";
+const char *KEY_PLUGIN_TAG_PASER = "Plugin/TagPaser";
 const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
 const char *KEY_TRACE_LOG = "TraceLog";
 const char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
 const char *KEY_FETCH_METADATA_MOBILE_NETWORK = "fetchMetaDataMobileNetwork";
+const char *KEY_PLAY_LIST_DIR = "PlayListDir";
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
     m_settings = new QSettings(qApp->organizationName(), qApp->applicationName(),
                               parent);
 
-#ifdef UBUNTU_TOUCH
+
     QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
-//    QDir d(dataPath);
-//    d.cdUp ();
-//    dataPath = d.absolutePath ();
+#ifdef UBUNTU_TOUCH
     mDefaultMusicDir = QString("%1/Music").arg (dataPath);
 #else
     m_defaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
             .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 #endif
-    m_defaultMusicImageDir = QString("%1/Images")
-            .arg (QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
+    m_defaultMusicImageDir = QString("%1/Images").arg (dataPath);
+//            .arg (QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
+
+    m_defaultPlayListDir = QString("%1/PlayList").arg (dataPath);
 
     QDir dir(m_defaultMusicImageDir);
     if (!dir.exists ()) {
         if (!dir.mkpath (m_defaultMusicImageDir)) {
-            qDebug()<<"make music image dir fail";
+            qDebug()<<Q_FUNC_INFO<<"make music image dir fail";
         }
     }
     dir.setPath(m_defaultMusicDir);
     if (!dir.exists()) {
         if (!dir.mkpath(m_defaultMusicDir))
-            qDebug()<<"make music default dir fail";
+            qDebug()<<Q_FUNC_INFO<<"make music default dir fail";
+    }
+
+    dir.setPath (m_defaultPlayListDir);
+    if (!dir.exists ()) {
+        if (!dir.mkpath (m_defaultPlayListDir))
+            qDebug()<<Q_FUNC_INFO<<"make playlist dir fail";
     }
 
     m_autoFetchMetadata = false;
@@ -55,11 +68,6 @@ Settings::Settings(QObject *parent) : QObject(parent)
     checkInit ();
 }
 
-//Settings *Settings::getInstance()
-//{
-//    static Settings s(0);
-//    return &s;
-//}
 
 Settings::~Settings()
 {
@@ -67,21 +75,10 @@ Settings::~Settings()
     m_settings->deleteLater ();
 }
 
-//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-//Settings *Settings::instance()
-//{
-//    static QMutex mutex;
-//    static QScopedPointer<Settings> scp;
-
-//    if (Q_UNLIKELY(scp.isNull())) {
-//        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
-//        mutex.lock();
-//        scp.reset(new Settings(0));
-//        mutex.unlock();
-//    }
-//    return scp.data();
-//}
-//#endif
+QSettings *Settings::settings() const
+{
+    return m_settings;
+}
 
 bool Settings::setMusicDir(const QStringList &dirList)
 {
@@ -90,17 +87,19 @@ bool Settings::setMusicDir(const QStringList &dirList)
 
     QStringList list = dirList;
     list.removeDuplicates ();
-    QString last = list.takeLast ();
-    //Only one dir in the list
-    if (list.isEmpty ()) {
-        m_settings->setValue (KEY_MUSIC_DIR, last);
-        return true;
-    }
-    QString tmp;
-    foreach (QString s, list) {
-        tmp += QString("%1||").arg (s);
-    }
-    m_settings->setValue (KEY_MUSIC_DIR, QString("%1%2").arg (tmp).arg (last));
+//    QString last = list.takeLast ();
+//    //Only one dir in the list
+//    if (list.isEmpty ()) {
+//        m_settings->setValue (KEY_MUSIC_DIR, last);
+//        return true;
+//    }
+//    QString tmp;
+//    foreach (QString s, list) {
+//        tmp += QString("%1||").arg (s);
+//    }
+//    m_settings->setValue (KEY_MUSIC_DIR, QString("%1%2").arg (tmp).arg (last));
+//    m_settings->sync ();
+    m_settings->setValue (KEY_MUSIC_DIR, list.join ("||"));
     m_settings->sync ();
     return true;
 }
@@ -109,7 +108,7 @@ bool Settings::addMusicDir(const QString &dir)
 {
     if (dir.isEmpty ())
         return false;
-    QStringList list = getMusicDirs ();
+    QStringList list = musicDirs ();
     if (list.contains (dir))
         return false;
     list.append (dir);
@@ -121,28 +120,38 @@ bool Settings::deleteMusicDir(const QString &target)
 {
     if (target.isEmpty ())
         return false;
-    QStringList list = getMusicDirs ();
+    QStringList list = musicDirs ();
     if (list.contains (target))
         list.removeOne (target);
     return setMusicDir (list);
 
 }
 
-QStringList Settings::getMusicDirs()
+QStringList Settings::musicDirs()
 {
-    return m_settings->value (KEY_MUSIC_DIR, m_defaultMusicDir).toString ().split ("||");
+    return m_settings->value (KEY_MUSIC_DIR, QString()).toString ().split ("||");
 }
 
-QString Settings::getLastPlayedSong()
-{
-    return m_settings->value (KEY_LAST_SONG, QString()).toString ();
-}
 
-bool Settings::setLastPlayedSong(const QString &songHash)
+void Settings::setLastPlayedSong(SongMetaData **data)
 {
-    m_settings->setValue (KEY_LAST_SONG, songHash);
+    if (!data)
+        return;
+    QStringList list;
+    list.append ((*data)->path ());
+    list.append ((*data)->name ());
+    list.append (QString::number ((*data)->size ()));
+    m_settings->setValue (KEY_LAST_SONG, list.join ("||"));
     m_settings->sync ();
-    return true;
+}
+
+SongMetaData *Settings::lastPlayedSong()
+{
+    SongMetaData *data = nullptr;
+    QStringList list = m_settings->value (KEY_LAST_SONG, QString()).toString ().split ("||");
+    if (!list.isEmpty () && list.size () == 3)
+        data = new SongMetaData(list.at (0), list.at (1), list.at (2).toInt ());
+    return data;
 }
 
 bool Settings::setCurrentPlayListHash(const QString &hash)
@@ -157,17 +166,17 @@ QString Settings::getPlayListHash()
     return m_settings->value (KEY_PLAY_LIST, QString()).toString ();
 }
 
-bool Settings::setPlayBackend(const QString &backendName)
-{
-    m_settings->setValue (KEY_PLAY_BACKEND, backendName);
-    m_settings->sync ();
-    return true;
-}
+//bool Settings::setPlayBackend(const QString &backendName)
+//{
+//    m_settings->setValue (KEY_PLAY_BACKEND, backendName);
+//    m_settings->sync ();
+//    return true;
+//}
 
-QString Settings::getCurrentPlayBackend()
-{
-    return m_settings->value (KEY_PLAY_BACKEND, QString()).toString ();
-}
+//QString Settings::getCurrentPlayBackend()
+//{
+//    return m_settings->value (KEY_PLAY_BACKEND, QString()).toString ();
+//}
 
 bool Settings::setMusicImageCachePath(const QString &absolutePath)
 {
@@ -180,7 +189,7 @@ bool Settings::setMusicImageCachePath(const QString &absolutePath)
     return true;
 }
 
-QString Settings::getMusicImageCachePath()
+QString Settings::musicImageCachePath()
 {
     return m_settings->value (KEY_MUSIC_IMAGE_CACHE, m_defaultMusicImageDir).toString ();
 }
@@ -242,12 +251,12 @@ void Settings::setAutoFetchMetaData(bool autoFetch)
     emit autoFetchMetaDataChanged ();
 }
 
-bool Settings::fetchMetaDataMobileNetwork()
+bool Settings::fetchMetadataOnMobileNetwork()
 {
     return m_fetchMetaDataMobileNetwork;
 }
 
-void Settings::setFetchMetaDataMobileNetwork(bool fetch)
+void Settings::setFetchMetadataOnMobileNetwork(bool fetch)
 {
     if (m_fetchMetaDataMobileNetwork == fetch)
         return;
@@ -255,6 +264,138 @@ void Settings::setFetchMetaDataMobileNetwork(bool fetch)
     m_settings->setValue (KEY_FETCH_METADATA_MOBILE_NETWORK, m_fetchMetaDataMobileNetwork);
     m_settings->sync ();
     emit fetchMetaDataMobileNetworkChanged ();
+}
+
+QString Settings::playListDir() const
+{
+    return m_settings->value (KEY_PLAY_LIST_DIR, m_defaultPlayListDir).toString ();
+}
+
+QString Settings::curPlayBackend() const
+{
+    return m_settings->value (KEY_PLUGIN_PLAY_BACKEND, QString()).toString ();
+}
+
+QString Settings::curMusicLibraryDAO() const
+{
+    return m_settings->value (KEY_PLUGIN_MUSIC_LIBRARY_DAO, QString()).toString ();
+}
+
+QString Settings::curOutPut() const
+{
+    return m_settings->value (KEY_PLUGIN_OUTPUT, QString()).toString ();
+}
+
+void Settings::enableDecoder(const QString &libraryFile)
+{
+    QStringList decoders = decoderLibraries ();
+    if (!decoders.contains (libraryFile)) {
+        decoders.append (libraryFile);
+        m_settings->setValue (KEY_PLUGIN_DECODERS, decoders.join ("||"));
+        m_settings->sync ();
+    }
+}
+
+void Settings::disableDecoder(const QString &libraryFile)
+{
+    QStringList decoders = decoderLibraries ();
+    if (decoders.contains (libraryFile)) {
+        decoders.removeOne (libraryFile);
+        m_settings->setValue (KEY_PLUGIN_DECODERS, decoders.join ("||"));
+        m_settings->sync ();
+    }
+}
+
+QStringList Settings::decoderLibraries() const
+{
+    return m_settings->value (KEY_PLUGIN_DECODERS, QString()).toString ().split ("||");
+}
+
+void Settings::enableMetadataLookup(const QString &libraryFile)
+{
+    QStringList list = metadataLookupLibraries ();
+    if (!list.contains (libraryFile)) {
+        list.append (libraryFile);
+        m_settings->setValue (KEY_PLUGIN_METADATA_LOOKUP, list.join ("||"));
+        m_settings->sync ();
+    }
+}
+
+void Settings::disableMetadataLookup(const QString &libraryFile)
+{
+    QStringList list = metadataLookupLibraries ();
+    if (list.contains (libraryFile)) {
+        list.removeOne (libraryFile);
+        m_settings->setValue (KEY_PLUGIN_METADATA_LOOKUP, list.join ("||"));
+        m_settings->sync ();
+    }
+}
+
+QStringList Settings::metadataLookupLibraries() const
+{
+    return m_settings->value (KEY_PLUGIN_METADATA_LOOKUP, QString()).toString ().split ("||");
+}
+
+void Settings::enableTagPaser(const QString &libraryFile)
+{
+    QStringList list = tagPaserLibraries ();
+    if (!list.contains (libraryFile)) {
+        list.append (libraryFile);
+        m_settings->setValue (KEY_PLUGIN_TAG_PASER, list.join ("||"));
+        m_settings->sync ();
+    }
+}
+
+void Settings::disableTagPaser(const QString &libraryFile)
+{
+    QStringList list = tagPaserLibraries ();
+    if (list.contains (libraryFile)) {
+        list.removeOne (libraryFile);
+        m_settings->setValue (KEY_PLUGIN_TAG_PASER, list.join ("||"));
+        m_settings->sync ();
+    }
+}
+
+QStringList Settings::tagPaserLibraries() const
+{
+    return m_settings->value (KEY_PLUGIN_TAG_PASER, QString()).toString ().split ("||");
+}
+
+void Settings::setPlayListDir(QString arg)
+{
+    if (m_defaultPlayListDir != arg) {
+        m_defaultPlayListDir = arg;
+        m_settings->setValue (KEY_PLAY_LIST_DIR, m_defaultPlayListDir);
+        m_settings->sync ();
+        emit playListDirChanged(arg);
+    }
+}
+
+void Settings::setCurPlayBackend(const QString &libraryFile)
+{
+    if (curPlayBackend () != libraryFile) {
+        m_settings->setValue (KEY_PLUGIN_PLAY_BACKEND, libraryFile);
+        m_settings->sync ();
+        emit curPlayBackendChanged(libraryFile);
+    }
+}
+
+void Settings::setCurMusicLibraryDAO(const QString &libraryFile)
+{
+    if (curMusicLibraryDAO () != libraryFile) {
+        m_settings->setValue (KEY_PLUGIN_MUSIC_LIBRARY_DAO, libraryFile);
+        m_settings->sync ();
+        emit curMusicLibraryDAOChanged(libraryFile);
+    }
+}
+
+void Settings::setCurOutPut(const QString &libraryFile)
+{
+    if (curOutPut ()!= libraryFile) {
+        m_settings->setValue (KEY_PLUGIN_OUTPUT, libraryFile);
+        m_settings->sync ();
+        emit curOutPutChanged(libraryFile);
+    }
 }
 
 void Settings::checkInit()

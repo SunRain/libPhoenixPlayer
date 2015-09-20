@@ -6,345 +6,497 @@
 #include <QPointer>
 #include <QMutex>
 
-#include "MusicLibrary/IPlayListDAO.h"
-#include "DiskLookup.h"
+#include "MusicLibrary/IMusicLibraryDAO.h"
+#include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "Settings.h"
 #include "Util.h"
 #include "SongMetaData.h"
 #include "Common.h"
-#include "TagParserManager.h"
 #include "PluginLoader.h"
 #include "SingletonPointer.h"
-#include "AsyncDiskLookup.h"
-#include "AsyncTagParserMgrWrapper.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
 MusicLibraryManager::MusicLibraryManager(QObject *parent)
-    : QObject(parent)
-    ,m_isInit(false)
+    : BaseObject(parent)
 {
-    m_asyncDiskLookup = nullptr;
-    m_tagParserWrapper = nullptr;
-    m_playListDAO = nullptr;
-
     m_settings = Settings::instance ();
     m_pluginLoader = PluginLoader::instance ();
+    m_dao = nullptr;
+    m_daoHost = m_pluginLoader->curDAOHost ();
+    if (m_daoHost)
+        m_dao = m_daoHost->instance<IMusicLibraryDAO>();
 
-    m_currentSongHash = QString();
-    m_currentPlayListHash = QString();
+    if (m_dao) {
+        connect (m_dao, &IMusicLibraryDAO::metaDataInserted,
+                 [&](SongMetaData **data) {
+            if (!trackInList (data)) {
+                SongMetaData *d = new SongMetaData(data);
+                m_dao->fillAttribute (&d);
+                m_trackList.append (d);
+            }
+        });
+        connect (m_dao, &IMusicLibraryDAO::metaDataDeleted,
+                 [&](SongMetaData **data) {
+            if (trackInList (data)) {
+                int i;
+                for(i=0; i<m_trackList.size (); ++i) {
+                    if (m_trackList.at (i)->equals (*data))
+                        break;
+                }
+                m_trackList.removeAt (i);
+            }
+        });
+    }
 
-    if (!m_isInit)
-        init ();
+    initList ();
 }
 
 MusicLibraryManager::~MusicLibraryManager()
 {
     qDebug()<<">>>>>>>> "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
-    if (m_settings != nullptr) {
-        qDebug()<<"save Settings";
-        m_settings->setLastPlayedSong (m_currentSongHash);
-    }
 
-//    if (m_playListDAO)
-//        m_playListDAO->deleteLater ();
+    if (m_dao)
+        m_dao = nullptr;
+    if (m_daoHost->isLoaded ()) {
+        if (!m_daoHost->unLoad ())
+            m_daoHost->forceUnload ();
+    }
+    if (!m_trackList.isEmpty ()) {
+        qDeleteAll(m_trackList);
+        m_trackList.clear ();
+    }
 
     qDebug()<<">>>>>>>> after "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
 }
-//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-//MusicLibraryManager *MusicLibraryManager::instance()
+
+QList<SongMetaData *> MusicLibraryManager::allTracks()
+{
+    return m_trackList;
+}
+
+QList<SongMetaData *> MusicLibraryManager::artistTracks(const QString &artistName, int limitNum)
+{
+    if (m_trackList.isEmpty ())
+        return QList<SongMetaData *>();
+    QList<SongMetaData *> list;
+    int i = 0;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->artistMeta ()->name () == artistName)
+            list.append (d);
+        i++;
+        if (limitNum > 0 && i >= limitNum)
+            break;
+    }
+    return list;
+}
+
+QList<SongMetaData *> MusicLibraryManager::albumTracks(const QString &albumName, int limitNum)
+{
+    if (m_trackList.isEmpty ())
+        return QList<SongMetaData *>();
+    QList<SongMetaData *> list;
+    int i = 0;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->albumMeta ()->name () == albumName)
+            list.append (d);
+        i++;
+        if (limitNum > 0 && i >= limitNum)
+            break;
+    }
+    return list;
+}
+
+QList<SongMetaData *> MusicLibraryManager::genreTracks(const QString &genreName, int limitNum)
+{
+    if (m_trackList.isEmpty ())
+        return QList<SongMetaData *>();
+    QList<SongMetaData *> list;
+    int i = 0;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->trackMeta ()->genre () == genreName)
+            list.append (d);
+        i++;
+        if (limitNum > 0 && i >= limitNum)
+            break;
+    }
+    return list;
+}
+
+QList<SongMetaData *> MusicLibraryManager::mediaTypeTracks(const QString &mediaType, int limitNum)
+{
+    if (m_trackList.isEmpty ())
+        return QList<SongMetaData *>();
+    QList<SongMetaData *> list;
+    int i = 0;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->mediaType () == mediaType.toInt ())
+            list.append (d);
+        i++;
+        if (limitNum > 0 && i >= limitNum)
+            break;
+    }
+    return list;
+}
+
+QList<SongMetaData *> MusicLibraryManager::userRatingTracks(const QString &rating, int limitNum)
+{
+    if (m_trackList.isEmpty ())
+        return QList<SongMetaData *>();
+    QList<SongMetaData *> list;
+    int i = 0;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->trackMeta ()->userRating ().toString () == rating)
+            list.append (d);
+        i++;
+        if (limitNum > 0 && i >= limitNum)
+            break;
+    }
+    return list;
+}
+
+QList<SongMetaData *> MusicLibraryManager::folderTracks(const QString &folder, int limitNum)
+{
+    if (m_trackList.isEmpty ())
+        return QList<SongMetaData *>();
+    QList<SongMetaData *> list;
+    int i = 0;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->path () == folder)
+            list.append (d);
+        i++;
+        if (limitNum > 0 && i >= limitNum)
+            break;
+    }
+    return list;
+}
+
+void MusicLibraryManager::initList()
+{
+    if (!m_trackList.isEmpty ()) {
+        qDeleteAll(m_trackList);
+        m_trackList.clear ();
+    }
+    if (!m_dao)
+        return;
+    QStringList list = m_dao->trackHashList ();
+    foreach (QString s, list) {
+        SongMetaData *d = m_dao->trackFromHash (s);
+        if (d) {
+            SongMetaData *dd = new SongMetaData(d);
+            m_dao->fillAttribute (&dd);
+            m_trackList.append (dd);
+        }
+    }
+}
+
+inline bool MusicLibraryManager::trackInList(SongMetaData **data)
+{
+    if (m_trackList.isEmpty ())
+        return false;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->equals (*data))
+            return true;
+    }
+    return false;
+}
+
+//TrackGroupObject::TrackGroupObject(const QString &name, const QUrl &imgUri, QObject *parent)
+//    : BaseObject(parent)
 //{
-//    static QMutex mutex;
-//    static QScopedPointer<MusicLibraryManager> scp;
-//    if (Q_UNLIKELY(scp.isNull())) {
-//        qDebug()<<Q_FUNC_INFO<<">>>>>>>> statr new";
-//        mutex.lock();
-//        scp.reset(new MusicLibraryManager(0));
-//        mutex.unlock();
-//    }
-//    return scp.data();
+//    m_name = name;
+//    m_imgUri = imgUri;
 //}
-//#endif
 
-bool MusicLibraryManager::changePlayList(const QString &playListHash)
-{
-    if (m_currentPlayListHash == playListHash) {
-        qDebug()<<"Same playList, not changed";
-        return false;
-    }
-    m_currentPlayListHash = playListHash;
-    m_currentSongHash = QString();
-    emit playListChanged ();
-    return true;
-}
+//QUrl TrackGroupObject::imgUri() const
+//{
+//    return m_imgUri;
+//}
 
-bool MusicLibraryManager::createPlayList(const QString &playListName)
-{
-    if (m_playListDAO->insertPlayList (playListName)) {
-        emit playListCreated ();
-        return true;
-    }
-    return false;
-}
+//QString TrackGroupObject::name() const
+//{
+//    return m_name;
+//}
 
-bool MusicLibraryManager::deletePlayList(const QString &playListHash)
-{
-    if (m_playListDAO->deletePlayList (playListHash)) {
-        emit playListDeleted ();
-        return true;
-    }
-    return false;
-}
+//bool MusicLibraryManager::changePlayList(const QString &playListHash)
+//{
+//    if (m_currentPlayListHash == playListHash) {
+//        qDebug()<<"Same playList, not changed";
+//        return false;
+//    }
+//    m_currentPlayListHash = playListHash;
+//    m_currentSongHash = QString();
+//    emit playListChanged ();
+//    return true;
+//}
 
-QString MusicLibraryManager::getCurrentPlayListHash()
-{
-    return m_currentPlayListHash;
-}
+//bool MusicLibraryManager::createPlayList(const QString &playListName)
+//{
+//    if (m_playListDAO->insertPlayList (playListName)) {
+//        emit playListCreated ();
+//        return true;
+//    }
+//    return false;
+//}
 
-QString MusicLibraryManager::playingSongHash()
-{
-    if (m_currentSongHash.isEmpty ()) {
-        qDebug()<<"try playingSongHash from settings";
-        m_currentSongHash = m_settings->getLastPlayedSong ();
-        if (m_currentSongHash.isEmpty ()
-                && !m_playListDAO->getSongHashList (m_currentPlayListHash).isEmpty ()) {
-            qDebug()<<"try playingSongHash from first from library";
-            m_currentSongHash = m_playListDAO->getSongHashList (m_currentPlayListHash).first ();
-        } else {
-            qDebug()<<Q_FUNC_INFO<<"get some error";
-        }
-    }
-    qDebug()<<"playingSongHash is "<<m_currentSongHash;
-    return m_currentSongHash;
-}
+//bool MusicLibraryManager::deletePlayList(const QString &playListHash)
+//{
+//    if (m_playListDAO->deletePlayList (playListHash)) {
+//        emit playListDeleted ();
+//        return true;
+//    }
+//    return false;
+//}
 
-void MusicLibraryManager::setPlayingSongHash(const QString &newHash)
-{
-    if (newHash.isEmpty ())
-        return;
-    if (m_currentSongHash == newHash)
-        return;
-    qDebug()<<Q_FUNC_INFO<<"change current song hash from "<<m_currentSongHash<<" to "<<newHash;
-    m_currentSongHash = newHash;
-    emit playingSongChanged ();
-}
+//QString MusicLibraryManager::getCurrentPlayListHash()
+//{
+//    return m_currentPlayListHash;
+//}
 
-QString MusicLibraryManager::firstSongHash()
-{
-    m_currentSongHash = m_playListDAO->getSongHashList (m_currentPlayListHash).first ();
-    return m_currentSongHash;
-}
+//QString MusicLibraryManager::playingSongHash()
+//{
+//    if (m_currentSongHash.isEmpty ()) {
+//        qDebug()<<"try playingSongHash from settings";
+//        m_currentSongHash = m_settings->lastPlayedSong ();
+//        if (m_currentSongHash.isEmpty ()
+//                && !m_playListDAO->getSongHashList (m_currentPlayListHash).isEmpty ()) {
+//            qDebug()<<"try playingSongHash from first from library";
+//            m_currentSongHash = m_playListDAO->getSongHashList (m_currentPlayListHash).first ();
+//        } else {
+//            qDebug()<<Q_FUNC_INFO<<"get some error";
+//        }
+//    }
+//    qDebug()<<"playingSongHash is "<<m_currentSongHash;
+//    return m_currentSongHash;
+//}
 
-QString MusicLibraryManager::lastSongHash()
-{
-    m_currentSongHash = m_playListDAO->getSongHashList (m_currentPlayListHash).last ();
-    return m_currentSongHash;
-}
+//void MusicLibraryManager::setPlayingSongHash(const QString &newHash)
+//{
+//    if (newHash.isEmpty ())
+//        return;
+//    if (m_currentSongHash == newHash)
+//        return;
+//    qDebug()<<Q_FUNC_INFO<<"change current song hash from "<<m_currentSongHash<<" to "<<newHash;
+//    m_currentSongHash = newHash;
+//    emit playingSongChanged ();
+//}
 
-QString MusicLibraryManager::nextSong(bool jumpToNextSong)
-{
-    QStringList list = m_playListDAO->getSongHashList (m_currentPlayListHash);
-    if (!list.isEmpty ()) {
-        int index = list.indexOf (m_currentSongHash) +1;
-        if (index >= list.size ())
-            index = 0;
-        if (jumpToNextSong) {
-            m_currentSongHash = list.at (index);
-            emit playingSongChanged ();
-        }
-        return list.at (index);
-    }
-    return QString();
-}
+//QString MusicLibraryManager::firstSongHash()
+//{
+//    m_currentSongHash = m_playListDAO->getSongHashList (m_currentPlayListHash).first ();
+//    return m_currentSongHash;
+//}
 
-QString MusicLibraryManager::preSong(bool jumpToPreSong)
-{
-    QStringList list = m_playListDAO->getSongHashList (m_currentPlayListHash);
-    if (!list.isEmpty ()) {
-        int index = list.indexOf (m_currentSongHash);
-        if (index == -1) { //no hash found
-            index = 0;
-        } else if (index == 0) { //hash is the first song
-            index = list.size () -1; //jump to last song
-        } else {
-            index --;
-        }
-        if (jumpToPreSong) {
-            m_currentSongHash = list.at (index);
-            emit playingSongChanged ();
-        }
-        return list.at (index);
-    }
-    return QString();
-}
+//QString MusicLibraryManager::lastSongHash()
+//{
+//    m_currentSongHash = m_playListDAO->getSongHashList (m_currentPlayListHash).last ();
+//    return m_currentSongHash;
+//}
 
-QString MusicLibraryManager::randomSong(bool jumpToRandomSong)
-{
-    QStringList list = m_playListDAO->getSongHashList (m_currentPlayListHash);
-    if (!list.isEmpty ()) {
-        QTime time = QTime::currentTime ();
-        qsrand(time.second () * 1000 + time.msec ());
-        int n = qrand ();
-        n = n % list.size ();
-        if (jumpToRandomSong) {
-            m_currentSongHash = list.at (n);
-            emit playingSongChanged ();
-        }
-        return list.at (n);
-    }
-    return QString();
-}
+//QString MusicLibraryManager::nextSong(bool jumpToNextSong)
+//{
+//    QStringList list = m_playListDAO->getSongHashList (m_currentPlayListHash);
+//    if (!list.isEmpty ()) {
+//        int index = list.indexOf (m_currentSongHash) +1;
+//        if (index >= list.size ())
+//            index = 0;
+//        if (jumpToNextSong) {
+//            m_currentSongHash = list.at (index);
+//            emit playingSongChanged ();
+//        }
+//        return list.at (index);
+//    }
+//    return QString();
+//}
 
-QString MusicLibraryManager::queryOneByIndex(const QString &hash, int tag, bool skipDuplicates)
-{
-    return queryOne(hash, Common::SongMetaTags(tag), skipDuplicates);
-}
+//QString MusicLibraryManager::preSong(bool jumpToPreSong)
+//{
+//    QStringList list = m_playListDAO->getSongHashList (m_currentPlayListHash);
+//    if (!list.isEmpty ()) {
+//        int index = list.indexOf (m_currentSongHash);
+//        if (index == -1) { //no hash found
+//            index = 0;
+//        } else if (index == 0) { //hash is the first song
+//            index = list.size () -1; //jump to last song
+//        } else {
+//            index --;
+//        }
+//        if (jumpToPreSong) {
+//            m_currentSongHash = list.at (index);
+//            emit playingSongChanged ();
+//        }
+//        return list.at (index);
+//    }
+//    return QString();
+//}
 
-QStringList MusicLibraryManager::queryMusicLibrary(Common::SongMetaTags targetColumn,
-                                                   Common::SongMetaTags regColumn,
-                                                   const QString &regValue,
-                                                   bool skipDuplicates)
-{
-    return m_playListDAO->queryMusicLibrary(targetColumn, regColumn, regValue, skipDuplicates);
-}
+//QString MusicLibraryManager::randomSong(bool jumpToRandomSong)
+//{
+//    QStringList list = m_playListDAO->getSongHashList (m_currentPlayListHash);
+//    if (!list.isEmpty ()) {
+//        QTime time = QTime::currentTime ();
+//        qsrand(time.second () * 1000 + time.msec ());
+//        int n = qrand ();
+//        n = n % list.size ();
+//        if (jumpToRandomSong) {
+//            m_currentSongHash = list.at (n);
+//            emit playingSongChanged ();
+//        }
+//        return list.at (n);
+//    }
+//    return QString();
+//}
 
-QString MusicLibraryManager::querySongImageUri(const QString &hash)
-{
-    QString uri = queryOne(hash, Common::E_CoverArtMiddle);
-    if (uri.isEmpty())
-        uri = queryOne(hash, Common::E_CoverArtLarge);
-    if (uri.isEmpty())
-        uri = queryOne(hash, Common::E_CoverArtSmall);
-    if (uri.isEmpty())
-        uri = queryOne(hash, Common::E_AlbumImageUrl);
-    if (uri.isEmpty())
-        uri = queryOne(hash, Common::E_ArtistImageUri);
-    return uri;
-}
+//QString MusicLibraryManager::queryOneByIndex(const QString &hash, int tag, bool skipDuplicates)
+//{
+//    return queryOne(hash, Common::SongMetaTags(tag), skipDuplicates);
+//}
 
-QString MusicLibraryManager::querySongTitle(const QString &hash)
-{
-    QString str = queryOne(hash, Common::E_SongTitle);
-    if (str.isEmpty()) {
-        str = queryOne(hash, Common::E_FileName);
-        if (!str.isEmpty())
-            str = str.mid(0, str.lastIndexOf("."));
-    }
-    return str;
-}
+//QStringList MusicLibraryManager::queryMusicLibrary(Common::SongMetaTags targetColumn,
+//                                                   Common::SongMetaTags regColumn,
+//                                                   const QString &regValue,
+//                                                   bool skipDuplicates)
+//{
+//    return m_playListDAO->queryMusicLibrary(targetColumn, regColumn, regValue, skipDuplicates);
+//}
 
-QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targetColumn,
-                                                      const QString &hash,
-                                                      bool skipDuplicates)
-{
-    QStringList list;
-    if (hash.isEmpty ()) {
-        list = m_playListDAO
-                ->queryMusicLibrary (targetColumn,
-                                     Common::SongMetaTags::E_FirstFlag, //UnUsed
-                                     QString(),
-                                     skipDuplicates);
-    } else {
-        list = m_playListDAO
-                ->queryMusicLibrary (targetColumn,
-                                     Common::SongMetaTags::E_Hash,
-                                     hash,
-                                     skipDuplicates);
-    }
-    return list;
-}
+//QString MusicLibraryManager::querySongImageUri(const QString &hash)
+//{
+//    QString uri = queryOne(hash, Common::E_CoverArtMiddle);
+//    if (uri.isEmpty())
+//        uri = queryOne(hash, Common::E_CoverArtLarge);
+//    if (uri.isEmpty())
+//        uri = queryOne(hash, Common::E_CoverArtSmall);
+//    if (uri.isEmpty())
+//        uri = queryOne(hash, Common::E_AlbumImageUrl);
+//    if (uri.isEmpty())
+//        uri = queryOne(hash, Common::E_ArtistImageUri);
+//    return uri;
+//}
 
-QStringList MusicLibraryManager::querySongMetaElementByIndex(
-        int columnIndex, const QString &hash, bool skipDuplicates)
-{
-    return querySongMetaElement (Common::SongMetaTags(columnIndex), hash, skipDuplicates);
-}
+//QString MusicLibraryManager::querySongTitle(const QString &hash)
+//{
+//    QString str = queryOne(hash, Common::E_TrackTitle);
+//    if (str.isEmpty()) {
+//        str = queryOne(hash, Common::E_FileName);
+//        if (!str.isEmpty())
+//            str = str.mid(0, str.lastIndexOf("."));
+//    }
+//    return str;
+//}
 
-QStringList MusicLibraryManager::queryPlayListElement(
-        Common::PlayListElement targetColumn, const QString &hash)
-{
-    QStringList list;
-    if (hash.isEmpty ()) {
-        list = m_playListDAO->queryPlayList (targetColumn, Common::PlayListFirstFlag, QString());
-    } else {
-        list = m_playListDAO->queryPlayList (targetColumn, Common::PlayListHash, hash);
-    }
+//QStringList MusicLibraryManager::querySongMetaElement(Common::SongMetaTags targetColumn,
+//                                                      const QString &hash,
+//                                                      bool skipDuplicates)
+//{
+//    QStringList list;
+//    if (hash.isEmpty ()) {
+//        list = m_playListDAO
+//                ->queryMusicLibrary (targetColumn,
+//                                     Common::SongMetaTags::E_FirstFlag, //UnUsed
+//                                     QString(),
+//                                     skipDuplicates);
+//    } else {
+//        list = m_playListDAO
+//                ->queryMusicLibrary (targetColumn,
+//                                     Common::SongMetaTags::E_Hash,
+//                                     hash,
+//                                     skipDuplicates);
+//    }
+//    return list;
+//}
 
-    qDebug()<<" query result "<< list;
-    return list;
-}
+//QStringList MusicLibraryManager::querySongMetaElementByIndex(
+//        int columnIndex, const QString &hash, bool skipDuplicates)
+//{
+//    return querySongMetaElement (Common::SongMetaTags(columnIndex), hash, skipDuplicates);
+//}
 
-QStringList MusicLibraryManager::queryPlayListElementByIndex(int index, const QString &hash)
-{
-    return queryPlayListElement (Common::PlayListElement(index), hash);
-}
+//QStringList MusicLibraryManager::queryPlayListElement(
+//        Common::PlayListElement targetColumn, const QString &hash)
+//{
+//    QStringList list;
+//    if (hash.isEmpty ()) {
+//        list = m_playListDAO->queryPlayList (targetColumn, Common::PlayListFirstFlag, QString());
+//    } else {
+//        list = m_playListDAO->queryPlayList (targetColumn, Common::PlayListHash, hash);
+//    }
 
-bool MusicLibraryManager::insertToPlayList(const QString &playListHash,
-                                           const QString &newSongHash)
-{
-    if (playListHash.isEmpty () || newSongHash.isEmpty ()) {
-        qDebug()<<"playListHash or newSongHash is empty";
-        return false;
-    }
-    bool ret = m_playListDAO->updatePlayList (Common::PlayListSongHashes,
-                                                    playListHash,
-                                                    newSongHash,
-                                                    true);
-    if (ret)
-        emit playListTrackChanged ();
-    return ret;
-}
+//    qDebug()<<" query result "<< list;
+//    return list;
+//}
 
-bool MusicLibraryManager::deleteFromPlayList(
-        const QString &playListHash, const QString &songHash, bool deleteFromStorage)
-{
-    Q_UNUSED(deleteFromStorage)
+//QStringList MusicLibraryManager::queryPlayListElementByIndex(int index, const QString &hash)
+//{
+//    return queryPlayListElement (Common::PlayListElement(index), hash);
+//}
 
-    if (playListHash.isEmpty () || songHash.isEmpty ()) {
-        qDebug()<<"playListHash or newSongHash is empty";
-        return false;
-    }
-    //TODO: 需要添加从本地删除的功能
-    bool ret = m_playListDAO->updatePlayList (Common::PlayListSongHashes,
-                                                    playListHash,
-                                                    songHash,
-                                                    false);
-    if (ret)
-        emit playListTrackChanged ();
-    return ret;
-}
+//bool MusicLibraryManager::insertToPlayList(const QString &playListHash,
+//                                           const QString &newSongHash)
+//{
+//    if (playListHash.isEmpty () || newSongHash.isEmpty ()) {
+//        qDebug()<<"playListHash or newSongHash is empty";
+//        return false;
+//    }
+//    bool ret = m_playListDAO->updatePlayList (Common::PlayListSongHashes,
+//                                                    playListHash,
+//                                                    newSongHash,
+//                                                    true);
+//    if (ret)
+//        emit playListTrackChanged ();
+//    return ret;
+//}
 
-bool MusicLibraryManager::init()
-{
-    qDebug()<<QString(">>>>>>>>>> %1 <<<<<<<<<").arg (Q_FUNC_INFO);
+//bool MusicLibraryManager::deleteFromPlayList(
+//        const QString &playListHash, const QString &songHash, bool deleteFromStorage)
+//{
+//    Q_UNUSED(deleteFromStorage)
 
-    m_currentSongHash = m_settings->getLastPlayedSong ();
-    m_currentPlayListHash = m_settings->getPlayListHash ();
+//    if (playListHash.isEmpty () || songHash.isEmpty ()) {
+//        qDebug()<<"playListHash or newSongHash is empty";
+//        return false;
+//    }
+//    //TODO: 需要添加从本地删除的功能
+//    bool ret = m_playListDAO->updatePlayList (Common::PlayListSongHashes,
+//                                                    playListHash,
+//                                                    songHash,
+//                                                    false);
+//    if (ret)
+//        emit playListTrackChanged ();
+//    return ret;
+//}
 
-    if (!m_playListDAO)
-        m_playListDAO = m_pluginLoader->getCurrentPlayListDAO ();
-    if (m_playListDAO) {
-        if (!m_playListDAO->initDataBase ()) {
-            qDebug()<<"initDataBase error";
-        }
-    } else {
-        qDebug()<<"Can't find mPlayListDAO";
-    }
-    m_isInit = true;
+//bool MusicLibraryManager::init()
+//{
+//    qDebug()<<QString(">>>>>>>>>> %1 <<<<<<<<<").arg (Q_FUNC_INFO);
 
-    return true;
-}
+//    m_currentSongHash = m_settings->lastPlayedSong ();
+//    m_currentPlayListHash = m_settings->getPlayListHash ();
 
-QString MusicLibraryManager::queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates)
-{
-    if (hash.isEmpty())
-        return QString();
-    QStringList list = this->querySongMetaElement(tag, hash, skipDuplicates);
-    if (list.isEmpty())
-        return QString();
-    return list.first();
-}
+//    if (!m_playListDAO)
+//        m_playListDAO = m_pluginLoader->getCurrentLibraryDAO ();
+//    if (m_playListDAO) {
+//        if (!m_playListDAO->initDataBase ()) {
+//            qDebug()<<"initDataBase error";
+//        }
+//    } else {
+//        qDebug()<<"Can't find mPlayListDAO";
+//    }
+//    m_isInit = true;
+
+//    return true;
+//}
+
+//QString MusicLibraryManager::queryOne(const QString &hash, Common::SongMetaTags tag, bool skipDuplicates)
+//{
+//    if (hash.isEmpty())
+//        return QString();
+//    QStringList list = this->querySongMetaElement(tag, hash, skipDuplicates);
+//    if (list.isEmpty())
+//        return QString();
+//    return list.first();
+//}
 
 } //MusicLibrary
 } //PhoenixPlayer

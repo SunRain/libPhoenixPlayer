@@ -6,7 +6,7 @@
 #include <QSqlDatabase>
 #include <QVariant>
 
-#include "MusicLibrary/IPlayListDAO.h"
+#include "MusicLibrary/IMusicLibraryDAO.h"
 
 class QString;
 namespace PhoenixPlayer {
@@ -19,11 +19,11 @@ namespace SQLite3 {
 #define LIBRARY_TABLE_TAG "LIBRARY"
 #define PLAYLIST_TABLE_TAG "PLAYLIST"
 
-class SQLite3DAO : public IPlayListDAO
+class SQLite3DAO : public IMusicLibraryDAO
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayListDAO.SQLite3DAO" FILE "playlistsqlite3plugin.json")
-    Q_INTERFACES(PhoenixPlayer::MusicLibrary::IPlayListDAO)
+    Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayListDAO.MusicLibraryDAO" FILE "playlistsqlite3plugin.json")
+    Q_INTERFACES(PhoenixPlayer::MusicLibrary::IMusicLibraryDAO)
 public:
     explicit SQLite3DAO(QObject *parent = 0);
 //    static SQLite3DAO *getInstance();
@@ -38,23 +38,25 @@ public:
     bool deleteMetaData(const QString &hash);
     bool updateMetaData(SongMetaData *metaData = 0, bool skipEmptyValue = true);
     bool insertMetaData(SongMetaData *metaData = 0, bool skipDuplicates = true);
-    SongMetaData *querySongMeta(const QString &hash, const QString &table);
+//    SongMetaData *querySongMeta(const QString &hash, const QString &table);
     QStringList getSongHashList(const QString &playListHash);
 
-    QStringList queryMusicLibrary(Common::SongMetaTags,
-                                  Common::SongMetaTags regColumn,
-                                  const QString &regValue, bool skipDuplicates = true);
+    bool fillAttribute(SongMetaData *meta);
 
-    QStringList queryPlayList(Common::PlayListElement targetColumn,
-                              Common::PlayListElement regColumn,
-                              const QString &regValue);
+//    QStringList queryMusicLibrary(Common::SongMetaTags,
+//                                  Common::SongMetaTags regColumn,
+//                                  const QString &regValue, bool skipDuplicates = true);
 
-    bool updatePlayList(Common::PlayListElement targetColumn,
-                        const QString &hash, const QString &newValue,
-                        bool appendNewValues = true);
+//    QStringList queryPlayList(Common::PlayListElement targetColumn,
+//                              Common::PlayListElement regColumn,
+//                              const QString &regValue);
 
-    bool deletePlayList(const QString &playListHash);
-    bool insertPlayList(const QString &playListName);
+//    bool updatePlayList(Common::PlayListElement targetColumn,
+//                        const QString &hash, const QString &newValue,
+//                        bool appendNewValues = true);
+
+//    bool deletePlayList(const QString &playListHash);
+//    bool insertPlayList(const QString &playListName);
 
     // IPlayListDAO interface
 public slots:

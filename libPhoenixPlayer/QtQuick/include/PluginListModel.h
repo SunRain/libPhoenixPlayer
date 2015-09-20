@@ -3,6 +3,8 @@
 
 #include <QAbstractListModel>
 
+#include "Common.h"
+
 namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
@@ -23,18 +25,19 @@ public:
     enum ModelRoles {
         RoleName = Qt::UserRole + 1,
         RolePluginType,
-//        RoleBasePath,
         RoleVersion,
         RoleDescription,
         RoleConfigFile,
-        RoleHash
+        RoleLibraryFile
     };
 signals:
 
 public slots:
 
 private:
-    PluginLoader *mPluginLoader;
+    PluginLoader *m_pluginLoader;
+//    QHash<Common::PluginType, QStringList> m_libs;
+    QList<PluginHost *> m_hosts;
 
 };
 } //QmlPlugin

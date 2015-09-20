@@ -9,12 +9,15 @@
 
 #include "PluginLoader.h"
 #include "Backend/IPlayBackend.h"
-#include "MusicLibrary/IPlayListDAO.h"
+#include "Backend/BackendHost.h"
 #include "MetadataLookup/IMetadataLookup.h"
 #include "MusicLibrary/IMusicTagParser.h"
+#include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "PluginHost.h"
 #include "Decoder/IDecoder.h"
 #include "OutPut/IOutPut.h"
+#include "OutPut/OutPutHost.h"
+#include "Settings.h"
 
 namespace PhoenixPlayer {
 using namespace MetadataLookup;
@@ -46,38 +49,131 @@ using namespace OutPut;
 
 PluginLoader::PluginLoader(QObject *parent)
     : QObject(parent)
-    ,m_isInit(false)
+//    ,m_isInit(false)
 {
+    m_settings = Settings::instance ();
+    m_curBackendHost = nullptr;
+    m_curDAOHost = nullptr;
+    m_curOutPutHost = nullptr;
     //TODO: 根据系统来设置插件的默认路径
     QString path = QString("%1/plugins").arg(QCoreApplication::applicationDirPath());
-
-    //初始化一个空容器
-    for (int i = (int)Common::PluginTypeAll + 1;
-         i < (int)Common::PluginTypeUndefined;
-         ++i) {
-        m_pluginPath.insert (Common::PluginType(i), path);
-        m_currentPluginHost.insert (Common::PluginType(i), 0);
-    }
-    if (!m_isInit)
-        initPlugins ();
+    initPluginByPath (path);
 }
 
 PluginLoader::~PluginLoader()
 {
     qDebug()<<Q_FUNC_INFO;
-    if (!m_pluginHostList.isEmpty()) {
-        foreach (PluginHost *host, m_pluginHostList) {
-            if (host->isLoaded ()) {
-                host->unLoad ();
-                host->deleteLater ();
-                host = 0;
+    if (m_curBackendHost && m_curBackendHost->isLoaded ()) {
+        if (!m_curBackendHost->unLoad ())
+            m_curBackendHost->forceUnload ();
+        m_curBackendHost->deleteLater ();
+        m_curBackendHost = nullptr;
+    }
+    if (m_curDAOHost && m_curDAOHost->isLoaded ()) {
+        if (!m_curDAOHost->unLoad ())
+            m_curDAOHost->forceUnload ();
+        m_curDAOHost->deleteLater ();
+        m_curDAOHost = nullptr;
+    }
+    if (m_curOutPutHost && m_curOutPutHost) {
+        if (!m_curOutPutHost->unLoad ())
+            m_curOutPutHost->forceUnload ();
+        m_curOutPutHost->deleteLater ();
+        m_curOutPutHost = nullptr;
+    }
+}
+
+void PluginLoader::addPluginPath(const QString &path)
+{
+    initPluginByPath (path);
+}
+
+BackendHost *PluginLoader::curBackendHost()
+{
+    if (!m_curBackendHost) {
+        QString lib = m_settings->curPlayBackend ();
+        m_curBackendHost = new BackendHost(lib, this);
+        if (!m_curBackendHost->isValid ()) {
+            if (m_curBackendHost) {
+                m_curBackendHost->deleteLater ();
+                m_curBackendHost = nullptr;
+            }
+            QStringList list = m_libraries.values (Common::PluginPlayBackend);
+            if (list.isEmpty ()) {
+                m_curBackendHost = nullptr;
+            } else {
+                foreach (QString str, list) {
+                    m_curBackendHost = new BackendHost(str, this);
+                    if (m_curBackendHost->isValid ())
+                        break;
+                    m_curBackendHost->deleteLater ();
+                    m_curBackendHost = nullptr;
+                }
             }
         }
-        m_pluginHostList.clear ();
     }
+    return m_curBackendHost;
+}
 
-    if (!m_pluginPath.isEmpty ())
-        m_pluginPath.clear ();
+OutPutHost *PluginLoader::curOutPutHost()
+{
+    if (!m_curOutPutHost) {
+        QString lib = m_settings->curOutPut ();
+        m_curOutPutHost = new OutPutHost(lib, this);
+        if (!m_curOutPutHost->isValid ()) {
+            if (m_curOutPutHost) {
+                m_curOutPutHost->deleteLater ();
+                m_curOutPutHost = nullptr;
+            }
+            QStringList list = m_libraries.values (Common::PluginOutPut);
+            if (list.isEmpty ()) {
+                m_curOutPutHost = nullptr;
+            } else {
+                foreach (QString str, list) {
+                    m_curOutPutHost = new OutPutHost(str, this);
+                    if (m_curOutPutHost->isValid ())
+                        break;
+                    m_curOutPutHost->deleteLater ();
+                    m_curOutPutHost = nullptr;
+                }
+            }
+        }
+    }
+    return m_curOutPutHost;
+}
+
+MusicLibraryDAOHost *PluginLoader::curDAOHost()
+{
+    if (!m_curDAOHost) {
+        QString lib = m_settings->curMusicLibraryDAO ();
+        m_curDAOHost = new MusicLibraryDAOHost(lib, this);
+        if (!m_curDAOHost->isValid ()) {
+            if (m_curDAOHost) {
+                m_curDAOHost->deleteLater ();
+                m_curDAOHost = nullptr;
+            }
+            QStringList list = m_libraries.values (Common::PluginMusicLibraryDAO);
+            if (list.isEmpty ()) {
+                m_curDAOHost = nullptr;
+            } else {
+                foreach (QString str, list) {
+                    m_curDAOHost = new MusicLibraryDAOHost(str, this);
+                    if (m_curDAOHost->isValid ())
+                        break;
+                    m_curDAOHost->deleteLater ();
+                    m_curDAOHost = nullptr;
+                }
+            }
+        }
+    }
+    return m_curDAOHost;
+}
+
+QStringList PluginLoader::pluginLibraries(Common::PluginType type)
+{
+    if (type == Common::PluginTypeAll)
+        return m_libraries.values ();
+    return m_libraries.values (type);
 }
 
 //#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
@@ -96,352 +192,348 @@ PluginLoader::~PluginLoader()
 //}
 //#endif
 
-void PluginLoader::setPluginPath(Common::PluginType type, const QString &path)
-{
-    if (type == Common::PluginTypeAll) {
-        for (int i=(int)Common::PluginTypeAll+1; i<(int)Common::PluginTypeUndefined; ++i) {
-            m_pluginPath[Common::PluginType(i)] = path;
-        }
-    } else {
-        m_pluginPath[type] = path;
-    }
-
-    initPlugins ();
-}
-
-IPlayBackend *PluginLoader::getCurrentPlayBackend()
-{
-//    IPlayBackend *p = nullptr;
-//    if (!mCurrentPluginHost[Common::PluginPlayBackend]) {
-//        foreach (PluginHost *host, mPluginHostList) {
-//            if (host->type () == Common::PluginPlayBackend) {
-//                    QObject *plugin = host->instance ();
-//                    if (plugin) {
-//                        p = qobject_cast<IPlayBackend *>(plugin);
-//                        if (p) {
-//                            mCurrentPluginHost[Common::PluginPlayBackend] = host;
-//                            break;
-//                        }
-//                    }
-//                    host->unLoad ();
-//            }
+//void PluginLoader::setPluginPath(Common::PluginType type, const QString &path)
+//{
+//    if (type == Common::PluginTypeAll) {
+//        for (int i=(int)Common::PluginTypeAll+1; i<(int)Common::PluginTypeUndefined; ++i) {
+//            m_pluginPath[Common::PluginType(i)] = path;
 //        }
 //    } else {
-//        p = qobject_cast<IPlayBackend *>(mCurrentPluginHost[Common::PluginPlayBackend]->instance ());
+//        m_pluginPath[type] = path;
 //    }
-//    return p;
-    RETURN_PLUGIN_OBJECT(IPlayBackend, Common::PluginPlayBackend)
-}
 
-IPlayListDAO *PluginLoader::getCurrentPlayListDAO()
-{
-//    IPlayListDAO *p = nullptr;
-//    if (!mCurrentPluginHost[Common::PluginPlayListDAO]) {
-//        foreach (PluginHost *host, mPluginHostList) {
-//            if (host->type () == Common::PluginPlayListDAO) {
-//                if (!host->isLoaded ()) {
-//                    QObject *plugin = host->instance ();
-//                    if (plugin) {
-//                        p = qobject_cast<IPlayListDAO *>(plugin);
-//                        if (p) {
-//                            mCurrentPluginHost[Common::PluginPlayListDAO] = host;
-//                            break;
-//                        }
-//                    }
-//                }
-//                host->unLoad ();
-//            }
+//    initPlugins ();
+//}
+
+//IPlayBackend *PluginLoader::getCurrentPlayBackend()
+//{
+////    IPlayBackend *p = nullptr;
+////    if (!mCurrentPluginHost[Common::PluginPlayBackend]) {
+////        foreach (PluginHost *host, mPluginHostList) {
+////            if (host->type () == Common::PluginPlayBackend) {
+////                    QObject *plugin = host->instance ();
+////                    if (plugin) {
+////                        p = qobject_cast<IPlayBackend *>(plugin);
+////                        if (p) {
+////                            mCurrentPluginHost[Common::PluginPlayBackend] = host;
+////                            break;
+////                        }
+////                    }
+////                    host->unLoad ();
+////            }
+////        }
+////    } else {
+////        p = qobject_cast<IPlayBackend *>(mCurrentPluginHost[Common::PluginPlayBackend]->instance ());
+////    }
+////    return p;
+//    RETURN_PLUGIN_OBJECT(IPlayBackend, Common::PluginPlayBackend)
+//}
+
+//IMusicLibraryDAO *PluginLoader::getCurrentLibraryDAO()
+//{
+////    IPlayListDAO *p = nullptr;
+////    if (!mCurrentPluginHost[Common::PluginPlayListDAO]) {
+////        foreach (PluginHost *host, mPluginHostList) {
+////            if (host->type () == Common::PluginPlayListDAO) {
+////                if (!host->isLoaded ()) {
+////                    QObject *plugin = host->instance ();
+////                    if (plugin) {
+////                        p = qobject_cast<IPlayListDAO *>(plugin);
+////                        if (p) {
+////                            mCurrentPluginHost[Common::PluginPlayListDAO] = host;
+////                            break;
+////                        }
+////                    }
+////                }
+////                host->unLoad ();
+////            }
+////        }
+////    } else {
+////        p = qobject_cast<IPlayListDAO *>(mCurrentPluginHost[Common::PluginPlayListDAO]->instance ());
+////    }
+////    return p;
+//    RETURN_PLUGIN_OBJECT(IMusicLibraryDAO, Common::PluginMusicLibraryDAO)
+//}
+
+//IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
+//{
+////    IMusicTagParser *p = nullptr;
+////    if (!mCurrentPluginHost[Common::PluginMusicTagParser]) {
+////        foreach (PluginHost *host, mPluginHostList) {
+////            if (host->type () == Common::PluginMusicTagParser) {
+////                if (!host->isLoaded ()) {
+////                    QObject *plugin = host->instance ();
+////                    if (plugin) {
+////                        p = qobject_cast<IMusicTagParser *>(plugin);
+////                        if (p) {
+////                            mCurrentPluginHost[Common::PluginMusicTagParser] = host;
+////                            break;
+////                        }
+////                    }
+////                }
+////                host->unLoad ();
+////            }
+////        }
+////    } else {
+////        p = qobject_cast<IMusicTagParser *>(mCurrentPluginHost[Common::PluginMusicTagParser]->instance ());
+////    }
+////    return p;
+//    RETURN_PLUGIN_OBJECT(IMusicTagParser, Common::PluginMusicTagParser)
+//}
+
+//IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
+//{
+////    IMetadataLookup *p = nullptr;
+////    if (!mCurrentPluginHost[Common::PluginMetadataLookup]) {
+////        foreach (PluginHost *host, mPluginHostList) {
+////            if (host->type () == Common::PluginMetadataLookup) {
+////                if (!host->isLoaded ()) {
+////                    QObject *plugin = host->instance ();
+////                    if (plugin) {
+////                        p = qobject_cast<IMetadataLookup *>(plugin);
+////                        if (p) {
+////                            mCurrentPluginHost[Common::PluginMetadataLookup] = host;
+////                            break;
+////                        }
+////                    }
+////                }
+////                host->unLoad ();
+////            }
+////        }
+////    } else {
+////        p = qobject_cast<IMetadataLookup *>(mCurrentPluginHost[Common::PluginMetadataLookup]->instance ());
+////    }
+////    return p;
+//    RETURN_PLUGIN_OBJECT(IMetadataLookup, Common::PluginMetadataLookup)
+//}
+
+//IDecoder *PluginLoader::getCurrentDecoder()
+//{
+////    IDecoder *p = nullptr;
+////    if (!mCurrentPluginHost[Common::PluginDecoder]) {
+////        foreach (PluginHost *host, mPluginHostList) {
+////            if (host->type () == Common::PluginDecoder) {
+////                if (!host->isLoaded ()) {
+////                    QObject *plugin = host->instance ();
+////                    if (plugin) {
+////                        p = qobject_cast<IDecoder *>(plugin);
+////                        if (p) {
+////                            mCurrentPluginHost[Common::PluginDecoder] = host;
+////                            break;
+////                        }
+////                    }
+////                }
+////                host->unLoad ();
+////            }
+////        }
+////    } else {
+////        p = qobject_cast<IDecoder *>(mCurrentPluginHost[Common::PluginDecoder]->instance ());
+////    }
+////    return p;
+//    RETURN_PLUGIN_OBJECT(IDecoder, Common::PluginDecoder)
+//}
+
+//IOutPut *PluginLoader::getCurrentOutPut()
+//{
+////    IOutPut *p = nullptr;
+////    if (!mCurrentPluginHost[Common::PluginOutPut]) {
+////        foreach (PluginHost *host, mPluginHostList) {
+////            if (host->type () == Common::PluginOutPut) {
+////                if (!host->isLoaded ()) {
+////                    QObject *plugin = host->instance ();
+////                    if (plugin) {
+////                        p = qobject_cast<IOutPut *>(plugin);
+////                        if (p) {
+////                            mCurrentPluginHost[Common::PluginOutPut] = host;
+////                            break;
+////                        }
+////                    }
+////                }
+////                host->unLoad ();
+////            }
+////        }
+////    } else {
+////        p = qobject_cast<IOutPut *>(mCurrentPluginHost[Common::PluginOutPut]->instance ());
+////    }
+////    return p;
+//    RETURN_PLUGIN_OBJECT(IOutPut, Common::PluginOutPut)
+//}
+
+//QStringList PluginLoader::getPluginHostHashList(Common::PluginType type)
+//{
+//    QStringList list;
+//    if (m_pluginHostList.isEmpty()) {
+//        qDebug()<<Q_FUNC_INFO<<" Can't find plugins";
+//        return list;
+//    }
+//    switch (type) {
+//    case Common::PluginMetadataLookup: {
+//        foreach (PluginHost *obj, m_pluginHostList) {
+//            if (obj->type () == Common::PluginMetadataLookup)
+//                list.append(obj->hash ());
 //        }
-//    } else {
-//        p = qobject_cast<IPlayListDAO *>(mCurrentPluginHost[Common::PluginPlayListDAO]->instance ());
+//        break;
 //    }
-//    return p;
-    RETURN_PLUGIN_OBJECT(IPlayListDAO, Common::PluginPlayListDAO)
-}
-
-IMusicTagParser *PluginLoader::getCurrentMusicTagParser()
-{
-//    IMusicTagParser *p = nullptr;
-//    if (!mCurrentPluginHost[Common::PluginMusicTagParser]) {
-//        foreach (PluginHost *host, mPluginHostList) {
-//            if (host->type () == Common::PluginMusicTagParser) {
-//                if (!host->isLoaded ()) {
-//                    QObject *plugin = host->instance ();
-//                    if (plugin) {
-//                        p = qobject_cast<IMusicTagParser *>(plugin);
-//                        if (p) {
-//                            mCurrentPluginHost[Common::PluginMusicTagParser] = host;
-//                            break;
-//                        }
-//                    }
-//                }
-//                host->unLoad ();
-//            }
+//    case Common::PluginMusicTagParser: {
+//        foreach (PluginHost *obj, m_pluginHostList) {
+//            if (obj->type () == Common::PluginMusicTagParser)
+//                list.append(obj->hash ());
 //        }
-//    } else {
-//        p = qobject_cast<IMusicTagParser *>(mCurrentPluginHost[Common::PluginMusicTagParser]->instance ());
+//        break;
 //    }
-//    return p;
-    RETURN_PLUGIN_OBJECT(IMusicTagParser, Common::PluginMusicTagParser)
-}
-
-IMetadataLookup *PluginLoader::getCurrentMetadataLookup()
-{
-//    IMetadataLookup *p = nullptr;
-//    if (!mCurrentPluginHost[Common::PluginMetadataLookup]) {
-//        foreach (PluginHost *host, mPluginHostList) {
-//            if (host->type () == Common::PluginMetadataLookup) {
-//                if (!host->isLoaded ()) {
-//                    QObject *plugin = host->instance ();
-//                    if (plugin) {
-//                        p = qobject_cast<IMetadataLookup *>(plugin);
-//                        if (p) {
-//                            mCurrentPluginHost[Common::PluginMetadataLookup] = host;
-//                            break;
-//                        }
-//                    }
-//                }
-//                host->unLoad ();
-//            }
+//    case Common::PluginPlayBackend: {
+//        foreach (PluginHost *obj, m_pluginHostList) {
+//            if (obj->type () == Common::PluginPlayBackend)
+//                list.append(obj->hash ());
 //        }
-//    } else {
-//        p = qobject_cast<IMetadataLookup *>(mCurrentPluginHost[Common::PluginMetadataLookup]->instance ());
+//        break;
 //    }
-//    return p;
-    RETURN_PLUGIN_OBJECT(IMetadataLookup, Common::PluginMetadataLookup)
-}
-
-IDecoder *PluginLoader::getCurrentDecoder()
-{
-//    IDecoder *p = nullptr;
-//    if (!mCurrentPluginHost[Common::PluginDecoder]) {
-//        foreach (PluginHost *host, mPluginHostList) {
-//            if (host->type () == Common::PluginDecoder) {
-//                if (!host->isLoaded ()) {
-//                    QObject *plugin = host->instance ();
-//                    if (plugin) {
-//                        p = qobject_cast<IDecoder *>(plugin);
-//                        if (p) {
-//                            mCurrentPluginHost[Common::PluginDecoder] = host;
-//                            break;
-//                        }
-//                    }
-//                }
-//                host->unLoad ();
-//            }
+//    case Common::PluginMusicLibraryDAO: {
+//        foreach (PluginHost *obj, m_pluginHostList) {
+//            if (obj->type () == Common::PluginMusicLibraryDAO)
+//                list.append(obj->hash ());
 //        }
-//    } else {
-//        p = qobject_cast<IDecoder *>(mCurrentPluginHost[Common::PluginDecoder]->instance ());
+//        break;
 //    }
-//    return p;
-    RETURN_PLUGIN_OBJECT(IDecoder, Common::PluginDecoder)
-}
-
-IOutPut *PluginLoader::getCurrentOutPut()
-{
-//    IOutPut *p = nullptr;
-//    if (!mCurrentPluginHost[Common::PluginOutPut]) {
-//        foreach (PluginHost *host, mPluginHostList) {
-//            if (host->type () == Common::PluginOutPut) {
-//                if (!host->isLoaded ()) {
-//                    QObject *plugin = host->instance ();
-//                    if (plugin) {
-//                        p = qobject_cast<IOutPut *>(plugin);
-//                        if (p) {
-//                            mCurrentPluginHost[Common::PluginOutPut] = host;
-//                            break;
-//                        }
-//                    }
-//                }
-//                host->unLoad ();
-//            }
+//    case Common::PluginDecoder: {
+//        foreach (PluginHost *obj, m_pluginHostList) {
+//            if (obj->type () == Common::PluginDecoder)
+//                list.append(obj->hash ());
 //        }
-//    } else {
-//        p = qobject_cast<IOutPut *>(mCurrentPluginHost[Common::PluginOutPut]->instance ());
+//        break;
 //    }
-//    return p;
-    RETURN_PLUGIN_OBJECT(IOutPut, Common::PluginOutPut)
-}
+//    case Common::PluginOutPut: {
+//        foreach (PluginHost *obj, m_pluginHostList) {
+//            if (obj->type () == Common::PluginOutPut)
+//                list.append(obj->hash ());
+//        }
+//        break;
+//    }
+//    case Common::PluginTypeAll: {
+//        foreach (PluginHost *obj, m_pluginHostList) {
+//            list.append (obj->hash ());
+//        }
+//        break;
+//    }
+//    default:
+//        qDebug()<<"Invalid plugin type.";
+//        break;
+//    }
+//    return list;
+//}
 
-QStringList PluginLoader::getPluginHostHashList(Common::PluginType type)
+//int PluginLoader::getPluginHostSize(Common::PluginType type)
+//{
+//    if (m_pluginHostList.isEmpty()) {
+//        qDebug()<<Q_FUNC_INFO<<" Can't find plugins";
+//        return 0;
+//    }
+//    int count = 0;
+//    if (type == Common::PluginTypeAll) {
+//        count = m_pluginHostList.size ();
+//    } else {
+//        foreach (PluginHost *h, m_pluginHostList) {
+//            if (h->type () == type)
+//                count ++;
+//        }
+//    }
+//    return count;
+//}
+
+//PluginHost *PluginLoader::getCurrentPluginHost(Common::PluginType type)
+//{
+//    if (type == Common::PluginTypeUndefined || type == Common::PluginTypeAll)
+//        return 0;
+//    return m_currentPluginHost[type];
+//}
+
+//PluginHost *PluginLoader::getPluginHostByHash(const QString &hostHash)
+//{
+//    if (hostHash.isEmpty ())
+//        return nullptr;
+//    foreach (PluginHost *h, m_pluginHostList) {
+//        if (h->hash () == hostHash)
+//            return h;
+//    }
+//    return nullptr;
+//}
+
+//QList<PluginHost *> PluginLoader::getPluginHostList(Common::PluginType type)
+//{
+//    if (type == Common::PluginTypeAll)
+//        return m_pluginHostList;
+//    QList<PluginHost *> list;
+//    if (m_pluginHostList.isEmpty () || type == Common::PluginTypeUndefined)
+//        return list;
+//    foreach (PluginHost *host, m_pluginHostList) {
+//        if (host->type () == type) {
+//            list.append (host);
+//        }
+//    }
+//    qDebug()<<Q_FUNC_INFO<<QString("Host num of type [%1] is [%2]").arg (type).arg (list.size ());
+//    return list;
+//}
+
+void PluginLoader::initPluginByPath(const QString &path)
 {
-    QStringList list;
-    if (m_pluginHostList.isEmpty()) {
-        qDebug()<<Q_FUNC_INFO<<" Can't find plugins";
-        return list;
-    }
-    switch (type) {
-    case Common::PluginMetadataLookup: {
-        foreach (PluginHost *obj, m_pluginHostList) {
-            if (obj->type () == Common::PluginMetadataLookup)
-                list.append(obj->hash ());
-        }
-        break;
-    }
-    case Common::PluginMusicTagParser: {
-        foreach (PluginHost *obj, m_pluginHostList) {
-            if (obj->type () == Common::PluginMusicTagParser)
-                list.append(obj->hash ());
-        }
-        break;
-    }
-    case Common::PluginPlayBackend: {
-        foreach (PluginHost *obj, m_pluginHostList) {
-            if (obj->type () == Common::PluginPlayBackend)
-                list.append(obj->hash ());
-        }
-        break;
-    }
-    case Common::PluginPlayListDAO: {
-        foreach (PluginHost *obj, m_pluginHostList) {
-            if (obj->type () == Common::PluginPlayListDAO)
-                list.append(obj->hash ());
-        }
-        break;
-    }
-    case Common::PluginDecoder: {
-        foreach (PluginHost *obj, m_pluginHostList) {
-            if (obj->type () == Common::PluginDecoder)
-                list.append(obj->hash ());
-        }
-        break;
-    }
-    case Common::PluginOutPut: {
-        foreach (PluginHost *obj, m_pluginHostList) {
-            if (obj->type () == Common::PluginOutPut)
-                list.append(obj->hash ());
-        }
-        break;
-    }
-    case Common::PluginTypeAll: {
-        foreach (PluginHost *obj, m_pluginHostList) {
-            list.append (obj->hash ());
-        }
-        break;
-    }
-    default:
-        qDebug()<<"Invalid plugin type.";
-        break;
-    }
-    return list;
-}
+    qDebug()<<Q_FUNC_INFO<<QString("Search plugin in dir [%1]").arg (path);
 
-int PluginLoader::getPluginHostSize(Common::PluginType type)
-{
-    if (m_pluginHostList.isEmpty()) {
-        qDebug()<<Q_FUNC_INFO<<" Can't find plugins";
-        return 0;
-    }
-    int count = 0;
-    if (type == Common::PluginTypeAll) {
-        count = m_pluginHostList.size ();
-    } else {
-        foreach (PluginHost *h, m_pluginHostList) {
-            if (h->type () == type)
-                count ++;
-        }
-    }
-    return count;
-}
-
-PluginHost *PluginLoader::getCurrentPluginHost(Common::PluginType type)
-{
-    if (type == Common::PluginTypeUndefined || type == Common::PluginTypeAll)
-        return 0;
-    return m_currentPluginHost[type];
-}
-
-PluginHost *PluginLoader::getPluginHostByHash(const QString &hostHash)
-{
-    if (hostHash.isEmpty ())
-        return nullptr;
-    foreach (PluginHost *h, m_pluginHostList) {
-        if (h->hash () == hostHash)
-            return h;
-    }
-    return nullptr;
-}
-
-QList<PluginHost *> PluginLoader::getPluginHostList(Common::PluginType type)
-{
-    if (type == Common::PluginTypeAll)
-        return m_pluginHostList;
-    QList<PluginHost *> list;
-    if (m_pluginHostList.isEmpty () || type == Common::PluginTypeUndefined)
-        return list;
-    foreach (PluginHost *host, m_pluginHostList) {
-        if (host->type () == type) {
-            list.append (host);
-        }
-    }
-    qDebug()<<Q_FUNC_INFO<<QString("Host num of type [%1] is [%2]").arg (type).arg (list.size ());
-    return list;
-}
-
-void PluginLoader::initPlugins()
-{
-    //删除之前容器中保存的插件
-    if (!m_pluginHostList.isEmpty()) {
-        foreach (PluginHost *host, m_pluginHostList) {
-            if (host->isLoaded ()) {
-                host->unLoad ();
-                host->deleteLater ();
-                host = 0;
-            }
-            m_pluginHostList.clear ();
-        }
-    }
-    QStringList existPaths;
-    for (int i = (int)Common::PluginTypeAll + 1; i < (int)Common::PluginTypeUndefined; ++i) {
-        // dynamic plugins
-        qDebug()<<Q_FUNC_INFO<<"Search plugin in dir ["<<m_pluginPath[Common::PluginType(i)] <<"]";
-
-        QDir dir(m_pluginPath[Common::PluginType(i)]);
-        foreach (QString fileName, dir.entryList(QDir::Files)) {
-            QString absFilePath = dir.absoluteFilePath(fileName);
-
-            if (existPaths.contains (absFilePath))
-                continue;
-            existPaths.append (absFilePath);
-
-            PluginHost *host = new PluginHost(absFilePath, this);
-            if (host->isValid ()) {
-                m_pluginHostList.append (host);
+    QDir dir(path);
+    foreach (QString fileName, dir.entryList(QDir::Files)) {
+        QString absFilePath = dir.absoluteFilePath(fileName);
+        QPluginLoader loader(absFilePath, this);
+        QJsonObject obj = loader.metaData ();
+        if (!obj.isEmpty ()) {
+            QString iid = obj.value ("IID").toString ();
+            if (iid.startsWith ("PhoenixPlayer.PlayBackend")) {
+                m_libraries.insertMulti (Common::PluginPlayBackend, absFilePath);
+            } else if (iid.startsWith ("PhoenixPlayer.MetadataLookup")) {
+                m_libraries.insertMulti (Common::PluginMetadataLookup, absFilePath);
+            } else if (iid.startsWith ("PhoenixPlayer.MusicTagParser")) {
+                m_libraries.insertMulti (Common::PluginMusicTagParser, absFilePath);
+            } else if (iid.startsWith ("PhoenixPlayer.MusicLibraryDAO")) {
+                m_libraries.insertMulti (Common::PluginMusicLibraryDAO, absFilePath);
+            } else if (iid.startsWith ("PhoenixPlayer.Decoder")) {
+                m_libraries.insertMulti (Common::PluginDecoder, absFilePath);
+            } else if (iid.startsWith ("PhoenixPlayer.OutPut")) {
+                m_libraries.insertMulti (Common::PluginOutPut, absFilePath);
             } else {
-                delete host;
-                host = 0;
+                m_libraries.insertMulti (Common::PluginTypeUndefined, absFilePath);
             }
         }
     }
-    qDebug()<<Q_FUNC_INFO<<" find plugin num "<<m_pluginHostList.size ();
-    foreach (PluginHost *obj, m_pluginHostList) {
-        qDebug()<<"Found plugins for type ["
-               <<obj->type ()<<"] name ["
-              <<obj->name ()<<"] file ["
-             <<obj->libraryFile ()<<"]";
-    }
-
-    m_isInit = true;
-}
-
-void PluginLoader::setNewPlugin(Common::PluginType type, const QString &newPluginHash)
-{
-    if (m_pluginHostList.isEmpty()) {
-        qDebug()<<Q_FUNC_INFO<<" mPluginList is empty!!!!";
-        return;
-    }
-    bool changed = false;
-
-    if (m_currentPluginHost[type] && m_currentPluginHost[type]->hash () == newPluginHash)
-        return;
-    foreach (PluginHost *host, m_pluginHostList) {
-        if (host->type () == type && host->hash () == newPluginHash) {
-            m_currentPluginHost[type] = host;
-            changed = true;
-            break;
+    qDebug()<<Q_FUNC_INFO<<" find plugin num "<<m_libraries.size ();
+//    foreach (PluginHost *obj, m_pluginHostList) {
+//        qDebug()<<"Found plugins for type ["
+//               <<obj->type ()<<"] name ["
+//              <<obj->name ()<<"] file ["
+//             <<obj->libraryFile ()<<"]";
+//    }
+    foreach (Common::PluginType t, m_libraries.uniqueKeys ()) {
+        foreach (QString str, m_libraries.values (t)) {
+            qDebug()<<Q_FUNC_INFO<<QString("Found plugin for type [%1], file [%2]").arg (t).arg (str);
         }
     }
-    if (changed)
-        emit signalPluginChanged (type);
 }
+
+//void PluginLoader::setNewPlugin(Common::PluginType type, const QString &newPluginHash)
+//{
+//    if (m_pluginHostList.isEmpty()) {
+//        qDebug()<<Q_FUNC_INFO<<" mPluginList is empty!!!!";
+//        return;
+//    }
+//    bool changed = false;
+
+//    if (m_currentPluginHost[type] && m_currentPluginHost[type]->hash () == newPluginHash)
+//        return;
+//    foreach (PluginHost *host, m_pluginHostList) {
+//        if (host->type () == type && host->hash () == newPluginHash) {
+//            m_currentPluginHost[type] = host;
+//            changed = true;
+//            break;
+//        }
+//    }
+//    if (changed)
+//        emit signalPluginChanged (type);
+//}
 }

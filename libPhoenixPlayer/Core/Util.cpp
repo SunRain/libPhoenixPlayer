@@ -145,56 +145,52 @@ Util::NetworkType Util::getNetworkType()
     }
 }
 
-QString Util::supportMDLookupTypeJsonStr(const QString &pluginHash)
-{
-    if (pluginHash.isEmpty ())
-        return QString();
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    PluginLoader *loader = PluginLoader::instance();
-#else
-    PluginLoader *loader = SingletonPointer<PluginLoader>::instance ();
-#endif
-    PluginHost *h = loader->getPluginHostByHash (pluginHash);
-    QObject *o = h->instance ();
-    if (o) {
-        MetadataLookup::IMetadataLookup *p = qobject_cast<MetadataLookup::IMetadataLookup *>(o);
-        if (p) {
-//            TypeUndefined = 0x0,
-//            TypeLyrics,             //歌词
-//            TypeAlbumImage,         //专辑封面
-//            TypeAlbumDescription,   //专辑介绍
-//            TypeAlbumDate,          //
-//            TypeArtistImage,        //艺术家封面
-//            TypeArtistDescription,  //艺术家信息
-//            TypeTrackDescription    //歌曲信息
-            QString s = "{";
-            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeAlbumDate)
-                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeAlbumDate));
+//QString Util::supportMDLookupTypeJsonStr(const QString &pluginHash)
+//{
+//    if (pluginHash.isEmpty ())
+//        return QString();
+//    PluginLoader *loader = PluginLoader::instance ();
+//    PluginHost *h = loader->getPluginHostByHash (pluginHash);
+//    QObject *o = h->instance ();
+//    if (o) {
+//        MetadataLookup::IMetadataLookup *p = qobject_cast<MetadataLookup::IMetadataLookup *>(o);
+//        if (p) {
+////            TypeUndefined = 0x0,
+////            TypeLyrics,             //歌词
+////            TypeAlbumImage,         //专辑封面
+////            TypeAlbumDescription,   //专辑介绍
+////            TypeAlbumDate,          //
+////            TypeArtistImage,        //艺术家封面
+////            TypeArtistDescription,  //艺术家信息
+////            TypeTrackDescription    //歌曲信息
+//            QString s = "{";
+//            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeAlbumDate)
+//                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeAlbumDate));
 
-            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeAlbumDescription)
-                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeAlbumDescription));
+//            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeAlbumDescription)
+//                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeAlbumDescription));
 
-            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeAlbumImage)
-                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeAlbumImage));
+//            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeAlbumImage)
+//                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeAlbumImage));
 
-            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeArtistDescription)
-                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeArtistDescription));
+//            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeArtistDescription)
+//                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeArtistDescription));
 
-            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeArtistImage)
-                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeArtistImage));
+//            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeArtistImage)
+//                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeArtistImage));
 
-            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeLyrics)
-                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeLyrics));
+//            s += QString("\"KEY_%1\":%2,").arg (MetadataLookup::IMetadataLookup::TypeLyrics)
+//                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeLyrics));
 
-            s += QString("\"KEY_%1\":%2").arg (MetadataLookup::IMetadataLookup::TypeTrackDescription)
-                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeTrackDescription));
+//            s += QString("\"KEY_%1\":%2").arg (MetadataLookup::IMetadataLookup::TypeTrackDescription)
+//                    .arg (p->supportLookup (MetadataLookup::IMetadataLookup::TypeTrackDescription));
 
-            s += "}";
+//            s += "}";
 
-            return s;
-        }
-    }
-    return QString();
-}
+//            return s;
+//        }
+//    }
+//    return QString();
+//}
 
 } //PhoenixPlayer

@@ -12,7 +12,7 @@
 #include <qobject.h>
 
 #include "MusicLibrary/IMusicTagParser.h"
-#include "MusicLibrary/IPlayListDAO.h"
+#include "MusicLibrary/IMusicLibraryDAO.h"
 #include "PluginLoader.h"
 
 #include "SongMetaData.h"
@@ -22,7 +22,8 @@
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-TagParserManager::TagParserManager(QObject *parent) : QObject(parent)
+TagParserManager::TagParserManager(QObject *parent)
+    : QThread(parent)
 {
     m_currentIndex = -1;
 
@@ -79,21 +80,21 @@ void TagParserManager::setPluginLoader()
 
 void TagParserManager::setPlayListDAO()
 {
-    m_playListDAO = m_pluginLoader->getCurrentPlayListDAO ();
+    m_playListDAO = m_pluginLoader->getCurrentLibraryDAO ();
 }
 
-void TagParserManager::addItem(SongMetaData *data, bool startImmediately)
-{
-    qDebug()<<Q_FUNC_INFO <<" item info "<<data->toString ();
+//void TagParserManager::addItem(SongMetaData *data, bool startImmediately)
+//{
+//    qDebug()<<Q_FUNC_INFO <<" item info "<<data->toString ();
 
-    m_mutex.lock ();
-    SongMetaData *d = new SongMetaData(data, 0);
-    m_metaList.append (d);
-    m_mutex.unlock ();
+//    m_mutex.lock ();
+//    SongMetaData *d = new SongMetaData(data, 0);
+//    m_metaList.append (d);
+//    m_mutex.unlock ();
 
-    if (startImmediately)
-        startParserLoop ();
-}
+//    if (startImmediately)
+//        startParserLoop ();
+//}
 
 //void TagParserManager::parserImmediately(const QList<SongMetaData *> &list)
 //{
@@ -118,24 +119,24 @@ void TagParserManager::parserImmediately(QList<SongMetaData *> *list)
     emit parserQueueFinished ();
 }
 
-bool TagParserManager::startParserLoop()
-{
-    emit parserPending ();
+//bool TagParserManager::startParserLoop()
+//{
+//    emit parserPending ();
 
-    if (m_metaList.isEmpty ()) {
-        qDebug()<<"No Song meta";
-        emit parserQueueFinished ();
-        return false;
-    }
-    m_mutex.lock ();
-    SongMetaData *d = nullptr;
-    if (!m_metaList.isEmpty ())
-        d = m_metaList.takeFirst ();
-    m_mutex.unlock ();
-    if (d)
-        parserItem (d);
-    return true;
-}
+//    if (m_metaList.isEmpty ()) {
+//        qDebug()<<"No Song meta";
+//        emit parserQueueFinished ();
+//        return false;
+//    }
+//    m_mutex.lock ();
+//    SongMetaData *d = nullptr;
+//    if (!m_metaList.isEmpty ())
+//        d = m_metaList.takeFirst ();
+//    m_mutex.unlock ();
+//    if (d)
+//        parserItem (d);
+//    return true;
+//}
 
 void TagParserManager::parserNextItem()
 {

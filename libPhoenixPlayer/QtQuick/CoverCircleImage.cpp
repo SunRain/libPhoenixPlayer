@@ -4,7 +4,8 @@
 #include <QUrl>
 
 #include "SingletonPointer.h"
-#include "MusicLibrary/MusicLibraryManager.h"
+#include "PlayerCore/PlayerCore.h"
+#include "SongMetaData.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;
@@ -13,13 +14,15 @@ namespace QmlPlugin {
 CoverCircleImage::CoverCircleImage(CircleImage *parent)
     :CircleImage(parent)
 {
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    mMusicLibraryManager = MusicLibraryManager::instance();
-#else
-    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
-#endif
+    m_playCore = PlayerCore::instance ();
+    m_autoChange = false;
 
-    mAutoChange = false;
+//    SongMetaData *d = m_playCore->curTrackMetadata ();
+
+//    if (d) {
+
+//    }
+
     //Fuck Qt ......
     //lambda in Qml model making memory leak!!!!!
 //    connect(mMusicLibraryManager,
@@ -34,8 +37,9 @@ CoverCircleImage::CoverCircleImage(CircleImage *parent)
 //            setImage(mSongHash);
 //        }
 //    });
-    QObject::connect(mMusicLibraryManager, &MusicLibraryManager::playingSongChanged,
-                     this, &CoverCircleImage::drawImage);
+    QObject::connect (m_playCore, &PlayerCore::trackChanged, this, &CoverCircleImage::drawImage);
+
+    drawImage ();
 }
 
 CoverCircleImage::~CoverCircleImage()
@@ -44,57 +48,79 @@ CoverCircleImage::~CoverCircleImage()
 
 QUrl CoverCircleImage::defaultSource() const
 {
-    return mDefaultSource;
+    return m_defaultSource;
 }
 
-bool CoverCircleImage::autoChange() const
+inline bool CoverCircleImage::autoChange() const
 {
-    return mAutoChange;
+    return m_autoChange;
 }
 
-QString CoverCircleImage::songHash() const
+void CoverCircleImage::setDefaultSource(QUrl arg)
 {
-    return mSongHash;
+    m_defaultSource = arg;
 }
 
-void CoverCircleImage::setDefaultSource(const QUrl &source)
+void CoverCircleImage::setAutoChange(bool arg)
 {
-    if (source.isEmpty() || !source.isValid() || mDefaultSource == source)
-        return;
-    mDefaultSource = source;
-    this->setSource(mDefaultSource);
+    m_autoChange = arg;
 }
 
-void CoverCircleImage::setAutoChange(bool autoChange)
-{
-    mAutoChange = autoChange;
-}
+//QUrl CoverCircleImage::defaultSource() const
+//{
+//    return mDefaultSource;
+//}
 
-void CoverCircleImage::setSongHash(const QString &hash)
-{
-    if (hash.isEmpty()) {
-        this->setSource(mDefaultSource);
-        return;
-    }
-    mSongHash = hash;
-    setImage(mSongHash);
-}
+//bool CoverCircleImage::autoChange() const
+//{
+//    return mAutoChange;
+//}
+
+//QString CoverCircleImage::songHash() const
+//{
+//    return mSongHash;
+//}
+
+//void CoverCircleImage::setDefaultSource(const QUrl &source)
+//{
+//    if (source.isEmpty() || !source.isValid() || mDefaultSource == source)
+//        return;
+//    mDefaultSource = source;
+//    this->setSource(mDefaultSource);
+//}
+
+//void CoverCircleImage::setAutoChange(bool autoChange)
+//{
+//    mAutoChange = autoChange;
+//}
+
+//void CoverCircleImage::setSongHash(const QString &hash)
+//{
+//    if (hash.isEmpty()) {
+//        this->setSource(mDefaultSource);
+//        return;
+//    }
+//    mSongHash = hash;
+//    setImage(mSongHash);
+//}
 
 void CoverCircleImage::drawImage()
 {
     if (autoChange()) {
-        mSongHash = mMusicLibraryManager->playingSongHash();
-        setImage(mSongHash);
+        SongMetaData *d = m_playCore->curTrackMetadata ();
+        if (d)
+            setImage (d->queryImgUri ());
+        else
+            setImage (QUrl());
     }
 }
 
-void CoverCircleImage::setImage(const QString &hash)
+void CoverCircleImage::setImage(const QUrl &url)
 {
-    QString str = mMusicLibraryManager->querySongImageUri(hash);
-    if (str.isEmpty())
-        this->setSource(mDefaultSource);
+    if (url.isEmpty () || !url.isValid ())
+        this->setSource(m_defaultSource);
     else
-        this->setSource(QUrl(str));
+        this->setSource(url);
 }
 
 } //QmlPlugin

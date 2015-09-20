@@ -58,7 +58,7 @@ bool TagParserPro::parserTag(SongMetaData *targetMetaDate)
 
         str = TStringToQString(tag->title());
         if (!str.isEmpty ()) {
-            targetMetaDate->setMeta (Common::E_SongTitle, QVariant(str));
+            targetMetaDate->setMeta (Common::E_TrackTitle, QVariant(str));
         }
 
         str = TStringToQString(tag->album());
@@ -85,7 +85,7 @@ bool TagParserPro::parserTag(SongMetaData *targetMetaDate)
     TagLib::AudioProperties *ap = mTagRef->audioProperties ();
 
     if (ap) {
-        targetMetaDate->setMeta (Common::E_SongLength, QVariant(ap->length ()));
+        targetMetaDate->setMeta (Common::E_TrackLength, QVariant(ap->length ()));
 
         str = QString::number(ap->sampleRate ());
         if (!str.isEmpty ()) {
@@ -102,7 +102,7 @@ bool TagParserPro::parserTag(SongMetaData *targetMetaDate)
     if (!image.isNull ()) {
         Settings *s = Settings::instance ();
 
-        QString imagePath = s->getMusicImageCachePath ();
+        QString imagePath = s->musicImageCachePath ();
         QString tmp = name;
         tmp = tmp.mid (0, tmp.lastIndexOf ("."));
         //loop to try to save cover image

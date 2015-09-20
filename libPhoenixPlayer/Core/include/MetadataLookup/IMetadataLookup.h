@@ -46,7 +46,7 @@ public:
     ///
     LookupType currentLookupFlag();
 
-    virtual void lookup(SongMetaData *meta) = 0;
+    virtual void lookup(SongMetaData **meta) = 0;
 
 signals:
     void lookupFailed();

@@ -11,10 +11,11 @@
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
-DiskLookup::DiskLookup(QObject *parent) : QObject(parent)
+DiskLookup::DiskLookup(QObject *parent)
+    : QThread(parent)
 {
     m_stopLookupFlag = false;
-    m_isRunning = false;
+//    m_isRunning = false;
 }
 
 DiskLookup::~DiskLookup()
@@ -24,43 +25,43 @@ DiskLookup::~DiskLookup()
     }
 }
 
-void DiskLookup::startLookup()
-{
-    qDebug()<<Q_FUNC_INFO<<"=================== startLookup started";
+//void DiskLookup::startLookup()
+//{
+//    qDebug()<<Q_FUNC_INFO<<"=================== startLookup started";
 
-    emit pending ();
+//    emit pending ();
 
-    m_stopLookupFlag = false;
-    m_isRunning = true;
+//    m_stopLookupFlag = false;
+//    m_isRunning = true;
 
-    if (m_pathList.isEmpty ()) {
-        QString tmp = QString("%1/%2").arg (QDir::homePath ())
-                .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
+//    if (m_pathList.isEmpty ()) {
+//        QString tmp = QString("%1/%2").arg (QDir::homePath ())
+//                .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
 
-        qDebug()<<"Lookup default dir "<<tmp;
-        scanDir (tmp);
-    } else {
-        while (!m_pathList.isEmpty ()) {
-            m_mutex.lock ();
-            if (m_stopLookupFlag) {
-                m_pathList.clear ();
-                m_mutex.unlock ();
-                break;
-            }
-            QString p = m_pathList.takeFirst ();
-            m_mutex.unlock ();
-            scanDir (p);
-        }
-    }
-    m_isRunning = false;
-    qDebug()<<Q_FUNC_INFO<<"=================== startLookup finish";
-    emit finished ();
-}
+//        qDebug()<<"Lookup default dir "<<tmp;
+//        scanDir (tmp);
+//    } else {
+//        while (!m_pathList.isEmpty ()) {
+//            m_mutex.lock ();
+//            if (m_stopLookupFlag) {
+//                m_pathList.clear ();
+//                m_mutex.unlock ();
+//                break;
+//            }
+//            QString p = m_pathList.takeFirst ();
+//            m_mutex.unlock ();
+//            scanDir (p);
+//        }
+//    }
+//    m_isRunning = false;
+//    qDebug()<<Q_FUNC_INFO<<"=================== startLookup finish";
+//    emit finished ();
+//}
 
-bool DiskLookup::isRunning()
-{
-    return m_isRunning;
-}
+//bool DiskLookup::isRunning()
+//{
+//    return m_isRunning;
+//}
 
 void DiskLookup::stopLookup()
 {
@@ -73,8 +74,30 @@ void DiskLookup::addLookupDir(const QString &dirName, bool lookupImmediately)
     if (!m_pathList.contains (dirName))
         m_pathList.append (dirName);
     m_mutex.unlock ();
-    if (lookupImmediately) {
-        startLookup();
+    if (lookupImmediately && !this->isRunning ()) {
+        this->start ();
+    }
+}
+
+void DiskLookup::run()
+{
+    if (m_pathList.isEmpty ()) {
+        QString tmp = QString("%1/%2").arg (QDir::homePath ())
+                .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
+
+        qDebug()<<"Lookup default dir "<<tmp;
+        m_pathList.append (tmp);
+    }
+    while (!m_pathList.isEmpty ()) {
+        m_mutex.lock ();
+        if (m_stopLookupFlag) {
+            m_pathList.clear ();
+            m_mutex.unlock ();
+            break;
+        }
+        QString p = m_pathList.takeFirst ();
+        m_mutex.unlock ();
+        scanDir (p);
     }
 }
 

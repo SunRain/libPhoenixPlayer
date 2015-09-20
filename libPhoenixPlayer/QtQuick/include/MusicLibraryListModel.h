@@ -8,7 +8,7 @@
 class QByteArray;
 class QVariant;
 namespace PhoenixPlayer {
-class Player;
+class PlayerCore;
 
 namespace MusicLibrary {
 class MusicLibraryManager;

@@ -138,7 +138,7 @@ void LastFmLookup::lookup(SongMetaData *meta)
     }
     case LookupType::TypeTrackDescription: {
         QString artist = formatStr (meta->getMeta (Common::E_ArtistName).toString ());
-        QString track = formatStr (meta->getMeta (Common::E_SongTitle).toString ());
+        QString track = formatStr (meta->getMeta (Common::E_TrackTitle).toString ());
         if (track.isEmpty ()) {
             track = meta->getMeta (Common::SongMetaTags::E_FileName).toString ();
             //TODO: quick hack

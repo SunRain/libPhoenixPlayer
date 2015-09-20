@@ -14,20 +14,20 @@ class PluginLoader;
 namespace MusicLibrary {
 
 class MusicLibrary;
-class IPlayListDAO;
+class IMusicLibraryDAO;
 class IMusicTagParser;
-class TagParserManager : public QObject
+class TagParserManager : public QThread
 {
     Q_OBJECT
 public:
     explicit TagParserManager(QObject *parent = 0);
     virtual ~TagParserManager();
 
-    void addItem(SongMetaData *data = 0, bool startImmediately = false);
+//    void addItem(SongMetaData *data = 0, bool startImmediately = false);
 //    void parserImmediately(const QList<SongMetaData *> &list);
     void parserImmediately(QList<SongMetaData *> *list);
 
-    bool startParserLoop();
+//    bool startParserLoop();
 
 protected:
     void parserNextItem();
@@ -41,7 +41,7 @@ private:
     void setPlayListDAO();
 private:
     QList<SongMetaData*> m_metaList;
-    QPointer<IPlayListDAO> m_playListDAO;
+    QPointer<IMusicLibraryDAO> m_playListDAO;
     PluginLoader *m_pluginLoader;
     QList<IMusicTagParser *> m_pluginList;
     QString m_pluginPath;

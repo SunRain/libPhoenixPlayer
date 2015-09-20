@@ -1,5 +1,5 @@
-#ifndef LOCALMUSICSACNNER_H
-#define LOCALMUSICSACNNER_H
+#ifndef LOCALMUSICSCANNER_H
+#define LOCALMUSICSCANNER_H
 
 #include <QObject>
 
@@ -10,18 +10,14 @@ class PluginLoader;
 class SongMetaData;
 namespace MusicLibrary {
 
-class IPlayListDAO;
-class DiskLookup;
-//class PlayListDAOLoader;
-class TagParserManager;
-class AsyncDiskLookup;
-class AsyncTagParserMgrWrapper;
-class LocalMusicSacnner : public QObject
+class IMusicLibraryDAO;
+class LocalMusicScannerThread;
+class LocalMusicScanner : public QObject
 {
     Q_OBJECT
 public:
-    explicit LocalMusicSacnner(QObject *parent = 0);
-    virtual ~LocalMusicSacnner();
+    explicit LocalMusicScanner(QObject *parent = 0);
+    virtual ~LocalMusicScanner();
     Q_INVOKABLE void scanLocalMusic();
 
 signals:
@@ -35,15 +31,16 @@ private slots:
 //    void parserTag(const QList<SongMetaData *> &list);
 
 private:
-    AsyncDiskLookup *m_asyncDiskLookup;
-    AsyncTagParserMgrWrapper *m_tagParserWrapper;
-    QList<PhoenixPlayer::SongMetaData *> m_metaDataList;
+//    AsyncDiskLookup *m_asyncDiskLookup;
+//    AsyncTagParserMgrWrapper *m_tagParserWrapper;
+//    QList<PhoenixPlayer::SongMetaData *> m_metaDataList;
     Settings *m_settings;
-    PluginLoader *m_pluginLoader;
-    IPlayListDAO *m_dao;
+//    PluginLoader *m_pluginLoader;
+//    IMusicLibraryDAO *m_dao;
+    LocalMusicScannerThread *m_scanner;
 
 };
 } //MusicLibrary
 } //PhoenixPlayer
 
-#endif // LOCALMUSICSACNNER_H
+#endif // LOCALMUSICSCANNER_H

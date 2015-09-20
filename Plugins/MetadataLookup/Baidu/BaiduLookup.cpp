@@ -40,7 +40,7 @@ void BaiduLookup::lookup(SongMetaData *meta)
     }
     mIsLrcidDL = true;
 
-    QString name = meta->getMeta (Common::SongMetaTags::E_SongTitle).toString ();
+    QString name = meta->getMeta (Common::SongMetaTags::E_TrackTitle).toString ();
     if (name.isEmpty ()) {
         name = meta->getMeta (Common::SongMetaTags::E_FileName).toString ();
         //TODO: quick hack

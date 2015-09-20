@@ -2,6 +2,7 @@
 #define TRACKGROUPMODEL_H
 
 #include <QAbstractListModel>
+#include <QUrl>
 
 #include "Common.h"
 
@@ -18,8 +19,16 @@ namespace QmlPlugin {
 class TrackGroupModel : public QAbstractListModel {
     Q_OBJECT
     Q_ENUMS(ModelType)
-    Q_PROPERTY(ModelType modelType READ getModelType WRITE setModelType NOTIFY modelTypeChanged)
+    Q_PROPERTY(ModelType type READ type WRITE setType NOTIFY typeChanged)
 public:
+    struct GroupObject {
+        QUrl imgUri;
+        QString name;
+        bool operator ==(const GroupObject &other) {
+            return this->name == other.name;
+        }
+    };
+
     enum ModelType {
         TypeArtist = 0x0,
         TypeAlbum,
@@ -30,12 +39,13 @@ public:
     };
 
     explicit TrackGroupModel(QAbstractListModel *parent = 0);
-    ~TrackGroupModel();
+    virtual ~TrackGroupModel();
 
-    void setModelType(ModelType type);
-    ModelType getModelType();
+//    void setModelType(ModelType type);
+//    ModelType getModelType();
+    ModelType type() const;
 
-    Q_INVOKABLE QStringList trackHashListFromGroup(ModelType tragetType, const QString &groupName);
+//    Q_INVOKABLE QStringList trackHashListFromGroup(ModelType tragetType, const QString &groupName);
 
 public:
     enum ModelRoles {
@@ -52,16 +62,20 @@ protected:
     void queryData();
     void appendToModel();
 signals:
-    void modelTypeChanged();
+    void typeChanged(ModelType type);
+
 public slots:
     void clear();
+    void setType(ModelType type);
 private:
-    QVariant queryGroupImageUri(const QString &groupName) const;
+//    QVariant queryGroupImageUri(const QString &groupName) const;
 private:
-    MusicLibrary::MusicLibraryManager *mMusicLibraryManager;
-    QStringList mDataList;
-    ModelType mModelType;
-    Common::SongMetaTags mSongMetaTag;
+    MusicLibrary::MusicLibraryManager *m_musicLibraryManager;
+//    QStringList mDataList;
+//    ModelType m_modelType;
+    //    Common::SongMetaTags mSongMetaTag;
+    QList<GroupObject> m_groupList;
+    ModelType m_type;
 };
 
 

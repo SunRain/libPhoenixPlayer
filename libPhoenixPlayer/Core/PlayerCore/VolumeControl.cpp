@@ -1,4 +1,4 @@
-#include "Player/VolumeControl.h"
+#include "PlayerCore/VolumeControl.h"
 
 #include <QDebug>
 #include <QTimer>
@@ -9,10 +9,10 @@
 #include "Backend/BaseVolume.h"
 #include "Backend/IPlayBackend.h"
 #include "Backend/SoftVolume.h"
+#include "Backend/BackendHost.h"
 
 namespace PhoenixPlayer {
 
-using namespace MetadataLookup;
 using namespace MusicLibrary;
 using namespace PlayBackend;
 
@@ -34,14 +34,14 @@ VolumeControl::VolumeControl(QObject *parent) :
     m_timer = new QTimer(0);
     m_timer->setSingleShot (false);
 
-    connect (m_pluginLoader, &PluginLoader::signalPluginChanged,
-             [&](Common::PluginType type) {
-        if (type == Common::PluginPlayBackend) {
-//            m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
-//            m_volume = m_playBackend->baseVolume ();
-            reload ();
-        }
-    });
+//    connect (m_pluginLoader, &PluginLoader::signalPluginChanged,
+//             [&](Common::PluginType type) {
+//        if (type == Common::PluginPlayBackend) {
+////            m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
+////            m_volume = m_playBackend->baseVolume ();
+//            reload ();
+//        }
+//    });
 
 //    connect (m_pluginLoader, &PluginLoader::signalPluginChanged, this, &VolumeControl::doPluginChanged);
 
@@ -174,7 +174,10 @@ void VolumeControl::reload()
     if (m_volume) {
         m_volume = nullptr;
     }
-    m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
+//    m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
+    BackendHost *host = m_pluginLoader->curBackendHost ();
+    if (host)
+        m_playBackend = host->instance<IPlayBackend>();
 
     if (m_playBackend) {
         m_volume = m_playBackend->baseVolume ();

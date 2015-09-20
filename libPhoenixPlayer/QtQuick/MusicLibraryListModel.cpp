@@ -9,7 +9,6 @@
 #include "MetadataLookup/MetadataLookupMgrWrapper.h"
 #include "Common.h"
 #include "Util.h"
-#include "Player/Player.h"
 #include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
@@ -23,13 +22,13 @@ namespace QmlPlugin {
 MusicLibraryListModel::MusicLibraryListModel(QAbstractListModel *parent) :
     QAbstractListModel(parent)
 {
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    mMusicLibraryManager = MusicLibraryManager::instance();
-    mLookupMgr = MetadataLookupMgrWrapper::instance ();
-#else
-    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
-    mLookupMgr = SingletonPointer<MetadataLookupMgrWrapper>::instance ();
-#endif
+//#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
+//    mMusicLibraryManager = MusicLibraryManager::instance();
+//    mLookupMgr = MetadataLookupMgrWrapper::instance ();
+//#else
+//    mMusicLibraryManager = SingletonPointer<MusicLibraryManager>::instance ();
+//    mLookupMgr = SingletonPointer<MetadataLookupMgrWrapper>::instance ();
+//#endif
     mLimitNum = -1;
     mAutoFetchMetadata = false;
     connect (mLookupMgr, &MetadataLookupMgrWrapper::lookupAlbumImageSucceed,
@@ -192,7 +191,7 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
     case ModelRoles::RoleMediaType:
         return mMusicLibraryManager->queryOne(hash, Common::E_MediaType, true);
     case ModelRoles::RoleSongTitle:
-        return mMusicLibraryManager->queryOne(hash, Common::E_SongTitle, true);
+        return mMusicLibraryManager->queryOne(hash, Common::E_TrackTitle, true);
     case ModelRoles::RoleUserRating:
         return mMusicLibraryManager->queryOne(hash, Common::E_UserRating, true);
     case ModelRoles::RoleHash:
@@ -205,7 +204,7 @@ QVariant MusicLibraryListModel::data(const QModelIndex &index, int role) const
         if (!s.isEmpty())
             s += " - ";
         s += mMusicLibraryManager->queryOne(hash, Common::E_ArtistName);
-        QString t = mMusicLibraryManager->queryOne(hash, Common::E_SongLength);
+        QString t = mMusicLibraryManager->queryOne(hash, Common::E_TrackLength);
         if (!t.isEmpty())
             s += QString(" (%1)").arg(Util::formateSongDuration(t.toInt()));
         return s;

@@ -3,7 +3,7 @@ DEPENDPATH += $$PWD/include
 
 HEADERS += \
     $$PWD/include/LyricsModel.h \
-    $$PWD/include/MusicLibraryListModel.h \
+#    $$PWD/include/MusicLibraryListModel.h \
     $$PWD/include/CircleImage.h \
     $$PWD/include/CoverCircleImage.h \
     $$PWD/include/TrackGroupModel.h \
@@ -13,7 +13,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/LyricsModel.cpp \
-    $$PWD/MusicLibraryListModel.cpp \
+#    $$PWD/MusicLibraryListModel.cpp \
     $$PWD/CircleImage.cpp \
     $$PWD/CoverCircleImage.cpp \
     $$PWD/TrackGroupModel.cpp \

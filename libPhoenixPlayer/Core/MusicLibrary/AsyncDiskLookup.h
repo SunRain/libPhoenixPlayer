@@ -31,7 +31,7 @@ public slots:
 private slots:
     void found(const QString &path, const QString &file, const qint64 &size);
 private:
-    QThread *m_diskLookupThread;
+//    QThread *m_diskLookupThread;
     DiskLookup *m_diskLookup;
     QList<PhoenixPlayer::SongMetaData *> m_metaDataList;
 };

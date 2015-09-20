@@ -25,7 +25,7 @@ public:
 
     // IPlayBackend interface
 public:
-    Common::PlayBackendState getPlayBackendState();
+    Common::PlayBackendState playBackendState();
     void init();
     BaseVolume *baseVolume();
     bool useExternalDecoder();

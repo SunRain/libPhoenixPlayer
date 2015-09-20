@@ -12,7 +12,7 @@ class PluginLoader;
 class SongMetaData;
 namespace MusicLibrary {
 
-class IPlayListDAO;
+class IMusicLibraryDAO;
 class TagParserManager;
 class AsyncTagParserMgrWrapper : public QObject
 {
@@ -34,7 +34,7 @@ private:
     TagParserManager *m_tagParserManager;
     QList<PhoenixPlayer::SongMetaData *> *m_metaDataList;
     PluginLoader *m_pluginLoader;
-    IPlayListDAO *m_dao;
+    IMusicLibraryDAO *m_dao;
     QMutex m_listLocker;
     QMutex m_commitLocker;
 };
