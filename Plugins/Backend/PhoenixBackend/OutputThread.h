@@ -16,6 +16,7 @@ class EqualizerMgr;
 
 namespace OutPut {
 class IOutPut;
+class OutPutHost;
 }
 namespace PlayBackend {
 //class BaseVolume;
@@ -101,8 +102,10 @@ private:
     QMutex m_mutex;
     Recycler m_recycler;
 
-    EqualizerMgr *m_eq;
+    OutPut::OutPutHost *m_outputHost;
     OutPut::IOutPut *m_output;
+
+    EqualizerMgr *m_eq;
     StateHandler *m_handler;
     AudioParameters *m_audioParameters;
     BaseVisual *m_visual;
@@ -111,7 +114,7 @@ private:
     qint64 m_visBufferSize;
 
     PluginLoader *m_pluginLoader;
-    PluginHost *m_pluginHost;
+//    PluginHost *m_pluginHost;
 };
 
 } //PhoenixBackend

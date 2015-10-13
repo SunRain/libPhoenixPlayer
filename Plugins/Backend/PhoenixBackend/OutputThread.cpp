@@ -17,6 +17,7 @@
 
 #include "StateHandler.h"
 #include "PhoenixBackend_global.h"
+#include "OutPut/OutPutHost.h"
 
 extern "C" {
 #include "equ/iir.h"
@@ -26,6 +27,7 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
 
+using namespace OutPut;
 //static functions
 static inline void s8_to_s16(qint8 *in, qint16 *out, qint64 samples)
 {
@@ -66,7 +68,7 @@ OutputThread::OutputThread(QObject *parent, BaseVisual *v)
     m_useEq = false;
     m_muted = false;
 
-    m_pluginHost = nullptr;
+//    m_pluginHost = nullptr;
 
     m_visBuffer = nullptr;
     m_visBufferSize = 0;
@@ -79,13 +81,23 @@ OutputThread::OutputThread(QObject *parent, BaseVisual *v)
 
     m_eq = EqualizerMgr::instance ();
 
+    m_outputHost = m_pluginLoader->curOutPutHost ();
+    if (m_outputHost) {
+        if (m_outputHost->isValid ()) {
+            m_output = m_outputHost->instance<IOutPut>();
+        }
+    }
+
     connect (m_eq, &EqualizerMgr::changed, this, &OutputThread::updateEQ);
 }
 
 OutputThread::~OutputThread()
 {
-    if (m_pluginHost) {
-        m_pluginHost->unLoad ();
+    if (m_output)
+        m_output = nullptr;
+    if (m_outputHost) {
+        if (!m_outputHost->unLoad ())
+            m_outputHost->forceUnload ();
     }
     if (m_audioParameters) {
         m_audioParameters->deleteLater();
@@ -103,8 +115,9 @@ bool OutputThread::initialize(quint32 freq, int chan, AudioParameters::AudioForm
 {
     qDebug()<<Q_FUNC_INFO<<"=========";
 
-    if (!m_output) {
-        m_output = m_pluginLoader->getCurrentOutPut ();
+    if (!m_output && m_outputHost) {
+        if (m_outputHost->isValid ())
+            m_output = m_outputHost->instance<IOutPut>();
     }
     if (!m_output) {
         qCritical()<<Q_FUNC_INFO<<"Can't find output!!";
@@ -112,8 +125,12 @@ bool OutputThread::initialize(quint32 freq, int chan, AudioParameters::AudioForm
     }
     if (!m_output->initialize (freq, chan, format)) {
         qCritical()<<Q_FUNC_INFO<<"Can't init output";
-        m_pluginHost = m_pluginLoader->getCurrentPluginHost (Common::PluginOutPut);
-        m_pluginHost->unLoad ();
+//        m_pluginHost = m_pluginLoader->getCurrentPluginHost (Common::PluginOutPut);
+//        m_pluginHost->unLoad ();
+        if (m_outputHost) {
+            if (!m_outputHost->unLoad ())
+                m_outputHost->forceUnload ();
+        }
         m_output = nullptr;
         return false;
     }

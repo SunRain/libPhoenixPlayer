@@ -32,7 +32,9 @@ HEADERS += \
     $$PWD/libPhoenixPlayer/Core/include/Decoder/IDecoder.h \
     $$PWD/libPhoenixPlayer/Core/include/OutPut/IOutPut.h \
     $$PWD/libPhoenixPlayer/Core/include/Backend/SoftVolume.h \
-    $$PWD/libPhoenixPlayer/Core/include/Backend/BaseVolume.h
+    $$PWD/libPhoenixPlayer/Core/include/Backend/BaseVolume.h \
+    $$PWD/libPhoenixPlayer/Core/include/OutPut/OutPutHost.h \
+    $$PWD/libPhoenixPlayer/Core/include/Decoder/DecoderHost.h
 
 contains (CONFIG, WITH_QML_LIB) {
     INCLUDEPATH += $$PWD/libPhoenixPlayer/QtQuick/include

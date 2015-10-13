@@ -9,9 +9,11 @@
 namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
+class Settings;
 
 namespace Decoder {
 class IDecoder;
+class DecoderHost;
 }
 namespace OutPut {
 class IOutPut;
@@ -57,16 +59,19 @@ private:
     QMutex m_mutex;
     PluginLoader *m_pluginLoader;
     StateHandler *m_handler;
+    Settings *m_settings;
 
     BaseVisual *m_visual;
     OutputThread *m_output;
     Decoder::IDecoder *m_decoder;
+    Decoder::DecoderHost *m_decoderHost;
 
     AudioParameters *m_audioParameters;
 
     bool m_use16BitOutputConvert;
     AudioParameters *m_convertAudioParameters;
 
+    QStringList m_decoderLibs;
     bool m_next;
     bool m_muted;
 

@@ -10,7 +10,7 @@
 #include "StateChangedEvent.h"
 
 #include "Common.h"
-#include "Player/VolumeControl.h"
+#include "PlayerCore/VolumeControl.h"
 
 namespace PhoenixPlayer {
 namespace PlayBackend {

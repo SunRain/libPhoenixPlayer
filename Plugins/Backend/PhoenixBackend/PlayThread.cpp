@@ -7,6 +7,7 @@
 
 #include "OutPut/IOutPut.h"
 #include "Decoder/IDecoder.h"
+#include "Decoder/DecoderHost.h"
 
 #include "Backend/BaseMediaObject.h"
 
@@ -16,6 +17,7 @@
 #include "SingletonPointer.h"
 #include "Common.h"
 #include "Buffer.h"
+#include "Settings.h"
 
 #include "OutputThread.h"
 #include "StateHandler.h"
@@ -24,6 +26,8 @@
 namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
+
+using namespace Decoder;
 
 //static functions
 static inline void s8_to_s16(qint8 *in, qint16 *out, qint64 samples)
@@ -52,8 +56,10 @@ PlayThread::PlayThread(QObject *parent, BaseVisual *v)
     ,m_visual(v)
 {
     m_pluginLoader = PluginLoader::instance ();
-
+    m_settings = Settings::instance ();
     m_handler = StateHandler::instance ();
+
+    m_decoderLibs = m_settings->decoderLibraries ();
 
     m_output_buf = 0;
     m_output_size = 0;
@@ -202,9 +208,28 @@ void PlayThread::changeMedia(BaseMediaObject *obj, quint64 startSec)
 
     if (!m_decoder) {
         //TODO 使用PluginLoader装载不同的Decoder，需要添加Decoder是否支持当前媒体的接口
-        m_decoder = m_pluginLoader->getCurrentDecoder ();
+//        m_decoder = m_pluginLoader->getCurrentDecoder ();
+        foreach (QString s, m_decoderLibs) {
+            m_decoderHost = new DecoderHost(s);
+            if (m_decoderHost->isValid ()) { //TODO 需要判断当前decoder/host是否支持当前媒体的解码
+                m_decoder = m_decoderHost->instance<IDecoder>();
+                if (!m_decoder) {
+                    if (!m_decoderHost->unLoad ()) {
+                        m_decoderHost->forceUnload ();
+                    }
+                    m_decoderHost->deleteLater ();
+                    m_decoderHost = nullptr;
+                    continue;
+                }
+                break;
+            }
+        }
     }
 
+    if (!m_decoder) {
+        qCritical()<<Q_FUNC_INFO<<"No decoder found!!";
+        return;
+    }
     //TODO 判断媒体类型，也许可以添加一个单独的方法？
     QString uri;
     if (!obj->filePath ().isEmpty () && !obj->fileName ().isEmpty ()) {
@@ -354,9 +379,15 @@ void PlayThread::run()
         }
         m_mutex.unlock ();
     }
-    //FIXME clear decoders
-    m_pluginLoader->getCurrentPluginHost (Common::PluginDecoder)->unLoad ();
     m_decoder = nullptr;
+    //FIXME clear decoders
+//    m_pluginLoader->getCurrentPluginHost (Common::PluginDecoder)->unLoad ();
+    if (m_decoderHost) {
+        if (!m_decoderHost->unLoad ())
+            m_decoderHost->forceUnload ();
+        m_decoderHost->deleteLater ();
+    }
+    m_decoderHost = nullptr;
 
     m_mutex.lock ();
     m_next = false;
