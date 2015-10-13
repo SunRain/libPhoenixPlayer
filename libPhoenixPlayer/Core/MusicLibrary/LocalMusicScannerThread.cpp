@@ -140,7 +140,7 @@ void LocalMusicScannerThread::scanDir(const QString &path)
                     IMusicTagParser *parser = host->instance<IMusicTagParser>();
                     if (!parser)
                         continue;
-                    if (parser->parserTag (data)) {
+                    if (parser->parserTag (&data)) {
                         break;
                     }
                 }

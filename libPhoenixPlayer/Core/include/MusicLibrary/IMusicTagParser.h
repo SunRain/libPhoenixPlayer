@@ -22,7 +22,7 @@ public:
     /// \param targetMetaDate
     /// \return 成功返回true
     ///
-    virtual bool parserTag(SongMetaData *targetMetaDate) = 0;
+    virtual bool parserTag(SongMetaData **target) = 0;
 protected:
     inline QString indexToGenre(const int &index) {
         return (index > 0 && index < m_list.size ())

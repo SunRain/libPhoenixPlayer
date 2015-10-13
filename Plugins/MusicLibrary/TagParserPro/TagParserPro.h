@@ -34,7 +34,7 @@ public:
 
     // IMusicTagParser interface
 public:
-    bool parserTag(SongMetaData *targetMetaDate);
+    bool parserTag(SongMetaData **target);
 
 protected:
     QImage getImage();
@@ -51,8 +51,8 @@ private:
 private:
 //    bool isUrl(const QString &file);
 private:
-    TagLib::FileRef *mTagRef;
-    QString mFilePath;
+    TagLib::FileRef *m_tagRef;
+    QString m_filePath;
 };
 
 } //TagParserPro
