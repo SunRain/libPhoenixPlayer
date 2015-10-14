@@ -16,14 +16,12 @@ namespace BaiduLookup {
 BaiduLookup::BaiduLookup(QObject *parent)
     : IMetadataLookup(parent)
 {
-     mGBKCodec = QTextCodec::codecForName("GBK");
-     mNDL = new BaseNetworkLookup(this);
-     mIsLrcidDL = true;
+     m_GBKCodec = QTextCodec::codecForName("GBK");
+     m_NDL = new BaseNetworkLookup(this);
+     m_isLrcidDL = true;
 
-     connect (mNDL, &BaseNetworkLookup::failed,
-              this, &BaiduLookup::dlFailed);
-     connect (mNDL, &BaseNetworkLookup::succeed,
-              this, &BaiduLookup::dlSucceed);
+     connect (m_NDL, &BaseNetworkLookup::failed, this, &BaiduLookup::dlFailed);
+     connect (m_NDL, &BaseNetworkLookup::succeed, this, &BaiduLookup::dlSucceed);
 }
 
 BaiduLookup::~BaiduLookup()
@@ -31,23 +29,22 @@ BaiduLookup::~BaiduLookup()
     qDebug()<<Q_FUNC_INFO;
 }
 
-void BaiduLookup::lookup(SongMetaData *meta)
+void BaiduLookup::lookup(SongMetaData **meta)
 {
     if (!meta) {
         qDebug()<<Q_FUNC_INFO<<"[BaiduLookup] No meta found";
         emit lookupFailed();
         return;
     }
-    mIsLrcidDL = true;
+    m_isLrcidDL = true;
 
-    QString name = meta->getMeta (Common::SongMetaTags::E_TrackTitle).toString ();
+    QString name = (*meta)->trackMeta ()->title ();
     if (name.isEmpty ()) {
-        name = meta->getMeta (Common::SongMetaTags::E_FileName).toString ();
+        name = (*meta)->name ();
         //TODO: quick hack
         name = name.mid (0, name.indexOf ("."));
     }
-    QString artist = meta->getMeta (Common::SongMetaTags::E_ArtistName)
-            .toString ();
+    QString artist = (*meta)->artistMeta ()->name ();
 
     QUrl url("http://box.zhangmen.baidu.com/x");
     QUrlQuery query;
@@ -57,9 +54,9 @@ void BaiduLookup::lookup(SongMetaData *meta)
     query.addQueryItem ("format", "json");
     url.setQuery (query);
 
-    mNDL->setUrl (url.toString ());
-    mNDL->setRequestType (BaseNetworkLookup::RequestType::RequestGet);
-    mNDL->startLookup ();
+    m_NDL->setUrl (url.toString ());
+    m_NDL->setRequestType (BaseNetworkLookup::RequestType::RequestGet);
+    m_NDL->startLookup ();
 }
 
 bool BaiduLookup::supportLookup(IMetadataLookup::LookupType type)
@@ -91,7 +88,7 @@ void BaiduLookup::dlSucceed(const QUrl &requestedUrl, const QByteArray &replyDat
     qDebug()<<Q_FUNC_INFO<<QString("Succeed for url [%1] with data [%2]")
               .arg (requestedUrl.toString ()).arg (QString(replyData));
 
-    if (mIsLrcidDL) {
+    if (m_isLrcidDL) {
         qDebug()<<Q_FUNC_INFO<<"Current is for lyrics id download";
 
         QRegularExpression lyricsID("<lrcid>([0-9]*)</lrcid>");
@@ -101,23 +98,23 @@ void BaiduLookup::dlSucceed(const QUrl &requestedUrl, const QByteArray &replyDat
             emit lookupFailed ();
             return;
         }
-        mIsLrcidDL = false;
+        m_isLrcidDL = false;
         //Use the first id.
         QString currentID = i.next().captured(1);
         QString str = QString("http://box.zhangmen.baidu.com/bdlrc/%1/%2.lrc")
                 .arg (QString::number(currentID.toLongLong()/100))
                 .arg (currentID);
 
-        mNDL->setUrl (str);
-        mNDL->setRequestType (BaseNetworkLookup::RequestType::RequestGet);
-        mNDL->startLookup ();
+        m_NDL->setUrl (str);
+        m_NDL->setRequestType (BaseNetworkLookup::RequestType::RequestGet);
+        m_NDL->startLookup ();
     } else {
         if (replyData.isEmpty ()) {
             qDebug()<<Q_FUNC_INFO<<"BaiduLookup download empty lyric";
             emit lookupFailed ();
             return;
         }
-        emit lookupSucceed (mGBKCodec->toUnicode (replyData).toLocal8Bit ());
+        emit lookupSucceed (m_GBKCodec->toUnicode (replyData).toLocal8Bit ());
     }
 }
 

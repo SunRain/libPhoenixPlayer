@@ -24,16 +24,16 @@ public:
 
      // ILyricsLookup interface
 public:
-    void lookup(SongMetaData *meta);
+    void lookup(SongMetaData **meta);
     bool supportLookup(LookupType type);
 private slots:
     void dlFailed(const QUrl &requestedUrl, const QString &error);
     void dlSucceed(const QUrl &requestedUrl, const QByteArray &replyData);
     QString formatStr(const QString &in);
 private:
-    QTextCodec *mGBKCodec;
-    BaseNetworkLookup *mNDL;
-    bool mIsLrcidDL;
+    QTextCodec *m_GBKCodec;
+    BaseNetworkLookup *m_NDL;
+    bool m_isLrcidDL;
 };
 
 } //BaiduLookup
