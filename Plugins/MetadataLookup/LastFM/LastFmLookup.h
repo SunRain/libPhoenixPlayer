@@ -45,7 +45,7 @@ public:
     // IMetadataLookup interface
 public:
     bool supportLookup(LookupType type);
-    void lookup(SongMetaData *meta);
+    void lookup(SongMetaData **meta);
 
 protected:
 //    void parseAlbumDescription(const QByteArray &qba);
@@ -60,8 +60,8 @@ private:
     bool parseRootObject(QJsonObject &out, const QByteArray &in, const QString &key);
     QString formatStr(const QString &in);
 private:
-    BaseNetworkLookup *mNetworkLookup;
-    QString mImageSizeValue;
+    BaseNetworkLookup *m_networkLookup;
+    QString m_imageSizeValue;
 };
 
 } //LastFmLookup

@@ -22,23 +22,18 @@ namespace LastFmLookup {
 LastFmLookup::LastFmLookup(QObject *parent)
     :IMetadataLookup(parent)
 {
-    mNetworkLookup = new BaseNetworkLookup(this);
-    Settings *setting = nullptr;
-#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
-    setting = Settings::instance();
-#else
-    setting = SingletonPointer<Settings>::instance ();
-#endif
-    mImageSizeValue = setting->getConfig (CONFIG_KEY, DEFAULT_IMAGE_SIZE_REGEXP);
+    m_networkLookup = new BaseNetworkLookup(this);
+    Settings *setting = Settings::instance ();
+    m_imageSizeValue = setting->getConfig (CONFIG_KEY, DEFAULT_IMAGE_SIZE_REGEXP);
 
-    connect (mNetworkLookup, &BaseNetworkLookup::failed,
+    connect (m_networkLookup, &BaseNetworkLookup::failed,
              [&](const QUrl &requestedUrl, const QString &error) {
         Q_UNUSED(requestedUrl);
         qDebug()<<Q_FUNC_INFO<<"lookup failed "<<error;
         emit lookupFailed ();
     });
 
-    connect (mNetworkLookup, &BaseNetworkLookup::succeed,
+    connect (m_networkLookup, &BaseNetworkLookup::succeed,
              [&](const QUrl &requestedUrl, const QByteArray &replyData) {
         Q_UNUSED(requestedUrl);
 
@@ -93,7 +88,7 @@ bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
 }
 
 //http://ws.audioscrobbler.com/2.0/?method=album.search&album=F.I.R&api_key=625fd47b3b685af19315cc3a1aa5920a&format=json
-void LastFmLookup::lookup(SongMetaData *meta)
+void LastFmLookup::lookup(SongMetaData **meta)
 {
     qDebug()<<"====> "<<Q_FUNC_INFO<<" <====";
 
@@ -111,8 +106,8 @@ void LastFmLookup::lookup(SongMetaData *meta)
     case LookupType::TypeAlbumImage:
     case LookupType::TypeAlbumDate:
     case LookupType::TypeAlbumDescription: {
-        QString artist = formatStr (meta->getMeta (Common::E_ArtistName).toString ());
-        QString album = formatStr (meta->getMeta (Common::E_AlbumName).toString ());
+        QString artist = formatStr ((*meta)->artistMeta ()->name ());
+        QString album = formatStr ((*meta)->albumMeta ()->name ());
         if (!artist.isEmpty () && !album.isEmpty ()) {
             query.addQueryItem ("artist", artist);
             query.addQueryItem ("album", album);
@@ -126,7 +121,7 @@ void LastFmLookup::lookup(SongMetaData *meta)
     }
     case LookupType::TypeArtistImage:
     case LookupType::TypeArtistDescription: {
-        QString artist = formatStr (meta->getMeta (Common::E_ArtistName).toString ());
+        QString artist = formatStr ((*meta)->artistMeta ()->name ());
         if (!artist.isEmpty ()) {
             query.addQueryItem ("artist", artist);
             query.addQueryItem ("method", QString("artist.getInfo"));
@@ -137,10 +132,10 @@ void LastFmLookup::lookup(SongMetaData *meta)
         break;
     }
     case LookupType::TypeTrackDescription: {
-        QString artist = formatStr (meta->getMeta (Common::E_ArtistName).toString ());
-        QString track = formatStr (meta->getMeta (Common::E_TrackTitle).toString ());
+        QString artist = formatStr ((*meta)->artistMeta ()->name ());
+        QString track = formatStr ((*meta)->trackMeta ()->title ());
         if (track.isEmpty ()) {
-            track = meta->getMeta (Common::SongMetaTags::E_FileName).toString ();
+            track = (*meta)->name ();
             //TODO: quick hack
             track = track.mid (0, track.indexOf ("."));
         }
@@ -161,11 +156,11 @@ void LastFmLookup::lookup(SongMetaData *meta)
     }
     url.setQuery (query);
 
-    qDebug()<<Q_FUNC_INFO<<" URL "<<url <<" network is null "<<(mNetworkLookup == nullptr);
+    qDebug()<<Q_FUNC_INFO<<" URL "<<url <<" network is null "<<(m_networkLookup == nullptr);
 
-    mNetworkLookup->setUrl (url.toString ());
-    mNetworkLookup->setRequestType (BaseNetworkLookup::RequestGet);
-    mNetworkLookup->startLookup ();
+    m_networkLookup->setUrl (url.toString ());
+    m_networkLookup->setRequestType (BaseNetworkLookup::RequestGet);
+    m_networkLookup->startLookup ();
 }
 
 void LastFmLookup::parseSongDescription(const QByteArray &qba)
@@ -272,7 +267,7 @@ void LastFmLookup::parseAlbumData(const QByteArray &qba)
             if (o.isEmpty ())
                 continue;
             if (o.value (QString("size")).toString ()
-                    == /*QString(DEFAULT_IMAGE_SIZE_REGEXP)*/mImageSizeValue) {
+                    == /*QString(DEFAULT_IMAGE_SIZE_REGEXP)*/m_imageSizeValue) {
                 str = o.value (QString("#text")).toString ();
                 found = true;
                 break;
@@ -338,7 +333,7 @@ void LastFmLookup::parseArtisData(const QByteArray &qba)
             if (o.isEmpty ())
                 continue;
             if (o.value (QString("size")).toString ()
-                    == /*QString(DEFAULT_IMAGE_SIZE_REGEXP)*/mImageSizeValue) {
+                    == /*QString(DEFAULT_IMAGE_SIZE_REGEXP)*/m_imageSizeValue) {
                 str = o.value (QString("#text")).toString ();
 //                emit lookupSucceed (o.value (QString("#text")).toString ().toLocal8Bit ());
                 found = true;
