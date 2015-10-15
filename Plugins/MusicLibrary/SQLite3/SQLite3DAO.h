@@ -15,9 +15,9 @@ class Common;
 namespace MusicLibrary {
 namespace SQLite3 {
 
-#define DATABASE_NAME "PhoenixPlayer_sqlite3"
+#define DATABASE_NAME "PhoenixPlayer_musiclibrary"
 #define LIBRARY_TABLE_TAG "LIBRARY"
-#define PLAYLIST_TABLE_TAG "PLAYLIST"
+//#define PLAYLIST_TABLE_TAG "PLAYLIST"
 
 class SQLite3DAO : public IMusicLibraryDAO
 {
@@ -28,20 +28,25 @@ public:
     explicit SQLite3DAO(QObject *parent = 0);
 //    static SQLite3DAO *getInstance();
     virtual ~SQLite3DAO();
-
-    // IPlayListDAO interface
+    bool openDataBase();
+    // IMusicLibraryDAO interface
 public:
     bool initDataBase();
-    bool openDataBase();
 
-    bool deleteMetaData(SongMetaData *metaData = 0);
-    bool deleteMetaData(const QString &hash);
-    bool updateMetaData(SongMetaData *metaData = 0, bool skipEmptyValue = true);
-    bool insertMetaData(SongMetaData *metaData = 0, bool skipDuplicates = true);
+    bool insertMetaData(SongMetaData **metaData, bool skipDuplicates = true);
+    bool updateMetaData(SongMetaData **metaData, bool skipEmptyValue);
+    bool fillAttribute(SongMetaData **meta);
+    bool deleteMetaData(SongMetaData **metaData = 0);
+    bool deleteByHash(const QString &hash);
+    SongMetaData *trackFromHash(const QString &hash);
+    QStringList trackHashList() const;
+//    bool deleteMetaData(const QString &hash);
+//    bool updateMetaData(SongMetaData *metaData = 0, bool skipEmptyValue = true);
+//    bool insertMetaData(SongMetaData *metaData = 0, bool skipDuplicates = true);
 //    SongMetaData *querySongMeta(const QString &hash, const QString &table);
-    QStringList getSongHashList(const QString &playListHash);
+//    QStringList getSongHashList(const QString &playListHash);
 
-    bool fillAttribute(SongMetaData *meta);
+//    bool fillAttribute(SongMetaData *meta);
 
 //    QStringList queryMusicLibrary(Common::SongMetaTags,
 //                                  Common::SongMetaTags regColumn,
@@ -58,11 +63,12 @@ public:
 //    bool deletePlayList(const QString &playListHash);
 //    bool insertPlayList(const QString &playListName);
 
-    // IPlayListDAO interface
+    // IMusicLibraryDAO interface
 public slots:
     bool beginTransaction();
     bool commitTransaction();
 private:
+    QStringList songMetaDataPropertyList();
     QString listToString(const QStringList &list);
     QStringList stringToList(const QString &str);
     void calcExistSongs();
@@ -79,10 +85,10 @@ private:
 
     bool checkDatabase();
 private:
-    QSqlDatabase mDatabase;
-    QStringList mExistSongHashes;
-    Common mCommon;
-    bool mTransaction;
+    QSqlDatabase m_database;
+    QStringList m_existSongHashes;
+    Common m_common;
+    bool m_transaction;
 };
 
 } //SQLite3

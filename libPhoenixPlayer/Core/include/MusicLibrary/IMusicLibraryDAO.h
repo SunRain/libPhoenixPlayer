@@ -15,7 +15,9 @@ class IMusicLibraryDAO : public QObject
 {
     Q_OBJECT
 public:
-    explicit IMusicLibraryDAO(QObject *parent = 0) : QObject(parent){}
+    explicit IMusicLibraryDAO(QObject *parent = 0) : QObject(parent){
+        init ();
+    }
     virtual ~IMusicLibraryDAO() {}
 
     virtual bool initDataBase() = 0;
@@ -26,16 +28,16 @@ public:
     /// \param skipDuplicates skip if track already exists in database
     /// \return
     ///
-    virtual bool insertMetaData(SongMetaData **metaData = 0, bool skipDuplicates = true) = 0;
+    virtual bool insertMetaData(SongMetaData **metaData, bool skipDuplicates = true) = 0;
     ///
     /// \brief updateMetaData update track meta
     /// \param metaData the track
     /// \param skipEmptyValue use origin value if new track has some empty values
     /// \return
     ///
-    virtual bool updateMetaData(SongMetaData **metaData = 0, bool skipEmptyValue = true) = 0;
-    virtual bool deleteMetaData(SongMetaData **metaData = 0) = 0;
-    virtual bool deleteMetaData(const QString &hash) = 0;
+    virtual bool updateMetaData(SongMetaData **metaData, bool skipEmptyValue = true) = 0;
+    virtual bool deleteMetaData(SongMetaData **metaData) = 0;
+    virtual bool deleteByHash(const QString &hash) = 0;
 //    virtual SongMetaData *querySongMeta(const QString &hash, const QString &table) = 0;
 
 //    virtual QStringList getSongHashList(const QString &playListHash) = 0;
@@ -97,8 +99,9 @@ public:
 //    virtual bool insertPlayList(const QString &playListName) = 0;
 
 signals:
-    void metaDataInserted(SongMetaData **data);
-    void metaDataDeleted(SongMetaData **data);
+//    void metaDataInserted(SongMetaData **data);
+//    void metaDataDeleted(SongMetaData **data);
+    void libraryChanged();
 
 public slots:
     ///
@@ -113,6 +116,10 @@ public slots:
     ///
     virtual bool commitTransaction() = 0;
 
+private:
+    void init() {
+        initDataBase ();
+    }
 };
 
 } //IMUSICLIBRARYDAO_H
