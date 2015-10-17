@@ -34,7 +34,7 @@ public:
     bool initDataBase();
 
     bool insertMetaData(SongMetaData **metaData, bool skipDuplicates = true);
-    bool updateMetaData(SongMetaData **metaData, bool skipEmptyValue);
+    bool updateMetaData(SongMetaData **metaData, bool skipEmptyValue = true);
     bool fillAttribute(SongMetaData **meta);
     bool deleteMetaData(SongMetaData **metaData = 0);
     bool deleteByHash(const QString &hash);
@@ -69,8 +69,8 @@ public slots:
     bool commitTransaction();
 private:
     QStringList songMetaDataPropertyList();
-    QString listToString(const QStringList &list);
-    QStringList stringToList(const QString &str);
+//    QString listToString(const QStringList &list);
+//    QStringList stringToList(const QString &str);
     void calcExistSongs();
     ///
     /// \brief fillValues 如果skipEmptyValue为真,则如果value是空值,就返回defaultValue;否则直接返回value
@@ -79,15 +79,15 @@ private:
     /// \param skipEmptyValue
     /// \return
     ///
-    QString fillValues(const QVariant &value, const QVariant &defaultValue,
-                       bool skipEmptyValue = true);
+//    QString fillValues(const QVariant &value, const QVariant &defaultValue,
+//                       bool skipEmptyValue = true);
 //    int fillValues (int value, int defaultVaule = 0, bool skipEmptyValue = true);
 
     bool checkDatabase();
 private:
     QSqlDatabase m_database;
     QStringList m_existSongHashes;
-    Common m_common;
+//    Common m_common;
     bool m_transaction;
 };
 

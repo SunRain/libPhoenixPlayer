@@ -43,6 +43,14 @@ public:
         }
         return list;
     }   
+    inline QVariant property(const QString &name) {
+        QByteArray qba = name.toLocal8Bit ();
+        return property (qba.constData ());
+    }
+    inline bool setProperty(const QString &name, const QVariant & value) {
+        QByteArray qba = name.toLocal8Bit ();
+        return setProperty (qba.constData (), value);
+    }
 };
 
 }

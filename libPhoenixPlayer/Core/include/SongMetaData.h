@@ -203,12 +203,7 @@ public:
 
     QString toString();
     bool equals(const SongMetaData *other);
-
-//    ///
-//    /// \brief metaKeys 返回所有支持的SongMetaData项
-//    /// \return
-//    ///
-//    static QStringList metaKeys();
+    void fillAttribute(const SongMetaData *other);
 
     static QString formatHash(const QString &path, const QString &name, quint64 size);
 

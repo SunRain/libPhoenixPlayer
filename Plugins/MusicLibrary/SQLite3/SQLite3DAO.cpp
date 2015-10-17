@@ -170,76 +170,206 @@ bool SQLite3DAO::initDataBase()
 
 bool SQLite3DAO::insertMetaData(SongMetaData **metaData, bool skipDuplicates)
 {
-        if (!checkDatabase ())
-            return false;
+    if (!metaData) {
+        qDebug()<<Q_FUNC_INFO<<"No SongMetaData pointer";
+        return false;
+    }
+    if (!checkDatabase ())
+        return false;
 
-        if (skipDuplicates) {
-            if (m_existSongHashes.contains ((*metaData)->hash ())) {
-                qDebug()<<"skipDuplicates "<<(*metaData)->uri ();
-                return true;
-            }
-        }
-        QString column, value;
-        foreach (QString s, MetaData::AlbumMeta::staticPropertyList ()) {
-            column += QString("%1_%2, ").arg (MetaData::AlbumMeta::staticMetaObject.className ()).arg (s);
-            value += QString("\"%1\", ").arg ((*metaData)->albumMeta ()->property (s).toString ());
-        }
-        foreach (QString s, MetaData::ArtistMeta::staticPropertyList ()) {
-            column += QString("%1_%2, ").arg (MetaData::ArtistMeta::staticMetaObject.className ()).arg (s);
-            value += QString("\"%1\", ").arg ((*metaData)->artistMeta ()->property (s).toString ());
-        }
-        foreach (QString s, MetaData::CoverMeta::staticPropertyList ()) {
-            column += QString("%1_%2, ").arg (MetaData::CoverMeta::staticMetaObject.className ()).arg (s);
-            value += QString("\"%1\", ").arg ((*metaData)->coverMeta ()->property (s).toString ());
-        }
-        foreach (QString s, MetaData::TrackMeta::staticPropertyList ()) {
-            column += QString("%1_%2, ").arg (MetaData::TrackMeta::staticMetaObject.className ()).arg (s);
-            value += QString("\"%1\", ").arg ((*metaData)->trackMeta ()->property (s).toString ());
-        }
-        foreach (QString s, songMetaDataPropertyList ()) {
-            column += QString("%1_%2, ").arg (SongMetaData::staticMetaObject.className ()).arg (s);
-            value += QString("\"%1\", ").arg ((*metaData)->property (s).toString ());
-        }
-        column = column.simplified ();
-        column = column.left (column.length () - 1);
-        value = value.simplified ();
-        value = value.left (value.length () - 1);
-
-        QString str = "insert into ";
-        str += LIBRARY_TABLE_TAG;
-        str += "(";
-        str += column;
-        str += ") values (";
-        str += value;
-        str += ") ";
-
-    //    for (i = (int)Common::SongMetaTags::E_FirstFlag + 1;
-    //         i < (int)Common::SongMetaTags::E_LastFlag - 1;
-    //         ++i) {
-    //        str += QString("%1, ")
-    //                .arg (m_common.enumToStr ("SongMetaTags", i));
-    //    }
-    //    str += QString("%1) values ( ")
-    //            .arg (m_common.enumToStr ("SongMetaTags", i));
-
-    //    for (i = (int)Common::SongMetaTags::E_FirstFlag + 1;
-    //         i < (int)Common::SongMetaTags::E_LastFlag - 1;
-    //         ++i) {
-    //        str += QString("\"%1\", ")
-    //                .arg (metaData->getMeta (Common::SongMetaTags(i)).toString ());
-    //    }
-    //    str += QString(" \"%1\") ")
-    //            .arg (metaData->getMeta (Common::SongMetaTags(i)).toString ());
-
-        QSqlQuery q;
-        if (q.exec (str)) {
-            m_existSongHashes.append ((*metaData)->hash ());
-            emit libraryChanged ();
+    if (skipDuplicates) {
+        if (m_existSongHashes.contains ((*metaData)->hash ())) {
+            qDebug()<<"skipDuplicates "<<(*metaData)->uri ();
             return true;
-        } else {
-            qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
-            return false;
         }
+    }
+    QString column, value;
+    foreach (QString s, MetaData::AlbumMeta::staticPropertyList ()) {
+        column += QString("%1_%2, ").arg (MetaData::AlbumMeta::staticMetaObject.className ()).arg (s);
+        value += QString("\"%1\", ").arg ((*metaData)->albumMeta ()->property (s).toString ());
+    }
+    foreach (QString s, MetaData::ArtistMeta::staticPropertyList ()) {
+        column += QString("%1_%2, ").arg (MetaData::ArtistMeta::staticMetaObject.className ()).arg (s);
+        value += QString("\"%1\", ").arg ((*metaData)->artistMeta ()->property (s).toString ());
+    }
+    foreach (QString s, MetaData::CoverMeta::staticPropertyList ()) {
+        column += QString("%1_%2, ").arg (MetaData::CoverMeta::staticMetaObject.className ()).arg (s);
+        value += QString("\"%1\", ").arg ((*metaData)->coverMeta ()->property (s).toString ());
+    }
+    foreach (QString s, MetaData::TrackMeta::staticPropertyList ()) {
+        column += QString("%1_%2, ").arg (MetaData::TrackMeta::staticMetaObject.className ()).arg (s);
+        value += QString("\"%1\", ").arg ((*metaData)->trackMeta ()->property (s).toString ());
+    }
+    foreach (QString s, songMetaDataPropertyList ()) {
+        column += QString("%1_%2, ").arg (SongMetaData::staticMetaObject.className ()).arg (s);
+        value += QString("\"%1\", ").arg ((*metaData)->property (s).toString ());
+    }
+    column = column.simplified ();
+    column = column.left (column.length () - 1);
+    value = value.simplified ();
+    value = value.left (value.length () - 1);
+
+    QString str = "insert into ";
+    str += LIBRARY_TABLE_TAG;
+    str += "(";
+    str += column;
+    str += ") values (";
+    str += value;
+    str += ") ";
+
+//    for (i = (int)Common::SongMetaTags::E_FirstFlag + 1;
+//         i < (int)Common::SongMetaTags::E_LastFlag - 1;
+//         ++i) {
+//        str += QString("%1, ")
+//                .arg (m_common.enumToStr ("SongMetaTags", i));
+//    }
+//    str += QString("%1) values ( ")
+//            .arg (m_common.enumToStr ("SongMetaTags", i));
+
+//    for (i = (int)Common::SongMetaTags::E_FirstFlag + 1;
+//         i < (int)Common::SongMetaTags::E_LastFlag - 1;
+//         ++i) {
+//        str += QString("\"%1\", ")
+//                .arg (metaData->getMeta (Common::SongMetaTags(i)).toString ());
+//    }
+//    str += QString(" \"%1\") ")
+//            .arg (metaData->getMeta (Common::SongMetaTags(i)).toString ());
+
+    QSqlQuery q(str, m_database);
+    if (q.exec ()) {
+        m_existSongHashes.append ((*metaData)->hash ());
+//        emit libraryChanged ();
+        emit metaDataInserted ();
+        return true;
+    }
+    qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
+    return false;
+}
+
+bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
+{
+    if (!metaData) {
+        qDebug()<<Q_FUNC_INFO<<"No SongMetaData pointer";
+        return false;
+    }
+    if (!checkDatabase ())
+        return false;
+
+    QString column, value;
+    foreach (QString s, MetaData::AlbumMeta::staticPropertyList ()) {
+        value = (*metaData)->albumMeta ()->property (s).toString ();
+        if (value.isEmpty () && skipEmptyValue)
+            continue;
+        column += QString ("%1_%2 = \"%3\", ")
+                .arg (MetaData::AlbumMeta::staticMetaObject.className ())
+                .arg (s)
+                .arg (value);
+
+    }
+    foreach (QString s, MetaData::ArtistMeta::staticPropertyList ()) {
+        value = (*metaData)->artistMeta ()->property (s).toString ();
+        if (value.isEmpty () && skipEmptyValue)
+            continue;
+        column += QString ("%1_%2 = \"%3\", ")
+                .arg (MetaData::ArtistMeta::staticMetaObject.className ())
+                .arg (s)
+                .arg (value);
+    }
+    foreach (QString s, MetaData::CoverMeta::staticPropertyList ()) {
+        value = (*metaData)->coverMeta ()->property (s).toString ();
+        if (value.isEmpty () && skipEmptyValue)
+            continue;
+        column += QString ("%1_%2 = \"%3\", ")
+                .arg (MetaData::CoverMeta::staticMetaObject.className ())
+                .arg (s)
+                .arg (value);
+    }
+    foreach (QString s, MetaData::TrackMeta::staticPropertyList ()) {
+        value = (*metaData)->trackMeta ()->property (s).toString ();
+        if (value.isEmpty () && skipEmptyValue)
+            continue;
+        column += QString ("%1_%2 = \"%3\", ")
+                .arg (MetaData::TrackMeta::staticMetaObject.className ())
+                .arg (s)
+                .arg (value);
+    }
+    foreach (QString s, songMetaDataPropertyList ()) {
+        value = (*metaData)->property (s).toString ();
+        if (value.isEmpty () && skipEmptyValue)
+            continue;
+        column += QString ("%1_%2 = \"%3\", ")
+                .arg (SongMetaData::staticMetaObject.className ())
+                .arg (s)
+                .arg (value);
+    }
+    column = column.simplified ();
+    column = column.left (column.length () - 1);
+
+    QString str = "update ";
+    str += LIBRARY_TABLE_TAG;
+    str += " set ";
+    str += column;
+    //%1_hash hash来自SongMetaData的hard code
+    //TODO do not use hard code
+    str += QString(" where %1_hash = \"%2\"")
+            .arg (SongMetaData::staticMetaObject.className ())
+            .arg ((*metaData)->hash ());
+
+    //    if (metaData == nullptr
+    //            || metaData->getMeta (Common::E_Hash).toString ().isEmpty ()) {
+    //        qDebug()<<"Can't update meta data due to metaData is empty or hash is empty";
+    //        return false;
+    //    }
+    //    SongMetaData *oriMeta
+    //            = querySongMeta (metaData->getMeta (Common::E_Hash).toString (),
+    //                             LIBRARY_TABLE_TAG);
+    //    int i;
+    //    QString str = "update ";
+    //    str += LIBRARY_TABLE_TAG;
+    //    str += " set ";
+    //    for (i = (int)(Common::SongMetaTags::E_Hash) + 1;
+    //         i < (int)(Common::SongMetaTags::E_LastFlag) -1;
+    //         ++i) {
+    //        str += QString ("%1 = \"%2\", ")
+    //                .arg (m_common.enumToStr ("SongMetaTags", i))
+    //                .arg (fillValues (metaData->getMeta (Common::SongMetaTags(i)),
+    //                                  oriMeta->getMeta (Common::SongMetaTags(i)),
+    //                                  skipEmptyValue));
+    //    }
+    //    str += QString ("%1 = \"%2\" ")
+    //            .arg (m_common.enumToStr ("SongMetaTags", i))
+    //            .arg (fillValues (metaData->getMeta (Common::SongMetaTags(i)),
+    //                              oriMeta->getMeta (Common::SongMetaTags(i)),
+    //                              skipEmptyValue));
+    //    str += QString("where %1 = \"%2\"")
+    //            .arg (m_common.enumToStr ("SongMetaTags", Common::SongMetaTags::E_Hash))
+    //            .arg (metaData->getMeta (Common::E_Hash).toString ());
+
+    qDebug()<<Q_FUNC_INFO<<"Run sql "<<str;
+
+    QSqlQuery q(str, m_database);
+    if (q.exec ()) {
+        return true;
+    }
+    qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
+    return false;
+}
+
+bool SQLite3DAO::fillAttribute(SongMetaData **meta)
+{
+    if (!meta) {
+        qDebug()<<Q_FUNC_INFO<<"No SongMetaData pointer";
+        return false;
+    }
+    if (!checkDatabase ())
+        return false;
+    SongMetaData *d = trackFromHash ((*meta)->hash ());
+    if (!d)
+        return false;
+    (*meta)->fillAttribute (d);
+    d->deleteLater ();
+    d = nullptr;
+    return true;
 }
 
 bool SQLite3DAO::deleteMetaData(SongMetaData **metaData)
@@ -255,7 +385,7 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
         return false;
 
     if (hash.isEmpty ()) {
-        qDebug()<<"hash is empty";
+        qDebug()<<Q_FUNC_INFO<<"hash is empty";
         return false;
     }
 
@@ -263,17 +393,75 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
     //TODO do not use hard code
     QString str = QString("delete from %1 where %2_hash = \"%3\"")
             .arg (LIBRARY_TABLE_TAG)
-            .arg (SongMetaData::staticQtMetaObject.className ())
+            .arg (SongMetaData::staticMetaObject.className ())
             .arg (hash);
     QSqlQuery q(str, m_database);
     if (q.exec ()) {
         calcExistSongs ();
-        emit libraryChanged ();
+//        emit libraryChanged ();
+        emit metaDataDeleted ();
         return true;
-    } else {
-        qDebug()<<Q_FUNC_INFO<<"deleteMetaData error "<<q.lastError ().text ();
-        return false;
     }
+    qDebug()<<Q_FUNC_INFO<<"deleteMetaData error "<<q.lastError ().text ();
+    return false;
+}
+
+SongMetaData *SQLite3DAO::trackFromHash(const QString &hash)
+{
+    if (hash.isEmpty ()) {
+        qDebug()<<Q_FUNC_INFO<<"Invalid hash";
+        return nullptr;
+    }
+    //%2_hash hash来自SongMetaData的hard code
+    //TODO do not use hard code
+    QString str = QString("select * from %1 where %2_hash = \"%3\"")
+            .arg (LIBRARY_TABLE_TAG)
+            .arg (SongMetaData::staticMetaObject.className ())
+            .arg (hash);
+    QSqlQuery q(str, m_database);
+    while (q.next ()) {
+        ///以下来自SongMetaData的hard code
+        //TODO do not use hard code
+        QString name = q.value (QString("%1_name").arg (SongMetaData::staticMetaObject.className ())).toString ();
+        QString path = q.value (QString("%1_path").arg (SongMetaData::staticMetaObject.className ())).toString ();
+        quint64 size = q.value (QString("%1_size").arg (SongMetaData::staticMetaObject.className ())).toUInt ();
+        SongMetaData d(path, name, size);
+        if (d.hash () != hash)
+            continue;
+        d.setMediaType (q.value (QString("%1_mediaType").arg (SongMetaData::staticMetaObject.className ())).toUInt ());
+        d.setLyricsData (q.value (QString("%1_lyricsData").arg (SongMetaData::staticMetaObject.className ())).toString ());
+        d.setLyricsUri (q.value (QString("%1_lyricsUri").arg (SongMetaData::staticMetaObject.className ())).toUrl ());
+        ///以上来自SongMetaData的hard code
+
+        foreach (QString s, MetaData::AlbumMeta::staticPropertyList ()) {
+            d.albumMeta ()->setProperty (s,
+                                         q.value (QString("%1_%2")
+                                                  .arg (MetaData::AlbumMeta::staticMetaObject.className ())
+                                                  .arg (s)));
+
+        }
+        foreach (QString s, MetaData::ArtistMeta::staticPropertyList ()) {
+            d.artistMeta ()->setProperty (s,
+                                          q.value (QString("%1_%2")
+                                                   .arg (MetaData::ArtistMeta::staticMetaObject.className ())
+                                                   .arg (s)));
+        }
+        foreach (QString s, MetaData::CoverMeta::staticPropertyList ()) {
+            d.coverMeta ()->setProperty (s,
+                                         q.value (QString("%1_%2")
+                                                  .arg (MetaData::CoverMeta::staticMetaObject.className ())
+                                                  .arg (s)));
+        }
+        foreach (QString s, MetaData::TrackMeta::staticPropertyList ()) {
+            d.trackMeta ()->setProperty (s,
+                                         q.value (QString("%1_%2")
+                                                  .arg (MetaData::TrackMeta::staticMetaObject.className ())
+                                                  .arg (s)));
+        }
+        return &d;
+    }
+    qDebug()<<Q_FUNC_INFO<<"Current hash not found in database";
+    return nullptr;
 }
 
 QStringList SQLite3DAO::trackHashList() const
@@ -744,26 +932,26 @@ inline QStringList SQLite3DAO::songMetaDataPropertyList()
 //    }
 //}
 
-QString SQLite3DAO::listToString(const QStringList &list)
-{
-    //a, b, c, d
-    if (list.isEmpty ())
-        return QString();
-    if (list.size () == 1)
-        return list.at (0);
-    QString str;
-    QString last = list.at (list.size ()-1);
-    for (int i=0; i<list.size ()-1; ++i) {
-        str += QString("%1||").arg (list.at (i));
-    }
-    str += last;
-    return str;
-}
+//QString SQLite3DAO::listToString(const QStringList &list)
+//{
+//    //a, b, c, d
+//    if (list.isEmpty ())
+//        return QString();
+//    if (list.size () == 1)
+//        return list.at (0);
+//    QString str;
+//    QString last = list.at (list.size ()-1);
+//    for (int i=0; i<list.size ()-1; ++i) {
+//        str += QString("%1||").arg (list.at (i));
+//    }
+//    str += last;
+//    return str;
+//}
 
-QStringList SQLite3DAO::stringToList(const QString &str)
-{
-    return str.split ("||");
-}
+//QStringList SQLite3DAO::stringToList(const QString &str)
+//{
+//    return str.split ("||");
+//}
 
 void SQLite3DAO::calcExistSongs()
 {
@@ -785,18 +973,18 @@ void SQLite3DAO::calcExistSongs()
     }
 }
 
-QString SQLite3DAO::fillValues(const QVariant &value,
-                               const QVariant &defaultValue,
-                               bool skipEmptyValue)
-{
-    if (skipEmptyValue && value.toString ().isEmpty ()) {
-        return defaultValue.toString ();
-    } else {
-        return value.toString ();
-    }
-}
+//QString SQLite3DAO::fillValues(const QVariant &value,
+//                               const QVariant &defaultValue,
+//                               bool skipEmptyValue)
+//{
+//    if (skipEmptyValue && value.toString ().isEmpty ()) {
+//        return defaultValue.toString ();
+//    } else {
+//        return value.toString ();
+//    }
+//}
 
-bool SQLite3DAO::checkDatabase()
+inline bool SQLite3DAO::checkDatabase()
 {
     if (!m_database.isOpen ()) {
         if (!openDataBase ()) {

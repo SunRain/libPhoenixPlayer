@@ -151,6 +151,43 @@ bool SongMetaData::equals(const SongMetaData *other)
     return m_hash == other->hash ();
 }
 
+void SongMetaData::fillAttribute(const SongMetaData *other)
+{
+    if (!other) {
+        qDebug()<<Q_FUNC_INFO<<"No other pointer";
+        return;
+    }
+    if (m_hash != other->hash ()) {
+        qDebug()<<Q_FUNC_INFO<<"hash invalid";
+        return;
+    }
+    m_path = other->path ();
+    m_name = other->name ();
+    m_size = other->size ();
+    m_mediaType = other->mediaType ();
+    m_lyricsData = other->lyricsData ();
+    m_lyricsUri = other->lyricsUri ();
+    m_albumMeta->setDate (other->albumMeta ()->date ());
+    m_albumMeta->setDescription (other->albumMeta ()->description ());
+    m_albumMeta->setImgUri (other->albumMeta ()->imgUri ());
+    m_albumMeta->setName (other->albumMeta ()->name ());
+    m_artistMeta->setDescription (other->artistMeta ()->description ());
+    m_artistMeta->setImgUri (other->artistMeta ()->imgUri ());
+    m_artistMeta->setName (other->artistMeta ()->name ());
+    m_coverMeta->setLargeUri (other->coverMeta ()->largeUri ());
+    m_coverMeta->setMiddleUri (other->coverMeta ()->middleUri ());
+    m_coverMeta->setSmallUri (other->coverMeta ()->smallUri ());
+    m_trackMeta->setBitRate (other->trackMeta ()->bitRate ());
+    m_trackMeta->setDate (other->trackMeta ()->date ());
+    m_trackMeta->setDescription (other->trackMeta ()->description ());
+    m_trackMeta->setDuration (other->trackMeta ()->duration ());
+    m_trackMeta->setGenre (other->trackMeta ()->genre ());
+    m_trackMeta->setSampleRate (other->trackMeta ()->sampleRate ());
+    m_trackMeta->setTitle (other->trackMeta ()->title ());
+    m_trackMeta->setUserRating (other->trackMeta ()->userRating ());
+    m_trackMeta->setYear (other->trackMeta ()->year ());
+}
+
 //QStringList SongMetaData::metaKeys()
 //{
 //    QStringList list;

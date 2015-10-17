@@ -30,23 +30,48 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 
     if (m_dao) {
         connect (m_dao, &IMusicLibraryDAO::metaDataInserted,
-                 [&](SongMetaData **data) {
-            if (!trackInList (data)) {
-                SongMetaData *d = new SongMetaData(data);
-                m_dao->fillAttribute (&d);
-                m_trackList.append (d);
+                 [&]() {
+//            if (!trackInList (data)) {
+//                SongMetaData *d = new SongMetaData(data);
+//                m_dao->fillAttribute (&d);
+//                m_trackList.append (d);
+//            }
+            QStringList daoList = m_dao->trackHashList ();
+            QStringList trackList;
+            foreach (SongMetaData *d, m_trackList) {
+                trackList.append (d->hash ());
+            }
+            foreach (QString s, daoList) {
+                if (!trackList.contains (s)) {
+                    SongMetaData *d = m_dao->trackFromHash (s);
+                    SongMetaData *dd = new SongMetaData(d);
+                    m_trackList.append (dd);
+                    d->deleteLater ();
+                    d = nullptr;
+                }
             }
         });
         connect (m_dao, &IMusicLibraryDAO::metaDataDeleted,
-                 [&](SongMetaData **data) {
-            if (trackInList (data)) {
-                int i;
-                for(i=0; i<m_trackList.size (); ++i) {
-                    if (m_trackList.at (i)->equals (*data))
-                        break;
-                }
-                m_trackList.removeAt (i);
+                 [&]() {
+//            if (trackInList (data)) {
+//                int i;
+//                for(i=0; i<m_trackList.size (); ++i) {
+//                    if (m_trackList.at (i)->equals (*data))
+//                        break;
+//                }
+//                m_trackList.removeAt (i);
+//            }
+            QStringList daoList = m_dao->trackHashList ();
+            QStringList trackList;
+            foreach (SongMetaData *d, m_trackList) {
+                trackList.append (d->hash ());
             }
+            int i;
+            for (i=0; i<trackList.size (); ++i) {
+                if (!daoList.contains (trackList.value (i)))
+                    break;
+            }
+            m_trackList.removeAt (i);
         });
     }
 

@@ -99,9 +99,9 @@ public:
 //    virtual bool insertPlayList(const QString &playListName) = 0;
 
 signals:
-//    void metaDataInserted(SongMetaData **data);
-//    void metaDataDeleted(SongMetaData **data);
-    void libraryChanged();
+    void metaDataInserted();
+    void metaDataDeleted();
+//    void libraryChanged();
 
 public slots:
     ///
