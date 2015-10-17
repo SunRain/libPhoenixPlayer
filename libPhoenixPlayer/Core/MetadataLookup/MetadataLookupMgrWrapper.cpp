@@ -1,11 +1,9 @@
 #include "MetadataLookup/MetadataLookupMgrWrapper.h"
 
-//#include <MusicLibraryDAOHost.h>
 #include <QMutex>
 
 #include "SingletonPointer.h"
 #include "PluginLoader.h"
-//#include "MusicLibrary/IPlayListDAO.h"
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryManager.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"

@@ -159,51 +159,51 @@ QString PluginHost::configFile() const
     return m_configFile;
 }
 
-inline bool PluginHost::isLoaded()
-{
-    if (!m_pluginLoader)
-        return false;
-    return m_pluginLoader->isLoaded ();
-}
+//bool PluginHost::isLoaded()
+//{
+//    if (!m_pluginLoader)
+//        return false;
+//    return m_pluginLoader->isLoaded ();
+//}
 
-inline bool PluginHost::unLoad()
-{
-    qDebug()<<Q_FUNC_INFO;
-    if (!m_pluginLoader)
-        m_pluginLoader = new QPluginLoader(m_libraryFile, this);
-    if (m_pluginLoader->isLoaded ()) {
-        if (!m_pluginLoader->unload ()) {
-            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
-            return false;
-        }
-    }
-    if (m_pluginLoader)
-        delete m_pluginLoader;
-    m_pluginLoader = nullptr;
-    return true;
-}
+//bool PluginHost::unLoad()
+//{
+//    qDebug()<<Q_FUNC_INFO;
+//    if (!m_pluginLoader)
+//        m_pluginLoader = new QPluginLoader(m_libraryFile, this);
+//    if (m_pluginLoader->isLoaded ()) {
+//        if (!m_pluginLoader->unload ()) {
+//            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
+//            return false;
+//        }
+//    }
+//    if (m_pluginLoader)
+//        delete m_pluginLoader;
+//    m_pluginLoader = nullptr;
+//    return true;
+//}
 
-inline void PluginHost::forceUnload()
-{
-    qDebug()<<Q_FUNC_INFO;
-    if (!m_pluginLoader)
-        m_pluginLoader = new QPluginLoader(m_libraryFile, this);
-    if (m_pluginLoader->isLoaded ()) {
-        if (!m_pluginLoader->unload ())
-            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
-    }
-    if (m_pluginObject)
-        delete m_pluginObject;
-    m_pluginObject = nullptr;
-    if (m_pluginLoader)
-        delete m_pluginLoader;
-    m_pluginLoader = nullptr;
-}
+//void PluginHost::forceUnload()
+//{
+//    qDebug()<<Q_FUNC_INFO;
+//    if (!m_pluginLoader)
+//        m_pluginLoader = new QPluginLoader(m_libraryFile, this);
+//    if (m_pluginLoader->isLoaded ()) {
+//        if (!m_pluginLoader->unload ())
+//            qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
+//    }
+//    if (m_pluginObject)
+//        delete m_pluginObject;
+//    m_pluginObject = nullptr;
+//    if (m_pluginLoader)
+//        delete m_pluginLoader;
+//    m_pluginLoader = nullptr;
+//}
 
-inline bool PluginHost::isValid()
-{
-    return m_valid;
-}
+//bool PluginHost::isValid()
+//{
+//    return m_valid;
+//}
 
 //template <class T>
 //PhoenixPlayer::PluginHost::T *PluginHost::instance()

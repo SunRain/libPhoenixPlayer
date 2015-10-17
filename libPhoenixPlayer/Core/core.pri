@@ -46,7 +46,7 @@ HEADERS += \
     $$PWD/include/PlayerCore/PlayListMgr.h \
     $$PWD/PlayerCore/PlayListFormat.h \
     $$PWD/PlayerCore/M3uPlayListFormat.h \
-    $$PWD/include/PlayerCore/PlayQueueMgr.h \
+#    $$PWD/include/PlayerCore/PlayQueueMgr.h \
     $$PWD/include/Backend/BackendHost.h \
     $$PWD/include/Decoder/DecoderHost.h \
     $$PWD/include/MetadataLookup/MetadataLookupHost.h \
@@ -86,7 +86,7 @@ SOURCES += \
     $$PWD/PlayerCore/PlayListMgr.cpp \
     $$PWD/PlayerCore/PlayListFormat.cpp \
     $$PWD/PlayerCore/M3uPlayListFormat.cpp \
-    $$PWD/PlayerCore/PlayQueueMgr.cpp \
+#    $$PWD/PlayerCore/PlayQueueMgr.cpp \
     $$PWD/MusicLibrary/LocalMusicScannerThread.cpp
 
 

@@ -25,20 +25,54 @@ public:
     virtual ~PluginHost();
 
     virtual Common::PluginType type() const = 0;
-//    ///
-//    /// \brief hash 插件hash值，为插件库文件路径的hash值
-//    /// \return
-//    ///
-//    QString hash() const;
+
     QString name() const;
     QString version() const;
     QString description() const;
     QString libraryFile() const;
     QString configFile() const;
-    bool isLoaded();
-    bool unLoad();
-    void forceUnload();
-    bool isValid();
+
+    inline bool isLoaded() {
+        if (!m_pluginLoader)
+            return false;
+        return m_pluginLoader->isLoaded ();
+    }
+
+    inline bool unLoad() {
+        qDebug()<<Q_FUNC_INFO;
+        if (!m_pluginLoader)
+            m_pluginLoader = new QPluginLoader(m_libraryFile, this);
+        if (m_pluginLoader->isLoaded ()) {
+            if (!m_pluginLoader->unload ()) {
+                qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
+                return false;
+            }
+        }
+        if (m_pluginLoader)
+            delete m_pluginLoader;
+        m_pluginLoader = nullptr;
+        return true;
+    }
+
+    inline void forceUnload() {
+        qDebug()<<Q_FUNC_INFO;
+        if (!m_pluginLoader)
+            m_pluginLoader = new QPluginLoader(m_libraryFile, this);
+        if (m_pluginLoader->isLoaded ()) {
+            if (!m_pluginLoader->unload ())
+                qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
+        }
+        if (m_pluginObject)
+            delete m_pluginObject;
+        m_pluginObject = nullptr;
+        if (m_pluginLoader)
+            delete m_pluginLoader;
+        m_pluginLoader = nullptr;
+    }
+
+    inline bool isValid() {
+        return m_valid;
+    }
 
     template <class T>
     T *instance() {
@@ -61,8 +95,6 @@ public:
             return qobject_cast<T *>(m_pluginObject);
         return nullptr;
     }
-
-//    bool operator == (const PluginHost &other);
 protected:
     inline QJsonObject metaObject ();
 

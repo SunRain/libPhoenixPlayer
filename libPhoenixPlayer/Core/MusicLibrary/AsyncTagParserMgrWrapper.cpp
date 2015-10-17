@@ -8,7 +8,6 @@
 #include "TagParserManager.h"
 #include "Util.h"
 #include "PluginLoader.h"
-#include "MusicLibrary/IPlayListDAO.h"
 #include "SongMetaData.h"
 
 namespace PhoenixPlayer {
