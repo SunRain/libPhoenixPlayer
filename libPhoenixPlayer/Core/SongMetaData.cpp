@@ -8,6 +8,11 @@ namespace PhoenixPlayer {
 
 using namespace MetaData;
 
+SongMetaData::SongMetaData(QObject *parent)
+    :BaseObject(parent)
+{
+}
+
 SongMetaData::SongMetaData(const QString &path, const QString &name, quint64 size, QObject *parent)
     : BaseObject(parent)
     , m_path(path)
@@ -245,24 +250,44 @@ QUrl SongMetaData::lyricsUri() const
     return m_lyricsUri;
 }
 
-inline AlbumMeta *SongMetaData::albumMeta() const
+AlbumMeta *SongMetaData::albumMeta() const
 {
     return m_albumMeta;
 }
 
-inline ArtistMeta *SongMetaData::artistMeta() const
+ArtistMeta *SongMetaData::artistMeta() const
 {
     return m_artistMeta;
 }
 
-inline CoverMeta *SongMetaData::coverMeta() const
+CoverMeta *SongMetaData::coverMeta() const
 {
     return m_coverMeta;
 }
 
-inline TrackMeta *SongMetaData::trackMeta() const
+TrackMeta *SongMetaData::trackMeta() const
 {
     return m_trackMeta;
+}
+
+QObject *SongMetaData::getAlbumMeta()
+{
+    return qobject_cast<QObject *>(m_albumMeta);
+}
+
+QObject *SongMetaData::getArtistMeta()
+{
+    return qobject_cast<QObject *>(m_artistMeta);
+}
+
+QObject *SongMetaData::getCoverMeta()
+{
+    return qobject_cast<QObject *>(m_coverMeta);
+}
+
+QObject *SongMetaData::getTrackMeta()
+{
+    return qobject_cast<QObject *>(m_trackMeta);
 }
 
 QUrl SongMetaData::uri() const

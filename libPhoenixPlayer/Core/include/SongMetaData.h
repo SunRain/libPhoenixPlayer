@@ -6,6 +6,8 @@
 #include <QVariant>
 #include <QDate>
 #include <QUrl>
+#include <QQmlEngine>
+#include <qqml.h>
 //#include "Common.h"
 #include "BaseObject.h"
 
@@ -188,13 +190,19 @@ class SongMetaData : public BaseObject
     Q_PROPERTY(QUrl lyricsUri READ lyricsUri WRITE setLyricsUri NOTIFY lyricsUriChanged)
     Q_PROPERTY(QUrl queryImgUri READ queryImgUri CONSTANT)
 
-    Q_PROPERTY(MetaData::AlbumMeta* albumMeta READ albumMeta)
-    Q_PROPERTY(MetaData::ArtistMeta* artistMeta READ artistMeta)
-    Q_PROPERTY(MetaData::CoverMeta* coverMeta READ coverMeta)
-    Q_PROPERTY(MetaData::TrackMeta* trackMeta READ trackMeta)
+    Q_PROPERTY(QObject* albumMeta READ getAlbumMeta)
+    Q_PROPERTY(QObject* artistMeta READ getArtistMeta)
+    Q_PROPERTY(QObject* coverMeta READ getCoverMeta)
+    Q_PROPERTY(QObject* trackMeta READ getTrackMeta)
+
+//    Q_PROPERTY(MetaData::AlbumMeta* albumMeta READ albumMeta)
+//    Q_PROPERTY(MetaData::ArtistMeta* artistMeta READ artistMeta)
+//    Q_PROPERTY(MetaData::CoverMeta* coverMeta READ coverMeta)
+//    Q_PROPERTY(MetaData::TrackMeta* trackMeta READ trackMeta)
 
     DECLARE_STATIC_PROPERTY_LIST(SongMetaData)
 public:
+    explicit SongMetaData(QObject *parent = 0);
     explicit SongMetaData(const QString &path, const QString &name, quint64 size,QObject *parent = 0);
     explicit SongMetaData(const SongMetaData *other, QObject *parent = 0);
     explicit SongMetaData(SongMetaData **other, QObject *parent = 0);
@@ -219,6 +227,11 @@ public:
     MetaData::ArtistMeta* artistMeta() const;
     MetaData::CoverMeta* coverMeta() const;
     MetaData::TrackMeta* trackMeta() const;
+
+    QObject *getAlbumMeta();
+    QObject *getArtistMeta();
+    QObject *getCoverMeta();
+    QObject *getTrackMeta();
 
     ///
     /// \brief uri
@@ -256,6 +269,5 @@ private:
     MetaData::CoverMeta *m_coverMeta;
     MetaData::TrackMeta *m_trackMeta;
 };
-
 } //PhoenixPlayer
 #endif // SONGMETADATA_H

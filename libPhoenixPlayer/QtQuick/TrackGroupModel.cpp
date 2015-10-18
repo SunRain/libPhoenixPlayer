@@ -125,8 +125,11 @@ void TrackGroupModel::queryData()
 //        break;
 //    }
 //     mDataList = m_musicLibraryManager->querySongMetaElement(mSongMetaTag, QString(), true);
-    QList<SongMetaData *> list = m_musicLibraryManager->allTracks ();
-    foreach (SongMetaData *d, list) {
+    QList<QObject *> list = m_musicLibraryManager->allTracks ();
+    foreach (QObject *o, list) {
+        SongMetaData *d = qobject_cast<SongMetaData *>(o);
+        if (!d)
+            continue;
         switch (m_type) {
         case ModelType::TypeAlbum: {
             GroupObject obj;
@@ -184,7 +187,10 @@ void TrackGroupModel::queryData()
     ///如果某个groupobject的imguri是空值，则从m_groupList循环读取某一个相同的GroupObject.name值来补全
     foreach (GroupObject obj, m_groupList) {
         if (obj.imgUri.isEmpty ()) {
-            foreach (SongMetaData *d, list) {
+            foreach (QObject *o, list) {
+                SongMetaData *d = qobject_cast<SongMetaData *>(o);
+                if (!o)
+                    continue;
                 if (m_type == ModelType::TypeAlbum) {
                     if (d->albumMeta ()->name () == obj.name
                             && (!d->albumMeta ()->imgUri ().isEmpty ())) {

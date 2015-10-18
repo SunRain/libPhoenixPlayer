@@ -48,7 +48,7 @@ public:
     /// \brief allTracks 显示所有曲目
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE QList<SongMetaData *> allTracks();
+    Q_INVOKABLE QList<QObject *> allTracks();
 
     ///
     /// \brief artistTracks 显示某个artist下的曲目
@@ -56,12 +56,12 @@ public:
     /// \param limitNum 显示个数
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE QList<SongMetaData *> artistTracks(const QString &artistName,int limitNum = 0);
-    Q_INVOKABLE QList<SongMetaData *> albumTracks(const QString  &albumName, int limitNum = 0);
-    Q_INVOKABLE QList<SongMetaData *> genreTracks(const QString &genreName, int limitNum = 0);
-    Q_INVOKABLE QList<SongMetaData *> mediaTypeTracks(const QString &mediaType, int limitNum = 0);
-    Q_INVOKABLE QList<SongMetaData *> userRatingTracks(const QString &rating, int limitNum = 0);
-    Q_INVOKABLE QList<SongMetaData *> folderTracks(const QString &folder, int limitNum = 0);
+    Q_INVOKABLE QList<QObject *> artistTracks(const QString &artistName,int limitNum = 0);
+    Q_INVOKABLE QList<QObject *> albumTracks(const QString  &albumName, int limitNum = 0);
+    Q_INVOKABLE QList<QObject *> genreTracks(const QString &genreName, int limitNum = 0);
+    Q_INVOKABLE QList<QObject *> mediaTypeTracks(const QString &mediaType, int limitNum = 0);
+    Q_INVOKABLE QList<QObject *> userRatingTracks(const QString &rating, int limitNum = 0);
+    Q_INVOKABLE QList<QObject *> folderTracks(const QString &folder, int limitNum = 0);
 
 //    ///
 //    /// \brief playingSong 返回当前播放的歌曲hash,

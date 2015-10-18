@@ -99,20 +99,50 @@ MusicLibraryManager::~MusicLibraryManager()
     qDebug()<<">>>>>>>> after "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
 }
 
-QList<SongMetaData *> MusicLibraryManager::allTracks()
+QList<QObject *> MusicLibraryManager::allTracks()
 {
-    return m_trackList;
+//    return m_trackList;
+    QList<QObject*> list;
+    foreach (SongMetaData *d, m_trackList) {
+        QObject *obj = qobject_cast<QObject *>(d);
+        if (obj)
+            list.append (obj);
+    }
+    return list;
 }
 
-QList<SongMetaData *> MusicLibraryManager::artistTracks(const QString &artistName, int limitNum)
+QList<QObject *> MusicLibraryManager::artistTracks(const QString &artistName, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<SongMetaData *>();
-    QList<SongMetaData *> list;
+        return QList<QObject *>();
+    QList<QObject *> list;
     int i = 0;
     foreach (SongMetaData *d, m_trackList) {
-        if (d->artistMeta ()->name () == artistName)
-            list.append (d);
+        if (d->artistMeta ()->name () == artistName) {
+            QObject *obj = qobject_cast<QObject *>(d);
+            if (obj)
+                list.append (obj);
+        }
+        i++;
+        if (limitNum > 0 && i >= limitNum)
+            break;
+    }
+    qDebug()<<Q_FUNC_INFO<<"list size is "<<list.size ();
+    return list;
+}
+
+QList<QObject *> MusicLibraryManager::albumTracks(const QString &albumName, int limitNum)
+{
+    if (m_trackList.isEmpty ())
+        return QList<QObject *>();
+    QList<QObject *> list;
+    int i = 0;
+    foreach (SongMetaData *d, m_trackList) {
+        if (d->albumMeta ()->name () == albumName) {
+            QObject *obj = qobject_cast<QObject *>(d);
+            if (obj)
+                list.append (obj);
+        }
         i++;
         if (limitNum > 0 && i >= limitNum)
             break;
@@ -120,15 +150,18 @@ QList<SongMetaData *> MusicLibraryManager::artistTracks(const QString &artistNam
     return list;
 }
 
-QList<SongMetaData *> MusicLibraryManager::albumTracks(const QString &albumName, int limitNum)
+QList<QObject *> MusicLibraryManager::genreTracks(const QString &genreName, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<SongMetaData *>();
-    QList<SongMetaData *> list;
+        return QList<QObject *>();
+    QList<QObject *> list;
     int i = 0;
     foreach (SongMetaData *d, m_trackList) {
-        if (d->albumMeta ()->name () == albumName)
-            list.append (d);
+        if (d->trackMeta ()->genre () == genreName) {
+            QObject *obj = qobject_cast<QObject *>(d);
+            if (obj)
+                list.append (obj);
+        }
         i++;
         if (limitNum > 0 && i >= limitNum)
             break;
@@ -136,15 +169,18 @@ QList<SongMetaData *> MusicLibraryManager::albumTracks(const QString &albumName,
     return list;
 }
 
-QList<SongMetaData *> MusicLibraryManager::genreTracks(const QString &genreName, int limitNum)
+QList<QObject *> MusicLibraryManager::mediaTypeTracks(const QString &mediaType, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<SongMetaData *>();
-    QList<SongMetaData *> list;
+        return QList<QObject *>();
+    QList<QObject *> list;
     int i = 0;
     foreach (SongMetaData *d, m_trackList) {
-        if (d->trackMeta ()->genre () == genreName)
-            list.append (d);
+        if (d->mediaType () == mediaType.toInt ()) {
+            QObject *obj = qobject_cast<QObject *>(d);
+            if (obj)
+                list.append (obj);
+        }
         i++;
         if (limitNum > 0 && i >= limitNum)
             break;
@@ -152,15 +188,18 @@ QList<SongMetaData *> MusicLibraryManager::genreTracks(const QString &genreName,
     return list;
 }
 
-QList<SongMetaData *> MusicLibraryManager::mediaTypeTracks(const QString &mediaType, int limitNum)
+QList<QObject *> MusicLibraryManager::userRatingTracks(const QString &rating, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<SongMetaData *>();
-    QList<SongMetaData *> list;
+        return QList<QObject *>();
+    QList<QObject *> list;
     int i = 0;
     foreach (SongMetaData *d, m_trackList) {
-        if (d->mediaType () == mediaType.toInt ())
-            list.append (d);
+        if (d->trackMeta ()->userRating ().toString () == rating) {
+            QObject *obj = qobject_cast<QObject *>(d);
+            if (obj)
+                list.append (obj);
+        }
         i++;
         if (limitNum > 0 && i >= limitNum)
             break;
@@ -168,31 +207,18 @@ QList<SongMetaData *> MusicLibraryManager::mediaTypeTracks(const QString &mediaT
     return list;
 }
 
-QList<SongMetaData *> MusicLibraryManager::userRatingTracks(const QString &rating, int limitNum)
+QList<QObject *> MusicLibraryManager::folderTracks(const QString &folder, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<SongMetaData *>();
-    QList<SongMetaData *> list;
+        return QList<QObject *>();
+    QList<QObject *> list;
     int i = 0;
     foreach (SongMetaData *d, m_trackList) {
-        if (d->trackMeta ()->userRating ().toString () == rating)
-            list.append (d);
-        i++;
-        if (limitNum > 0 && i >= limitNum)
-            break;
-    }
-    return list;
-}
-
-QList<SongMetaData *> MusicLibraryManager::folderTracks(const QString &folder, int limitNum)
-{
-    if (m_trackList.isEmpty ())
-        return QList<SongMetaData *>();
-    QList<SongMetaData *> list;
-    int i = 0;
-    foreach (SongMetaData *d, m_trackList) {
-        if (d->path () == folder)
-            list.append (d);
+        if (d->path () == folder) {
+            QObject *obj = qobject_cast<QObject *>(d);
+            if (obj)
+                list.append (obj);
+        }
         i++;
         if (limitNum > 0 && i >= limitNum)
             break;
