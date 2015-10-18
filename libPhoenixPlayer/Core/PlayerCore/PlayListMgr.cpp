@@ -274,6 +274,9 @@ void PlayListMgr::queryPlayLists()
 
 void PlayListMgr::setCurrentIndex(int index)
 {
+    qDebug()<<Q_FUNC_INFO<<QString("set index to [%1], current indext [%2], list size [%3]")
+              .arg (index).arg (m_currentIndex).arg (m_trackList.size ());
+
     if (index >= m_trackList.size () || index < 0)
         return;
     if (m_currentIndex != index) {

@@ -37,7 +37,7 @@ public slots:
     void pause();
 //    void setVolume(int vol);
     void setPosition(quint64 sec);
-    void changeMedia(BaseMediaObject *obj, quint64 startSec, bool startPlay);
+    void changeMedia(BaseMediaObject *obj, quint64 startSec = 0, bool startPlay = false);
 
 signals:
 //    void volumeChanged(int vol = 0);

@@ -32,8 +32,10 @@ PlayerCore::PlayerCore(QObject *parent)
     ,m_autoSkipForward(true)
 {
     m_playBackend = nullptr;
+    m_pb = nullptr;
     m_playBackendHost = nullptr;
     m_dao = nullptr;
+    m_curTrack = nullptr;
 
     m_pluginLoader = PluginLoader::instance ();
     m_settings = Settings::instance ();
@@ -47,26 +49,7 @@ PlayerCore::PlayerCore(QObject *parent)
 
     connect (m_playList, &PlayListMgr::currentIndexChanged,
              [&](int index) {
-        qDebug()<<Q_FUNC_INFO<<"change index to "<<index;
         SongMetaData *data = m_playList->get (index);
-//        if (data) {
-//            m_curTrack = &data;
-//            emit trackChanged ();
-//            BaseMediaObject obj;
-//            obj.setFilePath (data->path ());
-//            obj.setFileName (data->name ());
-//            obj.setMediaType ((Common::MediaType)data->mediaType ());
-//            qDebug()<<Q_FUNC_INFO<<"change file to "<<data->uri ();
-//            if (*m_playBackend) {
-//                (*m_playBackend)->changeMedia (&obj, 0, true);
-//                m_currentPlayPos = 0;
-//                (*m_playBackend)->play ();
-//            }
-//            else
-//                qCritical("No playBackend found");
-//        } else {
-//            qWarning()<<Q_FUNC_INFO<<"No SongMetaData found";
-//        }
         playTrack (data);
     });
     init ();
@@ -98,12 +81,12 @@ void PlayerCore::setPluginLoader()
         qCritical()<<Q_FUNC_INFO<<"No playBackendHost or playBackendHost invalid!!";
         return;
     }
-    IPlayBackend *b = m_playBackendHost->instance<IPlayBackend>();
-    if (!b) {
+    m_pb = m_playBackendHost->instance<IPlayBackend>();
+    if (!m_pb) {
         qCritical()<<Q_FUNC_INFO<<"PlayBackend instance fail";
         return;
     }
-    m_playBackend = &b;
+    m_playBackend = &m_pb;
     (*m_playBackend)->init ();
     (*m_playBackend)->stop ();
 
@@ -369,11 +352,18 @@ void PlayerCore::playFromLibrary(const QString &songHah)
         qCritical("%s : no IMusicLibraryDAO, can't play from library", Q_FUNC_INFO);
         return;
     }
+    qDebug()<<Q_FUNC_INFO<<"play for hash "<<songHah;
+
     SongMetaData *d = m_dao->trackFromHash (songHah);
-    SongMetaData data (d);
-    d->deleteLater ();
-    d = nullptr;
-    playTrack (&data);
+
+    qDebug()<<Q_FUNC_INFO<<"find in library "<<d->toString ();
+
+    if (!m_playList->addTrack (d)) {
+        d->deleteLater ();
+        d = nullptr;
+        return;
+    }
+    m_playList->setCurrentIndex (m_playList->count () -1);
 }
 
 void PlayerCore::playFromNetwork(const QUrl &url)
@@ -387,15 +377,18 @@ void PlayerCore::playFromNetwork(const QUrl &url)
 //    obj.setMediaType (Common::MediaTypeUrl);
 //    (*m_playBackend)->changeMedia (&obj, 0, true);
     SongMetaData d(url);
-    playTrack (&d);
+//    playTrack (&d);
+    m_playList->addTrack (&d);
+    m_playList->setCurrentIndex (m_playList->count ());
 }
 
 void PlayerCore::playTrack(const SongMetaData *data)
 {
     if (data) {
-        m_curTrack->deleteLater ();
+        if (m_curTrack)
+            m_curTrack->deleteLater ();
         m_curTrack = new SongMetaData(data);
-        emit trackChanged ();
+//        emit trackChanged ();
         BaseMediaObject obj;
         obj.setFilePath (data->path ());
         obj.setFileName (data->name ());
@@ -408,6 +401,7 @@ void PlayerCore::playTrack(const SongMetaData *data)
         }
         else
             qCritical("No playBackend found");
+        emit trackChanged ();
     } else {
         qWarning()<<Q_FUNC_INFO<<"No SongMetaData found";
     }

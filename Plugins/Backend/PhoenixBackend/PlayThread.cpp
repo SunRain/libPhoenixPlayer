@@ -60,6 +60,12 @@ PlayThread::PlayThread(QObject *parent, BaseVisual *v)
     m_handler = StateHandler::instance ();
 
     m_decoderLibs = m_settings->decoderLibraries ();
+    if (m_decoderLibs.isEmpty ())
+        m_decoderLibs = m_pluginLoader->pluginLibraries (Common::PluginDecoder);
+
+    qDebug()<<Q_FUNC_INFO<<" m_decoderLibs "<<m_decoderLibs
+              <<"m_decoderLibs size "<<m_decoderLibs.size ()
+           <<" all decoderLibs "<<m_pluginLoader->pluginLibraries (Common::PluginDecoder);
 
     m_output_buf = 0;
     m_output_size = 0;
@@ -95,11 +101,10 @@ QMutex *PlayThread::mutex()
 
 bool PlayThread::play()
 {
-    if (this->isRunning () || !m_decoder || (m_output && m_output->isRunning ())) {
+    if (this->isRunning () || !m_decoder) {
         qDebug()<<"Can't start play due to"
-               <<QString("current thread running [%1], decoder [%2], output [%3], output thread running [%4]")
-                 .arg (this->isRunning ()).arg ((m_decoder == nullptr)).arg ((m_output == nullptr))
-                 .arg (this->isRunning ());
+               <<QString("current thread running [%1], decoder [%2]")
+                 .arg (this->isRunning ()).arg ((m_decoder == nullptr));
         return false;
     }
     if (m_output) {
@@ -208,7 +213,6 @@ void PlayThread::changeMedia(BaseMediaObject *obj, quint64 startSec)
 
     if (!m_decoder) {
         //TODO 使用PluginLoader装载不同的Decoder，需要添加Decoder是否支持当前媒体的接口
-//        m_decoder = m_pluginLoader->getCurrentDecoder ();
         foreach (QString s, m_decoderLibs) {
             m_decoderHost = new DecoderHost(s);
             if (m_decoderHost->isValid ()) { //TODO 需要判断当前decoder/host是否支持当前媒体的解码
@@ -217,6 +221,7 @@ void PlayThread::changeMedia(BaseMediaObject *obj, quint64 startSec)
                     if (!m_decoderHost->unLoad ()) {
                         m_decoderHost->forceUnload ();
                     }
+                    m_decoder = nullptr;
                     m_decoderHost->deleteLater ();
                     m_decoderHost = nullptr;
                     continue;

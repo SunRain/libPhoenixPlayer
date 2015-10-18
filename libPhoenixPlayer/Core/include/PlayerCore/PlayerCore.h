@@ -185,6 +185,7 @@ private:
     PluginLoader *m_pluginLoader;
     MusicLibrary::MusicLibraryManager *m_musicLibraryManager;
     PlayBackend::IPlayBackend **m_playBackend;
+    PlayBackend::IPlayBackend *m_pb;
     PlayBackend::BackendHost *m_playBackendHost;
     SongMetaData *m_curTrack;
     PlayListMgr *m_playList;

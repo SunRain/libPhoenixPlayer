@@ -308,7 +308,11 @@ void Settings::disableDecoder(const QString &libraryFile)
 
 QStringList Settings::decoderLibraries() const
 {
-    return m_settings->value (KEY_PLUGIN_DECODERS, QString()).toString ().split ("||");
+    QString v = m_settings->value (KEY_PLUGIN_DECODERS, QString()).toString ();
+    if (v.isEmpty ())
+        return QStringList();
+    else
+        return v.split ("||");
 }
 
 void Settings::enableMetadataLookup(const QString &libraryFile)
@@ -333,7 +337,11 @@ void Settings::disableMetadataLookup(const QString &libraryFile)
 
 QStringList Settings::metadataLookupLibraries() const
 {
-    return m_settings->value (KEY_PLUGIN_METADATA_LOOKUP, QString()).toString ().split ("||");
+    QString v = m_settings->value (KEY_PLUGIN_METADATA_LOOKUP, QString()).toString ();
+    if (v.isEmpty ())
+        return QStringList();
+    else
+        return v.split ("||");
 }
 
 void Settings::enableTagPaser(const QString &libraryFile)
@@ -358,7 +366,11 @@ void Settings::disableTagPaser(const QString &libraryFile)
 
 QStringList Settings::tagPaserLibraries() const
 {
-    return m_settings->value (KEY_PLUGIN_TAG_PASER, QString()).toString ().split ("||");
+    QString v = m_settings->value (KEY_PLUGIN_TAG_PASER, QString()).toString ();
+    if (v.isEmpty ())
+        return QStringList();
+    else
+        return v.split ("||");
 }
 
 void Settings::setPlayListDir(QString arg)
