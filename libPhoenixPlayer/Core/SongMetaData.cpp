@@ -103,8 +103,9 @@ QString SongMetaData::toString()
     QStringList props = m_albumMeta->propertyList ();
     props.removeDuplicates ();
     foreach (QString s, props) {
-        QByteArray qba = s.toLocal8Bit ();
-        QString v = QString("%1 = [%2]").arg (s).arg (m_albumMeta->property (qba.constData ()).toString ());
+        QString v = QString("%1 = [%2]")
+                .arg (s)
+                .arg (m_albumMeta->property (s.toLocal8Bit ().constData ()).toString ());
         values.append (v);
     }
 
@@ -112,8 +113,9 @@ QString SongMetaData::toString()
     props = m_artistMeta->propertyList ();
     props.removeDuplicates ();
     foreach (QString s, props) {
-        QByteArray qba = s.toLocal8Bit ();
-        QString v = QString("%1 = [%2]").arg (s).arg (m_artistMeta->property (qba.constData ()).toString ());
+        QString v = QString("%1 = [%2]")
+                .arg (s)
+                .arg (m_artistMeta->property (s.toLocal8Bit ().constData ()).toString ());
         values.append (v);
     }
 
@@ -121,8 +123,9 @@ QString SongMetaData::toString()
     props = m_coverMeta->propertyList ();
     props.removeDuplicates ();
     foreach (QString s, props) {
-        QByteArray qba = s.toLocal8Bit ();
-        QString v = QString("%1 = [%2]").arg (s).arg (m_coverMeta->property (qba.constData ()).toString ());
+        QString v = QString("%1 = [%2]")
+                .arg (s)
+                .arg (m_coverMeta->property (s.toLocal8Bit ().constData ()).toString ());
         values.append (v);
     }
 
@@ -130,8 +133,9 @@ QString SongMetaData::toString()
     props = m_trackMeta->propertyList ();
     props.removeDuplicates ();
     foreach (QString s, props) {
-        QByteArray qba = s.toLocal8Bit ();
-        QString v = QString("%1 = [%2]").arg (s).arg (m_trackMeta->property (qba.constData ()).toString ());
+        QString v = QString("%1 = [%2]")
+                .arg (s)
+                .arg (m_trackMeta->property (s.toLocal8Bit ().constData ()).toString ());
         values.append (v);
     }
 
@@ -139,8 +143,9 @@ QString SongMetaData::toString()
     props = this->propertyList ();
     props.removeDuplicates ();
     foreach (QString s, props) {
-        QByteArray qba = s.toLocal8Bit ();
-        QString v = QString("%1 = [%2]").arg (s).arg (this->property (qba.constData ()).toString ());
+        QString v = QString("%1 = [%2]")
+                .arg (s)
+                .arg (this->property (s.toLocal8Bit ().constData ()).toString ());
         values.append (v);
     }
     return values.join (",");
@@ -266,7 +271,7 @@ QUrl SongMetaData::uri() const
         if (!m_path.isEmpty () && !m_name.isEmpty ())
             //TODO file:// or file:/ ? or no file:/ (file://) ?
             //FIXME should fix path like ../path/to/file
-            return QUrl::fromLocalFile (QString("file://%1/%2").arg (m_path).arg (m_name));
+            return QUrl::fromLocalFile (QString("%1/%2").arg (m_path).arg (m_name));
     } else {
         if (!m_path.isEmpty ())
             return QUrl(m_path);

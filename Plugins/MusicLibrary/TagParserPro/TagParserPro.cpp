@@ -198,7 +198,7 @@ QImage TagParserPro::getImage()
     return image;
 }
 
-bool TagParserPro::isValid()
+inline bool TagParserPro::isValid()
 {
     return (m_tagRef)
             && m_tagRef->file () && m_tagRef->file ()->isValid ();

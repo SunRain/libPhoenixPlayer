@@ -44,10 +44,13 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
             foreach (QString s, daoList) {
                 if (!trackList.contains (s)) {
                     SongMetaData *d = m_dao->trackFromHash (s);
-                    SongMetaData *dd = new SongMetaData(d);
-                    m_trackList.append (dd);
-                    d->deleteLater ();
+                    if (d) {
+                        SongMetaData *dd = new SongMetaData(d);
+                        m_trackList.append (dd);
+                        d->deleteLater ();
+                    }
                     d = nullptr;
+
                 }
             }
         });

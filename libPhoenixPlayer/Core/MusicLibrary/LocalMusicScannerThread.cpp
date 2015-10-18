@@ -36,6 +36,7 @@ LocalMusicScannerThread::LocalMusicScannerThread(QObject *parent) :
         }
         m_tagParserList.append (host);
     }
+    qDebug()<<Q_FUNC_INFO<<" m_tagParserList size "<<m_tagParserList.size ();
 }
 
 LocalMusicScannerThread::~LocalMusicScannerThread()
@@ -81,6 +82,7 @@ void LocalMusicScannerThread::addLookupDirs(const QStringList &dirList, bool loo
 
 void LocalMusicScannerThread::run()
 {
+    qDebug()<<Q_FUNC_INFO<<m_pathList;
     if (m_pathList.isEmpty ()) {
         QString tmp = QString("%1/%2").arg (QDir::homePath ())
                 .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
@@ -129,11 +131,9 @@ void LocalMusicScannerThread::scanDir(const QString &path)
 
             //TODO 虽然建议使用inherits方法来检测,但是此处我们需要所有音频文件,
             //所以直接检测mimetype 生成的字符串
-
 //            if (type.inherits ("audio/mpeg")) {
             if (type.name ().contains ("audio") || type.name ().contains ("Audio")) {
-//                emit fileFound (path, info.fileName (), info.size ());
-                SongMetaData *data = new SongMetaData(path, info.fileName (), info.size ());
+                SongMetaData *data = new SongMetaData(path, info.fileName (), info.size (), 0);
                 foreach (MusicTagParserHost *host, m_tagParserList) {
                     if (m_stopLookupFlag)
                         break;
@@ -144,6 +144,7 @@ void LocalMusicScannerThread::scanDir(const QString &path)
                         break;
                     }
                 }
+                qDebug()<<Q_FUNC_INFO<<"SongMetaData values ["<<data->toString ()<<"]";
                 if (m_dao)
                     m_dao->insertMetaData (&data);
                 data->deleteLater ();
