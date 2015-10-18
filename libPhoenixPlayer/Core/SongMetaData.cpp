@@ -32,7 +32,7 @@ SongMetaData::SongMetaData(const SongMetaData *other, QObject *parent)
     : BaseObject(parent)
 {
     if (other) {
-        m_path = other->hash ();
+        m_path = other->path ();
         m_name = other->name ();
         m_hash = other->hash ();
         m_size = other->size ();
@@ -60,7 +60,7 @@ SongMetaData::SongMetaData(SongMetaData **other, QObject *parent)
     : BaseObject(parent)
 {
     if (other) {
-        m_path = (*other)->hash ();
+        m_path = (*other)->path ();
         m_name = (*other)->name ();
         m_hash = (*other)->hash ();
         m_size = (*other)->size ();
@@ -91,6 +91,7 @@ SongMetaData::SongMetaData(const QUrl &url, QObject *parent)
     m_path = url.toString ();
     m_hash = Util::calculateHash (url.toString ());
     m_size = 0;
+    m_name = QString();
     m_albumMeta = new AlbumMeta(this);
     m_artistMeta = new ArtistMeta(this);
     m_coverMeta = new CoverMeta(this);
