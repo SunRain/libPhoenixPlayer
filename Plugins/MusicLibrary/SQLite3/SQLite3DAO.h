@@ -22,13 +22,13 @@ namespace SQLite3 {
 class SQLite3DAO : public IMusicLibraryDAO
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayListDAO.MusicLibraryDAO" FILE "playlistsqlite3plugin.json")
+    Q_PLUGIN_METADATA(IID "PhoenixPlayer.MusicLibraryDAO.SQLite3DAO" FILE "playlistsqlite3plugin.json")
     Q_INTERFACES(PhoenixPlayer::MusicLibrary::IMusicLibraryDAO)
 public:
     explicit SQLite3DAO(QObject *parent = 0);
-//    static SQLite3DAO *getInstance();
     virtual ~SQLite3DAO();
     bool openDataBase();
+
     // IMusicLibraryDAO interface
 public:
     bool initDataBase();
@@ -68,6 +68,17 @@ public slots:
     bool beginTransaction();
     bool commitTransaction();
 private:
+    template <class T>
+    inline QString classToKey() {
+        QString cls = T::staticMetaObject.className ();
+        if (cls.contains ("::")) {
+            QStringList list = cls.split("::");
+            if (!list.isEmpty ())
+                return list.last ();
+        }
+        return cls;
+    }
+
     QStringList songMetaDataPropertyList();
 //    QString listToString(const QStringList &list);
 //    QStringList stringToList(const QString &str);

@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QVariant>
-//#include <QtSql/QSqlQuery>
 
 #include "Common.h"
 
@@ -15,9 +14,7 @@ class IMusicLibraryDAO : public QObject
 {
     Q_OBJECT
 public:
-    explicit IMusicLibraryDAO(QObject *parent = 0) : QObject(parent){
-        init ();
-    }
+    explicit IMusicLibraryDAO(QObject *parent = 0) : QObject(parent){}
     virtual ~IMusicLibraryDAO() {}
 
     virtual bool initDataBase() = 0;
@@ -115,11 +112,6 @@ public slots:
     /// \return
     ///
     virtual bool commitTransaction() = 0;
-
-private:
-    void init() {
-        initDataBase ();
-    }
 };
 
 } //IMUSICLIBRARYDAO_H

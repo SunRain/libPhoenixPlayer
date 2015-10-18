@@ -22,6 +22,8 @@ SQLite3DAO::SQLite3DAO(QObject *parent)
     :IMusicLibraryDAO(parent)
 {
     m_transaction = false;
+
+    initDataBase ();
 }
 
 SQLite3DAO::~SQLite3DAO()
@@ -110,38 +112,39 @@ bool SQLite3DAO::initDataBase()
 //                                     (int)Common::SongMetaTags::E_LastFlag -1));
     QStringList list = MetaData::AlbumMeta::staticPropertyList ();
     foreach (QString s, list) {
-        str += QString ("%1_%2 TEXT, ").arg (MetaData::AlbumMeta::staticMetaObject.className ()).arg (s);
+        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::AlbumMeta>()).arg (s);
     }
     list.clear ();
     list = MetaData::ArtistMeta::staticPropertyList ();
     foreach (QString s, list) {
-        str += QString ("%1_%2 TEXT, ").arg (MetaData::ArtistMeta::staticMetaObject.className ()).arg (s);
+        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::ArtistMeta>()).arg (s);
     }
     list.clear ();
     list = MetaData::CoverMeta::staticPropertyList ();
     foreach (QString s, list) {
-        str += QString ("%1_%2 TEXT, ").arg (MetaData::CoverMeta::staticMetaObject.className ()).arg (s);
+        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::CoverMeta>()).arg (s);
     }
     list.clear ();
     list = MetaData::TrackMeta::staticPropertyList ();
     foreach (QString s, list) {
-        str += QString ("%1_%2 TEXT, ").arg (MetaData::TrackMeta::staticMetaObject.className ()).arg (s);
+        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::TrackMeta>()).arg (s);
     }
     list.clear ();
     list = songMetaDataPropertyList ();
     foreach (QString s, list) {
-        str += QString ("%1_%2 TEXT, ").arg (SongMetaData::staticMetaObject.className ()).arg (s);
+        str += QString ("%1_%2 TEXT, ").arg (classToKey<SongMetaData>()).arg (s);
     }
     str = str.simplified ();
     str = str.left (str.length () - 1);
     str += ")";
 
 
+    qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
     /*
      * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
      */
     if (!q.exec (str)) {
-        qDebug()<<Q_FUNC_INFO<<QString("Create library tab error [ %s ]").arg (q.lastError ().text ());
+        qDebug()<<Q_FUNC_INFO<<QString("Create library tab error [ %1 ]").arg (q.lastError ().text ());
         m_database.removeDatabase (DATABASE_NAME);
         return false;
     }
@@ -185,23 +188,23 @@ bool SQLite3DAO::insertMetaData(SongMetaData **metaData, bool skipDuplicates)
     }
     QString column, value;
     foreach (QString s, MetaData::AlbumMeta::staticPropertyList ()) {
-        column += QString("%1_%2, ").arg (MetaData::AlbumMeta::staticMetaObject.className ()).arg (s);
+        column += QString("%1_%2, ").arg (classToKey<MetaData::AlbumMeta>()).arg (s);
         value += QString("\"%1\", ").arg ((*metaData)->albumMeta ()->property (s).toString ());
     }
     foreach (QString s, MetaData::ArtistMeta::staticPropertyList ()) {
-        column += QString("%1_%2, ").arg (MetaData::ArtistMeta::staticMetaObject.className ()).arg (s);
+        column += QString("%1_%2, ").arg (classToKey<MetaData::ArtistMeta>()).arg (s);
         value += QString("\"%1\", ").arg ((*metaData)->artistMeta ()->property (s).toString ());
     }
     foreach (QString s, MetaData::CoverMeta::staticPropertyList ()) {
-        column += QString("%1_%2, ").arg (MetaData::CoverMeta::staticMetaObject.className ()).arg (s);
+        column += QString("%1_%2, ").arg (classToKey<MetaData::CoverMeta>()).arg (s);
         value += QString("\"%1\", ").arg ((*metaData)->coverMeta ()->property (s).toString ());
     }
     foreach (QString s, MetaData::TrackMeta::staticPropertyList ()) {
-        column += QString("%1_%2, ").arg (MetaData::TrackMeta::staticMetaObject.className ()).arg (s);
+        column += QString("%1_%2, ").arg (classToKey<MetaData::TrackMeta>()).arg (s);
         value += QString("\"%1\", ").arg ((*metaData)->trackMeta ()->property (s).toString ());
     }
     foreach (QString s, songMetaDataPropertyList ()) {
-        column += QString("%1_%2, ").arg (SongMetaData::staticMetaObject.className ()).arg (s);
+        column += QString("%1_%2, ").arg (classToKey<SongMetaData>()).arg (s);
         value += QString("\"%1\", ").arg ((*metaData)->property (s).toString ());
     }
     column = column.simplified ();
@@ -261,7 +264,7 @@ bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
         if (value.isEmpty () && skipEmptyValue)
             continue;
         column += QString ("%1_%2 = \"%3\", ")
-                .arg (MetaData::AlbumMeta::staticMetaObject.className ())
+                .arg (classToKey<MetaData::AlbumMeta>())
                 .arg (s)
                 .arg (value);
 
@@ -271,7 +274,7 @@ bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
         if (value.isEmpty () && skipEmptyValue)
             continue;
         column += QString ("%1_%2 = \"%3\", ")
-                .arg (MetaData::ArtistMeta::staticMetaObject.className ())
+                .arg (classToKey<MetaData::ArtistMeta>())
                 .arg (s)
                 .arg (value);
     }
@@ -280,7 +283,7 @@ bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
         if (value.isEmpty () && skipEmptyValue)
             continue;
         column += QString ("%1_%2 = \"%3\", ")
-                .arg (MetaData::CoverMeta::staticMetaObject.className ())
+                .arg (classToKey<MetaData::CoverMeta>())
                 .arg (s)
                 .arg (value);
     }
@@ -289,7 +292,7 @@ bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
         if (value.isEmpty () && skipEmptyValue)
             continue;
         column += QString ("%1_%2 = \"%3\", ")
-                .arg (MetaData::TrackMeta::staticMetaObject.className ())
+                .arg (classToKey<MetaData::TrackMeta>())
                 .arg (s)
                 .arg (value);
     }
@@ -298,7 +301,7 @@ bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
         if (value.isEmpty () && skipEmptyValue)
             continue;
         column += QString ("%1_%2 = \"%3\", ")
-                .arg (SongMetaData::staticMetaObject.className ())
+                .arg (classToKey<SongMetaData>())
                 .arg (s)
                 .arg (value);
     }
@@ -312,7 +315,7 @@ bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
     //%1_hash hash来自SongMetaData的hard code
     //TODO do not use hard code
     str += QString(" where %1_hash = \"%2\"")
-            .arg (SongMetaData::staticMetaObject.className ())
+            .arg (classToKey<SongMetaData>())
             .arg ((*metaData)->hash ());
 
     //    if (metaData == nullptr
@@ -393,7 +396,7 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
     //TODO do not use hard code
     QString str = QString("delete from %1 where %2_hash = \"%3\"")
             .arg (LIBRARY_TABLE_TAG)
-            .arg (SongMetaData::staticMetaObject.className ())
+            .arg (classToKey<SongMetaData>())
             .arg (hash);
     QSqlQuery q(str, m_database);
     if (q.exec ()) {
@@ -416,46 +419,46 @@ SongMetaData *SQLite3DAO::trackFromHash(const QString &hash)
     //TODO do not use hard code
     QString str = QString("select * from %1 where %2_hash = \"%3\"")
             .arg (LIBRARY_TABLE_TAG)
-            .arg (SongMetaData::staticMetaObject.className ())
+            .arg (classToKey<SongMetaData>())
             .arg (hash);
     QSqlQuery q(str, m_database);
     while (q.next ()) {
         ///以下来自SongMetaData的hard code
         //TODO do not use hard code
-        QString name = q.value (QString("%1_name").arg (SongMetaData::staticMetaObject.className ())).toString ();
-        QString path = q.value (QString("%1_path").arg (SongMetaData::staticMetaObject.className ())).toString ();
-        quint64 size = q.value (QString("%1_size").arg (SongMetaData::staticMetaObject.className ())).toUInt ();
+        QString name = q.value (QString("%1_name").arg (classToKey<SongMetaData>())).toString ();
+        QString path = q.value (QString("%1_path").arg (classToKey<SongMetaData>())).toString ();
+        quint64 size = q.value (QString("%1_size").arg (classToKey<SongMetaData>())).toUInt ();
         SongMetaData d(path, name, size);
         if (d.hash () != hash)
             continue;
-        d.setMediaType (q.value (QString("%1_mediaType").arg (SongMetaData::staticMetaObject.className ())).toUInt ());
-        d.setLyricsData (q.value (QString("%1_lyricsData").arg (SongMetaData::staticMetaObject.className ())).toString ());
-        d.setLyricsUri (q.value (QString("%1_lyricsUri").arg (SongMetaData::staticMetaObject.className ())).toUrl ());
+        d.setMediaType (q.value (QString("%1_mediaType").arg (classToKey<SongMetaData>())).toUInt ());
+        d.setLyricsData (q.value (QString("%1_lyricsData").arg (classToKey<SongMetaData>())).toString ());
+        d.setLyricsUri (q.value (QString("%1_lyricsUri").arg (classToKey<SongMetaData>())).toUrl ());
         ///以上来自SongMetaData的hard code
 
         foreach (QString s, MetaData::AlbumMeta::staticPropertyList ()) {
             d.albumMeta ()->setProperty (s,
                                          q.value (QString("%1_%2")
-                                                  .arg (MetaData::AlbumMeta::staticMetaObject.className ())
+                                                  .arg (classToKey<MetaData::AlbumMeta>())
                                                   .arg (s)));
 
         }
         foreach (QString s, MetaData::ArtistMeta::staticPropertyList ()) {
             d.artistMeta ()->setProperty (s,
                                           q.value (QString("%1_%2")
-                                                   .arg (MetaData::ArtistMeta::staticMetaObject.className ())
+                                                   .arg (classToKey<MetaData::ArtistMeta>())
                                                    .arg (s)));
         }
         foreach (QString s, MetaData::CoverMeta::staticPropertyList ()) {
             d.coverMeta ()->setProperty (s,
                                          q.value (QString("%1_%2")
-                                                  .arg (MetaData::CoverMeta::staticMetaObject.className ())
+                                                  .arg (classToKey<MetaData::CoverMeta>())
                                                   .arg (s)));
         }
         foreach (QString s, MetaData::TrackMeta::staticPropertyList ()) {
             d.trackMeta ()->setProperty (s,
                                          q.value (QString("%1_%2")
-                                                  .arg (MetaData::TrackMeta::staticMetaObject.className ())
+                                                  .arg (classToKey<MetaData::TrackMeta>())
                                                   .arg (s)));
         }
         return &d;
@@ -964,11 +967,11 @@ void SQLite3DAO::calcExistSongs()
     //%1_hash hash来自SongMetaData的hard code
     //TODO do not use hard code
     QString str = QString("select %1_hash from %2")
-            .arg (SongMetaData::staticMetaObject.className ())
+            .arg (classToKey<SongMetaData>())
             .arg (LIBRARY_TABLE_TAG);
     QSqlQuery q(str, m_database);
     while (q.next ()) {
-        m_existSongHashes.append (q.value (QString("%1_hash").arg (SongMetaData::staticMetaObject.className ()))
+        m_existSongHashes.append (q.value (QString("%1_hash").arg (classToKey<SongMetaData>()))
                                  .toString ());
     }
 }
