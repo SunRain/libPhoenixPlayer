@@ -103,8 +103,8 @@ void LocalMusicScanner::scanLocalMusic()
         m_scanner = new LocalMusicScannerThread(0);
         connect (m_scanner, &QThread::finished,
                  [&]() {
-            m_scanner->quit ();
-            m_scanner->wait (3*60*1000);
+//            m_scanner->quit ();
+//            m_scanner->wait (3*60*1000);
             m_scanner->deleteLater ();
             m_scanner = nullptr;
             emit searchingFinished ();

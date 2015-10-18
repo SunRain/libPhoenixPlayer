@@ -166,10 +166,10 @@ void VolumeControl::reload()
 {
     qDebug()<<Q_FUNC_INFO<<"================= ";
 
-//    m_mutex.lock ();
+    m_mutex.lock ();
     if (m_timer->isActive ())
         m_timer->stop ();
-//    m_mutex.unlock ();
+    m_mutex.unlock ();
 
     if (m_volume) {
         m_volume = nullptr;
@@ -193,12 +193,12 @@ void VolumeControl::reload()
     }
 }
 
-void VolumeControl::doPluginChanged(Common::PluginType type)
-{
-    if (type == Common::PluginPlayBackend) {
-        reload ();
-    }
-}
+//void VolumeControl::doPluginChanged(Common::PluginType type)
+//{
+//    if (type == Common::PluginPlayBackend) {
+//        reload ();
+//    }
+//}
 
 } //PhoenixPlayer
 

@@ -27,7 +27,7 @@ PhoenixPlayBackend::PhoenixPlayBackend(QObject *parent) :
 
 PhoenixPlayBackend::~PhoenixPlayBackend()
 {
-    stop ();
+//    stop ();
 }
 
 //    ///

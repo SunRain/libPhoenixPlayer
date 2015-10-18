@@ -76,7 +76,7 @@ public slots:
     ///
     void reload();
 private:
-    void doPluginChanged(Common::PluginType type);
+//    void doPluginChanged(Common::PluginType type);
 private:
     PluginLoader *m_pluginLoader;
     PlayBackend::IPlayBackend *m_playBackend;
