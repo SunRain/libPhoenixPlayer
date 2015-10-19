@@ -22,13 +22,13 @@ public:
     virtual void setMuted(bool muted = false);
     virtual bool muted() const;
 protected:
-    virtual int leftScale() const;
-    virtual int rightScale() const;
+    virtual qreal leftScale() const;
+    virtual qreal rightScale() const;
 private:
     int m_left;
     int m_right;
-    double m_scaleLeft;
-    double m_scaleRight;
+    qreal m_scaleLeft;
+    qreal m_scaleRight;
     bool m_muted;
 };
 } //namespace PlayBackend

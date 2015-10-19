@@ -7,9 +7,9 @@ namespace PlayBackend {
 BaseVolume::BaseVolume(QObject *parent) : QObject(parent)
 {
     //TODO: add settings
-    m_left = 80;
+    m_left = 100;
     m_right = m_left;
-    m_scaleLeft = (double)m_left/100.0;
+    m_scaleLeft = (qreal)m_left/100.0;
     m_scaleRight = m_scaleLeft;
     m_muted = false;
 }
@@ -23,8 +23,8 @@ void BaseVolume::setVolume(int left, int right)
 {
     m_left = left;
     m_right = right;
-    m_scaleLeft = (double)m_left/100.0;
-    m_scaleRight = (double)m_right/100.0;
+    m_scaleLeft = (qreal)m_left/100.0;
+    m_scaleRight = (qreal)m_right/100.0;
 }
 
 void BaseVolume::setVolume(int volume)
@@ -58,12 +58,12 @@ bool BaseVolume::muted() const
     return m_muted;
 }
 
-int BaseVolume::leftScale() const
+qreal BaseVolume::leftScale() const
 {
     return m_scaleLeft;
 }
 
-int BaseVolume::rightScale() const
+qreal BaseVolume::rightScale() const
 {
     return m_scaleRight;
 }

@@ -10,7 +10,7 @@ namespace PlayBackend {
 SoftVolume::SoftVolume(QObject *parent) :
     BaseVolume(parent)
 {
-    setVolume (80,80);
+    setVolume (100,100);
     setMuted (false);
 }
 

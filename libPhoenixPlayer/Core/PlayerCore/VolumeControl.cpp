@@ -24,8 +24,8 @@ VolumeControl::VolumeControl(QObject *parent) :
     m_playBackend = nullptr;
     m_volume = nullptr;
 
-    m_left = 0;
-    m_right = 0;
+    m_left = 100;
+    m_right = 100;
     m_prevLeft = 0;
     m_prevRight = 0;
     m_prev_block = false;
