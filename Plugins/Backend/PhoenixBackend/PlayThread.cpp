@@ -102,7 +102,7 @@ QMutex *PlayThread::mutex()
 bool PlayThread::play()
 {
     if (this->isRunning () || !m_decoder) {
-        qDebug()<<"Can't start play due to"
+        qDebug()<<Q_FUNC_INFO<<"Can't start play due to"
                <<QString("current thread running [%1], decoder [%2]")
                  .arg (this->isRunning ()).arg ((m_decoder == nullptr));
         return false;
