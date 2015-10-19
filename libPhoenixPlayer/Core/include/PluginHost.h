@@ -49,7 +49,7 @@ public:
             }
         }
         if (m_pluginLoader)
-            delete m_pluginLoader;
+            m_pluginLoader->deleteLater ();
         m_pluginLoader = nullptr;
         return true;
     }
@@ -63,10 +63,10 @@ public:
                 qDebug()<<Q_FUNC_INFO<<" fail to unload plugin due to "<<m_pluginLoader->errorString ();
         }
         if (m_pluginObject)
-            delete m_pluginObject;
+            m_pluginObject->deleteLater ();
         m_pluginObject = nullptr;
         if (m_pluginLoader)
-            delete m_pluginLoader;
+            m_pluginLoader->deleteLater ();
         m_pluginLoader = nullptr;
     }
 

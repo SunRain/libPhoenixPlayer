@@ -86,7 +86,7 @@ PluginHost::PluginHost(const QString &libraryFile, QObject *parent)
             m_valid = true;
         }
     }
-    delete m_pluginLoader;
+    m_pluginLoader->deleteLater ();
     m_pluginLoader = nullptr;
 }
 
@@ -114,11 +114,10 @@ PluginHost::~PluginHost()
     if (m_pluginLoader) {
         if (m_pluginLoader->isLoaded ())
             m_pluginLoader->unload ();
-        delete m_pluginLoader;
+        m_pluginLoader->deleteLater ();
         m_pluginLoader = nullptr;
     }
     if (m_pluginObject) {
-        delete m_pluginObject;
         m_pluginObject = nullptr;
     }
 }
