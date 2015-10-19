@@ -44,7 +44,7 @@ HEADERS += \
     $$PWD/libPhoenixPlayer/Core/include/BaseObject.h \
     $$PWD/libPhoenixPlayer/Core/include/EqualizerMgr.h
 
-#contains (CONFIG, WITH_QML_LIB) {
+contains (CONFIG, WITH_QML_LIB) {
     INCLUDEPATH += $$PWD/libPhoenixPlayer/QtQuick/include
     DEPENDPATH += $$PWD/libPhoenixPlayer/QtQuick/include
 
@@ -56,4 +56,4 @@ HEADERS += \
         $$PWD/libPhoenixPlayer/QtQuick/include/TrackGroupModel.h \
         $$PWD/libPhoenixPlayer/QtQuick/include/AddonListModel.h \
         $$PWD/libPhoenixPlayer/QtQuick/include/PluginListModel.h
-#}
+}
