@@ -72,7 +72,7 @@ PlayThread::PlayThread(QObject *parent, BaseVisual *v)
     m_bks = 0;
     m_startPos = -1;
     m_decoder = nullptr;
-    m_output = nullptr;
+    m_ouputThread = nullptr;
     m_audioParameters = nullptr;
     
     //FIXME where should we put the output convert flag?
@@ -107,15 +107,15 @@ bool PlayThread::play()
                  .arg (this->isRunning ()).arg ((m_decoder == nullptr));
         return false;
     }
-    if (m_output) {
-        m_output->mutex ()->lock ();
-        m_output->finish ();
-        m_output->stop ();
-        m_output->mutex ()->unlock ();
-        m_output->quit ();
-        m_output->wait (2000);
-        m_output->deleteLater ();
-        m_output = nullptr;
+    if (m_ouputThread) {
+        m_ouputThread->mutex ()->lock ();
+        m_ouputThread->finish ();
+        m_ouputThread->stop ();
+        m_ouputThread->mutex ()->unlock ();
+        m_ouputThread->quit ();
+        m_ouputThread->wait (2000);
+        m_ouputThread->deleteLater ();
+        m_ouputThread = nullptr;
     }
     if (m_audioParameters) {
         m_audioParameters->deleteLater ();
@@ -126,8 +126,8 @@ bool PlayThread::play()
     m_audioParameters = new AudioParameters(m_decoder->audioParameters (), this);
 
     //FIXME we should not destruct && construct every time
-    m_output = createOutput ();
-    if (!m_output) {
+    m_ouputThread = createOutput ();
+    if (!m_ouputThread) {
         qDebug()<<Q_FUNC_INFO<<"cant create output thread";
         return false;
     }
@@ -137,11 +137,11 @@ bool PlayThread::play()
 
 void PlayThread::seek(qint64 time)
 {
-    if (m_output && m_output->isRunning())
+    if (m_ouputThread && m_ouputThread->isRunning())
     {
-        m_output->mutex()->lock ();
-        m_output->seek(time, true);
-        m_output->mutex()->unlock();
+        m_ouputThread->mutex()->lock ();
+        m_ouputThread->seek(time, true);
+        m_ouputThread->mutex()->unlock();
         if (isRunning())
         {
             mutex()->lock ();
@@ -157,26 +157,26 @@ void PlayThread::stop()
     m_user_stop = true;
     m_mutex.unlock ();
 
-    if (m_output)
-        m_output->recycler ()->cond ()->wakeAll ();
+    if (m_ouputThread)
+        m_ouputThread->recycler ()->cond ()->wakeAll ();
     if (this->isRunning ())
         this->wait ();
 
-    if (m_output) {
-        m_output->mutex ()->lock ();
-        m_output->stop ();
-        m_output->mutex ()->unlock ();
+    if (m_ouputThread) {
+        m_ouputThread->mutex ()->lock ();
+        m_ouputThread->stop ();
+        m_ouputThread->mutex ()->unlock ();
     }
     // wake up threads
-    if (m_output) {
-        m_output->mutex ()->lock ();
-        m_output->recycler ()->cond ()->wakeAll ();
-        m_output->mutex ()->unlock ();
-        if (m_output->isRunning ()) {
-            m_output->quit ();
-            m_output->wait ();
-            m_output->deleteLater ();
-            m_output = nullptr;
+    if (m_ouputThread) {
+        m_ouputThread->mutex ()->lock ();
+        m_ouputThread->recycler ()->cond ()->wakeAll ();
+        m_ouputThread->mutex ()->unlock ();
+        if (m_ouputThread->isRunning ()) {
+            m_ouputThread->quit ();
+            m_ouputThread->wait ();
+            m_ouputThread->deleteLater ();
+            m_ouputThread = nullptr;
         }
     }
     //FIXME should clear decoder?
@@ -189,21 +189,21 @@ void PlayThread::stop()
 
 void PlayThread::pause()
 {
-    if (m_output) {
-        m_output->pause ();
-        m_output->recycler ()->mutex ()->lock ();
-        m_output->recycler ()->cond ()->wakeAll ();
-        m_output->recycler ()->mutex ()->unlock ();
+    if (m_ouputThread) {
+        m_ouputThread->pause ();
+        m_ouputThread->recycler ()->mutex ()->lock ();
+        m_ouputThread->recycler ()->cond ()->wakeAll ();
+        m_ouputThread->recycler ()->mutex ()->unlock ();
     }
 }
 
 void PlayThread::setMuted(bool muted)
 {
     m_muted = muted;
-    if (m_output) {
-        m_output->mutex ()->lock ();
-        m_output->setMuted (muted);
-        m_output->mutex ()->unlock ();
+    if (m_ouputThread) {
+        m_ouputThread->mutex ()->lock ();
+        m_ouputThread->setMuted (muted);
+        m_ouputThread->mutex ()->unlock ();
     }
 }
 
@@ -323,7 +323,7 @@ void PlayThread::run()
     //TODO add replayGain
     m_mutex.unlock ();
 
-    m_output->start ();
+    m_ouputThread->start ();
 
     m_handler->dispatch (PlayState::Playing);
     m_handler->dispatch (m_decoder->getLength ());
@@ -339,9 +339,9 @@ void PlayThread::run()
         if (m_seekTime >=0) {
             m_decoder->setPosition (m_seekTime);
             m_seekTime = -1;
-            m_output->recycler ()->mutex ()->lock ();
-            m_output->recycler ()->clear ();
-            m_output->recycler ()->mutex ()->unlock ();
+            m_ouputThread->recycler ()->mutex ()->lock ();
+            m_ouputThread->recycler ()->clear ();
+            m_ouputThread->recycler ()->mutex ()->unlock ();
             m_output_at = 0;
         }
         //TODO if we'are using stream data, we should wait for data buffering, now we start output atm
@@ -366,16 +366,16 @@ void PlayThread::run()
             /// ///////////////////////  get another decoder
 
             flush (true);
-            if (m_output) {
-                m_output->recycler ()->mutex ()->lock ();
+            if (m_ouputThread) {
+                m_ouputThread->recycler ()->mutex ()->lock ();
                 // end of stream
-                while (!m_output->recycler ()->empty () && !m_user_stop) {
-                    m_output->recycler ()->cond ()->wakeOne ();
+                while (!m_ouputThread->recycler ()->empty () && !m_user_stop) {
+                    m_ouputThread->recycler ()->cond ()->wakeOne ();
                     m_mutex.unlock ();
-                    m_output->recycler ()->cond ()->wait (m_output->recycler ()->mutex ());
+                    m_ouputThread->recycler ()->cond ()->wait (m_ouputThread->recycler ()->mutex ());
                     m_mutex.lock ();
                 }
-                m_output->recycler ()->mutex ()->unlock ();
+                m_ouputThread->recycler ()->mutex ()->unlock ();
             }
             m_done = true;
             m_finish = !m_user_stop;
@@ -398,20 +398,20 @@ void PlayThread::run()
     m_next = false;
     if (m_finish)
         finish ();
-    if (m_output) {
-        m_output->mutex ()->lock ();
-        m_output->recycler ()->cond ()->wakeAll ();
-        m_output->mutex ()->unlock ();
+    if (m_ouputThread) {
+        m_ouputThread->mutex ()->lock ();
+        m_ouputThread->recycler ()->cond ()->wakeAll ();
+        m_ouputThread->mutex ()->unlock ();
     }
     m_mutex.unlock ();
 }
 
 void PlayThread::finish()
 {
-    if (m_output) {
-        m_output->mutex ()->lock ();
-        m_output->finish ();
-        m_output->mutex ()->unlock ();
+    if (m_ouputThread) {
+        m_ouputThread->mutex ()->lock ();
+        m_ouputThread->finish ();
+        m_ouputThread->mutex ()->unlock ();
     }
     m_handler->sendFinished ();
 }
@@ -443,18 +443,18 @@ void PlayThread::flush(bool final)
 
     while ((!m_done && !m_finish) && m_output_at > min) {
 
-        m_output->recycler ()->mutex ()->lock ();
+        m_ouputThread->recycler ()->mutex ()->lock ();
 
-        while ((m_output->recycler ()->full () || m_output->recycler ()->blocked ())
+        while ((m_ouputThread->recycler ()->full () || m_ouputThread->recycler ()->blocked ())
                && (!m_done && !m_finish)) {
             if (m_seekTime > 0) {
                 m_output_at = 0;
-                m_output->recycler ()->mutex ()->unlock ();
+                m_ouputThread->recycler ()->mutex ()->unlock ();
                 return;
             }
 
             m_mutex.unlock ();
-            m_output->recycler ()->cond ()->wait (m_output->recycler ()->mutex ());
+            m_ouputThread->recycler ()->cond ()->wait (m_ouputThread->recycler ()->mutex ());
             m_mutex.unlock ();
             m_done = m_user_stop;
         }
@@ -463,10 +463,10 @@ void PlayThread::flush(bool final)
         } else {
             m_output_at -= produceSound ((char*)m_output_buf, m_output_at, m_bitrate);
         }
-        if (!m_output->recycler ()->empty ()) {
-            m_output->recycler ()->cond ()->wakeOne ();
+        if (!m_ouputThread->recycler ()->empty ()) {
+            m_ouputThread->recycler ()->cond ()->wakeOne ();
         }
-        m_output->recycler ()->mutex ()->unlock ();
+        m_ouputThread->recycler ()->mutex ()->unlock ();
     }
 }
 
@@ -475,7 +475,7 @@ void PlayThread::addOffset()
     qint64 pos = m_startPos;
     if (pos > 0) {
         m_seekTime = pos;
-        m_output->seek (pos);
+        m_ouputThread->seek (pos);
     }
 }
 
@@ -483,7 +483,7 @@ qint64 PlayThread::produceSound(char *data, qint64 size, quint32 brate)
 {
 //    qDebug()<<Q_FUNC_INFO<<QString("size(m_output_at) = [%1], m_bitrate = [%2]").arg (size).arg (brate);
 
-    Buffer *b = m_output->recycler ()->get ();
+    Buffer *b = m_ouputThread->recycler ()->get ();
     uint sz = size < m_bks ? size : m_bks;
     memcpy (b->data, data, sz);
     b->nbytes = sz;
@@ -516,7 +516,7 @@ qint64 PlayThread::produceSound(char *data, qint64 size, quint32 brate)
 
     size -= sz;
     memmove (data, data + sz, size);
-    m_output->recycler ()->add ();
+    m_ouputThread->recycler ()->add ();
     return sz;
 
 }
@@ -569,6 +569,16 @@ OutputThread *PlayThread::createOutput()
     m_output_buf = new unsigned char[m_output_size];
     return o;
 }
+OutputThread *PlayThread::output() const
+{
+    return m_ouputThread;
+}
+
+void PlayThread::setOutput(OutputThread *output)
+{
+    m_ouputThread = output;
+}
+
 
 } //PhoenixBackend
 } //PlayBackend

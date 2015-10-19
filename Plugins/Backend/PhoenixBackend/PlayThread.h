@@ -43,6 +43,9 @@ public:
     void changeMedia(PlayBackend::BaseMediaObject *obj = 0, quint64 startSec = 0);
 
     // QThread interface
+    OutputThread *output() const;
+    void setOutput(OutputThread *output);
+
 protected:
     void run();
 
@@ -62,7 +65,7 @@ private:
     Settings *m_settings;
 
     BaseVisual *m_visual;
-    OutputThread *m_output;
+    OutputThread *m_ouputThread;
     Decoder::IDecoder *m_decoder;
     Decoder::DecoderHost *m_decoderHost;
 

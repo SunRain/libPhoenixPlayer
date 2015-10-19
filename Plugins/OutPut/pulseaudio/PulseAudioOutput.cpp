@@ -21,7 +21,12 @@ PulseAudioOutput::PulseAudioOutput(QObject *parent) :
 
 PulseAudioOutput::~PulseAudioOutput()
 {
-    uninitialize ();
+//    uninitialize ();
+    if (m_connection) {
+        qDebug()<<Q_FUNC_INFO<<"closing connection";
+        pa_simple_free(m_connection);
+        m_connection = nullptr;
+    }
 }
 
 bool PulseAudioOutput::initialize(quint32 srate, int chan, AudioParameters::AudioFormat f)
@@ -112,12 +117,12 @@ void PulseAudioOutput::reset()
 
 void PulseAudioOutput::uninitialize()
 {
-    if (m_connection)
-    {
-        qDebug()<<Q_FUNC_INFO<<"closing connection";
-        pa_simple_free(m_connection);
-        m_connection = 0;
-    }
+//    if (m_connection)
+//    {
+//        qDebug()<<Q_FUNC_INFO<<"closing connection";
+//        pa_simple_free(m_connection);
+//        m_connection = 0;
+//    }
 }
 
 

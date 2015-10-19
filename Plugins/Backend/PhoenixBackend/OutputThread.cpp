@@ -93,8 +93,10 @@ OutputThread::OutputThread(QObject *parent, BaseVisual *v)
 
 OutputThread::~OutputThread()
 {
-    if (m_output)
+    if (m_output) {
+        m_output->drain ();
         m_output = nullptr;
+    }
     if (m_outputHost) {
         if (!m_outputHost->unLoad ())
             m_outputHost->forceUnload ();
@@ -360,7 +362,10 @@ void OutputThread::dispatch(qint64 elapsed, int bitrate, int frequency, int bits
 
 void OutputThread::status()
 {
-    qint64 ct = m_totalWritten / m_bytesPerMillisecond - m_output->latency();
+    qint64 latency = m_output->latency ();
+    if (latency < 0)
+        latency = 0;
+    qint64 ct = m_totalWritten / m_bytesPerMillisecond - latency;
 
     if (ct < 0)
         ct = 0;
