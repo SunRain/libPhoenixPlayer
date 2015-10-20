@@ -101,10 +101,10 @@ QMutex *PlayThread::mutex()
 
 bool PlayThread::play()
 {
-    if (this->isRunning () || !m_decoder) {
+    if (this->isRunning () || !m_decoder || (m_ouputThread && m_ouputThread->isRunning ())) {
         qDebug()<<Q_FUNC_INFO<<"Can't start play due to"
-               <<QString("current thread running [%1], decoder [%2]")
-                 .arg (this->isRunning ()).arg ((m_decoder == nullptr));
+               <<QString("current thread running [%1], decoder [%2] || m_ouputThread && m_ouputThread->isRunning [%3]")
+                 .arg (this->isRunning ()).arg ((m_decoder == nullptr)).arg ((m_ouputThread && m_ouputThread->isRunning ()));
         return false;
     }
     if (m_ouputThread) {
@@ -137,13 +137,12 @@ bool PlayThread::play()
 
 void PlayThread::seek(qint64 time)
 {
-    if (m_ouputThread && m_ouputThread->isRunning())
-    {
+    qDebug()<<Q_FUNC_INFO<<"===";
+    if (m_ouputThread && m_ouputThread->isRunning()) {
         m_ouputThread->mutex()->lock ();
         m_ouputThread->seek(time, true);
         m_ouputThread->mutex()->unlock();
-        if (isRunning())
-        {
+        if (isRunning()) {
             mutex()->lock ();
             m_seekTime = time;
             mutex()->unlock();
@@ -187,10 +186,10 @@ void PlayThread::stop()
     //TODO should remove effects when stop ?
 }
 
-void PlayThread::pause()
+void PlayThread::togglePlayPause()
 {
     if (m_ouputThread) {
-        m_ouputThread->pause ();
+        m_ouputThread->togglePlayPause ();
         m_ouputThread->recycler ()->mutex ()->lock ();
         m_ouputThread->recycler ()->cond ()->wakeAll ();
         m_ouputThread->recycler ()->mutex ()->unlock ();
@@ -337,6 +336,7 @@ void PlayThread::run()
 
         //seek
         if (m_seekTime >=0) {
+            qDebug()<<Q_FUNC_INFO<<"m_seekTime "<<m_seekTime;
             m_decoder->setPosition (m_seekTime);
             m_seekTime = -1;
             m_ouputThread->recycler ()->mutex ()->lock ();

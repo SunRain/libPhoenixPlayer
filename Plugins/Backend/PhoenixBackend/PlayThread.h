@@ -37,7 +37,7 @@ public:
     bool play();
     void seek(qint64 time);
     void stop();
-    void pause();
+    void togglePlayPause();
     void setMuted(bool muted);
 
     void changeMedia(PlayBackend::BaseMediaObject *obj = 0, quint64 startSec = 0);

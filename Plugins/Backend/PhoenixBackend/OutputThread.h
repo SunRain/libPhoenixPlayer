@@ -33,7 +33,9 @@ public:
 
     bool initialize(quint32 freq, int chan, AudioParameters::AudioFormat format);
 
-    void pause();
+    bool isPaused();
+
+    void togglePlayPause();
     /*!
      * Requests playback to stop.
      */

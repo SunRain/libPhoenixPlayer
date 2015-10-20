@@ -142,6 +142,7 @@ void PlayerCore::setPluginLoader()
     connect (*m_playBackend,
              &IPlayBackend::tick,
              [&] (quint64 sec) {
+        qDebug()<<Q_FUNC_INFO<<"Tick "<<sec;
         m_currentPlayPos = sec;
         emit playTickActual (sec);
         if (m_currentSongLength <= 0)

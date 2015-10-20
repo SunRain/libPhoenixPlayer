@@ -159,7 +159,12 @@ bool OutputThread::initialize(quint32 freq, int chan, AudioParameters::AudioForm
     return true;
 }
 
-void OutputThread::pause()
+bool OutputThread::isPaused()
+{
+    return m_pause;
+}
+
+void OutputThread::togglePlayPause()
 {
     m_mutex.lock ();
     m_pause = !m_pause;
@@ -185,6 +190,7 @@ void OutputThread::finish()
 
 void OutputThread::seek(qint64 pos, bool reset)
 {
+    qDebug()<<Q_FUNC_INFO<<"seek to "<<pos<<" should reset "<<reset;
     m_totalWritten = pos * m_bytesPerMillisecond;
     m_currentMilliseconds = -1;
     m_skip = this->isRunning ()&& reset;
