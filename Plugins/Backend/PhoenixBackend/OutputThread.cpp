@@ -146,7 +146,8 @@ bool OutputThread::initialize(quint32 freq, int chan, AudioParameters::AudioForm
     qDebug()<<Q_FUNC_INFO<<"Current audio info "<<m_audioParameters->parametersInfo ();
 
     m_bytesPerMillisecond = freq * chan * AudioParameters::sampleSize(format) / 1000;
-    m_recycler.configure(freq, chan, format); //calculate output buffer size
+    m_recycler.clear ();
+    m_recycler.configure(freq, chan, format, true); //calculate output buffer size
 
     if (m_visBuffer) {
         delete[] m_visBuffer;
@@ -173,8 +174,24 @@ void OutputThread::togglePlayPause()
     dispatch(s);
 }
 
+void OutputThread::reset()
+{
+    m_frequency = 0;
+    m_totalWritten = 0;
+    m_currentMilliseconds = -1;
+    m_bytesPerMillisecond = 0;
+    m_userStop = false;
+    m_finish = false;
+    m_kbps = 0;
+    m_skip = false;
+    m_pause = false;
+    m_prev_pause = false;
+    m_useEq = false;
+}
+
 void OutputThread::stop()
 {
+    qDebug()<<Q_FUNC_INFO<<"===";
     m_userStop = true;
 }
 
@@ -218,7 +235,7 @@ AudioParameters *OutputThread::audioParameters()
 
 void OutputThread::run()
 {
-    qDebug()<<Q_FUNC_INFO<<"===============";
+    qDebug()<<Q_FUNC_INFO<<">>>>>>>> OutputThread start loop <<<<<<<<<";
 
     m_mutex.lock ();
     if (!m_bytesPerMillisecond) {
@@ -231,7 +248,7 @@ void OutputThread::run()
     m_mutex.unlock ();
 
     bool done = false;
-    Buffer *b = 0;
+    Buffer *b = nullptr;
     qint64 l, m = 0;
 
     dispatch(PlayState::Playing);
@@ -334,22 +351,19 @@ void OutputThread::run()
         recycler()->mutex()->lock ();
         recycler()->done();
         recycler()->mutex()->unlock();
-        b = 0;
+        b = nullptr;
         mutex()->unlock();
     }
     mutex()->lock ();
     //write remaining data
-    if(m_finish)
-    {
+    if(m_finish) {
         m_output->drain();
-#ifdef Q_OS_WIN
-        qDebug("OutputWriter: total written %I64d", m_totalWritten);
-#else
-        qDebug("OutputWriter: total written %lld", m_totalWritten);
-#endif
+        qDebug()<<Q_FUNC_INFO<<"total written "<<m_totalWritten;
     }
     dispatch(PlayState::Stopped);
     mutex()->unlock();
+
+    qDebug()<<Q_FUNC_INFO<<">>>>>>>> OutputThread finish loop <<<<<<<<<";
 }
 
 void OutputThread::dispatch(const PlayState &state)

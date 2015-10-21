@@ -22,8 +22,7 @@ Recycler::Recycler()
 
 Recycler::~Recycler()
 {
-    for (unsigned int i = 0; i < m_bufferCount; i++)
-    {
+    for (unsigned int i = 0; i < m_bufferCount; i++) {
         delete m_buffers[i];
         m_buffers[i] = 0;
     }
@@ -32,18 +31,17 @@ Recycler::~Recycler()
     m_blocked = 0;
 }
 
-void Recycler::configure(quint32 srate, int chan, AudioParameters::AudioFormat format)
+void Recycler::configure(quint32 srate, int chan, AudioParameters::AudioFormat format, bool force)
 {
     unsigned long block_size = AudioParameters::sampleSize(format) * chan * BUFFER_PERIOD;
     unsigned int buffer_count = srate * BUFFER_MSEC / 1000 / BUFFER_PERIOD;
-    if(block_size == m_blockSize && buffer_count == m_bufferCount)
+    if(block_size == m_blockSize && buffer_count == m_bufferCount && !force)
         return;
 
     qDebug()<<Q_FUNC_INFO<<QString("Configure for sampleRate = [%1], channels = [%2], blockSize = [%3], bufferCount = [%4]")
               .arg (srate).arg (chan).arg (block_size).arg (buffer_count);
 
-    for (unsigned int i = 0; i < m_bufferCount; i++)
-    {
+    for (unsigned int i = 0; i < m_bufferCount; i++) {
         delete m_buffers[i];
         m_buffers[i] = 0;
     }
@@ -104,8 +102,7 @@ Buffer *Recycler::get()
 
 void Recycler::add()
 {
-    if(m_buffers[m_addIndex]->nbytes)
-    {
+    if(m_buffers[m_addIndex]->nbytes) {
         m_addIndex = (m_addIndex + 1) % m_bufferCount;
         m_currentCount++;
     }
@@ -113,19 +110,17 @@ void Recycler::add()
 
 Buffer *Recycler::next()
 {
-    if(m_currentCount)
-    {
+    if(m_currentCount) {
         m_blocked = m_buffers[m_doneIndex];
         return m_blocked;
     }
-    return 0;
+    return nullptr;
 }
 
 void Recycler::done()
 {
-    m_blocked = 0;
-    if (m_currentCount)
-    {
+    m_blocked = nullptr;
+    if (m_currentCount) {
         m_currentCount--;
         m_doneIndex = (m_doneIndex + 1) % m_bufferCount;
     }

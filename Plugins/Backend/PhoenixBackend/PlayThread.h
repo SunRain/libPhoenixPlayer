@@ -56,7 +56,7 @@ private:
     void flush(bool final = false);
     void addOffset();
     qint64 produceSound(char *data, qint64 size, quint32 brate);
-    OutputThread *createOutput();
+    void createOutput();
 
 private:
     QMutex m_mutex;
@@ -65,7 +65,7 @@ private:
     Settings *m_settings;
 
     BaseVisual *m_visual;
-    OutputThread *m_ouputThread;
+    OutputThread *m_outputThread;
     Decoder::IDecoder *m_decoder;
     Decoder::DecoderHost *m_decoderHost;
 

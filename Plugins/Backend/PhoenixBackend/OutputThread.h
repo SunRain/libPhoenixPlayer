@@ -36,6 +36,8 @@ public:
     bool isPaused();
 
     void togglePlayPause();
+
+    void reset();
     /*!
      * Requests playback to stop.
      */

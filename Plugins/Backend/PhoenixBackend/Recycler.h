@@ -29,7 +29,7 @@ public:
     /// \param srate Sample rate.
     /// \param chan Number of channels.
     ///
-    void configure(quint32 srate, int chan, AudioParameters::AudioFormat format);
+    void configure(quint32 srate, int chan, AudioParameters::AudioFormat format, bool force = false);
 
     //Returns true if queue if full, otherwise returns false
     bool full() const;
@@ -57,13 +57,11 @@ public:
     ///
     unsigned long blockSize() const; // size in bytes
 
-    QMutex *mutex()
-    {
+    QMutex *mutex() {
         return &m_mutex;
     }
 
-    QWaitCondition *cond()
-    {
+    QWaitCondition *cond() {
         return &m_cnd;
     }
     //Returns  true if the next buffer is used by output. Otherwise returns  false.
