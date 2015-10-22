@@ -17,6 +17,7 @@ namespace MusicLibrary {
 class IMusicTagParser;
 class IMusicLibraryDAO;
 class MusicTagParserHost;
+class IMusicTagParser;
 class LocalMusicScannerThread : public QThread
 {
     Q_OBJECT
@@ -51,7 +52,8 @@ private:
     Settings *m_settings;
     PluginLoader *m_pluginLoader;
     IMusicLibraryDAO *m_dao;
-    QList<MusicTagParserHost *> m_tagParserList;
+    QList<MusicTagParserHost *> m_tagHostList;
+    QList<IMusicTagParser *> m_tagParserList;
 };
 } //MusicLibrary
 } //PhoenixPlayer

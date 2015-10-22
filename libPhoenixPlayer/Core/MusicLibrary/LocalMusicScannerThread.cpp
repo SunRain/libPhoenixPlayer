@@ -37,21 +37,31 @@ LocalMusicScannerThread::LocalMusicScannerThread(QObject *parent) :
             host = nullptr;
             continue;
         }
-        m_tagParserList.append (host);
+        IMusicTagParser *parser = host->instance<IMusicTagParser>();
+        if (!parser)
+            continue;
+        m_tagHostList.append (host);
+        m_tagParserList.append (parser);
     }
-    qDebug()<<Q_FUNC_INFO<<" m_tagParserList size "<<m_tagParserList.size ();
+    qDebug()<<Q_FUNC_INFO<<" m_tagParserList size "<<m_tagHostList.size ();
 }
 
 LocalMusicScannerThread::~LocalMusicScannerThread()
 {
-    foreach (MusicTagParserHost *h, m_tagParserList) {
+    foreach (IMusicTagParser *p, m_tagParserList) {
+        p = nullptr;
+    }
+    foreach (MusicTagParserHost *h, m_tagHostList) {
         if (!h->unLoad ())
             h->forceUnload ();
     }
-    if (!m_tagParserList.isEmpty ()) {
-        qDeleteAll(m_tagParserList);
-        m_tagParserList.clear ();
+    if (!m_tagHostList.isEmpty ()) {
+        qDeleteAll(m_tagHostList);
+        m_tagHostList.clear ();
     }
+    if (!m_tagParserList.isEmpty ())
+        m_tagParserList.clear ();
+
     if (!m_pathList.isEmpty ())
         m_pathList.clear ();
 }
@@ -137,12 +147,13 @@ void LocalMusicScannerThread::scanDir(const QString &path)
 //            if (type.inherits ("audio/mpeg")) {
             if (type.name ().contains ("audio") || type.name ().contains ("Audio")) {
                 SongMetaData *data = new SongMetaData(path, info.fileName (), info.size (), 0);
-                foreach (MusicTagParserHost *host, m_tagParserList) {
+//                foreach (MusicTagParserHost *host, m_tagHostList) {
+                foreach (IMusicTagParser *parser, m_tagParserList) {
                     if (m_stopLookupFlag)
                         break;
-                    IMusicTagParser *parser = host->instance<IMusicTagParser>();
-                    if (!parser)
-                        continue;
+//                    IMusicTagParser *parser = host->instance<IMusicTagParser>();
+//                    if (!parser)
+//                        continue;
                     if (parser->parserTag (&data)) {
                         break;
                     }
