@@ -20,7 +20,7 @@ class PlayListMgr : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(SongMetaData* currentTrack READ currentTrack CONSTANT)
+    Q_PROPERTY(QObject* currentTrack READ currentTrackObject CONSTANT)
     Q_PROPERTY(int count READ count CONSTANT)
 //    Q_PROPERTY(int randomIndex READ randomIndex CONSTANT)
     Q_PROPERTY(QStringList existPlayLists READ existPlayLists CONSTANT)
@@ -50,6 +50,7 @@ public:
     /// \return nullptr if no track exists
     ///
     SongMetaData *currentTrack() const;
+    QObject *currentTrackObject() const;
     ///
     /// \brief get
     /// \param index

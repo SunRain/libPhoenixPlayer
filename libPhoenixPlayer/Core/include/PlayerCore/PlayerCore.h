@@ -32,9 +32,9 @@ class PlayerCore : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(Common::PlayMode playMode READ playMode WRITE setPlayMode NOTIFY playModeChanged)
-    Q_PROPERTY(Common::PlayBackendState playBackendState READ playBackendState NOTIFY playBackendStateChanged)
+    Q_PROPERTY(int playBackendState READ playBackendStateInt NOTIFY playBackendStateChanged)
     Q_PROPERTY(bool autoSkipForward READ autoSkipForward WRITE setAutoSkipForward NOTIFY autoSkipForwardChanged)
-    Q_PROPERTY(PlayListMgr* playList READ playList CONSTANT)
+    Q_PROPERTY(QObject* playList READ playListObject CONSTANT)
     Q_PROPERTY(int forwardIndex READ forwardIndex CONSTANT)
     Q_PROPERTY(int backwardIndex READ backwardIndex CONSTANT)
     Q_PROPERTY(int shuffleIndex READ shuffleIndex CONSTANT)
@@ -45,8 +45,10 @@ public:
 
     Common::PlayMode playMode() const;
     Common::PlayBackendState playBackendState() const;
+    int playBackendStateInt() const;
 
     PlayListMgr *playList() const;
+    QObject *playListObject() const;
 
     SongMetaData *curTrackMetadata();
 
@@ -109,7 +111,7 @@ signals:
 //    void playModeChanged (int mode);
 
     ///
-    /// \brief trackChanged 当切换歌曲的时候发送此信号，慢于MusicLibraryManager的playingSongChanged信号
+    /// \brief trackChanged 当切换歌曲的时候发送此信号
     ///
     void trackChanged();
     void playTrackFinished();
@@ -129,7 +131,7 @@ signals:
 
     void playModeChanged(Common::PlayMode mode);
 
-    void playBackendStateChanged(Common::PlayBackendState state);
+    void playBackendStateChanged(int state);
 
     void autoSkipForwardChanged(bool skip);
 
@@ -169,7 +171,7 @@ private:
 
 //    bool PointerValid(EPointer pointer = EPointer::PNULL);
 
-    int getSongLength(const QString &hash);
+//    int getSongLength(const QString &hash);
 
 //    void doMetadataLookup(const QString &songHash,
 //                        MetadataLookup::IMetadataLookup::LookupType type);
@@ -192,7 +194,7 @@ private:
     MusicLibrary::IMusicLibraryDAO *m_dao;
 
     Common::PlayMode m_playMode;
-    quint64 m_currentSongLength;
+    quint64 m_curTrackDuration;
     quint64 m_currentPlayPos;
 
     //临时播放器队列

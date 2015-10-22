@@ -154,6 +154,11 @@ SongMetaData *PlayListMgr::currentTrack() const
     return m_trackList.value (m_currentIndex);
 }
 
+QObject *PlayListMgr::currentTrackObject() const
+{
+    return qobject_cast<QObject*>(currentTrack ());
+}
+
 SongMetaData *PlayListMgr::get(int index) const
 {
     if (m_trackList.isEmpty () || index >= m_trackList.size () || index < 0)

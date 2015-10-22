@@ -28,14 +28,17 @@ using namespace PlayBackend;
 
 PlayerCore::PlayerCore(QObject *parent)
     : QObject(parent)
-//    ,m_isInit(false)
-    ,m_autoSkipForward(true)
 {
     m_playBackend = nullptr;
     m_pb = nullptr;
     m_playBackendHost = nullptr;
     m_dao = nullptr;
     m_curTrack = nullptr;
+
+    m_autoSkipForward = true;
+
+    m_curTrackDuration = 0;
+    m_currentPlayPos = 0;
 
     m_pluginLoader = PluginLoader::instance ();
     m_settings = Settings::instance ();
@@ -142,14 +145,15 @@ void PlayerCore::setPluginLoader()
     connect (*m_playBackend,
              &IPlayBackend::tick,
              [&] (quint64 sec) {
-        qDebug()<<Q_FUNC_INFO<<"Tick "<<sec;
+        qDebug()<<Q_FUNC_INFO<<"Tick "<<sec<<" duration "<<m_curTrackDuration;
         m_currentPlayPos = sec;
         emit playTickActual (sec);
-        if (m_currentSongLength <= 0)
-            return;
-
-        if (m_currentSongLength > 0)
-            emit playTickPercent (((qreal)sec/m_currentSongLength) * 100);
+        if (m_curTrackDuration > 0) {
+            qreal v = sec *1000/m_curTrackDuration;
+            int p = v *1000;
+            qDebug()<<Q_FUNC_INFO<<" Percent "<<p;
+            emit playTickPercent (p);
+        }
     });
 }
 
@@ -284,6 +288,11 @@ Common::PlayBackendState PlayerCore::playBackendState() const
     return (*m_playBackend)->playBackendState ();
 }
 
+int PlayerCore::playBackendStateInt() const
+{
+    return (int)playBackendState ();
+}
+
 //bool PlayerCore::autoSkipForward() const
 //{
 //    return m_autoSkipForward;
@@ -292,6 +301,11 @@ Common::PlayBackendState PlayerCore::playBackendState() const
 PlayListMgr *PlayerCore::playList() const
 {
     return m_playList;
+}
+
+QObject *PlayerCore::playListObject() const
+{
+    return qobject_cast<QObject*>(playList ());
 }
 
 SongMetaData *PlayerCore::curTrackMetadata()
@@ -389,6 +403,7 @@ void PlayerCore::playTrack(const SongMetaData *data)
         if (m_curTrack)
             m_curTrack->deleteLater ();
         m_curTrack = new SongMetaData(data);
+        m_curTrackDuration = data->trackMeta ()->duration ();
 //        emit trackChanged ();
         BaseMediaObject obj;
         obj.setFilePath (data->path ());
@@ -603,7 +618,7 @@ void PlayerCore::togglePlayPause()
             SongMetaData *data = m_playList->currentTrack ();
             if (!data)
                 break;
-            m_currentSongLength = data->trackMeta ()->duration ();//getSongLength (data->trackMeta ()->duration ());
+            m_curTrackDuration = data->trackMeta ()->duration ();//getSongLength (data->trackMeta ()->duration ());
             m_currentPlayPos = 0;
 
 //            //设置播放歌曲的hash,使得MusicLibraryManager发送playingSongChanged信号
@@ -669,9 +684,9 @@ void PlayerCore::setPosition(qreal pos, bool isPercent)
     qDebug()<<"PlayerCore setPosition to "<<pos<<" isPercent "<<isPercent;
 
     if (isPercent) {
-        if (m_currentSongLength <= 0)
+        if (m_curTrackDuration <= 0)
             return;
-        (*m_playBackend)->setPosition (m_currentSongLength * pos/100);
+        (*m_playBackend)->setPosition (m_curTrackDuration * pos/100);
     } else {
         (*m_playBackend)->setPosition (pos);
     }
@@ -734,23 +749,23 @@ void PlayerCore::init()
 //    return valid;
 //}
 
-int PlayerCore::getSongLength(const QString &hash)
-{
-//    if (hash.isEmpty ())
-//        return 0;
+//int PlayerCore::getSongLength(const QString &hash)
+//{
+////    if (hash.isEmpty ())
+////        return 0;
 
-//    if (!PointerValid (EPointer::PMusicLibraryManager))
-//        return 0;
+////    if (!PointerValid (EPointer::PMusicLibraryManager))
+////        return 0;
 
-//    QStringList list = m_musicLibraryManager
-//            ->querySongMetaElement (Common::SongMetaTags::E_TrackLength,
-//                                    hash, true);
-//    if (!list.isEmpty ()) {
-//       return list.first ().toULongLong ();
-//    }
-//    return 0;
-    //TODO dummy
-}
+////    QStringList list = m_musicLibraryManager
+////            ->querySongMetaElement (Common::SongMetaTags::E_TrackLength,
+////                                    hash, true);
+////    if (!list.isEmpty ()) {
+////       return list.first ().toULongLong ();
+////    }
+////    return 0;
+////    TODO dummy
+//}
 
 //void PlayerCore::doMetadataLookup(const QString &songHash,
 //                            IMetadataLookup::LookupType type)
