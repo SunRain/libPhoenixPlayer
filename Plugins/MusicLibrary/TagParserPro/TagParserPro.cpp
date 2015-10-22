@@ -94,18 +94,15 @@ bool TagParserPro::parserTag(SongMetaData **target)
     TagLib::AudioProperties *ap = m_tagRef->audioProperties ();
 
     if (ap) {
-//        target->setMeta (Common::E_TrackLength, QVariant(ap->length ()));
-        (*target)->trackMeta ()->setDuration (ap->length ());
+        (*target)->trackMeta ()->setDuration (ap->lengthInMilliseconds ());
 
         str = QString::number(ap->sampleRate ());
         if (!str.isEmpty ()) {
-//            target->setMeta (Common::E_SampleRate, QVariant(str));
             (*target)->trackMeta ()->setSampleRate (str);
         }
 
         str = QString::number(ap->bitrate());
         if (!str.isEmpty ()) {
-//            target->setMeta (Common::E_Bitrate, QVariant(str));
             (*target)->trackMeta ()->setBitRate (str);
         }
     }

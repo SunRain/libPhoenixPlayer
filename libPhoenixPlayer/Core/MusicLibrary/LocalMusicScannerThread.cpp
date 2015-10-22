@@ -121,7 +121,7 @@ void LocalMusicScannerThread::scanDir(const QString &path)
 
     dir.setFilter (QDir::Dirs | QDir::Files | /*QDir::NoSymLinks |*/ QDir::NoDotAndDotDot);
     QFileInfoList list = dir.entryInfoList ();
-    qDebug()<<Q_FUNC_INFO<<QString("scanDir [%1], entryInfoList size = %2").arg (path).arg (list.size ());
+    qDebug()<<Q_FUNC_INFO<<QString("scanDir [%1]").arg (path)<<" list "<<dir.entryList ();
     foreach (QFileInfo info, list) {
         if (info.isDir ()) {
             m_mutex.lock ();
