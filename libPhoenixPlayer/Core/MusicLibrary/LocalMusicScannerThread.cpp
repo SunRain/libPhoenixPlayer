@@ -27,6 +27,9 @@ LocalMusicScannerThread::LocalMusicScannerThread(QObject *parent) :
         m_dao = dh->instance<IMusicLibraryDAO>();
 
     QStringList tagHosts = m_settings->tagPaserLibraries ();
+    if (tagHosts.isEmpty ())
+        tagHosts.append (m_pluginLoader->pluginLibraries (Common::PluginMusicTagParser));
+
     foreach (QString s, tagHosts) {
         MusicTagParserHost *host = new MusicTagParserHost(s);
         if (!host->isValid ()) {
