@@ -46,3 +46,5 @@ Makefile*
 *.qmlproject.user
 *.qmlproject.user.*
 tmp/*
+ThirdParty/Taglib/build
+ThirdParty/Taglib/target

@@ -2,3 +2,7 @@
 	path = ThirdParty/CuteLogger/CuteLogger
 	url = https://github.com/SunRain/CuteLogger.git
 	branch = master
+[submodule "ThirdParty/Taglib/src"]
+	path = ThirdParty/Taglib/src
+	url = https://github.com/SunRain/taglib.git
+	branch = phoenixplayer

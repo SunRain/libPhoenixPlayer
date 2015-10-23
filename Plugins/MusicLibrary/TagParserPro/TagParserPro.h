@@ -1,17 +1,17 @@
 #ifndef TAGPARSERPRO_H
 #define TAGPARSERPRO_H
 
-#include <taglib/apefile.h>
-#include <taglib/apetag.h>
-#include <taglib/asffile.h>
-#include <taglib/fileref.h>
-#include <taglib/flacfile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/mpcfile.h>
-#include <taglib/mp4file.h>
-#include <taglib/mpegfile.h>
-#include <taglib/vorbisfile.h>
-#include <taglib/wavpackfile.h>
+#include "taglib/apefile.h"
+#include "taglib/apetag.h"
+#include "taglib/asffile.h"
+#include "taglib/fileref.h"
+#include "taglib/flacfile.h"
+#include "taglib/id3v2tag.h"
+#include "taglib/mpcfile.h"
+#include "taglib/mp4file.h"
+#include "taglib/mpegfile.h"
+#include "taglib/vorbisfile.h"
+#include "taglib/wavpackfile.h"
 
 #include "MusicLibrary/IMusicTagParser.h"
 
