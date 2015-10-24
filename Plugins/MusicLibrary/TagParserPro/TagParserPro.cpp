@@ -39,17 +39,18 @@ bool TagParserPro::parserTag(SongMetaData **target)
 //    QString name = targetMetaDate->getMeta (Common::E_FileName).toString ();
 //    QString path = targetMetaDate->getMeta (Common::E_FilePath).toString ();
 //    m_filePath = QString("%1/%2").arg (path).arg (name);
-    //FIXME should remove file:/ ?
-    m_filePath = (*target)->uri ().toString ();
-
+    m_filePath = (*target)->uri ().toLocalFile ();
     QFile f(m_filePath);
-    if (!f.exists ())
+    if (!f.exists ()) {
+        qWarning()<<Q_FUNC_INFO<<"wrong file path ["<<m_filePath<<"]";
         return false;
-
+    }
     m_tagRef = new TagLib::FileRef(m_filePath.toLocal8Bit ().constData ());
 
-    if (!isValid ())
+    if (!isValid ()) {
+        qWarning()<<Q_FUNC_INFO<<"InValid!!";
         return false;
+    }
 
     TagLib::Tag *tag = m_tagRef->tag ();
     QString str;
