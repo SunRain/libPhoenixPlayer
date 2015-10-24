@@ -245,8 +245,8 @@ bool SQLite3DAO::insertMetaData(SongMetaData **metaData, bool skipDuplicates)
 //            .arg (metaData->getMeta (Common::SongMetaTags(i)).toString ());
 
     qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
-    QSqlQuery q(str, m_database);
-    if (q.exec ()) {
+    QSqlQuery q;
+    if (q.exec (str)) {
         m_existSongHashes.append ((*metaData)->hash ());
         emit metaDataInserted ();
         return true;
@@ -356,8 +356,8 @@ bool SQLite3DAO::updateMetaData(SongMetaData **metaData, bool skipEmptyValue)
 
     qDebug()<<Q_FUNC_INFO<<"Run sql "<<str;
 
-    QSqlQuery q(str, m_database);
-    if (q.exec ()) {
+    QSqlQuery q;
+    if (q.exec (str)) {
         return true;
     }
     qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
@@ -404,8 +404,8 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
             .arg (LIBRARY_TABLE_TAG)
             .arg (classToKey<SongMetaData>())
             .arg (hash);
-    QSqlQuery q(str, m_database);
-    if (q.exec ()) {
+    QSqlQuery q;
+    if (q.exec (str)) {
         calcExistSongs ();
 //        emit libraryChanged ();
         emit metaDataDeleted ();
