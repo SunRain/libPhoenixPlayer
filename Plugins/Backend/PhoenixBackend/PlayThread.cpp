@@ -172,7 +172,7 @@ void PlayThread::stop()
         m_outputThread->mutex ()->unlock ();
 
         m_outputThread->quit ();
-        m_outputThread->wait ();
+//        m_outputThread->wait ();
     }
     // wake up threads
     qDebug()<<Q_FUNC_INFO<<"wake up threads";
