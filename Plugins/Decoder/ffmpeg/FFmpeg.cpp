@@ -260,7 +260,7 @@ quint64 FFmpeg::getLength()
 void FFmpeg::setPosition(qreal pos)
 {
     qDebug()<<Q_FUNC_INFO<<"set to pos "<<pos;
-    int64_t timestamp = int64_t(pos)*AV_TIME_BASE;///1000;
+    int64_t timestamp = int64_t(pos)*AV_TIME_BASE/1000;
     qDebug()<<Q_FUNC_INFO<<"timestamp "<<timestamp;
     if (ic->start_time != (qint64)AV_NOPTS_VALUE)
         timestamp += ic->start_time;

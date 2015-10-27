@@ -120,7 +120,7 @@ signals:
     /// \brief playTickActual 播放实际时间
     /// \param sec 实际时间
     ///
-    void playTickActual(quint64 sec);
+    void playTickActual(quint64 second);
     ///
     /// \brief playTickPercent 播放时间百分比,
     /// \param percent 0~100的播放时间百分比

@@ -136,16 +136,16 @@ bool PlayThread::play()
     return true;
 }
 
-void PlayThread::seek(qint64 time)
+void PlayThread::seek(qint64 millisecond)
 {
     qDebug()<<Q_FUNC_INFO<<"===";
     if (m_outputThread && m_outputThread->isRunning()) {
         m_outputThread->mutex()->lock ();
-        m_outputThread->seek(time, true);
+        m_outputThread->seek(millisecond, true);
         m_outputThread->mutex()->unlock();
         if (isRunning()) {
             mutex()->lock ();
-            m_seekTime = time;
+            m_seekTime = millisecond;
             mutex()->unlock();
         }
     }
@@ -301,7 +301,7 @@ void PlayThread::changeMedia(BaseMediaObject *obj, quint64 startSec)
     if (!m_decoder->getLength ()) {
         m_startPos = -1;
     } else if (startSec) {
-        m_startPos = startSec;
+        m_startPos = startSec * 1000;
     }
 //    if (startPlay && !this->isRunning ()) {
 //        qDebug()<<Q_FUNC_INFO<<"start run now";

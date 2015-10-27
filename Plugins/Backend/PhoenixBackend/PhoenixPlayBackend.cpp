@@ -160,7 +160,7 @@ void PhoenixPlayBackend::play(quint64 startSec)
                     m_engine->togglePlayPause ();
             }
         }
-        m_engine->seek (startSec);
+        m_engine->seek (startSec * 1000);
     }
 }
 
@@ -192,7 +192,7 @@ void PhoenixPlayBackend::setPosition(quint64 sec)
 {
     m_preSec = sec;
     if (m_engine)
-        m_engine->seek (sec);
+        m_engine->seek (sec * 1000);
 }
 
 void PhoenixPlayBackend::changeMedia(BaseMediaObject *obj, quint64 startSec, bool startPlay)

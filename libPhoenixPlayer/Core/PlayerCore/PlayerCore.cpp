@@ -149,7 +149,7 @@ void PlayerCore::setPluginLoader()
         m_currentPlayPos = sec;
         emit playTickActual (sec);
         if (m_curTrackDuration > 0) {
-            qreal v = sec *1000/m_curTrackDuration;
+            qreal v = sec / m_curTrackDuration;
             int p = v *1000;
             qDebug()<<Q_FUNC_INFO<<" Percent "<<p;
             emit playTickPercent (p);

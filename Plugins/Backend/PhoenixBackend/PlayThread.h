@@ -35,7 +35,7 @@ public:
     QMutex *mutex();
 
     bool play();
-    void seek(qint64 time);
+    void seek(qint64 millisecond = 0);
     void stop();
     void togglePlayPause();
     void setMuted(bool muted);

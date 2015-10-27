@@ -32,11 +32,11 @@ public:
     bool useExternalOutPut();
 
 public slots:
-    void play(quint64 startSec);
+    void play(quint64 startSec = 0);
     void stop();
     void pause();
 //    void setVolume(int vol);
-    void setPosition(quint64 sec);
+    void setPosition(quint64 sec = 0);
     void changeMedia(BaseMediaObject *obj, quint64 startSec = 0, bool startPlay = false);
 
 signals:
