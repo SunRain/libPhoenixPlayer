@@ -137,7 +137,7 @@ bool FFmpeg::initialize()
         qWarning("DecoderFFmpeg: unable to initialize I/O callbacks");
         return false;
     }
-    m_stream->seekable = inputSource ()->isSequential ();//!input()->isSequential();
+    m_stream->seekable = !inputSource ()->isSequential ();
     m_stream->max_packet_size = INPUT_BUFFER_SIZE;
     ic->pb = m_stream;
 
@@ -242,13 +242,9 @@ bool FFmpeg::initialize()
         m_bitrate = ic->bit_rate/1000;
     if(c->bit_rate)
         m_bitrate = c->bit_rate/1000;
-    qDebug()<<Q_FUNC_INFO<<"initialize succes";
 
-#ifdef Q_OS_WIN
-    qDebug("total time = %I64d", m_totalTime);
-#else
-    qDebug("total time = %lld ", m_totalTime);
-#endif
+    qDebug()<<Q_FUNC_INFO<<"initialize succes";
+    qDebug()<<Q_FUNC_INFO<<"total time "<<m_totalTime;
     return true;
 }
 
