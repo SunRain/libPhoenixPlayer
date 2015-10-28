@@ -23,7 +23,6 @@ PhoenixPlayBackend::PhoenixPlayBackend(QObject *parent) :
     m_handler = nullptr;
     m_volumeControl = nullptr;
     m_muted = false;
-    m_preSec = 0;
 }
 
 PhoenixPlayBackend::~PhoenixPlayBackend()
@@ -104,8 +103,7 @@ void PhoenixPlayBackend::init()
 
     connect (m_handler, &StateHandler::elapsedChanged,
              [&](qint64 time) {
-        qDebug()<<Q_FUNC_INFO<<"Time is "<<time;
-        emit tick(m_preSec + time/1000);
+        emit tick(time/1000);
     });
 
     connect (m_handler, &StateHandler::bitrateChanged,
@@ -151,7 +149,7 @@ bool PhoenixPlayBackend::useExternalOutPut()
 
 void PhoenixPlayBackend::play(quint64 startSec)
 {
-    m_preSec = startSec;
+    qDebug()<<Q_FUNC_INFO<<"play with startSec "<<startSec;
     if (m_engine) {
         if (!m_engine->isRunning ()) {
             m_engine->play ();
@@ -160,7 +158,7 @@ void PhoenixPlayBackend::play(quint64 startSec)
                     m_engine->togglePlayPause ();
             }
         }
-        m_engine->seek (startSec * 1000);
+        this->setPosition (startSec);
     }
 }
 
@@ -179,7 +177,6 @@ void PhoenixPlayBackend::stop()
             || m_handler->state () == PlayState::Buffering) {
         m_handler->dispatch (PlayState::Stopped); //clear error and buffering state
     }
-    m_preSec = 0;
 }
 
 void PhoenixPlayBackend::pause()
@@ -190,7 +187,7 @@ void PhoenixPlayBackend::pause()
 
 void PhoenixPlayBackend::setPosition(quint64 sec)
 {
-    m_preSec = sec;
+    qDebug()<<Q_FUNC_INFO<<" setPosition "<<sec;
     if (m_engine)
         m_engine->seek (sec * 1000);
 }
@@ -211,13 +208,6 @@ void PhoenixPlayBackend::changeMedia(BaseMediaObject *obj, quint64 startSec, boo
     if (startPlay)
         m_engine->play ();
 }
-
-
-
-
-
-
-
 
 } //PhoenixBackend
 } //PlayBackend

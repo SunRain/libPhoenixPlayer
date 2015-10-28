@@ -138,7 +138,7 @@ bool PlayThread::play()
 
 void PlayThread::seek(qint64 millisecond)
 {
-    qDebug()<<Q_FUNC_INFO<<"===";
+    qDebug()<<Q_FUNC_INFO<<"=== seek to "<<millisecond;
     if (m_outputThread && m_outputThread->isRunning()) {
         m_outputThread->mutex()->lock ();
         m_outputThread->seek(millisecond, true);
@@ -462,6 +462,7 @@ void PlayThread::flush(bool final)
         while ((m_outputThread->recycler ()->full () || m_outputThread->recycler ()->blocked ())
                && (!m_done && !m_finish)) {
             if (m_seekTime > 0) {
+                qDebug()<<Q_FUNC_INFO<<" m_seekTime "<<m_seekTime;
                 m_output_at = 0;
                 m_outputThread->recycler ()->mutex ()->unlock ();
                 return;
@@ -488,6 +489,7 @@ void PlayThread::addOffset()
 {
     qint64 pos = m_startPos;
     if (pos > 0) {
+        qDebug()<<Q_FUNC_INFO<<" add pos "<<pos;
         m_seekTime = pos;
         m_outputThread->seek (pos);
     }

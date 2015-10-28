@@ -149,8 +149,9 @@ void PlayerCore::setPluginLoader()
         m_currentPlayPos = sec;
         emit playTickActual (sec);
         if (m_curTrackDuration > 0) {
-            qreal v = sec / m_curTrackDuration;
-            int p = v *1000;
+//            qreal v = sec / m_curTrackDuration;
+//            int p = v *1000;
+            int p = sec/m_curTrackDuration * 100;
             qDebug()<<Q_FUNC_INFO<<" Percent "<<p;
             emit playTickPercent (p);
         }
@@ -681,15 +682,20 @@ void PlayerCore::setPosition(qreal pos, bool isPercent)
     if (!m_playBackend)
         return;
 
-    qDebug()<<"PlayerCore setPosition to "<<pos<<" isPercent "<<isPercent;
+    qDebug()<<Q_FUNC_INFO<<"setPosition to "<<pos<<" isPercent "<<isPercent;
 
-    if (isPercent) {
-        if (m_curTrackDuration <= 0)
-            return;
-        (*m_playBackend)->setPosition (m_curTrackDuration * pos/100);
-    } else {
-        (*m_playBackend)->setPosition (pos);
-    }
+
+    m_currentPlayPos = isPercent
+            ? m_curTrackDuration <= 0 ? m_currentPlayPos : m_currentPlayPos * pos/100
+            : pos;
+//    if (isPercent) {
+//        if (m_curTrackDuration <= 0)
+//            return;
+//        (*m_playBackend)->setPosition (m_curTrackDuration * pos/100);
+//    } else {
+//        (*m_playBackend)->setPosition (pos);
+//    }
+    (*m_playBackend)->setPosition (m_currentPlayPos);
 }
 
 void PlayerCore::skipForward()

@@ -118,7 +118,7 @@ signals:
     void playTrackFailed();
     ///
     /// \brief playTickActual 播放实际时间
-    /// \param sec 实际时间
+    /// \param second 实际时间
     ///
     void playTickActual(quint64 second);
     ///

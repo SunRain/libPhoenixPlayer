@@ -211,6 +211,7 @@ void OutputThread::seek(qint64 pos, bool reset)
     m_totalWritten = pos * m_bytesPerMillisecond;
     m_currentMilliseconds = -1;
     m_skip = this->isRunning () && reset;
+    qDebug()<<Q_FUNC_INFO<<" m_skip "<<m_skip;
 }
 
 Recycler *OutputThread::recycler()

@@ -64,7 +64,7 @@ private:
     QString m_url;
 
     int m_nextState;
-    quint64 m_preSec;
+//    quint64 m_preSec;
     bool m_muted;
 };
 
