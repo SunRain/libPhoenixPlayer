@@ -31,15 +31,12 @@ TagParserPro::~TagParserPro()
     }
 }
 
-bool TagParserPro::parserTag(AudioMetaObject **target)
+bool TagParserPro::parserTag(AudioMetaObject *target)
 {
-    if (!target || (*target)->mediaType () == (int)Common::MediaTypeUrl)
+    if (!target || target->mediaType () == (int)Common::MediaTypeUrl)
         return false;
 
-//    QString name = targetMetaDate->getMeta (Common::E_FileName).toString ();
-//    QString path = targetMetaDate->getMeta (Common::E_FilePath).toString ();
-//    m_filePath = QString("%1/%2").arg (path).arg (name);
-    m_filePath = (*target)->uri ().toLocalFile ();
+    m_filePath = target->uri ().toLocalFile ();
     QFile f(m_filePath);
     if (!f.exists ()) {
         qWarning()<<Q_FUNC_INFO<<"wrong file path ["<<m_filePath<<"]";
@@ -54,23 +51,25 @@ bool TagParserPro::parserTag(AudioMetaObject **target)
 
     TagLib::Tag *tag = m_tagRef->tag ();
     QString str;
+    ArtistMeta artist = target->artistMeta ();
+    AlbumMeta album = target->albumMeta ();
+    TrackMeta track = target->trackMeta ();
+    CoverMeta cover = target->coverMeta ();
+
     if (tag) {
         str = TStringToQString(tag->artist());
         if (!str.isEmpty ()) {
-//            target->setMeta (Common::E_ArtistName, QVariant(str));
-            (*target)->artistMeta ()->setName (str);
+            artist.setName (str);
         }
 
         str = TStringToQString(tag->title());
         if (!str.isEmpty ()) {
-//            target->setMeta (Common::E_TrackTitle, QVariant(str));
-            (*target)->trackMeta ()->setTitle (str);
+            track.setTitle (str);
         }
 
         str = TStringToQString(tag->album());
         if (!str.isEmpty ()) {
-//            target->setMeta (Common::E_AlbumName, QVariant(str));
-            (*target)->albumMeta ()->setName (str);
+            album.setName (str);
         }
 
         //TODO remove comment atm
@@ -81,30 +80,30 @@ bool TagParserPro::parserTag(AudioMetaObject **target)
 
         str = TStringToQString(tag->genre());
         if (!str.isEmpty ()) {
-//            target->setMeta (Common::E_Genre, QVariant(str));
-            (*target)->trackMeta ()->setGenre (str);
+            track.setGenre (str);
         }
 
         str = QString::number(tag->year());
         if (!str.isEmpty ()) {
-//            target->setMeta (Common::E_Year, QVariant(str));
-            (*target)->trackMeta ()->setYear (str);
+            track.setYear (str);
         }
     }
 
     TagLib::AudioProperties *ap = m_tagRef->audioProperties ();
 
     if (ap) {
-        (*target)->trackMeta ()->setDuration (ap->length ());
+        target->trackMeta ()->setDuration (ap->length ());
 
         str = QString::number(ap->sampleRate ());
         if (!str.isEmpty ()) {
-            (*target)->trackMeta ()->setSampleRate (str);
+//            target->trackMeta ()->setSampleRate (str);
+            track.setSampleRate (str);
         }
 
         str = QString::number(ap->bitrate());
         if (!str.isEmpty ()) {
-            (*target)->trackMeta ()->setBitRate (str);
+//            target->trackMeta ()->setBitRate (str);
+            track.setBitRate (str);
         }
     }
     //get cover image
@@ -113,43 +112,54 @@ bool TagParserPro::parserTag(AudioMetaObject **target)
         Settings *s = Settings::instance ();
 
         QString imagePath = s->musicImageCachePath ();
-        QString tmp = (*target)->name ();//name;
+        QString tmp = target->name ();//name;
         tmp = tmp.mid (0, tmp.lastIndexOf ("."));
         //loop to try to save cover image
+        bool breakLoop = false;
         do {
             QString fileName = QString("%1/%2_cover.png").arg (imagePath).arg (tmp);
             if (image.save (fileName, "PNG")) {
 //                target->setMeta (Common::E_CoverArtSmall, fileName);
-                (*target)->coverMeta ()->setSmallUri (fileName);
+//                target->coverMeta ()->setSmallUri (fileName);
+                cover.setSmallUri (fileName);
                 break;
             }
             fileName = QString("%1/%2_cover.bmp").arg (imagePath).arg (tmp);
             if (image.save (fileName, "BMP")) {
 //                target->setMeta (Common::E_CoverArtSmall, fileName);
-                (*target)->coverMeta ()->setSmallUri (fileName);
+//                target->coverMeta ()->setSmallUri (fileName);
+                cover.setSmallUri (fileName);
                 break;
             }
             fileName = QString("%1/%2_cover.jpg").arg (imagePath).arg (tmp);
             if (image.save (fileName, "JPG")) {
 //                target->setMeta (Common::E_CoverArtSmall, fileName);
-                (*target)->coverMeta ()->setSmallUri (fileName);
+//                target->coverMeta ()->setSmallUri (fileName);
+                cover.setSmallUri (fileName);
                 break;
             }
             fileName = QString("%1/%2_cover.jpeg").arg (imagePath).arg (tmp);
             if (image.save (fileName, "JPEG")) {
 //                target->setMeta (Common::E_CoverArtSmall, fileName);
-                (*target)->coverMeta ()->setSmallUri (fileName);
+//                target->coverMeta ()->setSmallUri (fileName);
+                cover.setSmallUri (fileName);
                 break;
             }
             fileName = QString("%1/%2_cover.gif").arg (imagePath).arg (tmp);
             if (image.save (fileName, "GIF")) {
 //                target->setMeta (Common::E_CoverArtSmall, fileName);
-                (*target)->coverMeta ()->setSmallUri (fileName);
+//                target->coverMeta ()->setSmallUri (fileName);
+                cover.setSmallUri (fileName);
                 break;
             }
-        } while (true);
+            breakLoop = true;
+        } while (!breakLoop);
     }
 
+    target->setAlbumMeta (album);
+    target->setArtistMeta (artist);
+    target->setCoverMeta (cover);
+    target->setTrackMeta (track);
     return true;
 }
 

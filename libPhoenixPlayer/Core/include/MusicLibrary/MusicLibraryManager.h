@@ -15,7 +15,7 @@ class QThread;
 namespace PhoenixPlayer {
 class Settings;
 class PluginLoader;
-class SongMetaData;
+class AudioMetaObject;
 namespace MusicLibrary {
 
 class MusicLibraryDAOHost;
@@ -48,7 +48,7 @@ public:
     /// \brief allTracks 显示所有曲目
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE QList<QObject *> allTracks();
+    Q_INVOKABLE QList<AudioMetaObject> allTracks();
 
 
     ///
@@ -63,12 +63,12 @@ public:
     /// \param limitNum 显示个数
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE QList<QObject *> artistTracks(const QString &artistName,int limitNum = 0);
-    Q_INVOKABLE QList<QObject *> albumTracks(const QString  &albumName, int limitNum = 0);
-    Q_INVOKABLE QList<QObject *> genreTracks(const QString &genreName, int limitNum = 0);
-    Q_INVOKABLE QList<QObject *> mediaTypeTracks(const QString &mediaType, int limitNum = 0);
-    Q_INVOKABLE QList<QObject *> userRatingTracks(const QString &rating, int limitNum = 0);
-    Q_INVOKABLE QList<QObject *> folderTracks(const QString &folder, int limitNum = 0);
+    Q_INVOKABLE QList<AudioMetaObject> artistTracks(const QString &artistName,int limitNum = 0);
+    Q_INVOKABLE QList<AudioMetaObject> albumTracks(const QString  &albumName, int limitNum = 0);
+    Q_INVOKABLE QList<AudioMetaObject> genreTracks(const QString &genreName, int limitNum = 0);
+    Q_INVOKABLE QList<AudioMetaObject> mediaTypeTracks(const QString &mediaType, int limitNum = 0);
+    Q_INVOKABLE QList<AudioMetaObject> userRatingTracks(const QString &rating, int limitNum = 0);
+    Q_INVOKABLE QList<AudioMetaObject> folderTracks(const QString &folder, int limitNum = 0);
 
 //    ///
 //    /// \brief playingSong 返回当前播放的歌曲hash,
@@ -202,7 +202,7 @@ public:
 private:
 //      bool init();
     void initList();
-    bool trackInList(SongMetaData **data);
+//    bool trackInList(AudioMetaObject **data);
 private:
 //      bool m_isInit;
 //      QPointer<IPlayListDAO> m_playListDAO;
@@ -210,7 +210,7 @@ private:
     IMusicLibraryDAO *m_dao;
     PluginLoader *m_pluginLoader;
     Settings *m_settings;
-    QList<SongMetaData *> m_trackList;
+    QList<AudioMetaObject> m_trackList;
 //      AsyncDiskLookup *m_asyncDiskLookup;
 //      AsyncTagParserMgrWrapper *m_tagParserWrapper;
 

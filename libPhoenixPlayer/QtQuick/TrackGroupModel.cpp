@@ -4,7 +4,7 @@
 #include <QList>
 #include <QVariant>
 #include <QDebug>
-#include <SongMetaData.h>
+#include <AudioMetaObject.h>
 
 #include "SingletonPointer.h"
 #include "MusicLibrary/MusicLibraryManager.h"
@@ -127,7 +127,7 @@ void TrackGroupModel::queryData()
 //     mDataList = m_musicLibraryManager->querySongMetaElement(mSongMetaTag, QString(), true);
     QList<QObject *> list = m_musicLibraryManager->allTracks ();
     foreach (QObject *o, list) {
-        SongMetaData *d = qobject_cast<SongMetaData *>(o);
+        AudioMetaObject *d = qobject_cast<AudioMetaObject *>(o);
         if (!d)
             continue;
         switch (m_type) {
@@ -188,7 +188,7 @@ void TrackGroupModel::queryData()
     foreach (GroupObject obj, m_groupList) {
         if (obj.imgUri.isEmpty ()) {
             foreach (QObject *o, list) {
-                SongMetaData *d = qobject_cast<SongMetaData *>(o);
+                AudioMetaObject *d = qobject_cast<AudioMetaObject *>(o);
                 if (!o)
                     continue;
                 if (m_type == ModelType::TypeAlbum) {

@@ -96,6 +96,7 @@ void LocalMusicScannerThread::addLookupDirs(const QStringList &dirList, bool loo
 void LocalMusicScannerThread::run()
 {
     qDebug()<<Q_FUNC_INFO<<m_pathList;
+    m_mutex.lock ();
     if (m_pathList.isEmpty ()) {
         QString tmp = QString("%1/%2").arg (QDir::homePath ())
                 .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
@@ -103,6 +104,7 @@ void LocalMusicScannerThread::run()
         qDebug()<<"Lookup default dir "<<tmp;
         m_pathList.append (tmp);
     }
+    m_mutex.unlock ();
     if (m_dao)
         m_dao->beginTransaction ();
     while (!m_pathList.isEmpty ()) {
@@ -146,7 +148,8 @@ void LocalMusicScannerThread::scanDir(const QString &path)
             //所以直接检测mimetype 生成的字符串
 //            if (type.inherits ("audio/mpeg")) {
             if (type.name ().contains ("audio") || type.name ().contains ("Audio")) {
-                AudioMetaObject *data = new AudioMetaObject(path, info.fileName (), info.size (), 0);
+//                AudioMetaObject *data = new AudioMetaObject(path, info.fileName (), info.size (), 0);
+                AudioMetaObject data(path, info.fileName (), info.size ());
 //                foreach (MusicTagParserHost *host, m_tagHostList) {
                 foreach (IMusicTagParser *parser, m_tagParserList) {
                     if (m_stopLookupFlag)
@@ -160,9 +163,7 @@ void LocalMusicScannerThread::scanDir(const QString &path)
                 }
                 qDebug()<<Q_FUNC_INFO<<"SongMetaData values ["<<data->toString ()<<"]";
                 if (m_dao)
-                    m_dao->insertMetaData (&data);
-                data->deleteLater ();
-                data = nullptr;
+                    m_dao->insertMetaData (data);
             }
         }
     }

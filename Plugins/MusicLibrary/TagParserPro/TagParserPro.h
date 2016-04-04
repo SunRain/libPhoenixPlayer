@@ -34,7 +34,7 @@ public:
 
     // IMusicTagParser interface
 public:
-    bool parserTag(AudioMetaObject **target);
+    bool parserTag(AudioMetaObject *target);
 
 protected:
     QImage getImage();
