@@ -9,8 +9,6 @@
 
 namespace PhoenixPlayer {
 
-using namespace MetaData;
-
 #define KEY_NAME "NAME"
 #define KEY_URI "URI"
 #define KEY_DESCRIPTION "DESCRIPTION"
@@ -180,7 +178,7 @@ QString SongMetaData::formatHash(const QString &path, const QString &name, quint
 
 QString SongMetaData::hash() const
 {
-    return d.data ()->hash
+    return d.data ()->hash;
 }
 
 QString SongMetaData::path() const
@@ -356,9 +354,6 @@ SongMetaData SongMetaData::fromJson(const QByteArray &json)
 
     return meta;
 }
-
-///////////////////////  namespace MetaData /////////////////////////////////
-namespace MetaData {
 
 class AlbumMetaPriv : public QSharedData
 {
@@ -847,7 +842,4 @@ TrackMeta TrackMeta::fromJson(const QByteArray &json)
     return meta;
 }
 
-
-
-} //MetaData
 } //PhoenixPlayer

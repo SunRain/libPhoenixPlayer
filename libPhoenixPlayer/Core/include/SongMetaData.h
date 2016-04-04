@@ -10,8 +10,6 @@ class QDate;
 class QJsonObject;
 namespace PhoenixPlayer {
 
-namespace MetaData {
-
 class AlbumMetaPriv;
 class AlbumMeta
 {
@@ -173,8 +171,6 @@ private:
     QSharedDataPointer<TrackMetaPriv> d;
 };
 
-} //MetaData
-
 class SongMetaDataPriv;
 class SongMetaData
 {
@@ -212,15 +208,15 @@ public:
     void setLyricsUri(const QUrl &arg);
 
 
-    MetaData::AlbumMeta albumMeta() const;
-    MetaData::ArtistMeta artistMeta() const;
-    MetaData::CoverMeta coverMeta() const;
-    MetaData::TrackMeta trackMeta() const;
+    AlbumMeta albumMeta() const;
+    ArtistMeta artistMeta() const;
+    CoverMeta coverMeta() const;
+    TrackMeta trackMeta() const;
 
-    void setAlbumMeta(const MetaData::AlbumMeta &meta);
-    void setArtistMeta(const MetaData::ArtistMeta &meta);
-    void setCoverMeta(const MetaData::CoverMeta &meta);
-    void setTrackMeta(const MetaData::TrackMeta &meta);
+    void setAlbumMeta(const AlbumMeta &meta);
+    void setArtistMeta(const ArtistMeta &meta);
+    void setCoverMeta(const CoverMeta &meta);
+    void setTrackMeta(const TrackMeta &meta);
 
     ///
     /// \brief uri
