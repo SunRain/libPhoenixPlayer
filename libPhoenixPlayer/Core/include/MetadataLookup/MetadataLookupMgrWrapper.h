@@ -7,7 +7,7 @@
 
 namespace PhoenixPlayer {
 class PluginLoader;
-class SongMetaData;
+class AudioMetaObject;
 
 namespace MusicLibrary {
 class MusicLibraryManager;
@@ -27,31 +27,31 @@ public:
 //    static MetadataLookupMgrWrapper *instance();
 //#endif
 
-    Q_INVOKABLE void lookupLyric(SongMetaData **data);
+    Q_INVOKABLE void lookupLyric(AudioMetaObject **data);
     Q_INVOKABLE void lookupLyric(const QString &uuid,
                                  const QString &title, const QString &artist, const QString &album);
 
-    Q_INVOKABLE void lookupAlbumImage(SongMetaData **data);
+    Q_INVOKABLE void lookupAlbumImage(AudioMetaObject **data);
     Q_INVOKABLE void lookupAlbumImage(const QString &uuid,
                                       const QString &title, const QString &artist, const QString &album);
 
-    Q_INVOKABLE void lookupAlbumDescription(SongMetaData **data);
+    Q_INVOKABLE void lookupAlbumDescription(AudioMetaObject **data);
     Q_INVOKABLE void lookupAlbumDescription(const QString &uuid,
                                             const QString &title, const QString &artist, const QString &album);
 
-    Q_INVOKABLE void lookupAlbumDate(SongMetaData **data);
+    Q_INVOKABLE void lookupAlbumDate(AudioMetaObject **data);
     Q_INVOKABLE void lookupAlbumDate(const QString &uuid,
                                      const QString &title, const QString &artist, const QString &album);
 
-    Q_INVOKABLE void lookupArtistImage(SongMetaData **data);
+    Q_INVOKABLE void lookupArtistImage(AudioMetaObject **data);
     Q_INVOKABLE void lookupArtistImage(const QString &uuid,
                                        const QString &title, const QString &artist, const QString &album);
 
-    Q_INVOKABLE void lookupArtistDescription(SongMetaData **data);
+    Q_INVOKABLE void lookupArtistDescription(AudioMetaObject **data);
     Q_INVOKABLE void lookupArtistDescription(const QString &uuid,
                                              const QString &title, const QString &artist, const QString &album);
 
-    Q_INVOKABLE void lookupTrackDescription(SongMetaData **data);
+    Q_INVOKABLE void lookupTrackDescription(AudioMetaObject **data);
     Q_INVOKABLE void lookupTrackDescription(const QString &uuid,
                                             const QString &title, const QString &artist, const QString &album);
 
@@ -65,43 +65,43 @@ protected:
         }
     };
 signals:
-    void lookupLyricSucceed(SongMetaData **data);
-    void lookupLyricFailed(SongMetaData **data);
+    void lookupLyricSucceed(AudioMetaObject **data);
+    void lookupLyricFailed(AudioMetaObject **data);
 
-    void lookupAlbumImageSucceed(SongMetaData **data);
-    void lookupAlbumImageFailed(SongMetaData **data);
+    void lookupAlbumImageSucceed(AudioMetaObject **data);
+    void lookupAlbumImageFailed(AudioMetaObject **data);
 
-    void lookupAlbumDescriptionSucceed(SongMetaData **data);
-    void lookupAlbumDescriptionFailed(SongMetaData **data);
+    void lookupAlbumDescriptionSucceed(AudioMetaObject **data);
+    void lookupAlbumDescriptionFailed(AudioMetaObject **data);
 
-    void lookupAlbumDateSucceed(SongMetaData **data);
-    void lookupAlbumDateFailed(SongMetaData **data);
+    void lookupAlbumDateSucceed(AudioMetaObject **data);
+    void lookupAlbumDateFailed(AudioMetaObject **data);
 
-    void lookupArtistImageSucceed(SongMetaData **data);
-    void lookupArtistImageFailed(SongMetaData **data);
+    void lookupArtistImageSucceed(AudioMetaObject **data);
+    void lookupArtistImageFailed(AudioMetaObject **data);
 
-    void lookupArtistDescriptionSucceed(SongMetaData **data);
-    void lookupArtistDescriptionFailed(SongMetaData **data);
+    void lookupArtistDescriptionSucceed(AudioMetaObject **data);
+    void lookupArtistDescriptionFailed(AudioMetaObject **data);
 
-    void lookupTrackDescriptionSucceed(SongMetaData **data);
-    void lookupTrackDescriptionFailed(SongMetaData **data);
+    void lookupTrackDescriptionSucceed(AudioMetaObject **data);
+    void lookupTrackDescriptionFailed(AudioMetaObject **data);
 
-    void metadataLookupFailed(SongMetaData **data);
+    void metadataLookupFailed(AudioMetaObject **data);
 
 private slots:
-    void doLookupFailed(SongMetaData **data, const IMetadataLookup::LookupType &type);
-    void doLookupSucceed(SongMetaData **data,
+    void doLookupFailed(AudioMetaObject **data, const IMetadataLookup::LookupType &type);
+    void doLookupSucceed(AudioMetaObject **data,
                          const IMetadataLookup::LookupType &type);
 
 private:
-    void doLookup(SongMetaData **data,
+    void doLookup(AudioMetaObject **data,
                   MetadataLookup::IMetadataLookup::LookupType type);
     void doLookupByDetail(const QString &uuid,
                           const QString &title, const QString &artist, const QString &album,
                           MetadataLookup::IMetadataLookup::LookupType type);
 
     void emitResult(MetadataLookup::IMetadataLookup::LookupType type,
-                    SongMetaData **data,
+                    AudioMetaObject **data,
                     const QString &result,
                     bool succeed);
 private:

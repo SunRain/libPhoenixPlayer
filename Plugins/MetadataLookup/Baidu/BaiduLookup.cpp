@@ -29,7 +29,7 @@ BaiduLookup::~BaiduLookup()
     qDebug()<<Q_FUNC_INFO;
 }
 
-void BaiduLookup::lookup(SongMetaData **meta)
+void BaiduLookup::lookup(AudioMetaObject **meta)
 {
     if (!meta) {
         qDebug()<<Q_FUNC_INFO<<"[BaiduLookup] No meta found";

@@ -7,7 +7,7 @@ namespace PhoenixPlayer {
 
 class Settings;
 class PluginLoader;
-class SongMetaData;
+class AudioMetaObject;
 namespace MusicLibrary {
 
 class IMusicLibraryDAO;

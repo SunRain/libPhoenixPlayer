@@ -17,7 +17,7 @@
 
 class QImage;
 namespace PhoenixPlayer {
-class SongMetaData;
+class AudioMetaObject;
 namespace MusicLibrary {
 
 namespace TagParserPro {
@@ -34,7 +34,7 @@ public:
 
     // IMusicTagParser interface
 public:
-    bool parserTag(SongMetaData **target);
+    bool parserTag(AudioMetaObject **target);
 
 protected:
     QImage getImage();

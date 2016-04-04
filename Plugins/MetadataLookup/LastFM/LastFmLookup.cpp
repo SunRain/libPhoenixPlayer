@@ -88,7 +88,7 @@ bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
 }
 
 //http://ws.audioscrobbler.com/2.0/?method=album.search&album=F.I.R&api_key=625fd47b3b685af19315cc3a1aa5920a&format=json
-void LastFmLookup::lookup(SongMetaData **meta)
+void LastFmLookup::lookup(AudioMetaObject **meta)
 {
     qDebug()<<"====> "<<Q_FUNC_INFO<<" <====";
 

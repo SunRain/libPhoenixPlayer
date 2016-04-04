@@ -5,7 +5,7 @@
 #include <QFile>
 
 namespace PhoenixPlayer {
-class SongMetaData;
+class AudioMetaObject;
 class PlayListFormat : public QObject
 {
     Q_OBJECT
@@ -25,7 +25,7 @@ public:
     /// \param list 歌曲列表
     /// \return 格式化后的文件内容
     ///
-    virtual QString format(const QList<SongMetaData *> &list);
+    virtual QString format(const QList<AudioMetaObject *> &list);
 //    virtual QString encode(const QStringList &fileList);
 };
 } //PhoenixPlayer

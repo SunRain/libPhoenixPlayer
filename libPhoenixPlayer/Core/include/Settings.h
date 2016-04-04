@@ -9,7 +9,7 @@ class QSettings;
 
 namespace PhoenixPlayer {
 
-class SongMetaData;
+class AudioMetaObject;
 class Settings : public QObject
 {
     Q_OBJECT
@@ -34,8 +34,8 @@ public:
 
 //    Q_INVOKABLE bool setLastPlayedSong(const QString &songHash);
 //    Q_INVOKABLE QString lastPlayedSong();
-    void setLastPlayedSong(SongMetaData **data);
-    SongMetaData *lastPlayedSong();
+    void setLastPlayedSong(AudioMetaObject **data);
+    AudioMetaObject *lastPlayedSong();
 
     Q_INVOKABLE bool setCurrentPlayListHash(const QString &hash);
     Q_INVOKABLE QString getPlayListHash();

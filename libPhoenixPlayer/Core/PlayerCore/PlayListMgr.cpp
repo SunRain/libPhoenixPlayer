@@ -47,21 +47,21 @@ PlayListMgr::~PlayListMgr()
     }
 }
 
-bool PlayListMgr::addTrack(const SongMetaData *song)
+bool PlayListMgr::addTrack(const AudioMetaObject *song)
 {
     if (!song)
         return false;
-    SongMetaData *d = new SongMetaData(song, this);
+    AudioMetaObject *d = new AudioMetaObject(song, this);
     m_trackList.append (d);
     return true;
 }
 
-bool PlayListMgr::addTrack(const QList<SongMetaData *> &list)
+bool PlayListMgr::addTrack(const QList<AudioMetaObject *> &list)
 {
     if (list.isEmpty ())
         return false;
-    foreach (SongMetaData *d, list) {
-        SongMetaData *m = new SongMetaData(d, this);
+    foreach (AudioMetaObject *d, list) {
+        AudioMetaObject *m = new AudioMetaObject(d, this);
         m_trackList.append (m);
     }
     return true;
@@ -74,10 +74,10 @@ bool PlayListMgr::removeTrack(int index)
         return false;
     }
     //FIXME is it right to use QList.removeAt(i) function?
-    QList<SongMetaData *> tmp;
+    QList<AudioMetaObject *> tmp;
     for (int i=0; i<m_trackList.size (); ++i) {
         if (i == index) {
-            SongMetaData *d = m_trackList.value (i);
+            AudioMetaObject *d = m_trackList.value (i);
             d->deleteLater ();
             d = nullptr;
             continue;
@@ -85,7 +85,7 @@ bool PlayListMgr::removeTrack(int index)
         tmp.append (m_trackList.value (i));
     }
     m_trackList.clear ();
-    foreach (SongMetaData *d, tmp) {
+    foreach (AudioMetaObject *d, tmp) {
         m_trackList.append (d);
     }
     return true;
@@ -101,10 +101,10 @@ bool PlayListMgr::removeTracks(int startPos, int endPos)
     }
 
     //FIXME is it right to use QList.removeAt(i) function?
-    QList<SongMetaData *> tmp;
+    QList<AudioMetaObject *> tmp;
     for (int i=0; i<m_trackList.size (); ++i) {
         if (i >= startPos && i <= endPos) {
-            SongMetaData *d = m_trackList.value (i);
+            AudioMetaObject *d = m_trackList.value (i);
             d->deleteLater ();
             d = nullptr;
             continue;
@@ -112,7 +112,7 @@ bool PlayListMgr::removeTracks(int startPos, int endPos)
         tmp.append (m_trackList.value (i));
     }
     m_trackList.clear ();
-    foreach (SongMetaData *d, tmp) {
+    foreach (AudioMetaObject *d, tmp) {
         m_trackList.append (d);
     }
     return true;
@@ -144,7 +144,7 @@ int PlayListMgr::count() const
     return m_trackList.size ();
 }
 
-SongMetaData *PlayListMgr::currentTrack() const
+AudioMetaObject *PlayListMgr::currentTrack() const
 {
     if (m_trackList.isEmpty ())
         return nullptr;
@@ -159,7 +159,7 @@ QObject *PlayListMgr::currentTrackObject() const
     return qobject_cast<QObject*>(currentTrack ());
 }
 
-SongMetaData *PlayListMgr::get(int index) const
+AudioMetaObject *PlayListMgr::get(int index) const
 {
     if (m_trackList.isEmpty () || index >= m_trackList.size () || index < 0)
         return nullptr;
@@ -210,7 +210,7 @@ bool PlayListMgr::open(const QString &name)
     foreach (QString s, fileList) {
         QUrl url(s);
         QString str;
-        SongMetaData *meta;
+        AudioMetaObject *meta;
         if (url.isLocalFile ()) {
             str = url.toLocalFile ();
             if (!QFile::exists (str)) {
@@ -218,12 +218,12 @@ bool PlayListMgr::open(const QString &name)
                 continue;
             }
             QFileInfo info(str);
-            meta = new SongMetaData(info.absolutePath (), info.fileName (), info.size (),this);
+            meta = new AudioMetaObject(info.absolutePath (), info.fileName (), info.size (),this);
             meta->setMediaType ((int)Common::MediaTypeLocalFile);
             //TODO: should fill other SongMetaData properties from music library
         } else {
             str = url.toString ();
-            meta = new SongMetaData(str, "", 0, this);
+            meta = new AudioMetaObject(str, "", 0, this);
             meta->setMediaType ((int)Common::MediaTypeUrl);
         }
         m_trackList.append (meta);

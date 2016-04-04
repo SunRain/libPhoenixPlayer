@@ -34,10 +34,10 @@ namespace PhoenixPlayer {
 #define KEY_COVER_META "COVER_META"
 #define KEY_TRACK_META "TRACK_META"
 
-class SongMetaDataPriv : public QSharedData
+class AudioMetaObjectPriv : public QSharedData
 {
 public:
-    SongMetaDataPriv() {
+    AudioMetaObjectPriv() {
         hash = QString();
         path = QString();
         name = QString();
@@ -65,39 +65,39 @@ public:
     MetaData::TrackMeta trackMeta;
 };
 
-SongMetaData::SongMetaData()
-    : d(new SongMetaDataPriv())
+AudioMetaObject::AudioMetaObject()
+    : d(new AudioMetaObjectPriv())
 {
 }
 
-SongMetaData::SongMetaData(const QString &path, const QString &name, quint64 size)
-    : d(new SongMetaDataPriv())
+AudioMetaObject::AudioMetaObject(const QString &path, const QString &name, quint64 size)
+    : d(new AudioMetaObjectPriv())
 {
     d.data ()->path = path;
     d.data ()->name = name;
     d.data ()->size = size;
-    d.data ()->hash = SongMetaData::formatHash(path, name, size);
+    d.data ()->hash = AudioMetaObject::formatHash(path, name, size);
 }
 
-SongMetaData::SongMetaData(const SongMetaData &other)
+AudioMetaObject::AudioMetaObject(const AudioMetaObject &other)
     : d(other.d)
 {
 }
 
-SongMetaData::SongMetaData(const QUrl &url)
-    : d(new SongMetaDataPriv())
+AudioMetaObject::AudioMetaObject(const QUrl &url)
+    : d(new AudioMetaObjectPriv())
 {
     d.data ()->mediaType = (int)Common::MediaTypeUrl;
     d.data ()->path = url.toString ();
     d.data ()->hash = Util::calculateHash (url.toString ());
 }
 
-SongMetaData::~SongMetaData()
+AudioMetaObject::~AudioMetaObject()
 {
 
 }
 
-bool SongMetaData::operator ==(const SongMetaData &other)
+bool AudioMetaObject::operator ==(const AudioMetaObject &other)
 {
     return d.data ()->albumMeta == other.d.data ()->albumMeta
             && d.data ()->artistMeta == other.d.data ()->artistMeta
@@ -112,161 +112,106 @@ bool SongMetaData::operator ==(const SongMetaData &other)
             && d.data ()->trackMeta == other.d.data ()->trackMeta;
 }
 
-QString SongMetaData::keyHash() const
+QString AudioMetaObject::keyHash() const
 {
     return QString(KEY_HASH);
 }
-
-//QString SongMetaData::toString()
-//{
-////    QStringList values;
-////    QStringList props = m_albumMeta->propertyList ();
-////    props.removeDuplicates ();
-////    foreach (QString s, props) {
-////        QString v = QString("%1 = [%2]")
-////                .arg (s)
-////                .arg (m_albumMeta->property (s.toLocal8Bit ().constData ()).toString ());
-////        values.append (v);
-////    }
-
-////    props.clear ();
-////    props = m_artistMeta->propertyList ();
-////    props.removeDuplicates ();
-////    foreach (QString s, props) {
-////        QString v = QString("%1 = [%2]")
-////                .arg (s)
-////                .arg (m_artistMeta->property (s.toLocal8Bit ().constData ()).toString ());
-////        values.append (v);
-////    }
-
-////    props.clear ();
-////    props = m_coverMeta->propertyList ();
-////    props.removeDuplicates ();
-////    foreach (QString s, props) {
-////        QString v = QString("%1 = [%2]")
-////                .arg (s)
-////                .arg (m_coverMeta->property (s.toLocal8Bit ().constData ()).toString ());
-////        values.append (v);
-////    }
-
-////    props.clear ();
-////    props = m_trackMeta->propertyList ();
-////    props.removeDuplicates ();
-////    foreach (QString s, props) {
-////        QString v = QString("%1 = [%2]")
-////                .arg (s)
-////                .arg (m_trackMeta->property (s.toLocal8Bit ().constData ()).toString ());
-////        values.append (v);
-////    }
-
-////    props.clear ();
-////    props = this->propertyList ();
-////    props.removeDuplicates ();
-////    foreach (QString s, props) {
-////        QString v = QString("%1 = [%2]")
-////                .arg (s)
-////                .arg (this->property (s.toLocal8Bit ().constData ()).toString ());
-////        values.append (v);
-////    }
-////    return values.join (",");
-//}
-
-QString SongMetaData::formatHash(const QString &path, const QString &name, quint64 size)
+QString AudioMetaObject::formatHash(const QString &path, const QString &name, quint64 size)
 {
     return Util::calculateHash (QString("%1/%2-%3").arg (path).arg (name).arg (size));
 }
 
-QString SongMetaData::hash() const
+QString AudioMetaObject::hash() const
 {
     return d.data ()->hash;
 }
 
-QString SongMetaData::path() const
+QString AudioMetaObject::path() const
 {
     return d.data ()->path;
 }
 
-QString SongMetaData::name() const
+QString AudioMetaObject::name() const
 {
     return d.data ()->name;
 }
 
-quint64 SongMetaData::size() const
+quint64 AudioMetaObject::size() const
 {
     return d.data ()->size;
 }
 
-int SongMetaData::mediaType() const
+int AudioMetaObject::mediaType() const
 {
     return d.data ()->mediaType;
 }
 
-QString SongMetaData::lyricsData() const
+QString AudioMetaObject::lyricsData() const
 {
     return d.data ()->lyricsData;
 }
 
-QUrl SongMetaData::lyricsUri() const
+QUrl AudioMetaObject::lyricsUri() const
 {
     return d.data ()->lyricsUri;
 }
 
-void SongMetaData::setMediaType(int arg)
+void AudioMetaObject::setMediaType(int arg)
 {
     d.data ()->mediaType = arg;
 }
 
-void SongMetaData::setLyricsData(const QString &arg)
+void AudioMetaObject::setLyricsData(const QString &arg)
 {
     d.data ()->lyricsData = arg;
 }
 
-void SongMetaData::setLyricsUri(const QUrl &arg)
+void AudioMetaObject::setLyricsUri(const QUrl &arg)
 {
     d.data ()->lyricsUri = arg;
 }
 
-AlbumMeta SongMetaData::albumMeta() const
+AlbumMeta AudioMetaObject::albumMeta() const
 {
     return d.data ()->albumMeta;
 }
 
-ArtistMeta SongMetaData::artistMeta() const
+ArtistMeta AudioMetaObject::artistMeta() const
 {
     return d.data ()->artistMeta;
 }
 
-CoverMeta SongMetaData::coverMeta() const
+CoverMeta AudioMetaObject::coverMeta() const
 {
     return d.data ()->coverMeta;
 }
 
-TrackMeta SongMetaData::trackMeta() const
+TrackMeta AudioMetaObject::trackMeta() const
 {
     return d.data ()->trackMeta;
 }
 
-void SongMetaData::setAlbumMeta(const AlbumMeta &meta)
+void AudioMetaObject::setAlbumMeta(const AlbumMeta &meta)
 {
     d.data ()->albumMeta = meta;
 }
 
-void SongMetaData::setArtistMeta(const ArtistMeta &meta)
+void AudioMetaObject::setArtistMeta(const ArtistMeta &meta)
 {
     d.data ()->artistMeta = meta;
 }
 
-void SongMetaData::setCoverMeta(const CoverMeta &meta)
+void AudioMetaObject::setCoverMeta(const CoverMeta &meta)
 {
     d.data ()->coverMeta = meta;
 }
 
-void SongMetaData::setTrackMeta(const TrackMeta &meta)
+void AudioMetaObject::setTrackMeta(const TrackMeta &meta)
 {
     d.data ()->trackMeta = meta;
 }
 
-QUrl SongMetaData::uri() const
+QUrl AudioMetaObject::uri() const
 {
     if (d.data ()->mediaType == (int)Common::MediaTypeLocalFile) {
         if (!d.data ()->path.isEmpty () && !d.data ()->name.isEmpty ())
@@ -282,7 +227,7 @@ QUrl SongMetaData::uri() const
     return QUrl();
 }
 
-QUrl SongMetaData::queryImgUri() const
+QUrl AudioMetaObject::queryImgUri() const
 {
     if (!coverMeta ().middleUri ().isEmpty ())
         return coverMeta ().middleUri ();
@@ -297,7 +242,7 @@ QUrl SongMetaData::queryImgUri() const
     return QUrl();
 }
 
-QJsonObject SongMetaData::toObject() const
+QJsonObject AudioMetaObject::toObject() const
 {
     QJsonObject o;
     o.insert (KEY_HASH, d.data ()->hash);
@@ -314,15 +259,15 @@ QJsonObject SongMetaData::toObject() const
     return o;
 }
 
-QByteArray SongMetaData::toJson() const
+QByteArray AudioMetaObject::toJson() const
 {
     QJsonDocument doc(toObject ());
     return doc.toJson ();
 }
 
-SongMetaData SongMetaData::fromJson(const QByteArray &json)
+AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
 {
-    SongMetaData meta;
+    AudioMetaObject meta;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
@@ -338,7 +283,7 @@ SongMetaData SongMetaData::fromJson(const QByteArray &json)
     QString name = o.value (KEY_NAME).toString ();
     QString path = o.value (KEY_PATH).toString ();
     QString size = o.value (KEY_SIZE).toInt ();
-    SongMetaData m(path, name, size);
+    AudioMetaObject m(path, name, size);
     meta = m;
     AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ().toUtf8 ());
     ArtistMeta ar = ArtistMeta::fromJson (o.value (KEY_ARTIST_META).toString ().toUtf8 ());

@@ -25,11 +25,11 @@ class MetadataLookupMgr : public QThread
 public:
     explicit MetadataLookupMgr(QObject *parent = 0);
     virtual ~MetadataLookupMgr();
-    void lookup(SongMetaData **data, IMetadataLookup::LookupType type);
+    void lookup(AudioMetaObject **data, IMetadataLookup::LookupType type);
 
 protected:
     struct WorkNode {
-        SongMetaData **data;
+        AudioMetaObject **data;
         IMetadataLookup::LookupType type;
         bool operator == (const WorkNode &other) const {
             return ((*(this->data))->hash () == (*(other.data))->hash ()
@@ -49,9 +49,9 @@ signals:
 //    void lookupSucceed(const QString &songHash,
 //                       const QByteArray &result,
 //                       const IMetadataLookup::LookupType &type);
-    void lookupSucceed(SongMetaData **data, const IMetadataLookup::LookupType &type);
+    void lookupSucceed(AudioMetaObject **data, const IMetadataLookup::LookupType &type);
 //    void lookupFailed(const QString &songHash, const IMetadataLookup::LookupType &type);
-    void lookupFailed(SongMetaData **data, const IMetadataLookup::LookupType &type);
+    void lookupFailed(AudioMetaObject **data, const IMetadataLookup::LookupType &type);
     void queueFinished();
 public slots:
 

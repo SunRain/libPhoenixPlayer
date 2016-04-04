@@ -107,7 +107,7 @@ void CoverCircleImage::setAutoChange(bool arg)
 void CoverCircleImage::drawImage()
 {
     if (autoChange()) {
-        SongMetaData *d = m_playCore->curTrackMetadata ();
+        AudioMetaObject *d = m_playCore->curTrackMetadata ();
         if (d)
             setImage (d->queryImgUri ());
         else

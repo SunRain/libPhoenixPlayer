@@ -133,7 +133,7 @@ QStringList Settings::musicDirs()
 }
 
 
-void Settings::setLastPlayedSong(SongMetaData **data)
+void Settings::setLastPlayedSong(AudioMetaObject **data)
 {
     if (!data)
         return;
@@ -145,12 +145,12 @@ void Settings::setLastPlayedSong(SongMetaData **data)
     m_settings->sync ();
 }
 
-SongMetaData *Settings::lastPlayedSong()
+AudioMetaObject *Settings::lastPlayedSong()
 {
-    SongMetaData *data = nullptr;
+    AudioMetaObject *data = nullptr;
     QStringList list = m_settings->value (KEY_LAST_SONG, QString()).toString ().split ("||");
     if (!list.isEmpty () && list.size () == 3)
-        data = new SongMetaData(list.at (0), list.at (1), list.at (2).toInt ());
+        data = new AudioMetaObject(list.at (0), list.at (1), list.at (2).toInt ());
     return data;
 }
 

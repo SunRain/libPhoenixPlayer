@@ -7,7 +7,7 @@
 #include "Common.h"
 
 namespace PhoenixPlayer {
-class SongMetaData;
+class AudioMetaObject;
 namespace MusicLibrary {
 
 class IMusicLibraryDAO : public QObject
@@ -25,15 +25,15 @@ public:
     /// \param skipDuplicates skip if track already exists in database
     /// \return
     ///
-    virtual bool insertMetaData(SongMetaData **metaData, bool skipDuplicates = true) = 0;
+    virtual bool insertMetaData(AudioMetaObject **metaData, bool skipDuplicates = true) = 0;
     ///
     /// \brief updateMetaData update track meta
     /// \param metaData the track
     /// \param skipEmptyValue use origin value if new track has some empty values
     /// \return
     ///
-    virtual bool updateMetaData(SongMetaData **metaData, bool skipEmptyValue = true) = 0;
-    virtual bool deleteMetaData(SongMetaData **metaData) = 0;
+    virtual bool updateMetaData(AudioMetaObject **metaData, bool skipEmptyValue = true) = 0;
+    virtual bool deleteMetaData(AudioMetaObject **metaData) = 0;
     virtual bool deleteByHash(const QString &hash) = 0;
 //    virtual SongMetaData *querySongMeta(const QString &hash, const QString &table) = 0;
 
@@ -44,7 +44,7 @@ public:
     /// \param meta 目标指针
     /// \return true如果填充成功
     ///
-    virtual bool fillAttribute(SongMetaData **meta) = 0;
+    virtual bool fillAttribute(AudioMetaObject **meta) = 0;
 
 //    ///
 //    /// \brief allTracks
@@ -52,7 +52,7 @@ public:
 //    ///
 //    virtual QList<SongMetaData *> allTracks() = 0;
 
-    virtual SongMetaData *trackFromHash(const QString &hash) = 0;
+    virtual AudioMetaObject *trackFromHash(const QString &hash) = 0;
 
     virtual QStringList trackHashList() const = 0;
 

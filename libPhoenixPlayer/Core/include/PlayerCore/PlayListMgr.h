@@ -6,7 +6,7 @@
 #include <QStringList>
 
 namespace PhoenixPlayer {
-class SongMetaData;
+class AudioMetaObject;
 class PluginLoader;
 class PluginHost;
 class Settings;
@@ -28,8 +28,8 @@ class PlayListMgr : public QObject
 public:
     explicit PlayListMgr(QObject *parent = 0);
     virtual ~PlayListMgr();
-    bool addTrack(const SongMetaData *song);
-    bool addTrack(const QList<SongMetaData *> &list);
+    bool addTrack(const AudioMetaObject *song);
+    bool addTrack(const QList<AudioMetaObject *> &list);
     bool removeTrack(int index);
     bool removeTracks(int startPos, int endPos);
     void clear();
@@ -49,14 +49,14 @@ public:
     /// \brief currentTrack
     /// \return nullptr if no track exists
     ///
-    SongMetaData *currentTrack() const;
+    AudioMetaObject *currentTrack() const;
     QObject *currentTrackObject() const;
     ///
     /// \brief get
     /// \param index
     /// \return nullptr if no track exists
     ///
-    SongMetaData *get(int index) const;
+    AudioMetaObject *get(int index) const;
 
 //    void setRandom(bool random);
     ///
@@ -99,7 +99,7 @@ private:
 
     QString m_playListDir;
     QStringList m_existPlayLists;
-    QList<SongMetaData *> m_trackList;
+    QList<AudioMetaObject *> m_trackList;
 
     Settings *m_settings;
     PlayListFormat *m_listFormat;

@@ -171,24 +171,24 @@ private:
     QSharedDataPointer<TrackMetaPriv> d;
 };
 
-class SongMetaDataPriv;
-class SongMetaData
+class AudioMetaObjectPriv;
+class AudioMetaObject
 {
 public:
-    explicit SongMetaData();
-    explicit SongMetaData(const QString &path, const QString &name, quint64 size);
-    explicit SongMetaData(const SongMetaData &other);
-    explicit SongMetaData(const QUrl &url);
-    virtual ~SongMetaData();
+    explicit AudioMetaObject();
+    explicit AudioMetaObject(const QString &path, const QString &name, quint64 size);
+    explicit AudioMetaObject(const AudioMetaObject &other);
+    explicit AudioMetaObject(const QUrl &url);
+    virtual ~AudioMetaObject();
 
-    SongMetaData &operator =(const SongMetaData &other) {
+    AudioMetaObject &operator =(const AudioMetaObject &other) {
         if (*this == other)
             return *this;
         d.operator = (other.d);
         return *this;
     }
-    bool operator == (const SongMetaData &other);
-    inline bool operator != (const SongMetaData &other) {
+    bool operator == (const AudioMetaObject &other);
+    inline bool operator != (const AudioMetaObject &other) {
         return !operator == (other);
     }
 
@@ -232,10 +232,10 @@ public:
 
     QJsonObject toObject() const;
     QByteArray toJson() const;
-    static SongMetaData fromJson(const QByteArray &json);
+    static AudioMetaObject fromJson(const QByteArray &json);
 
 private:
-    QSharedDataPointer<SongMetaDataPriv> d;
+    QSharedDataPointer<AudioMetaObjectPriv> d;
 };
 } //PhoenixPlayer
 #endif // SONGMETADATA_H

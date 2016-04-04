@@ -8,7 +8,7 @@
 class QTextCodec;
 class QByteArray;
 namespace PhoenixPlayer{
-class SongMetaData;
+class AudioMetaObject;
 namespace MetadataLookup {
 class BaseNetworkLookup;
 namespace BaiduLookup {
@@ -24,7 +24,7 @@ public:
 
      // ILyricsLookup interface
 public:
-    void lookup(SongMetaData **meta);
+    void lookup(AudioMetaObject **meta);
     bool supportLookup(LookupType type);
 private slots:
     void dlFailed(const QUrl &requestedUrl, const QString &error);

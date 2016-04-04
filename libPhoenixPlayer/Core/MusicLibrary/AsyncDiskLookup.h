@@ -9,7 +9,7 @@ class QThread;
 namespace PhoenixPlayer {
 
 class PluginLoader;
-class SongMetaData;
+class AudioMetaObject;
 namespace MusicLibrary {
 
 class DiskLookup;
@@ -24,7 +24,7 @@ public:
 signals:
 //    void fileFound(const QString &path, const QString &file, const qint64 &size);
     void started();
-    void finished(const QList<PhoenixPlayer::SongMetaData *> &list);
+    void finished(const QList<PhoenixPlayer::AudioMetaObject *> &list);
 
 public slots:
     void startLookup();
@@ -33,7 +33,7 @@ private slots:
 private:
 //    QThread *m_diskLookupThread;
     DiskLookup *m_diskLookup;
-    QList<PhoenixPlayer::SongMetaData *> m_metaDataList;
+    QList<PhoenixPlayer::AudioMetaObject *> m_metaDataList;
 };
 
 } //MusicLibrary

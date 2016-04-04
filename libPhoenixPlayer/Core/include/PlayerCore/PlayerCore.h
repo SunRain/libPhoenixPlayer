@@ -50,7 +50,7 @@ public:
     PlayListMgr *playList() const;
     QObject *playListObject() const;
 
-    SongMetaData *curTrackMetadata();
+    AudioMetaObject *curTrackMetadata();
 
     ///
     /// \brief setAutoSkipForward 是否在播放结束或者播放失败后自动跳转到下一首歌曲，跳转的歌曲由Common::PlayMode决定
@@ -61,7 +61,7 @@ public:
 
     Q_INVOKABLE void playFromLibrary(const QString &songHash);
     Q_INVOKABLE void playFromNetwork(const QUrl &url);
-    Q_INVOKABLE void playTrack(const SongMetaData *data);
+    Q_INVOKABLE void playTrack(const AudioMetaObject *data);
 
     //播放队列相关操作
 //    Q_INVOKABLE void addToQueue(const QString &songHash, bool skipDuplicates = true);
@@ -189,7 +189,7 @@ private:
     PlayBackend::IPlayBackend **m_playBackend;
     PlayBackend::IPlayBackend *m_pb;
     PlayBackend::BackendHost *m_playBackendHost;
-    SongMetaData *m_curTrack;
+    AudioMetaObject *m_curTrack;
     PlayListMgr *m_playList;
     MusicLibrary::IMusicLibraryDAO *m_dao;
 

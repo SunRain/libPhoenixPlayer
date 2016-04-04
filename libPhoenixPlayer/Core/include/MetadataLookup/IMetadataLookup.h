@@ -6,7 +6,7 @@
 class QByteArray;
 
 namespace PhoenixPlayer{
-class SongMetaData;
+class AudioMetaObject;
 namespace MetadataLookup {
 
 class IMetadataLookup : public QObject {
@@ -46,7 +46,7 @@ public:
     ///
     LookupType currentLookupFlag();
 
-    virtual void lookup(SongMetaData **meta) = 0;
+    virtual void lookup(AudioMetaObject **meta) = 0;
 
 signals:
     void lookupFailed();

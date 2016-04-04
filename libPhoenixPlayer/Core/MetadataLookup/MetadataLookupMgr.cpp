@@ -57,7 +57,7 @@ MetadataLookupMgr::~MetadataLookupMgr()
     }
 }
 
-void MetadataLookupMgr::lookup(SongMetaData **data, IMetadataLookup::LookupType type)
+void MetadataLookupMgr::lookup(AudioMetaObject **data, IMetadataLookup::LookupType type)
 {
     if (!m_settings->fetchMetadataOnMobileNetwork ()
             && (m_util->getNetworkType () == Util::NetworkType::TypeMobile)) {

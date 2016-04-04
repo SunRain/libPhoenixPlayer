@@ -10,7 +10,7 @@
 #include "Common.h"
 
 namespace PhoenixPlayer {
-class SongMetaData;
+class AudioMetaObject;
 namespace MusicLibrary {
 
 namespace TagParserPro {
@@ -31,7 +31,7 @@ TagParserPro::~TagParserPro()
     }
 }
 
-bool TagParserPro::parserTag(SongMetaData **target)
+bool TagParserPro::parserTag(AudioMetaObject **target)
 {
     if (!target || (*target)->mediaType () == (int)Common::MediaTypeUrl)
         return false;

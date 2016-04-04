@@ -18,7 +18,7 @@ QStringList PlayListFormat::fileList(const QString &contents)
     return QStringList();
 }
 
-QString PlayListFormat::format(const QList<SongMetaData *> &list)
+QString PlayListFormat::format(const QList<AudioMetaObject *> &list)
 {
     return QString();
 }

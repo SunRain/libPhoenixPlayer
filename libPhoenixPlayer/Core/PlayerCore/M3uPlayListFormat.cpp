@@ -36,11 +36,11 @@ QStringList M3uPlayListFormat::fileList(const QString &contents)
     return out;
 }
 
-QString M3uPlayListFormat::format(const QList<SongMetaData *> &list)
+QString M3uPlayListFormat::format(const QList<AudioMetaObject *> &list)
 {
     QStringList out;
     out.append ("#EXTM3U");
-    foreach (SongMetaData *d, list) {
+    foreach (AudioMetaObject *d, list) {
         //TODO add EXTINF
         out.append (d->uri ().toString ());
     }

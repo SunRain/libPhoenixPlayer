@@ -9,7 +9,7 @@ class QThread;
 namespace PhoenixPlayer {
 
 class PluginLoader;
-class SongMetaData;
+class AudioMetaObject;
 namespace MusicLibrary {
 
 class IMusicLibraryDAO;
@@ -22,7 +22,7 @@ public:
     virtual ~AsyncTagParserMgrWrapper();
 //    void addFile(const QString &path, const QString &file, qint64 size);
 //    void startParser();
-    void parser(QList<PhoenixPlayer::SongMetaData *> *list = 0);
+    void parser(QList<PhoenixPlayer::AudioMetaObject *> *list = 0);
     bool isRunning();
 signals:
     void started();
@@ -32,7 +32,7 @@ public slots:
 private:
     QThread *m_thread;
     TagParserManager *m_tagParserManager;
-    QList<PhoenixPlayer::SongMetaData *> *m_metaDataList;
+    QList<PhoenixPlayer::AudioMetaObject *> *m_metaDataList;
     PluginLoader *m_pluginLoader;
     IMusicLibraryDAO *m_dao;
     QMutex m_listLocker;

@@ -7,7 +7,7 @@
 class QByteArray;
 class QJsonObject;
 namespace PhoenixPlayer{
-class SongMetaData;
+class AudioMetaObject;
 
 namespace MetadataLookup {
 class BaseNetworkLookup;
@@ -45,7 +45,7 @@ public:
     // IMetadataLookup interface
 public:
     bool supportLookup(LookupType type);
-    void lookup(SongMetaData **meta);
+    void lookup(AudioMetaObject **meta);
 
 protected:
 //    void parseAlbumDescription(const QByteArray &qba);

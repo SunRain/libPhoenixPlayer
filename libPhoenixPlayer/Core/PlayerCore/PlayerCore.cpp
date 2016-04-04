@@ -52,7 +52,7 @@ PlayerCore::PlayerCore(QObject *parent)
 
     connect (m_playList, &PlayListMgr::currentIndexChanged,
              [&](int index) {
-        SongMetaData *data = m_playList->get (index);
+        AudioMetaObject *data = m_playList->get (index);
         playTrack (data);
     });
     init ();
@@ -309,7 +309,7 @@ QObject *PlayerCore::playListObject() const
     return qobject_cast<QObject*>(playList ());
 }
 
-SongMetaData *PlayerCore::curTrackMetadata()
+AudioMetaObject *PlayerCore::curTrackMetadata()
 {
     return m_curTrack;
 }
@@ -370,7 +370,7 @@ void PlayerCore::playFromLibrary(const QString &songHah)
     }
     qDebug()<<Q_FUNC_INFO<<"play for hash "<<songHah;
 
-    SongMetaData *d = m_dao->trackFromHash (songHah);
+    AudioMetaObject *d = m_dao->trackFromHash (songHah);
 
     qDebug()<<Q_FUNC_INFO<<"find in library "<<d->toString ();
 
@@ -392,18 +392,18 @@ void PlayerCore::playFromNetwork(const QUrl &url)
 //    obj.setFilePath (url.toString ());
 //    obj.setMediaType (Common::MediaTypeUrl);
 //    (*m_playBackend)->changeMedia (&obj, 0, true);
-    SongMetaData d(url);
+    AudioMetaObject d(url);
 //    playTrack (&d);
     m_playList->addTrack (&d);
     m_playList->setCurrentIndex (m_playList->count ());
 }
 
-void PlayerCore::playTrack(const SongMetaData *data)
+void PlayerCore::playTrack(const AudioMetaObject *data)
 {
     if (data) {
         if (m_curTrack)
             m_curTrack->deleteLater ();
-        m_curTrack = new SongMetaData(data);
+        m_curTrack = new AudioMetaObject(data);
         m_curTrackDuration = data->trackMeta ()->duration ();
 //        emit trackChanged ();
         BaseMediaObject obj;
@@ -616,7 +616,7 @@ void PlayerCore::togglePlayPause()
             qDebug()<<Q_FUNC_INFO<<"playbackend stopped";
 //            QString playingHash = m_musicLibraryManager->playingSongHash ();
 
-            SongMetaData *data = m_playList->currentTrack ();
+            AudioMetaObject *data = m_playList->currentTrack ();
             if (!data)
                 break;
             m_curTrackDuration = data->trackMeta ()->duration ();//getSongLength (data->trackMeta ()->duration ());
@@ -895,7 +895,7 @@ void PlayerCore::doPlayByPlayMode()
 //        obj.setMediaType (Common::MediaTypeLocalFile);
 //        m_playBackend->changeMedia (&obj, 0, true);
 
-        SongMetaData *data = m_playList->currentTrack ();
+        AudioMetaObject *data = m_playList->currentTrack ();
         if (data) {
             BaseMediaObject obj;
             obj.setFilePath (data->path ());

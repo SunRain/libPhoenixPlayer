@@ -146,7 +146,7 @@ void LocalMusicScannerThread::scanDir(const QString &path)
             //所以直接检测mimetype 生成的字符串
 //            if (type.inherits ("audio/mpeg")) {
             if (type.name ().contains ("audio") || type.name ().contains ("Audio")) {
-                SongMetaData *data = new SongMetaData(path, info.fileName (), info.size (), 0);
+                AudioMetaObject *data = new AudioMetaObject(path, info.fileName (), info.size (), 0);
 //                foreach (MusicTagParserHost *host, m_tagHostList) {
                 foreach (IMusicTagParser *parser, m_tagParserList) {
                     if (m_stopLookupFlag)
