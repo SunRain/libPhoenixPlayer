@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include "BaiduLookup.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "Common.h"
 #include "MetadataLookup/BaseNetworkLookup.h"
 

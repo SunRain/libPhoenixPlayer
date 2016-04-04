@@ -4,7 +4,7 @@
 #include <QJsonObject>
 
 #include "Util.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "Common.h"
 
 namespace PhoenixPlayer {

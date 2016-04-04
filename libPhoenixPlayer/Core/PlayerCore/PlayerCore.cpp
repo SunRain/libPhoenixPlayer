@@ -13,7 +13,7 @@
 #include "PluginLoader.h"
 #include "MetadataLookup/IMetadataLookup.h"
 #include "MetadataLookup/MetadataLookupMgr.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "PlayerCore/PlayListMgr.h"

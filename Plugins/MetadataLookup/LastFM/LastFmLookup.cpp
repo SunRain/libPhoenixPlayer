@@ -10,7 +10,7 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "MetadataLookup/BaseNetworkLookup.h"
 #include "Common.h"
 #include "Settings.h"

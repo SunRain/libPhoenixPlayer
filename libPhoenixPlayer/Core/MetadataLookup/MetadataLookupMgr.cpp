@@ -12,7 +12,7 @@
 #include "PluginLoader.h"
 #include "PluginHost.h"
 #include "SingletonPointer.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "MetadataLookup/MetadataLookupHost.h"
 
 namespace PhoenixPlayer {

@@ -5,7 +5,7 @@
 #include <QMimeType>
 #include <QStandardPaths>
 
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "PluginLoader.h"
 #include "Settings.h"
 

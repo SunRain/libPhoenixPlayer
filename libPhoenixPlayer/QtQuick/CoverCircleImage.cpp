@@ -5,7 +5,7 @@
 
 #include "SingletonPointer.h"
 #include "PlayerCore/PlayerCore.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
 using namespace MusicLibrary;

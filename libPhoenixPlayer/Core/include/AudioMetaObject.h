@@ -1,5 +1,5 @@
-#ifndef SONGMETADATA_H
-#define SONGMETADATA_H
+#ifndef AUDIOMETAOBJECT_H
+#define AUDIOMETAOBJECT_H
 
 #include <QSharedDataPointer>
 #include <QVariant>
@@ -238,4 +238,4 @@ private:
     QSharedDataPointer<AudioMetaObjectPriv> d;
 };
 } //PhoenixPlayer
-#endif // SONGMETADATA_H
+#endif // AUDIOMETAOBJECT_H

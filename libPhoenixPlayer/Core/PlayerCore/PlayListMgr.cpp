@@ -12,7 +12,7 @@
 #include "MusicLibrary/IMusicLibraryDAO.h"
 
 #include "Settings.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 
 #include "PlayListFormat.h"
 #include "M3uPlayListFormat.h"

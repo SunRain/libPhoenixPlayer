@@ -4,7 +4,7 @@
 #include <QDebug>
 
 #include "TagParserPro.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "Settings.h"
 #include "SingletonPointer.h"
 #include "Common.h"

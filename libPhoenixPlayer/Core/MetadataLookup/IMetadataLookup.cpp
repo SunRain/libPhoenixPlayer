@@ -1,6 +1,6 @@
 #include "MetadataLookup/IMetadataLookup.h"
 
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 
 namespace PhoenixPlayer{
 

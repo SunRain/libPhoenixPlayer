@@ -13,7 +13,6 @@ HEADERS += \
     $$PWD/include/SingletonPointer_p.h \
     $$PWD/include/SingletonPointer_sf.h \
     $$PWD/include/SingletonPointer.h \
-    $$PWD/include/SongMetaData.h \
     $$PWD/include/Util.h \
     $$PWD/include/Backend/BaseMediaObject.h \
     $$PWD/include/Backend/IPlayBackend.h \
@@ -53,7 +52,8 @@ HEADERS += \
     $$PWD/include/MusicLibrary/MusicLibraryDAOHost.h \
     $$PWD/include/MusicLibrary/MusicTagParserHost.h \
     $$PWD/include/OutPut/OutPutHost.h \
-    $$PWD/MusicLibrary/LocalMusicScannerThread.h
+    $$PWD/MusicLibrary/LocalMusicScannerThread.h \
+    $$PWD/include/AudioMetaObject.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
@@ -67,7 +67,6 @@ SOURCES += \
     $$PWD/IMusicTagParser.cpp \
     $$PWD/PluginLoader.cpp \
     $$PWD/Settings.cpp \
-    $$PWD/SongMetaData.cpp \
     $$PWD/Util.cpp \
     $$PWD/PluginHost.cpp \
     $$PWD/AddonMgr.cpp \
@@ -87,7 +86,8 @@ SOURCES += \
     $$PWD/PlayerCore/PlayListFormat.cpp \
     $$PWD/PlayerCore/M3uPlayListFormat.cpp \
 #    $$PWD/PlayerCore/PlayQueueMgr.cpp \
-    $$PWD/MusicLibrary/LocalMusicScannerThread.cpp
+    $$PWD/MusicLibrary/LocalMusicScannerThread.cpp \
+    $$PWD/AudioMetaObject.cpp
 
 
 

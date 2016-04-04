@@ -8,9 +8,9 @@
 #include "PluginLoader.h"
 #include "Settings.h"
 #include "Util.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "SingletonPointer.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 
 #include "LocalMusicScannerThread.h"
 

@@ -8,7 +8,7 @@
 #include <QScopedPointer>
 
 #include "Settings.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
 

@@ -6,7 +6,7 @@
 #include <QThread>
 
 #include "Common.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "MetadataLookup/IMetadataLookup.h"
 
 class QTimer;

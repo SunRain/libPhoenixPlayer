@@ -2,7 +2,7 @@
 
 #include <QStringList>
 
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
 
