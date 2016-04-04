@@ -10,7 +10,7 @@
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "Settings.h"
 #include "Util.h"
-#include "SongMetaData.h"
+#include "AudioMetaObject.h"
 #include "Common.h"
 #include "PluginLoader.h"
 #include "SingletonPointer.h"
@@ -38,14 +38,14 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 //            }
             QStringList daoList = m_dao->trackHashList ();
             QStringList trackList;
-            foreach (SongMetaData *d, m_trackList) {
+            foreach (AudioMetaObject *d, m_trackList) {
                 trackList.append (d->hash ());
             }
             foreach (QString s, daoList) {
                 if (!trackList.contains (s)) {
-                    SongMetaData *d = m_dao->trackFromHash (s);
+                    AudioMetaObject *d = m_dao->trackFromHash (s);
                     if (d) {
-                        SongMetaData *dd = new SongMetaData(d);
+                        AudioMetaObject *dd = new AudioMetaObject(d);
                         m_trackList.append (dd);
                         d->deleteLater ();
                     }
@@ -66,7 +66,7 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 //            }
             QStringList daoList = m_dao->trackHashList ();
             QStringList trackList;
-            foreach (SongMetaData *d, m_trackList) {
+            foreach (AudioMetaObject *d, m_trackList) {
                 trackList.append (d->hash ());
             }
             int i;
@@ -103,7 +103,7 @@ QList<QObject *> MusicLibraryManager::allTracks()
 {
 //    return m_trackList;
     QList<QObject*> list;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         QObject *obj = qobject_cast<QObject *>(d);
         if (obj)
             list.append (obj);
@@ -122,7 +122,7 @@ QList<QObject *> MusicLibraryManager::artistTracks(const QString &artistName, in
         return QList<QObject *>();
     QList<QObject *> list;
     int i = 0;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         if (d->artistMeta ()->name () == artistName) {
             QObject *obj = qobject_cast<QObject *>(d);
             if (obj)
@@ -142,7 +142,7 @@ QList<QObject *> MusicLibraryManager::albumTracks(const QString &albumName, int 
         return QList<QObject *>();
     QList<QObject *> list;
     int i = 0;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         if (d->albumMeta ()->name () == albumName) {
             QObject *obj = qobject_cast<QObject *>(d);
             if (obj)
@@ -161,7 +161,7 @@ QList<QObject *> MusicLibraryManager::genreTracks(const QString &genreName, int 
         return QList<QObject *>();
     QList<QObject *> list;
     int i = 0;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         if (d->trackMeta ()->genre () == genreName) {
             QObject *obj = qobject_cast<QObject *>(d);
             if (obj)
@@ -180,7 +180,7 @@ QList<QObject *> MusicLibraryManager::mediaTypeTracks(const QString &mediaType, 
         return QList<QObject *>();
     QList<QObject *> list;
     int i = 0;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         if (d->mediaType () == mediaType.toInt ()) {
             QObject *obj = qobject_cast<QObject *>(d);
             if (obj)
@@ -199,7 +199,7 @@ QList<QObject *> MusicLibraryManager::userRatingTracks(const QString &rating, in
         return QList<QObject *>();
     QList<QObject *> list;
     int i = 0;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         if (d->trackMeta ()->userRating ().toString () == rating) {
             QObject *obj = qobject_cast<QObject *>(d);
             if (obj)
@@ -218,7 +218,7 @@ QList<QObject *> MusicLibraryManager::folderTracks(const QString &folder, int li
         return QList<QObject *>();
     QList<QObject *> list;
     int i = 0;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         if (d->path () == folder) {
             QObject *obj = qobject_cast<QObject *>(d);
             if (obj)
@@ -241,20 +241,20 @@ void MusicLibraryManager::initList()
         return;
     QStringList list = m_dao->trackHashList ();
     foreach (QString s, list) {
-        SongMetaData *d = m_dao->trackFromHash (s);
+        AudioMetaObject *d = m_dao->trackFromHash (s);
         if (d) {
-            SongMetaData *dd = new SongMetaData(d);
+            AudioMetaObject *dd = new AudioMetaObject(d);
             m_dao->fillAttribute (&dd);
             m_trackList.append (dd);
         }
     }
 }
 
-inline bool MusicLibraryManager::trackInList(SongMetaData **data)
+inline bool MusicLibraryManager::trackInList(AudioMetaObject **data)
 {
     if (m_trackList.isEmpty ())
         return false;
-    foreach (SongMetaData *d, m_trackList) {
+    foreach (AudioMetaObject *d, m_trackList) {
         if (d->equals (*data))
             return true;
     }

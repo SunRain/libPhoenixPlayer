@@ -10,13 +10,11 @@
 
 class QString;
 namespace PhoenixPlayer {
-class SongMetaData;
+class AudioMetaObject;
 class Common;
 namespace MusicLibrary {
 namespace SQLite3 {
 
-#define DATABASE_NAME "PhoenixPlayer_musiclibrary"
-#define LIBRARY_TABLE_TAG "LIBRARY"
 //#define PLAYLIST_TABLE_TAG "PLAYLIST"
 
 class SQLite3DAO : public IMusicLibraryDAO
@@ -33,12 +31,12 @@ public:
 public:
     bool initDataBase();
 
-    bool insertMetaData(SongMetaData **metaData, bool skipDuplicates = true);
-    bool updateMetaData(SongMetaData **metaData, bool skipEmptyValue = true);
-    bool fillAttribute(SongMetaData **meta);
-    bool deleteMetaData(SongMetaData **metaData = 0);
+    bool insertMetaData(const AudioMetaObject &obj, bool skipDuplicates = true);
+    bool updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue = true);
+//    bool fillAttribute(AudioMetaObject **meta);
+    bool deleteMetaData(const AudioMetaObject &obj);
     bool deleteByHash(const QString &hash);
-    SongMetaData *trackFromHash(const QString &hash);
+    AudioMetaObject trackFromHash(const QString &hash) const;
     QStringList trackHashList() const;
 //    bool deleteMetaData(const QString &hash);
 //    bool updateMetaData(SongMetaData *metaData = 0, bool skipEmptyValue = true);
@@ -68,16 +66,16 @@ public slots:
     bool beginTransaction();
     bool commitTransaction();
 private:
-    template <class T>
-    inline QString classToKey() {
-        QString cls = T::staticMetaObject.className ();
-        if (cls.contains ("::")) {
-            QStringList list = cls.split("::");
-            if (!list.isEmpty ())
-                return list.last ();
-        }
-        return cls;
-    }
+//    template <class T>
+//    inline QString classToKey() {
+//        QString cls = T::staticMetaObject.className ();
+//        if (cls.contains ("::")) {
+//            QStringList list = cls.split("::");
+//            if (!list.isEmpty ())
+//                return list.last ();
+//        }
+//        return cls;
+//    }
 
     QStringList songMetaDataPropertyList();
 //    QString listToString(const QStringList &list);

@@ -2,6 +2,7 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QJsonObject>
+#include <QCryptographicHash>
 
 #include "Util.h"
 #include "AudioMetaObject.h"
@@ -89,7 +90,7 @@ AudioMetaObject::AudioMetaObject(const QUrl &url)
 {
     d.data ()->mediaType = (int)Common::MediaTypeUrl;
     d.data ()->path = url.toString ();
-    d.data ()->hash = Util::calculateHash (url.toString ());
+    d.data ()->hash = formatHash (url.toString ());
 }
 
 AudioMetaObject::~AudioMetaObject()
@@ -116,9 +117,15 @@ QString AudioMetaObject::keyHash() const
 {
     return QString(KEY_HASH);
 }
+
+QString AudioMetaObject::formatHash(const QString &value)
+{
+    return QString (QCryptographicHash::hash (str.toUtf8 (), QCryptographicHash::Md5).toHex ());
+}
 QString AudioMetaObject::formatHash(const QString &path, const QString &name, quint64 size)
 {
-    return Util::calculateHash (QString("%1/%2-%3").arg (path).arg (name).arg (size));
+    QString str = QString("%1/%2-%3").arg (path).arg (name).arg (size);
+    return formatHash (str);
 }
 
 QString AudioMetaObject::hash() const
@@ -155,6 +162,21 @@ QUrl AudioMetaObject::lyricsUri() const
 {
     return d.data ()->lyricsUri;
 }
+
+//void AudioMetaObject::setPath(const QString &path)
+//{
+//    d.data ()->path = path;
+//}
+
+//void AudioMetaObject::setName(const QString &name)
+//{
+//    d.data ()->name = name;
+//}
+
+//void AudioMetaObject::setSize(quint64 size)
+//{
+//    d.data ()->size = size;
+//}
 
 void AudioMetaObject::setMediaType(int arg)
 {
@@ -210,6 +232,16 @@ void AudioMetaObject::setTrackMeta(const TrackMeta &meta)
 {
     d.data ()->trackMeta = meta;
 }
+
+//void AudioMetaObject::generateHash()
+//{
+//    if (d.data ()->mediaType == (int)Common::MediaTypeLocalFile) {
+//        d.data ()->hash = formatHash (d.data ()->path, d.data ()->name, d.data ()->size);
+//    } else {
+//        /// follow AudioMetaObject(const QUrl &url)
+//        d.data ()->hash = formatHash (d.data ()->path);
+//    }
+//}
 
 QUrl AudioMetaObject::uri() const
 {

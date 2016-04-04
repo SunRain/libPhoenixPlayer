@@ -192,7 +192,14 @@ public:
         return !operator == (other);
     }
 
+    ///
+    /// \brief keyHash the primary key for audio meta data, each audio meta data had a unique hash
+    /// this should be used for database searching
+    /// \return
+    ///
     static QString keyHash() const;
+
+    static QString formatHash(const QString &value);
     static QString formatHash(const QString &path, const QString &name, quint64 size);
 
     QString hash() const;
@@ -203,10 +210,12 @@ public:
     QString lyricsData() const;
     QUrl lyricsUri() const;
 
+//    void setPath(const QString &path);
+//    void setName(const QString &name);
+//    void setSize(quint64 size);
     void setMediaType(int arg);
     void setLyricsData(const QString &arg);
     void setLyricsUri(const QUrl &arg);
-
 
     AlbumMeta albumMeta() const;
     ArtistMeta artistMeta() const;
@@ -217,6 +226,11 @@ public:
     void setArtistMeta(const ArtistMeta &meta);
     void setCoverMeta(const CoverMeta &meta);
     void setTrackMeta(const TrackMeta &meta);
+
+    ///
+    /// \brief generateHash generate hash by name,path,size
+    ///
+//    void generateHash();
 
     ///
     /// \brief uri
