@@ -455,6 +455,8 @@ void PlayThread::flush(bool final)
 {
     ulong min = final ? 0 : m_bks;
 
+    qDebug()<<Q_FUNC_INFO<<" min "<<min;
+
     while ((!m_done && !m_finish) && m_output_at > min) {
 
         m_outputThread->recycler ()->mutex ()->lock ();

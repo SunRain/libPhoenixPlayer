@@ -17,7 +17,7 @@ namespace PhoenixPlayer {
 namespace Decoder {
 namespace FFmpegDecoder {
 
-#define PROBE_BUFFER_SIZE 8192
+#define PROBE_BUFFER_SIZE 8192 // 2*2*512*4
 #define INPUT_BUFFER_SIZE 16384
 
 class FFmpeg : public IDecoder
@@ -38,17 +38,13 @@ public:
     int bitrate();
     qint64 read(char *audio, qint64 maxSize);
 
-signals:
-
-public slots:
-
 private:
     //helper functions
     void fillBuffer();
     qint64 ffmpeg_decode();
 private:
-    AVFormatContext *ic;
-    AVCodecContext *c;
+    AVFormatContext *m_formatCtx;
+    AVCodecContext *m_codecCtx;
 
     int m_bitrate, wma_idx;
 

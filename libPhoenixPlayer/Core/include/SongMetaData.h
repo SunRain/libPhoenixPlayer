@@ -1,110 +1,120 @@
 #ifndef SONGMETADATA_H
 #define SONGMETADATA_H
 
-#include <QObject>
-#include <QHash>
+#include <QSharedDataPointer>
 #include <QVariant>
 #include <QDate>
 #include <QUrl>
-#include <QQmlEngine>
-#include <qqml.h>
-//#include "Common.h"
-#include "BaseObject.h"
-
 class QStringList;
 class QDate;
+class QJsonObject;
 namespace PhoenixPlayer {
 
 namespace MetaData {
 
-class AlbumMeta : public BaseObject
+class AlbumMetaPriv;
+class AlbumMeta
 {
-    Q_OBJECT
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QUrl imgUri READ imgUri WRITE setImgUri NOTIFY imgUriChanged)
-    Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
-    Q_PROPERTY(QVariant date READ date WRITE setDate NOTIFY dateChanged)
-    DECLARE_STATIC_PROPERTY_LIST(MetaData::AlbumMeta)
 public:
-    explicit AlbumMeta(QObject *parent = 0);
-    explicit AlbumMeta(const AlbumMeta *other, QObject *parent = 0);
-    virtual ~AlbumMeta();
+    explicit AlbumMeta();
+    explicit AlbumMeta(const AlbumMeta &other);
+    virtual ~AlbumMeta(){}
+
+    AlbumMeta &operator =(const AlbumMeta &other) {
+        if (*this == other)
+            return *this;
+        d.operator = (other.d);
+        return *this;
+    }
+    bool operator == (const AlbumMeta &other);
+    inline bool operator != (const AlbumMeta &other) {
+        return !operator == (other);
+    }
+
     QString name() const;
     QUrl imgUri() const;
     QString description() const;
     QVariant date() const;
 
-public slots:
-    void setName(QString arg);
-    void setImgUri(QUrl arg);
-    void setDescription(QString arg);
-    void setDate(QVariant arg);
-signals:
-    void nameChanged(QString arg);
-    void imgUriChanged(QUrl arg);
-    void descriptionChanged(QString arg);
-    void dateChanged(QVariant arg);
+    void setName(const QString &name);
+    void setImgUri(const QUrl &uri);
+    void setDescription(const QString &description);
+    void setDate(const QVariant &date);
+
+    QJsonObject toObject() const;
+    QByteArray toJson() const;
+    static AlbumMeta fromJson(const QByteArray &json);
+
 private:
-    QString m_name;
-    QUrl m_imgUri;
-    QString m_description;
-    QVariant m_date;
+    QSharedDataPointer<AlbumMetaPriv> d;
 };
 
-class ArtistMeta : public BaseObject
+class ArtistMetaPriv;
+class ArtistMeta
 {
-    Q_OBJECT
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QUrl imgUri READ imgUri WRITE setImgUri NOTIFY imgUriChanged)
-    Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
-    DECLARE_STATIC_PROPERTY_LIST(MetaData::ArtistMeta)
 public:
-    explicit ArtistMeta(QObject *parent = 0);
-    explicit ArtistMeta(const ArtistMeta *other, QObject *parent = 0);
-    virtual ~ArtistMeta();
+    explicit ArtistMeta();
+    explicit ArtistMeta(const ArtistMeta &other);
+    virtual ~ArtistMeta() {}
+    ArtistMeta &operator =(const ArtistMeta &other) {
+        if (*this == other)
+            return *this;
+        d.operator = (other.d);
+        return *this;
+    }
+    bool operator == (const ArtistMeta &other);
+    inline bool operator != (const ArtistMeta &other) {
+        return !operator == (other);
+    }
+
     QString name() const;
     QUrl imgUri() const;
     QString description() const;
-public slots:
-    void setName(QString arg);
-    void setImgUri(QUrl arg);
-    void setDescription(QString arg);
-signals:
-    void nameChanged(QString arg);
-    void imgUriChanged(QUrl arg);
-    void descriptionChanged(QString arg);
+
+    void setName(const QString &name);
+    void setImgUri(const QUrl &uri);
+    void setDescription(const QString &description);
+
+    QJsonObject toObject() const;
+    QByteArray toJson() const;
+    static ArtistMeta fromJson(const QByteArray &json);
+
 private:
-    QString m_name;
-    QUrl m_imgUri;
-    QString m_description;
+    QSharedDataPointer<ArtistMetaPriv> d;
 };
 
-class CoverMeta : public BaseObject
+class CoverMetaPriv;
+class CoverMeta
 {
-    Q_OBJECT
-    Q_PROPERTY(QUrl smallUri READ smallUri WRITE setSmallUri NOTIFY smallUriChanged)
-    Q_PROPERTY(QUrl middleUri READ middleUri WRITE setMiddleUri NOTIFY middleUriChanged)
-    Q_PROPERTY(QUrl largeUri READ largeUri WRITE setLargeUri NOTIFY largeUriChanged)
-    DECLARE_STATIC_PROPERTY_LIST(MetaData::CoverMeta)
 public:
-    explicit CoverMeta(QObject *parent = 0);
-    explicit CoverMeta(const CoverMeta *other, QObject *parent = 0);
-    virtual ~CoverMeta();
+    explicit CoverMeta();
+    explicit CoverMeta(const CoverMeta &other);
+    virtual ~CoverMeta() {}
+    CoverMeta &operator =(const CoverMeta &other) {
+        if (*this == other)
+            return *this;
+        d.operator = (other.d);
+        return *this;
+    }
+    bool operator == (const CoverMeta &other);
+    inline bool operator != (const CoverMeta &other) {
+        return !operator == (other);
+    }
+
     QUrl smallUri() const;
     QUrl middleUri() const;
     QUrl largeUri() const;
-public slots:
-    void setSmallUri(QUrl arg);
-    void setMiddleUri(QUrl arg);
-    void setLargeUri(QUrl arg);
-signals:
-    void smallUriChanged(QUrl arg);
-    void middleUriChanged(QUrl arg);
-    void largeUriChanged(QUrl arg);
+
+    void setSmallUri(const QUrl &small);
+    void setMiddleUri(const QUrl &middle);
+    void setLargeUri(const QUrl &large);
+
+    QJsonObject toObject() const;
+    QByteArray toJson() const;
+    static CoverMeta fromJson(const QByteArray &json);
+
 private:
-    QUrl m_smallUri;
-    QUrl m_middleUri;
-    QUrl m_largeUri;
+    QSharedDataPointer<CoverMetaPriv> d;
 };
 
 //    E_Category,
@@ -116,23 +126,25 @@ private:
 //    E_Composer,
 //    E_Conductor	,
 //    E_Comment,
-class TrackMeta : public BaseObject
+class TrackMetaPriv;
+class TrackMeta
 {
-    Q_OBJECT
-    Q_PROPERTY(QVariant bitRate READ bitRate WRITE setBitRate NOTIFY bitRateChanged)
-    Q_PROPERTY(int duration READ duration WRITE setDuration NOTIFY durationChanged)
-    Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
-    Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
-    Q_PROPERTY(QVariant year READ year WRITE setYear NOTIFY yearChanged)
-    Q_PROPERTY(QVariant date READ date WRITE setDate NOTIFY dateChanged)
-    Q_PROPERTY(QVariant genre READ genre WRITE setGenre NOTIFY genreChanged)
-    Q_PROPERTY(QVariant sampleRate READ sampleRate WRITE setSampleRate NOTIFY sampleRateChanged)
-    Q_PROPERTY(QVariant userRating READ userRating WRITE setUserRating NOTIFY userRatingChanged)
-    DECLARE_STATIC_PROPERTY_LIST(MetaData::TrackMeta)
 public:
-    explicit TrackMeta(QObject *parent = 0);
-    explicit TrackMeta(const TrackMeta *other, QObject *parent = 0);
-    virtual ~TrackMeta();
+    explicit TrackMeta();
+    explicit TrackMeta(const TrackMeta &other);
+    virtual ~TrackMeta(){}
+
+    TrackMeta &operator =(const TrackMeta &other) {
+        if (*this == other)
+            return *this;
+        d.operator = (other.d);
+        return *this;
+    }
+    bool operator == (const TrackMeta &other);
+    inline bool operator != (const TrackMeta &other) {
+        return !operator == (other);
+    }
+
     QVariant bitRate() const;
     int duration() const;
     QString title() const;
@@ -142,77 +154,49 @@ public:
     QVariant genre() const;
     QVariant sampleRate() const;
     QVariant userRating() const;
-public slots:
-    void setBitRate(QVariant arg);
+
+    void setBitRate(const QVariant &arg);
     void setDuration(int arg);
-    void setTitle(QString arg);
-    void setDescription(QString arg);
-    void setYear(QVariant arg);
-    void setDate(QVariant arg);
-    void setGenre(QVariant arg);
-    void setSampleRate(QVariant arg);
-    void setUserRating(QVariant arg);
-signals:
-    void bitRateChanged(QVariant arg);
-    void durationChanged(int arg);
-    void titleChanged(QString arg);
-    void descriptionChanged(QString arg);
-    void yearChanged(QVariant arg);
-    void dateChanged(QVariant arg);
-    void genreChanged(QVariant arg);
-    void sampleRateChanged(QVariant arg);
-    void userRatingChanged(QVariant arg);
+    void setTitle(const QString &arg);
+    void setDescription(const QString &arg);
+    void setYear(const QVariant &arg);
+    void setDate(const QVariant &arg);
+    void setGenre(const QVariant &arg);
+    void setSampleRate(const QVariant &arg);
+    void setUserRating(const QVariant &arg);
+
+    QJsonObject toObject() const;
+    QByteArray toJson() const;
+    static TrackMeta fromJson(const QByteArray &json);
+
 private:
-    QVariant m_bitRate;
-    int m_duration;
-    QString m_title;
-    QString m_description;
-    QVariant m_year;
-    QVariant m_date;
-    QVariant m_genre;
-    QVariant m_sampleRate;
-    QVariant m_userRating;
+    QSharedDataPointer<TrackMetaPriv> d;
 };
+
 } //MetaData
 
-//typedef QList<SongMetaData *> SongMetaDataList;
-
-class SongMetaData : public BaseObject
+class SongMetaDataPriv;
+class SongMetaData
 {
-    Q_OBJECT
-    Q_PROPERTY(QString hash READ hash CONSTANT)
-    Q_PROPERTY(QString path READ path CONSTANT)
-    Q_PROPERTY(QString name READ name CONSTANT)
-    Q_PROPERTY(quint64 size READ size CONSTANT)
-    Q_PROPERTY(QUrl uri READ uri CONSTANT)
-    Q_PROPERTY(int mediaType READ mediaType WRITE setMediaType NOTIFY mediaTypeChanged)
-    Q_PROPERTY(QString lyricsData READ lyricsData WRITE setLyricsData NOTIFY lyricsDataChanged)
-    Q_PROPERTY(QUrl lyricsUri READ lyricsUri WRITE setLyricsUri NOTIFY lyricsUriChanged)
-    Q_PROPERTY(QUrl queryImgUri READ queryImgUri CONSTANT)
-
-    Q_PROPERTY(QObject* albumMeta READ getAlbumMeta)
-    Q_PROPERTY(QObject* artistMeta READ getArtistMeta)
-    Q_PROPERTY(QObject* coverMeta READ getCoverMeta)
-    Q_PROPERTY(QObject* trackMeta READ getTrackMeta)
-
-//    Q_PROPERTY(MetaData::AlbumMeta* albumMeta READ albumMeta)
-//    Q_PROPERTY(MetaData::ArtistMeta* artistMeta READ artistMeta)
-//    Q_PROPERTY(MetaData::CoverMeta* coverMeta READ coverMeta)
-//    Q_PROPERTY(MetaData::TrackMeta* trackMeta READ trackMeta)
-
-    DECLARE_STATIC_PROPERTY_LIST(SongMetaData)
 public:
-    explicit SongMetaData(QObject *parent = 0);
-    explicit SongMetaData(const QString &path, const QString &name, quint64 size,QObject *parent = 0);
-    explicit SongMetaData(const SongMetaData *other, QObject *parent = 0);
-    explicit SongMetaData(SongMetaData **other, QObject *parent = 0);
-    explicit SongMetaData(const QUrl &url, QObject *parent = 0);
+    explicit SongMetaData();
+    explicit SongMetaData(const QString &path, const QString &name, quint64 size);
+    explicit SongMetaData(const SongMetaData &other);
+    explicit SongMetaData(const QUrl &url);
     virtual ~SongMetaData();
 
-    QString toString();
-    bool equals(const SongMetaData *other);
-    void fillAttribute(const SongMetaData *other);
+    SongMetaData &operator =(const SongMetaData &other) {
+        if (*this == other)
+            return *this;
+        d.operator = (other.d);
+        return *this;
+    }
+    bool operator == (const SongMetaData &other);
+    inline bool operator != (const SongMetaData &other) {
+        return !operator == (other);
+    }
 
+    static QString keyHash() const;
     static QString formatHash(const QString &path, const QString &name, quint64 size);
 
     QString hash() const;
@@ -223,15 +207,20 @@ public:
     QString lyricsData() const;
     QUrl lyricsUri() const;
 
-    MetaData::AlbumMeta* albumMeta() const;
-    MetaData::ArtistMeta* artistMeta() const;
-    MetaData::CoverMeta* coverMeta() const;
-    MetaData::TrackMeta* trackMeta() const;
+    void setMediaType(int arg);
+    void setLyricsData(const QString &arg);
+    void setLyricsUri(const QUrl &arg);
 
-    QObject *getAlbumMeta();
-    QObject *getArtistMeta();
-    QObject *getCoverMeta();
-    QObject *getTrackMeta();
+
+    MetaData::AlbumMeta albumMeta() const;
+    MetaData::ArtistMeta artistMeta() const;
+    MetaData::CoverMeta coverMeta() const;
+    MetaData::TrackMeta trackMeta() const;
+
+    void setAlbumMeta(const MetaData::AlbumMeta &meta);
+    void setArtistMeta(const MetaData::ArtistMeta &meta);
+    void setCoverMeta(const MetaData::CoverMeta &meta);
+    void setTrackMeta(const MetaData::TrackMeta &meta);
 
     ///
     /// \brief uri
@@ -245,29 +234,12 @@ public:
     ///
     QUrl queryImgUri() const;
 
-public slots:
-//    void setSize(QVariant arg);
-    void setMediaType(int arg);
-    void setLyricsData(QString arg);
-    void setLyricsUri(QUrl arg);
-signals:
-//    void sizeChanged(QVariant arg);
-    void mediaTypeChanged(int arg);
-    void lyricsDataChanged(QString arg);
-    void lyricsUriChanged(QUrl arg);
-private:
-    QString m_hash;
-    QString m_path;
-    QString m_name;
-    quint64 m_size;
-    int m_mediaType;
-    QString m_lyricsData;
-    QUrl m_lyricsUri;
+    QJsonObject toObject() const;
+    QByteArray toJson() const;
+    static SongMetaData fromJson(const QByteArray &json);
 
-    MetaData::AlbumMeta *m_albumMeta;
-    MetaData::ArtistMeta *m_artistMeta;
-    MetaData::CoverMeta *m_coverMeta;
-    MetaData::TrackMeta *m_trackMeta;
+private:
+    QSharedDataPointer<SongMetaDataPriv> d;
 };
 } //PhoenixPlayer
 #endif // SONGMETADATA_H

@@ -50,6 +50,13 @@ public:
     ///
     Q_INVOKABLE QList<QObject *> allTracks();
 
+
+    ///
+    /// \brief empty wether current library is empty
+    /// \return true if empty
+    ///
+    Q_INVOKABLE bool empty() const;
+
     ///
     /// \brief artistTracks 显示某个artist下的曲目
     /// \param artistName artist名

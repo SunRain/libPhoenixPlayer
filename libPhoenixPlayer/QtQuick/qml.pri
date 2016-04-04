@@ -9,7 +9,8 @@ HEADERS += \
     $$PWD/include/TrackGroupModel.h \
     $$PWD/include/PathListModel.h \
     $$PWD/include/AddonListModel.h \
-    $$PWD/include/PluginListModel.h
+    $$PWD/include/PluginListModel.h \
+#    $$PWD/include/MusicLibraryListModel.h
 
 SOURCES += \
     $$PWD/LyricsModel.cpp \
@@ -19,7 +20,8 @@ SOURCES += \
     $$PWD/TrackGroupModel.cpp \
     $$PWD/PathListModel.cpp \
     $$PWD/AddonListModel.cpp \
-    $$PWD/PluginListModel.cpp
+    $$PWD/PluginListModel.cpp \
+#    $$PWD/MusicLibraryListModel.cpp
 
 
 

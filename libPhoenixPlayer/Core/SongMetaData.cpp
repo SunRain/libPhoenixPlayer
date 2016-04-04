@@ -1,4 +1,7 @@
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <QJsonObject>
 
 #include "Util.h"
 #include "SongMetaData.h"
@@ -8,94 +11,87 @@ namespace PhoenixPlayer {
 
 using namespace MetaData;
 
-SongMetaData::SongMetaData(QObject *parent)
-    :BaseObject(parent)
-{
-}
+#define KEY_NAME "NAME"
+#define KEY_URI "URI"
+#define KEY_DESCRIPTION "DESCRIPTION"
+#define KEY_DATE "DATE"
+#define KEY_SMALL_IMG "SMALL_URI"
+#define KEY_MIDDLE_IMG "MIDDLE_URI"
+#define KEY_LARGE_IMG "LARGE_URI"
+#define KEY_BIT_RATE "BIT_RATE"
+#define KEY_DURATION "DURATION"
+#define KEY_TITLE "TITLE"
+#define KEY_YEAR "YEAR"
+#define KEY_GENRE "GENRE"
+#define KEY_SAMPLE_RATE "SAMPLE_RATE"
+#define KEY_USER_RATING "USER_RATING"
+#define KEY_HASH "HASH"
+#define KEY_PATH "PATH"
+#define KEY_SIZE "SIZE"
+#define KEY_MEDIA_TYPE "MEDIA_TYPE"
+#define KEY_LYRICS_DATA "LYRICS_DATA"
+#define KEY_LYRICS_URI "LYRICS_URI"
+#define KEY_ALBUM_META "ALBUM_META"
+#define KEY_ARTIST_META "ARTIST_META"
+#define KEY_COVER_META "COVER_META"
+#define KEY_TRACK_META "TRACK_META"
 
-SongMetaData::SongMetaData(const QString &path, const QString &name, quint64 size, QObject *parent)
-    : BaseObject(parent)
-    , m_path(path)
-    , m_name(name)
-    , m_size(size)
+class SongMetaDataPriv : public QSharedData
 {
-    m_mediaType = (int)Common::MediaTypeLocalFile;
-    m_hash = SongMetaData::formatHash(path, name, size);
-
-    m_albumMeta = new AlbumMeta(this);
-    m_artistMeta = new ArtistMeta(this);
-    m_coverMeta = new CoverMeta(this);
-    m_trackMeta = new TrackMeta(this);
-}
-
-SongMetaData::SongMetaData(const SongMetaData *other, QObject *parent)
-    : BaseObject(parent)
-{
-    if (other) {
-        m_path = other->path ();
-        m_name = other->name ();
-        m_hash = other->hash ();
-        m_size = other->size ();
-        m_mediaType = other->mediaType ();
-        m_lyricsData = other->lyricsData ();
-        m_lyricsUri = other->lyricsUri ();
-        m_albumMeta = new AlbumMeta(other->albumMeta (), this);
-        m_artistMeta = new ArtistMeta(other->artistMeta (), this);
-        m_coverMeta = new CoverMeta(other->coverMeta (), this);
-        m_trackMeta = new TrackMeta(other->trackMeta (), this);
-    } else {
-        m_path = QString();
-        m_name = QString();
-        m_hash = QString();
-        m_size = 0;
-        m_mediaType = (int)Common::MediaTypeLocalFile;
-        m_albumMeta = new AlbumMeta(this);
-        m_artistMeta = new ArtistMeta(this);
-        m_coverMeta = new CoverMeta(this);
-        m_trackMeta = new TrackMeta(this);
+public:
+    SongMetaDataPriv() {
+        hash = QString();
+        path = QString();
+        name = QString();
+        size = 0;
+        mediaType = (int)Common::MediaTypeLocalFile;
+        lyricsData = QString();
+        lyricsUri = QUrl();
+        albumMeta = AlbumMeta();
+        artistMeta = ArtistMeta();
+        coverMeta = CoverMeta();
+        trackMeta = TrackMeta();
     }
+
+    QString hash;
+    QString path;
+    QString name;
+    quint64 size;
+    int mediaType;
+    QString lyricsData;
+    QUrl lyricsUri;
+
+    MetaData::AlbumMeta albumMeta;
+    MetaData::ArtistMeta artistMeta;
+    MetaData::CoverMeta coverMeta;
+    MetaData::TrackMeta trackMeta;
+};
+
+SongMetaData::SongMetaData()
+    : d(new SongMetaDataPriv())
+{
 }
 
-SongMetaData::SongMetaData(SongMetaData **other, QObject *parent)
-    : BaseObject(parent)
+SongMetaData::SongMetaData(const QString &path, const QString &name, quint64 size)
+    : d(new SongMetaDataPriv())
 {
-    if (other) {
-        m_path = (*other)->path ();
-        m_name = (*other)->name ();
-        m_hash = (*other)->hash ();
-        m_size = (*other)->size ();
-        m_mediaType = (*other)->mediaType ();
-        m_lyricsData = (*other)->lyricsData ();
-        m_lyricsUri = (*other)->lyricsUri ();
-        m_albumMeta = new AlbumMeta((*other)->albumMeta (), this);
-        m_artistMeta = new ArtistMeta((*other)->artistMeta (), this);
-        m_coverMeta = new CoverMeta((*other)->coverMeta (), this);
-        m_trackMeta = new TrackMeta((*other)->trackMeta (), this);
-    } else {
-        m_path = QString();
-        m_name = QString();
-        m_hash = QString();
-        m_size = 0;
-        m_mediaType = (int)Common::MediaTypeLocalFile;
-        m_albumMeta = new AlbumMeta(this);
-        m_artistMeta = new ArtistMeta(this);
-        m_coverMeta = new CoverMeta(this);
-        m_trackMeta = new TrackMeta(this);
-    }
+    d.data ()->path = path;
+    d.data ()->name = name;
+    d.data ()->size = size;
+    d.data ()->hash = SongMetaData::formatHash(path, name, size);
 }
 
-SongMetaData::SongMetaData(const QUrl &url, QObject *parent)
-    : BaseObject(parent)
+SongMetaData::SongMetaData(const SongMetaData &other)
+    : d(other.d)
 {
-    m_mediaType = (int)Common::MediaTypeUrl;
-    m_path = url.toString ();
-    m_hash = Util::calculateHash (url.toString ());
-    m_size = 0;
-    m_name = QString();
-    m_albumMeta = new AlbumMeta(this);
-    m_artistMeta = new ArtistMeta(this);
-    m_coverMeta = new CoverMeta(this);
-    m_trackMeta = new TrackMeta(this);
+}
+
+SongMetaData::SongMetaData(const QUrl &url)
+    : d(new SongMetaDataPriv())
+{
+    d.data ()->mediaType = (int)Common::MediaTypeUrl;
+    d.data ()->path = url.toString ();
+    d.data ()->hash = Util::calculateHash (url.toString ());
 }
 
 SongMetaData::~SongMetaData()
@@ -103,112 +99,78 @@ SongMetaData::~SongMetaData()
 
 }
 
-QString SongMetaData::toString()
+bool SongMetaData::operator ==(const SongMetaData &other)
 {
-    QStringList values;
-    QStringList props = m_albumMeta->propertyList ();
-    props.removeDuplicates ();
-    foreach (QString s, props) {
-        QString v = QString("%1 = [%2]")
-                .arg (s)
-                .arg (m_albumMeta->property (s.toLocal8Bit ().constData ()).toString ());
-        values.append (v);
-    }
-
-    props.clear ();
-    props = m_artistMeta->propertyList ();
-    props.removeDuplicates ();
-    foreach (QString s, props) {
-        QString v = QString("%1 = [%2]")
-                .arg (s)
-                .arg (m_artistMeta->property (s.toLocal8Bit ().constData ()).toString ());
-        values.append (v);
-    }
-
-    props.clear ();
-    props = m_coverMeta->propertyList ();
-    props.removeDuplicates ();
-    foreach (QString s, props) {
-        QString v = QString("%1 = [%2]")
-                .arg (s)
-                .arg (m_coverMeta->property (s.toLocal8Bit ().constData ()).toString ());
-        values.append (v);
-    }
-
-    props.clear ();
-    props = m_trackMeta->propertyList ();
-    props.removeDuplicates ();
-    foreach (QString s, props) {
-        QString v = QString("%1 = [%2]")
-                .arg (s)
-                .arg (m_trackMeta->property (s.toLocal8Bit ().constData ()).toString ());
-        values.append (v);
-    }
-
-    props.clear ();
-    props = this->propertyList ();
-    props.removeDuplicates ();
-    foreach (QString s, props) {
-        QString v = QString("%1 = [%2]")
-                .arg (s)
-                .arg (this->property (s.toLocal8Bit ().constData ()).toString ());
-        values.append (v);
-    }
-    return values.join (",");
+    return d.data ()->albumMeta == other.d.data ()->albumMeta
+            && d.data ()->artistMeta == other.d.data ()->artistMeta
+            && d.data ()->coverMeta == other.d.data ()->coverMeta
+            && d.data ()->hash == other.d.data ()->hash
+            && d.data ()->lyricsData == other.d.data ()->lyricsData
+            && d.data ()->lyricsUri == other.d.data ()->lyricsUri
+            && d.data ()->mediaType == other.d.data ()->mediaType
+            && d.data ()->name == other.d.data ()->name
+            && d.data ()->path == other.d.data ()->path
+            && d.data ()->size == other.d.data ()->size
+            && d.data ()->trackMeta == other.d.data ()->trackMeta;
 }
 
-bool SongMetaData::equals(const SongMetaData *other)
+QString SongMetaData::keyHash() const
 {
-    return m_hash == other->hash ();
+    return QString(KEY_HASH);
 }
 
-void SongMetaData::fillAttribute(const SongMetaData *other)
-{
-    if (!other) {
-        qDebug()<<Q_FUNC_INFO<<"No other pointer";
-        return;
-    }
-    if (m_hash != other->hash ()) {
-        qDebug()<<Q_FUNC_INFO<<"hash invalid";
-        return;
-    }
-    m_path = other->path ();
-    m_name = other->name ();
-    m_size = other->size ();
-    m_mediaType = other->mediaType ();
-    m_lyricsData = other->lyricsData ();
-    m_lyricsUri = other->lyricsUri ();
-    m_albumMeta->setDate (other->albumMeta ()->date ());
-    m_albumMeta->setDescription (other->albumMeta ()->description ());
-    m_albumMeta->setImgUri (other->albumMeta ()->imgUri ());
-    m_albumMeta->setName (other->albumMeta ()->name ());
-    m_artistMeta->setDescription (other->artistMeta ()->description ());
-    m_artistMeta->setImgUri (other->artistMeta ()->imgUri ());
-    m_artistMeta->setName (other->artistMeta ()->name ());
-    m_coverMeta->setLargeUri (other->coverMeta ()->largeUri ());
-    m_coverMeta->setMiddleUri (other->coverMeta ()->middleUri ());
-    m_coverMeta->setSmallUri (other->coverMeta ()->smallUri ());
-    m_trackMeta->setBitRate (other->trackMeta ()->bitRate ());
-    m_trackMeta->setDate (other->trackMeta ()->date ());
-    m_trackMeta->setDescription (other->trackMeta ()->description ());
-    m_trackMeta->setDuration (other->trackMeta ()->duration ());
-    m_trackMeta->setGenre (other->trackMeta ()->genre ());
-    m_trackMeta->setSampleRate (other->trackMeta ()->sampleRate ());
-    m_trackMeta->setTitle (other->trackMeta ()->title ());
-    m_trackMeta->setUserRating (other->trackMeta ()->userRating ());
-    m_trackMeta->setYear (other->trackMeta ()->year ());
-}
-
-//QStringList SongMetaData::metaKeys()
+//QString SongMetaData::toString()
 //{
-//    QStringList list;
-//    list.append (ArtistMeta::staticPropertyList ());
-//    list.append (AlbumMeta::staticPropertyList ());
-//    list.append (CoverMeta::staticPropertyList ());
-//    list.append (TrackMeta::staticPropertyList ());
-//    list.append (SongMetaData::staticPropertyList ());
-//    list.removeDuplicates ();
-//    return list;
+////    QStringList values;
+////    QStringList props = m_albumMeta->propertyList ();
+////    props.removeDuplicates ();
+////    foreach (QString s, props) {
+////        QString v = QString("%1 = [%2]")
+////                .arg (s)
+////                .arg (m_albumMeta->property (s.toLocal8Bit ().constData ()).toString ());
+////        values.append (v);
+////    }
+
+////    props.clear ();
+////    props = m_artistMeta->propertyList ();
+////    props.removeDuplicates ();
+////    foreach (QString s, props) {
+////        QString v = QString("%1 = [%2]")
+////                .arg (s)
+////                .arg (m_artistMeta->property (s.toLocal8Bit ().constData ()).toString ());
+////        values.append (v);
+////    }
+
+////    props.clear ();
+////    props = m_coverMeta->propertyList ();
+////    props.removeDuplicates ();
+////    foreach (QString s, props) {
+////        QString v = QString("%1 = [%2]")
+////                .arg (s)
+////                .arg (m_coverMeta->property (s.toLocal8Bit ().constData ()).toString ());
+////        values.append (v);
+////    }
+
+////    props.clear ();
+////    props = m_trackMeta->propertyList ();
+////    props.removeDuplicates ();
+////    foreach (QString s, props) {
+////        QString v = QString("%1 = [%2]")
+////                .arg (s)
+////                .arg (m_trackMeta->property (s.toLocal8Bit ().constData ()).toString ());
+////        values.append (v);
+////    }
+
+////    props.clear ();
+////    props = this->propertyList ();
+////    props.removeDuplicates ();
+////    foreach (QString s, props) {
+////        QString v = QString("%1 = [%2]")
+////                .arg (s)
+////                .arg (this->property (s.toLocal8Bit ().constData ()).toString ());
+////        values.append (v);
+////    }
+////    return values.join (",");
 //}
 
 QString SongMetaData::formatHash(const QString &path, const QString &name, quint64 size)
@@ -218,478 +180,674 @@ QString SongMetaData::formatHash(const QString &path, const QString &name, quint
 
 QString SongMetaData::hash() const
 {
-    return m_hash;
+    return d.data ()->hash
 }
 
 QString SongMetaData::path() const
 {
-    return m_path;
+    return d.data ()->path;
 }
 
 QString SongMetaData::name() const
 {
-    return m_name;
+    return d.data ()->name;
 }
 
 quint64 SongMetaData::size() const
 {
-    return m_size;
+    return d.data ()->size;
 }
 
 int SongMetaData::mediaType() const
 {
-    return m_mediaType;
+    return d.data ()->mediaType;
 }
 
 QString SongMetaData::lyricsData() const
 {
-    return m_lyricsData;
+    return d.data ()->lyricsData;
 }
 
 QUrl SongMetaData::lyricsUri() const
 {
-    return m_lyricsUri;
+    return d.data ()->lyricsUri;
 }
 
-AlbumMeta *SongMetaData::albumMeta() const
+void SongMetaData::setMediaType(int arg)
 {
-    return m_albumMeta;
+    d.data ()->mediaType = arg;
 }
 
-ArtistMeta *SongMetaData::artistMeta() const
+void SongMetaData::setLyricsData(const QString &arg)
 {
-    return m_artistMeta;
+    d.data ()->lyricsData = arg;
 }
 
-CoverMeta *SongMetaData::coverMeta() const
+void SongMetaData::setLyricsUri(const QUrl &arg)
 {
-    return m_coverMeta;
+    d.data ()->lyricsUri = arg;
 }
 
-TrackMeta *SongMetaData::trackMeta() const
+AlbumMeta SongMetaData::albumMeta() const
 {
-    return m_trackMeta;
+    return d.data ()->albumMeta;
 }
 
-QObject *SongMetaData::getAlbumMeta()
+ArtistMeta SongMetaData::artistMeta() const
 {
-    return qobject_cast<QObject *>(m_albumMeta);
+    return d.data ()->artistMeta;
 }
 
-QObject *SongMetaData::getArtistMeta()
+CoverMeta SongMetaData::coverMeta() const
 {
-    return qobject_cast<QObject *>(m_artistMeta);
+    return d.data ()->coverMeta;
 }
 
-QObject *SongMetaData::getCoverMeta()
+TrackMeta SongMetaData::trackMeta() const
 {
-    return qobject_cast<QObject *>(m_coverMeta);
+    return d.data ()->trackMeta;
 }
 
-QObject *SongMetaData::getTrackMeta()
+void SongMetaData::setAlbumMeta(const AlbumMeta &meta)
 {
-    return qobject_cast<QObject *>(m_trackMeta);
+    d.data ()->albumMeta = meta;
+}
+
+void SongMetaData::setArtistMeta(const ArtistMeta &meta)
+{
+    d.data ()->artistMeta = meta;
+}
+
+void SongMetaData::setCoverMeta(const CoverMeta &meta)
+{
+    d.data ()->coverMeta = meta;
+}
+
+void SongMetaData::setTrackMeta(const TrackMeta &meta)
+{
+    d.data ()->trackMeta = meta;
 }
 
 QUrl SongMetaData::uri() const
 {
-    if (m_mediaType == (int)Common::MediaTypeLocalFile) {
-        if (!m_path.isEmpty () && !m_name.isEmpty ())
+    if (d.data ()->mediaType == (int)Common::MediaTypeLocalFile) {
+        if (!d.data ()->path.isEmpty () && !d.data ()->name.isEmpty ())
             //TODO file:// or file:/ ? or no file:/ (file://) ?
             //FIXME should fix path like ../path/to/file
-            return QUrl::fromLocalFile (QString("%1/%2").arg (m_path).arg (m_name));
+            return QUrl::fromLocalFile (QString("%1/%2").arg (d.data ()->path).arg (d.data ()->name));
     } else {
-        if (!m_path.isEmpty ())
-            return QUrl(m_path);
-        else if (!m_name.isEmpty ())
-            return QUrl(m_name);
+        if (!d.data ()->path.isEmpty ())
+            return QUrl(d.data ()->path);
+        else if (!d.data ()->name.isEmpty ())
+            return QUrl(d.data ()->name);
     }
     return QUrl();
 }
 
 QUrl SongMetaData::queryImgUri() const
 {
-    if (coverMeta ()) {
-        if (!m_coverMeta->middleUri ().isEmpty ())
-            return m_coverMeta->middleUri ();
-        if (!m_coverMeta->largeUri ().isEmpty ())
-            return m_coverMeta->largeUri ();
-        if (!m_coverMeta->smallUri ().isEmpty ())
-            return m_coverMeta->smallUri ();
-    }
-    if (artistMeta ()) {
-        if (!artistMeta ()->imgUri ().isEmpty ())
-            return artistMeta ()->imgUri ();
-    }
-    if (albumMeta ()) {
-        if (!albumMeta ()->imgUri ().isEmpty ())
-            return albumMeta ()->imgUri ();
-    }
+    if (!coverMeta ().middleUri ().isEmpty ())
+        return coverMeta ().middleUri ();
+    if (!coverMeta ().largeUri ().isEmpty ())
+        return coverMeta ().largeUri ();
+    if (!coverMeta ().smallUri ().isEmpty ())
+        return coverMeta ().smallUri ();
+    if (!artistMeta ().imgUri ().isEmpty ())
+        return artistMeta ().imgUri ();
+    if (!albumMeta ().imgUri ().isEmpty ())
+        return albumMeta ().imgUri ();
     return QUrl();
 }
 
-//void SongMetaData::setSize(QVariant arg)
-//{
-//    if (m_size != arg) {
-//        m_size = arg;
-//        emit sizeChanged(arg);
-//    }
-//}
-
-void SongMetaData::setMediaType(int arg)
+QJsonObject SongMetaData::toObject() const
 {
-    if (m_mediaType != arg) {
-        m_mediaType = arg;
-        emit mediaTypeChanged(arg);
-    }
+    QJsonObject o;
+    o.insert (KEY_HASH, d.data ()->hash);
+    o.insert (KEY_PATH, d.data ()->path);
+    o.insert (KEY_NAME, d.data ()->name);
+    o.insert (KEY_SIZE, d.data ()->size);
+    o.insert (KEY_MEDIA_TYPE, d.data ()->mediaType);
+    o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
+    o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri);
+    o.insert (KEY_ALBUM_META, d.data ()->albumMeta.toJson ());
+    o.insert (KEY_ARTIST_META, d.data ()->artistMeta.toJson ());
+    o.insert (KEY_COVER_META, d.data ()->coverMeta.toJson ());
+    o.insert (KEY_TRACK_META, d.data ()->trackMeta.toJson ());
+    return o;
 }
 
-void SongMetaData::setLyricsData(QString arg)
+QByteArray SongMetaData::toJson() const
 {
-    if (m_lyricsData != arg) {
-        m_lyricsData = arg;
-        emit lyricsDataChanged(arg);
-    }
+    QJsonDocument doc(toObject ());
+    return doc.toJson ();
 }
 
-void SongMetaData::setLyricsUri(QUrl arg)
+SongMetaData SongMetaData::fromJson(const QByteArray &json)
 {
-    if (m_lyricsUri != arg) {
-        m_lyricsUri = arg;
-        emit lyricsUriChanged(arg);
+    SongMetaData meta;
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        return meta;
     }
+    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+        return meta;
+    QJsonObject o = doc.object ();
+    if (o.isEmpty ())
+        return meta;
+
+    QString name = o.value (KEY_NAME).toString ();
+    QString path = o.value (KEY_PATH).toString ();
+    QString size = o.value (KEY_SIZE).toInt ();
+    SongMetaData m(path, name, size);
+    meta = m;
+    AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ().toUtf8 ());
+    ArtistMeta ar = ArtistMeta::fromJson (o.value (KEY_ARTIST_META).toString ().toUtf8 ());
+    CoverMeta co = CoverMeta::fromJson (o.value (KEY_COVER_META).toString ().toUtf8 ());
+    TrackMeta tr = TrackMeta::fromJson (o.value (KEY_TRACK_META).toString ().toUtf8 ());
+    meta.setAlbumMeta (al);
+    meta.setArtistMeta (ar);
+    meta.setCoverMeta (co);
+    meta.setTrackMeta (tr);
+    meta.setLyricsData (o.value (KEY_LYRICS_DATA).toString ());
+    meta.setLyricsUri (QUrl(o.value (KEY_LYRICS_URI).toString ()));
+    meta.setMediaType (o.value (KEY_MEDIA_TYPE).toInt ());
+
+    return meta;
 }
 
 ///////////////////////  namespace MetaData /////////////////////////////////
 namespace MetaData {
 
-AlbumMeta::AlbumMeta(QObject *parent)
-    : BaseObject(parent)
+class AlbumMetaPriv : public QSharedData
+{
+public:
+    AlbumMetaPriv() {
+        name = QString();
+        imgUri = QUrl();
+        description = QString();
+        date = QDate::currentDate ();
+    }
+    QString name;
+    QUrl imgUri;
+    QString description;
+    QVariant date;
+};
+
+class ArtistMetaPriv : public QSharedData
+{
+public:
+    ArtistMetaPriv() {
+        name = QString();
+        imgUri = QUrl();
+        description = QString();
+    }
+    QString name;
+    QUrl imgUri;
+    QString description;
+};
+
+class CoverMetaPriv : public QSharedData
+{
+public:
+    CoverMetaPriv() {
+        smallUri = QUrl();
+        middleUri = QUrl();
+        largeUri = QUrl();
+    }
+    QUrl smallUri;
+    QUrl middleUri;
+    QUrl largeUri;
+};
+
+class TrackMetaPriv : public QSharedData
+{
+public:
+    TrackMetaPriv() {
+        bitRate = QVariant();
+        duration = 0;
+        title = QString();
+        description = QString();
+        year = QVariant();
+        date = QVariant();
+        genre = QVariant();
+        sampleRate = QVariant();
+        userRating = QVariant();
+    }
+    QVariant bitRate;
+    int duration;
+    QString title;
+    QString description;
+    QVariant year;
+    QVariant date;
+    QVariant genre;
+    QVariant sampleRate;
+    QVariant userRating;
+};
+
+AlbumMeta::AlbumMeta()
+    : d(new AlbumMetaPriv())
 {
 }
 
-AlbumMeta::AlbumMeta(const AlbumMeta *other, QObject *parent)
-    : BaseObject(parent)
+AlbumMeta::AlbumMeta(const AlbumMeta &other)
+    : d(other.d)
 {
-    m_name = other->name ();
-    m_imgUri = other->imgUri ();
-    m_description = other->description ();
-    m_date = other->date ();
 }
 
-AlbumMeta::~AlbumMeta()
+bool AlbumMeta::operator ==(const AlbumMeta &other)
 {
-
+    return d.data ()->date == other.d.data ()->date
+            && d.data ()->description == other.d.data ()->description
+            && d.data ()->imgUri == other.d.data ()->imgUri
+            && d.data ()->name == other.d.data ()->name;
 }
 
 QString AlbumMeta::name() const
 {
-    return m_name;
+    return d.data ()->name;
 }
 
 QUrl AlbumMeta::imgUri() const
 {
-    return m_imgUri;
+    return d.data ()->imgUri;
 }
 
 QString AlbumMeta::description() const
 {
-    return m_description;
+    return d.data ()->description;
 }
 
 QVariant AlbumMeta::date() const
 {
-    return m_date;
+    return d.data ()->date;
 }
 
-void AlbumMeta::setName(QString arg)
+void AlbumMeta::setName(const QString &name)
 {
-    if (m_name != arg) {
-        m_name = arg;
-        emit nameChanged(arg);
+    d.data ()->name = name;
+}
+
+void AlbumMeta::setImgUri(const QUrl &uri)
+{
+    d.data ()->imgUri = uri;
+}
+
+void AlbumMeta::setDescription(const QString &description)
+{
+    d.data ()->description = description;
+}
+
+void AlbumMeta::setDate(const QVariant &date)
+{
+    d.data ()->date = date;
+}
+
+QJsonObject AlbumMeta::toObject() const
+{
+    QJsonObject o;
+    o.insert (KEY_NAME, d.data ()->name);
+    o.insert (KEY_URI, d.data ()->imgUri);
+    o.insert (KEY_DESCRIPTION, d.data ()->description);
+    o.insert (KEY_DATE, d.data ()->date);
+    return o;
+}
+
+QByteArray AlbumMeta::toJson() const
+{
+    QJsonDocument doc(toObject ());
+    return doc.toJson ();
+}
+
+AlbumMeta AlbumMeta::fromJson(const QByteArray &json)
+{
+    AlbumMeta meta;
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        return meta;
     }
+    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+        return meta;
+    QJsonObject o = doc.object ();
+    if (o.isEmpty ())
+        return meta;
+    meta.setDate (o.value (KEY_DATE).toVariant ());
+    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
+    meta.setImgUri (QUrl(o.value (KEY_URI).toString ()));
+    meta.setName (o.value (KEY_NAME).toString ());
+    return meta;
 }
 
-void AlbumMeta::setImgUri(QUrl arg)
-{
-    if (m_imgUri != arg) {
-        m_imgUri = arg;
-        emit imgUriChanged(arg);
-    }
-}
-
-void AlbumMeta::setDescription(QString arg)
-{
-    if (m_description != arg) {
-        m_description = arg;
-        emit descriptionChanged(arg);
-    }
-}
-
-void AlbumMeta::setDate(QVariant arg)
-{
-    if (m_date != arg) {
-        m_date = arg;
-        emit dateChanged(arg);
-    }
-}
-
-ArtistMeta::ArtistMeta(QObject *parent)
-    :BaseObject(parent)
+ArtistMeta::ArtistMeta()
+    : d(new ArtistMetaPriv())
 {
 }
 
-ArtistMeta::ArtistMeta(const ArtistMeta *other, QObject *parent)
-    :BaseObject(parent)
+ArtistMeta::ArtistMeta(const ArtistMeta &other)
+    : d(other.d)
 {
-    m_name = other->name ();
-    m_imgUri = other->imgUri ();
-    m_description = other->description ();
 }
 
-ArtistMeta::~ArtistMeta()
+bool ArtistMeta::operator ==(const ArtistMeta &other)
 {
-
+    return d.data ()->description == other.d.data ()->description
+            && d.data ()->imgUri == other.d.data ()->imgUri
+            && d.data ()->name == other.d.data ()->name;
 }
 
 QString ArtistMeta::name() const
 {
-    return m_name;
+    return d.data ()->name;
 }
 
 QUrl ArtistMeta::imgUri() const
 {
-    return m_imgUri;
+    return d.data ()->imgUri;
 }
 
 QString ArtistMeta::description() const
 {
-    return m_description;
+    return d.data ()->description;
 }
 
-void ArtistMeta::setName(QString arg)
+void ArtistMeta::setName(const QString &name)
 {
-    if (m_name != arg) {
-        m_name = arg;
-        emit nameChanged(arg);
+    d.data ()->name = name;
+}
+
+void ArtistMeta::setImgUri(const QUrl &uri)
+{
+    d.data ()->imgUri = uri;
+}
+
+void ArtistMeta::setDescription(const QString &description)
+{
+    d.data ()->description = description;
+}
+
+QJsonObject ArtistMeta::toObject() const
+{
+    QJsonObject o;
+    o.insert (KEY_NAME, d.data ()->name);
+    o.insert (KEY_URI, d.data ()->imgUri);
+    o.insert (KEY_DESCRIPTION, d.data ()->description);
+    return o;
+}
+
+QByteArray ArtistMeta::toJson() const
+{
+    QJsonDocument doc(toObject ());
+    return doc.toJson ();
+}
+
+ArtistMeta ArtistMeta::fromJson(const QByteArray &json)
+{
+    ArtistMeta meta;
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        return meta;
     }
+    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+        return meta;
+    QJsonObject o = doc.object ();
+    if (o.isEmpty ())
+        return meta;
+    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
+    meta.setImgUri (QUrl(o.value (KEY_URI).toString ()));
+    meta.setName (o.value (KEY_NAME).toString ());
+    return meta;
 }
 
-void ArtistMeta::setImgUri(QUrl arg)
+CoverMeta::CoverMeta()
+    : d(new CoverMetaPriv())
 {
-    if (m_imgUri != arg) {
-        m_imgUri = arg;
-        emit imgUriChanged(arg);
-    }
 }
 
-void ArtistMeta::setDescription(QString arg)
+CoverMeta::CoverMeta(const CoverMeta &other)
+    : d(other.d)
 {
-    if (m_description != arg) {
-        m_description = arg;
-        emit descriptionChanged(arg);
-    }
 }
 
-CoverMeta::CoverMeta(QObject *parent)
-    :BaseObject(parent)
+bool CoverMeta::operator ==(const CoverMeta &other)
 {
-
-}
-
-CoverMeta::CoverMeta(const CoverMeta *other, QObject *parent)
-    :BaseObject(parent)
-{
-    m_smallUri = other->smallUri ();
-    m_middleUri = other->middleUri ();
-    m_largeUri = other->largeUri ();
-}
-
-CoverMeta::~CoverMeta()
-{
-
+    return d.data ()->largeUri == other.d.data ()->largeUri
+            && d.data ()->middleUri == other.d.data ()->middleUri
+            && d.data ()->smallUri == other.d.data ()->smallUri;
 }
 
 QUrl CoverMeta::smallUri() const
 {
-    return m_smallUri;
+    return d.data ()->smallUri;
 }
 
 QUrl CoverMeta::middleUri() const
 {
-    return m_middleUri;
+    return d.data ()->middleUri;
 }
 
 QUrl CoverMeta::largeUri() const
 {
-    return m_largeUri;
+    return d.data ()->largeUri;
 }
 
-void CoverMeta::setSmallUri(QUrl arg)
+void CoverMeta::setSmallUri(const QUrl &small)
 {
-    if (m_smallUri != arg) {
-        m_smallUri = arg;
-        emit smallUriChanged(arg);
+    d.data ()->smallUri = small;
+}
+
+void CoverMeta::setMiddleUri(const QUrl &middle)
+{
+    d.data ()->middleUri = middle;
+}
+
+void CoverMeta::setLargeUri(const QUrl &large)
+{
+    d.data ()->largeUri = large;
+}
+
+QJsonObject CoverMeta::toObject() const
+{
+    QJsonObject o;
+    o.insert (KEY_LARGE_IMG, d.data ()->largeUri);
+    o.insert (KEY_MIDDLE_IMG, d.data ()->middleUri);
+    o.insert (KEY_SMALL_IMG, d.data ()->smallUri);
+    return o;
+}
+
+QByteArray CoverMeta::toJson() const
+{
+    QJsonDocument doc(toObject ());
+    return doc.toJson ();
+}
+
+CoverMeta CoverMeta::fromJson(const QByteArray &json)
+{
+    CoverMeta meta;
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        return meta;
     }
+    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+        return meta;
+    QJsonObject o = doc.object ();
+    if (o.isEmpty ())
+        return meta;
+    meta.setLargeUri (QUrl(o.value (KEY_LARGE_IMG).toString ()));
+    meta.setMiddleUri (QUrl(o.value (KEY_MIDDLE_IMG).toString ()));
+    meta.setSmallUri (QUrl(o.value (KEY_SMALL_IMG).toString ()));
+    return meta;
 }
 
-void CoverMeta::setMiddleUri(QUrl arg)
-{
-    if (m_middleUri != arg) {
-        m_middleUri = arg;
-        emit middleUriChanged(arg);
-    }
-}
-
-void CoverMeta::setLargeUri(QUrl arg)
-{
-    if (m_largeUri != arg) {
-        m_largeUri = arg;
-        emit largeUriChanged(arg);
-    }
-}
-
-TrackMeta::TrackMeta(QObject *parent)
-    :BaseObject(parent)
+TrackMeta::TrackMeta()
+    : d(new TrackMetaPriv())
 {
 
 }
 
-TrackMeta::TrackMeta(const TrackMeta *other, QObject *parent)
-    :BaseObject(parent)
+TrackMeta::TrackMeta(const TrackMeta &other)
+    : d(other.d)
 {
-    m_bitRate = other->bitRate ();
-    m_date = other->date ();
-    m_description = other->description ();
-    m_duration = other->duration ();
-    m_genre = other->genre ();
-    m_sampleRate = other->sampleRate ();
-    m_title = other->title ();
-    m_userRating = other->userRating ();
-    m_year = other->year ();
+
 }
 
-TrackMeta::~TrackMeta()
+bool TrackMeta::operator ==(const TrackMeta &other)
 {
-
+    return d.data ()->bitRate == other.d.data ()->bitRate
+            && d.data ()->date == other.d.data ()->date
+            && d.data ()->description == other.d.data ()->description
+            && d.data ()->duration == other.d.data ()->duration
+            && d.data ()->genre == other.d.data ()->genre
+            && d.data ()->sampleRate == other.d.data ()->sampleRate
+            && d.data ()->title == other.d.data ()->title
+            && d.data ()->userRating == other.d.data ()->userRating
+            && d.data ()->year == other.d.data ()->year;
 }
 
 QVariant TrackMeta::bitRate() const
 {
-    return m_bitRate;
+    return d.data ()->bitRate;
 }
 
 int TrackMeta::duration() const
 {
-    return m_duration;
+    return d.data ()->duration;
 }
 
 QString TrackMeta::title() const
 {
-    return m_title;
+    return d.data ()->title;
 }
 
 QString TrackMeta::description() const
 {
-    return m_description;
+    return d.data ()->description;
 }
 
 QVariant TrackMeta::year() const
 {
-    return m_year;
+    return d.data ()->year;
 }
 
 QVariant TrackMeta::date() const
 {
-    return m_date;
+    return d.data ()->date;
 }
 
 QVariant TrackMeta::genre() const
 {
-    return m_genre;
+    return d.data ()->genre;
 }
 
 QVariant TrackMeta::sampleRate() const
 {
-    return m_sampleRate;
+    return d.data ()->sampleRate;
 }
 
 QVariant TrackMeta::userRating() const
 {
-    return m_userRating;
+    return d.data ()->userRating;
 }
 
-void TrackMeta::setBitRate(QVariant arg)
+void TrackMeta::setBitRate(const QVariant &arg)
 {
-    if (m_bitRate != arg) {
-        m_bitRate = arg;
-        emit bitRateChanged(arg);
-    }
+    d.data ()->bitRate = arg;
 }
 
 void TrackMeta::setDuration(int arg)
 {
-    if (m_duration != arg) {
-        m_duration = arg;
-        emit durationChanged(arg);
-    }
+    d.data ()->duration = arg;
 }
 
-void TrackMeta::setTitle(QString arg)
+void TrackMeta::setTitle(const QString &arg)
 {
-    if (m_title != arg) {
-        m_title = arg;
-        emit titleChanged(arg);
-    }
+    d.data ()->title = arg;
 }
 
-void TrackMeta::setDescription(QString arg)
+void TrackMeta::setDescription(const QString &arg)
 {
-    if (m_description != arg) {
-        m_description = arg;
-        emit descriptionChanged(arg);
-    }
+    d.data ()->description = arg;
 }
 
-void TrackMeta::setYear(QVariant arg)
+void TrackMeta::setYear(const QVariant &arg)
 {
-    if (m_year != arg) {
-        m_year = arg;
-        emit yearChanged(arg);
-    }
+    d.data ()->year = arg;
 }
 
-void TrackMeta::setDate(QVariant arg)
+void TrackMeta::setDate(const QVariant &arg)
 {
-    if (m_date != arg) {
-        m_date = arg;
-        emit dateChanged(arg);
-    }
+    d.data ()->date = arg;
 }
 
-void TrackMeta::setGenre(QVariant arg)
+void TrackMeta::setGenre(const QVariant &arg)
 {
-    if (m_genre != arg) {
-        m_genre = arg;
-        emit genreChanged(arg);
-    }
+    d.data ()->genre = arg;
 }
 
-void TrackMeta::setSampleRate(QVariant arg)
+void TrackMeta::setSampleRate(const QVariant &arg)
 {
-    if (m_sampleRate != arg) {
-        m_sampleRate = arg;
-        emit sampleRateChanged(arg);
-    }
+    d.data ()->sampleRate = arg;
 }
 
-void TrackMeta::setUserRating(QVariant arg)
+void TrackMeta::setUserRating(const QVariant &arg)
 {
-    if (m_userRating != arg) {
-        m_userRating = arg;
-        emit userRatingChanged(arg);
-    }
+    d.data ()->userRating = arg;
 }
+
+QJsonObject TrackMeta::toObject() const
+{
+    QJsonObject o;
+    o.insert (KEY_BIT_RATE, d.data ()->bitRate);
+    o.insert (KEY_DATE, d.data ()->date);
+    o.insert (KEY_DESCRIPTION, d.data ()->description);
+    o.insert (KEY_DURATION, d.data ()->duration);
+    o.insert (KEY_GENRE, d.data ()->genre);
+    o.insert (KEY_SAMPLE_RATE, d.data ()->sampleRate);
+    o.insert (KEY_TITLE, d.data ()->title);
+    o.insert (KEY_USER_RATING, d.data ()->userRating);
+    o.insert (KEY_YEAR, d.data ()->year);
+    return o;
+}
+
+QByteArray TrackMeta::toJson() const
+{
+    QJsonDocument doc(toObject ());
+    return doc.toJson ();
+}
+
+TrackMeta TrackMeta::fromJson(const QByteArray &json)
+{
+    TrackMeta meta;
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        return meta;
+    }
+    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+        return meta;
+    QJsonObject o = doc.object ();
+    if (o.isEmpty ())
+        return meta;
+    meta.setBitRate (o.value (KEY_BIT_RATE).toVariant ());
+    meta.setDate (o.value (KEY_DATE).toVariant ());
+    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
+    meta.setDuration (o.value (KEY_DURATION).toInt ());
+    meta.setGenre (o.value (KEY_GENRE).toVariant ());
+    meta.setSampleRate (o.value (KEY_SAMPLE_RATE).toVariant ());
+    meta.setTitle (o.value (KEY_TITLE).toString ());
+    meta.setUserRating (o.value (KEY_USER_RATING).toVariant ());
+    meta.setYear (o.value (KEY_YEAR).toVariant ());
+    return meta;
+}
+
+
 
 } //MetaData
 } //PhoenixPlayer

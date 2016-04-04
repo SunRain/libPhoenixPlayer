@@ -111,6 +111,11 @@ QList<QObject *> MusicLibraryManager::allTracks()
     return list;
 }
 
+bool MusicLibraryManager::empty() const
+{
+    return m_trackList.isEmpty ();
+}
+
 QList<QObject *> MusicLibraryManager::artistTracks(const QString &artistName, int limitNum)
 {
     if (m_trackList.isEmpty ())
