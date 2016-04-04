@@ -230,6 +230,7 @@ public:
     ///
     QUrl queryImgUri() const;
 
+    bool isEmpty() const;
     QJsonObject toObject() const;
     QByteArray toJson() const;
     static AudioMetaObject fromJson(const QByteArray &json);

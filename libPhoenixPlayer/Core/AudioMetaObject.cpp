@@ -59,10 +59,10 @@ public:
     QString lyricsData;
     QUrl lyricsUri;
 
-    MetaData::AlbumMeta albumMeta;
-    MetaData::ArtistMeta artistMeta;
-    MetaData::CoverMeta coverMeta;
-    MetaData::TrackMeta trackMeta;
+    AlbumMeta albumMeta;
+    ArtistMeta artistMeta;
+    CoverMeta coverMeta;
+    TrackMeta trackMeta;
 };
 
 AudioMetaObject::AudioMetaObject()
@@ -240,6 +240,11 @@ QUrl AudioMetaObject::queryImgUri() const
     if (!albumMeta ().imgUri ().isEmpty ())
         return albumMeta ().imgUri ();
     return QUrl();
+}
+
+bool AudioMetaObject::isEmpty() const
+{
+    return d.data ()->hash.isEmpty ();
 }
 
 QJsonObject AudioMetaObject::toObject() const
