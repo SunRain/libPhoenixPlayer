@@ -5,6 +5,8 @@
 #include <QList>
 #include <QStringList>
 
+#include "libphoenixplayer_global.h"
+
 namespace PhoenixPlayer {
 class AudioMetaObject;
 class PluginLoader;
@@ -16,11 +18,11 @@ class IMusicLibraryDAO;
 }
 
 class PlayListFormat;
-class PlayListMgr : public QObject
+class LIBPHOENIXPLAYER_EXPORT PlayListMgr : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(QObject* currentTrack READ currentTrackObject CONSTANT)
+//    Q_PROPERTY(QObject* currentTrack READ currentTrackObject CONSTANT)
     Q_PROPERTY(int count READ count CONSTANT)
 //    Q_PROPERTY(int randomIndex READ randomIndex CONSTANT)
     Q_PROPERTY(QStringList existPlayLists READ existPlayLists CONSTANT)
@@ -28,10 +30,10 @@ class PlayListMgr : public QObject
 public:
     explicit PlayListMgr(QObject *parent = 0);
     virtual ~PlayListMgr();
-    bool addTrack(const AudioMetaObject *song);
-    bool addTrack(const QList<AudioMetaObject *> &list);
-    bool removeTrack(int index);
-    bool removeTracks(int startPos, int endPos);
+    bool addTrack(const AudioMetaObject &song);
+    bool addTrack(const /*QList<AudioMetaObject>*/AudioMetaList &list);
+    bool removeTrack(const int &index);
+    bool removeTracks(const int &startPos, const int &endPos);
     void clear();
     bool isEmpty();
     ///
@@ -49,14 +51,14 @@ public:
     /// \brief currentTrack
     /// \return nullptr if no track exists
     ///
-    AudioMetaObject *currentTrack() const;
-    QObject *currentTrackObject() const;
+    AudioMetaObject currentTrack();
+//    QObject *currentTrackObject() const;
     ///
     /// \brief get
     /// \param index
     /// \return nullptr if no track exists
     ///
-    AudioMetaObject *get(int index) const;
+    AudioMetaObject get(int index) const;
 
 //    void setRandom(bool random);
     ///
@@ -99,7 +101,8 @@ private:
 
     QString m_playListDir;
     QStringList m_existPlayLists;
-    QList<AudioMetaObject *> m_trackList;
+//    QList<AudioMetaObject *> m_trackList;
+    AudioMetaList m_trackList;
 
     Settings *m_settings;
     PlayListFormat *m_listFormat;

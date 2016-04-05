@@ -4,14 +4,17 @@
 #include <QObject>
 #include <QPointer>
 
+#include "libphoenixplayer_global.h"
 #include "Common.h"
 #include "MetadataLookup/IMetadataLookup.h"
 #include "SingletonPointer.h"
+#include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
 class Settings;
 class PluginLoader;
 class PlayListMgr;
+//class AudioMetaObject;
 
 namespace PlayBackend {
 class IPlayBackend;
@@ -50,7 +53,7 @@ public:
     PlayListMgr *playList() const;
     QObject *playListObject() const;
 
-    AudioMetaObject *curTrackMetadata();
+    AudioMetaObject curTrackMetadata();
 
     ///
     /// \brief setAutoSkipForward 是否在播放结束或者播放失败后自动跳转到下一首歌曲，跳转的歌曲由Common::PlayMode决定
@@ -61,7 +64,7 @@ public:
 
     Q_INVOKABLE void playFromLibrary(const QString &songHash);
     Q_INVOKABLE void playFromNetwork(const QUrl &url);
-    Q_INVOKABLE void playTrack(const AudioMetaObject *data);
+    void playTrack(const AudioMetaObject &data);
 
     //播放队列相关操作
 //    Q_INVOKABLE void addToQueue(const QString &songHash, bool skipDuplicates = true);
@@ -189,7 +192,7 @@ private:
     PlayBackend::IPlayBackend **m_playBackend;
     PlayBackend::IPlayBackend *m_pb;
     PlayBackend::BackendHost *m_playBackendHost;
-    AudioMetaObject *m_curTrack;
+    AudioMetaObject m_curTrack;
     PlayListMgr *m_playList;
     MusicLibrary::IMusicLibraryDAO *m_dao;
 

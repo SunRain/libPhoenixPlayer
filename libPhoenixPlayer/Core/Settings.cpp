@@ -133,25 +133,33 @@ QStringList Settings::musicDirs()
 }
 
 
-void Settings::setLastPlayedSong(AudioMetaObject **data)
+void Settings::setLastPlayedSong(const AudioMetaObject &data)
 {
-    if (!data)
+//    if (!data)
+//        return;
+//    QStringList list;
+//    list.append ((*data)->path ());
+//    list.append ((*data)->name ());
+//    list.append (QString::number ((*data)->size ()));
+//    m_settings->setValue (KEY_LAST_SONG, list.join ("||"));
+//    m_settings->sync ();
+    if (data.isEmpty ())
         return;
-    QStringList list;
-    list.append ((*data)->path ());
-    list.append ((*data)->name ());
-    list.append (QString::number ((*data)->size ()));
-    m_settings->setValue (KEY_LAST_SONG, list.join ("||"));
+    m_settings->setValue (KEY_LAST_SONG, data.toJson ());
     m_settings->sync ();
 }
 
-AudioMetaObject *Settings::lastPlayedSong()
+AudioMetaObject Settings::lastPlayedSong() const
 {
-    AudioMetaObject *data = nullptr;
-    QStringList list = m_settings->value (KEY_LAST_SONG, QString()).toString ().split ("||");
-    if (!list.isEmpty () && list.size () == 3)
-        data = new AudioMetaObject(list.at (0), list.at (1), list.at (2).toInt ());
-    return data;
+//    AudioMetaObject *data = nullptr;
+//    QStringList list = m_settings->value (KEY_LAST_SONG, QString()).toString ().split ("||");
+//    if (!list.isEmpty () && list.size () == 3)
+//        data = new AudioMetaObject(list.at (0), list.at (1), list.at (2).toInt ());
+//    return data;
+    QByteArray ba = m_settings->value (KEY_LAST_SONG).toByteArray ();
+    if (ba.isEmpty () || ba.isNull ())
+        return AudioMetaObject();
+    return AudioMetaObject::fromJson (ba);
 }
 
 bool Settings::setCurrentPlayListHash(const QString &hash)

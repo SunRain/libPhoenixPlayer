@@ -1,6 +1,7 @@
 #ifndef COVERCIRCLEIMAGE_H
 #define COVERCIRCLEIMAGE_H
 
+#include "libphoenixplayer_global.h"
 #include "CircleImage.h"
 #include "Common.h"
 
@@ -12,7 +13,7 @@ class MusicLibraryManager;
 }
 namespace QmlPlugin {
 
-class CoverCircleImage : public CircleImage
+class LIBPHOENIXPLAYER_EXPORT CoverCircleImage : public CircleImage
 {
     Q_OBJECT
     Q_PROPERTY(QUrl defaultSource READ defaultSource WRITE setDefaultSource)

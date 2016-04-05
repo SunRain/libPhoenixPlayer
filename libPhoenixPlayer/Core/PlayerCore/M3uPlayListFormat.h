@@ -3,10 +3,11 @@
 
 #include <QObject>
 
+#include "libphoenixplayer_global.h"
 #include "PlayListFormat.h"
 
 namespace PhoenixPlayer {
-class AudioMetaObject;
+//class AudioMetaObject;
 
 class M3uPlayListFormat : public PlayListFormat
 {
@@ -18,7 +19,7 @@ public:
 public:
     QString extension() const;
     QStringList fileList(const QString &contents);
-    QString format(const QList<AudioMetaObject *> &list);
+    QString format(const /*QList<AudioMetaObject *>*/ AudioMetaList &list);
 };
 } //PhoenixPlayer
 #endif // M3UPLAYLIST_H

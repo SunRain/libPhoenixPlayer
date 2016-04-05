@@ -107,9 +107,10 @@ void CoverCircleImage::setAutoChange(bool arg)
 void CoverCircleImage::drawImage()
 {
     if (autoChange()) {
-        AudioMetaObject *d = m_playCore->curTrackMetadata ();
-        if (d)
-            setImage (d->queryImgUri ());
+//        AudioMetaObject *d = m_playCore->curTrackMetadata ();
+        AudioMetaObject d = m_playCore->curTrackMetadata ();
+        if (!d.isEmpty ())
+            setImage (d.queryImgUri ());
         else
             setImage (QUrl());
     }

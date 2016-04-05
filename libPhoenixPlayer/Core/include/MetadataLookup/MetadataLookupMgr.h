@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QThread>
 
+#include "libphoenixplayer_global.h"
 #include "Common.h"
 #include "AudioMetaObject.h"
 #include "MetadataLookup/IMetadataLookup.h"
@@ -15,25 +16,28 @@ class PluginLoader;
 class PluginHost;
 class Settings;
 class Util;
+class AudioMetaObject;
 
 namespace MetadataLookup {
 
 class MetadataLookupHost;
-class MetadataLookupMgr : public QThread
+class LIBPHOENIXPLAYER_EXPORT MetadataLookupMgr : public QThread
 {
     Q_OBJECT
 public:
     explicit MetadataLookupMgr(QObject *parent = 0);
     virtual ~MetadataLookupMgr();
-    void lookup(AudioMetaObject **data, IMetadataLookup::LookupType type);
+    void lookup(const AudioMetaObject &data, IMetadataLookup::LookupType type);
 
 protected:
     struct WorkNode {
-        AudioMetaObject **data;
+        AudioMetaObject data;
         IMetadataLookup::LookupType type;
         bool operator == (const WorkNode &other) const {
-            return ((*(this->data))->hash () == (*(other.data))->hash ()
-                    && (this->type == other.type));
+//            return ((*(this->data))->hash () == (*(other.data))->hash ()
+//                    && (this->type == other.type));
+            return data.hash () == other.data.hash ()
+                    && type == other.type;
         }
     };
     struct HostNode {
@@ -49,9 +53,9 @@ signals:
 //    void lookupSucceed(const QString &songHash,
 //                       const QByteArray &result,
 //                       const IMetadataLookup::LookupType &type);
-    void lookupSucceed(AudioMetaObject **data, const IMetadataLookup::LookupType &type);
+    void lookupSucceed(const AudioMetaObject &data, const IMetadataLookup::LookupType &type);
 //    void lookupFailed(const QString &songHash, const IMetadataLookup::LookupType &type);
-    void lookupFailed(AudioMetaObject **data, const IMetadataLookup::LookupType &type);
+    void lookupFailed(const AudioMetaObject &data, const IMetadataLookup::LookupType &type);
     void queueFinished();
 public slots:
 

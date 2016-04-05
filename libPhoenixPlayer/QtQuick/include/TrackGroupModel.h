@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QUrl>
 
+#include "libphoenixplayer_global.h"
 #include "Common.h"
 
 class QByteArray;
@@ -16,7 +17,7 @@ class MusicLibraryManager;
 }
 namespace QmlPlugin {
 
-class TrackGroupModel : public QAbstractListModel {
+class LIBPHOENIXPLAYER_EXPORT TrackGroupModel : public QAbstractListModel {
     Q_OBJECT
     Q_ENUMS(ModelType)
     Q_PROPERTY(ModelType type READ type WRITE setType NOTIFY typeChanged)

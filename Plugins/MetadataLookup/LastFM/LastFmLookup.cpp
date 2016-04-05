@@ -88,7 +88,7 @@ bool LastFmLookup::supportLookup(IMetadataLookup::LookupType type)
 }
 
 //http://ws.audioscrobbler.com/2.0/?method=album.search&album=F.I.R&api_key=625fd47b3b685af19315cc3a1aa5920a&format=json
-void LastFmLookup::lookup(AudioMetaObject **meta)
+void LastFmLookup::lookup(const AudioMetaObject &object)
 {
     qDebug()<<"====> "<<Q_FUNC_INFO<<" <====";
 
@@ -106,8 +106,8 @@ void LastFmLookup::lookup(AudioMetaObject **meta)
     case LookupType::TypeAlbumImage:
     case LookupType::TypeAlbumDate:
     case LookupType::TypeAlbumDescription: {
-        QString artist = formatStr ((*meta)->artistMeta ()->name ());
-        QString album = formatStr ((*meta)->albumMeta ()->name ());
+        QString artist = formatStr (/*(*object)->artistMeta ()->name ()*/object.artistMeta ().name ());
+        QString album = formatStr (/*(*object)->albumMeta ()->name ()*/object.albumMeta ().name ());
         if (!artist.isEmpty () && !album.isEmpty ()) {
             query.addQueryItem ("artist", artist);
             query.addQueryItem ("album", album);
@@ -121,7 +121,7 @@ void LastFmLookup::lookup(AudioMetaObject **meta)
     }
     case LookupType::TypeArtistImage:
     case LookupType::TypeArtistDescription: {
-        QString artist = formatStr ((*meta)->artistMeta ()->name ());
+        QString artist = formatStr (/*(*object)->artistMeta ()->name ()*/object.artistMeta ().name ());
         if (!artist.isEmpty ()) {
             query.addQueryItem ("artist", artist);
             query.addQueryItem ("method", QString("artist.getInfo"));
@@ -132,10 +132,10 @@ void LastFmLookup::lookup(AudioMetaObject **meta)
         break;
     }
     case LookupType::TypeTrackDescription: {
-        QString artist = formatStr ((*meta)->artistMeta ()->name ());
-        QString track = formatStr ((*meta)->trackMeta ()->title ());
+        QString artist = formatStr (/*(*object)->artistMeta ()->name ()*/object.artistMeta ().name ());
+        QString track = formatStr (/*(*object)->trackMeta ()->title ()*/object.trackMeta ().title ());
         if (track.isEmpty ()) {
-            track = (*meta)->name ();
+            track = (*object)->name ();
             //TODO: quick hack
             track = track.mid (0, track.indexOf ("."));
         }

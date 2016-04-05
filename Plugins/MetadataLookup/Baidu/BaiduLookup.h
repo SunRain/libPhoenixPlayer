@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "libphoenixplayer_global.h"
 #include "MetadataLookup/IMetadataLookup.h"
 
 class QTextCodec;
@@ -13,7 +14,7 @@ namespace MetadataLookup {
 class BaseNetworkLookup;
 namespace BaiduLookup {
 
-class BaiduLookup : public IMetadataLookup
+class LIBPHOENIXPLAYER_EXPORT BaiduLookup : public IMetadataLookup
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "PhoenixPlayer.MetadataLookup.BaiduLyricsLookup" FILE "lyricsbaidu.json")
@@ -24,7 +25,7 @@ public:
 
      // ILyricsLookup interface
 public:
-    void lookup(AudioMetaObject **meta);
+    void lookup(const AudioMetaObject &object);
     bool supportLookup(LookupType type);
 private slots:
     void dlFailed(const QUrl &requestedUrl, const QString &error);

@@ -5,6 +5,8 @@
 #include <QMutex>
 #include <QMimeDatabase>
 
+#include "libphoenixplayer_global.h"
+
 class QStringList;
 
 namespace PhoenixPlayer {
@@ -18,7 +20,7 @@ class IMusicTagParser;
 class IMusicLibraryDAO;
 class MusicTagParserHost;
 class IMusicTagParser;
-class LocalMusicScannerThread : public QThread
+class LIBPHOENIXPLAYER_EXPORT LocalMusicScannerThread : public QThread
 {
     Q_OBJECT
 public:

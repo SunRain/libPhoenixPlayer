@@ -3,10 +3,11 @@
 
 #include <QObject>
 #include <QFile>
+#include "libphoenixplayer_global.h"
 
 namespace PhoenixPlayer {
-class AudioMetaObject;
-class PlayListFormat : public QObject
+//class AudioMetaObject;
+class LIBPHOENIXPLAYER_EXPORT PlayListFormat : public QObject
 {
     Q_OBJECT
 public:
@@ -25,7 +26,7 @@ public:
     /// \param list 歌曲列表
     /// \return 格式化后的文件内容
     ///
-    virtual QString format(const QList<AudioMetaObject *> &list);
+    virtual QString format(const /*QList<AudioMetaObject *>*/AudioMetaList &list);
 //    virtual QString encode(const QStringList &fileList);
 };
 } //PhoenixPlayer

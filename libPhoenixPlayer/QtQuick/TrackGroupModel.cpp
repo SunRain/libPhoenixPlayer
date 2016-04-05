@@ -125,56 +125,57 @@ void TrackGroupModel::queryData()
 //        break;
 //    }
 //     mDataList = m_musicLibraryManager->querySongMetaElement(mSongMetaTag, QString(), true);
-    QList<QObject *> list = m_musicLibraryManager->allTracks ();
-    foreach (QObject *o, list) {
-        AudioMetaObject *d = qobject_cast<AudioMetaObject *>(o);
-        if (!d)
+//    QList<QObject *> list = m_musicLibraryManager->allTracks ();
+    AudioMetaList list = m_musicLibraryManager->allTracks ();
+    foreach (AudioMetaObject d, list) {
+//        AudioMetaObject *d = qobject_cast<AudioMetaObject *>(o);
+        if (d.isEmpty ())
             continue;
         switch (m_type) {
         case ModelType::TypeAlbum: {
             GroupObject obj;
-            obj.name = d->albumMeta ()->name ();
-            obj.imgUri = d->albumMeta ()->imgUri ();
+            obj.name = d.albumMeta ().name ();//d->albumMeta ()->name ();
+            obj.imgUri = d.albumMeta ().imgUri ();//d->albumMeta ()->imgUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
             break;
         }
         case ModelType::TypeArtist: {
             GroupObject obj;
-            obj.name = d->artistMeta ()->name ();
-            obj.imgUri = d->artistMeta ()->imgUri ();
+            obj.name = d.artistMeta ().name ();//d->artistMeta ()->name ();
+            obj.imgUri = d.artistMeta ().imgUri ();//d->artistMeta ()->imgUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
             break;
         }
         case ModelType::TypeFolders: {
             GroupObject obj;
-            obj.name = d->path ();
-            obj.imgUri = d->coverMeta ()->middleUri ();
+            obj.name = d.path ();//d->path ();
+            obj.imgUri = d.coverMeta ().middleUri ();//d->coverMeta ()->middleUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
             break;
         }
         case ModelType::TypeGenre: {
             GroupObject obj;
-            obj.name = d->trackMeta ()->genre ().toString ();
-            obj.imgUri = d->coverMeta ()->middleUri ();
+            obj.name = d.trackMeta ().genre ().toString ();//d->trackMeta ()->genre ().toString ();
+            obj.imgUri = d.coverMeta ().middleUri ();//d->coverMeta ()->middleUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
             break;
         }
         case ModelType::TypeMediaType: {
             GroupObject obj;
-            obj.name = d->mediaType ();
-            obj.imgUri = d->coverMeta ()->middleUri ();
+            obj.name = d.mediaType ();//d->mediaType ();
+            obj.imgUri = d.coverMeta ().middleUri ();// d->coverMeta ()->middleUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
             break;
         }
         case ModelType::TypeUserRating: {
             GroupObject obj;
-            obj.name = d->trackMeta ()->userRating ().toString ();
-            obj.imgUri = d->coverMeta ()->middleUri ();
+            obj.name = d.trackMeta ().userRating ().toString ();//d->trackMeta ()->userRating ().toString ();
+            obj.imgUri = d.coverMeta ().middleUri ();//d->coverMeta ()->middleUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
             break;
@@ -187,44 +188,44 @@ void TrackGroupModel::queryData()
     ///如果某个groupobject的imguri是空值，则从m_groupList循环读取某一个相同的GroupObject.name值来补全
     foreach (GroupObject obj, m_groupList) {
         if (obj.imgUri.isEmpty ()) {
-            foreach (QObject *o, list) {
-                AudioMetaObject *d = qobject_cast<AudioMetaObject *>(o);
-                if (!o)
+            foreach (/*QObject *o*/AudioMetaObject d, list) {
+//                AudioMetaObject *d = qobject_cast<AudioMetaObject *>(o);
+                if (d.isEmpty ())
                     continue;
                 if (m_type == ModelType::TypeAlbum) {
-                    if (d->albumMeta ()->name () == obj.name
-                            && (!d->albumMeta ()->imgUri ().isEmpty ())) {
-                        obj.imgUri = d->albumMeta ()->imgUri ();
+                    if (d.albumMeta ().name () == obj.name
+                            && (!d.albumMeta ().imgUri ().isEmpty ())) {
+                        obj.imgUri = d.albumMeta ().imgUri ();
                         break;
                     }
                 } else if(m_type == ModelType::TypeArtist) {
-                    if (d->artistMeta ()->name () == obj.name
-                            && (!d->artistMeta ()->imgUri ().isEmpty ())) {
-                        obj.imgUri = d->artistMeta ()->imgUri ();
+                    if (d.artistMeta ().name () == obj.name
+                            && (!d.artistMeta ().imgUri ().isEmpty ())) {
+                        obj.imgUri = d.artistMeta ().imgUri ();
                         break;
                     }
                 } else if(m_type == ModelType::TypeFolders) {
-                    if (d->path ()== obj.name
-                            && (!d->coverMeta ()->middleUri ().isEmpty ())) {
-                        obj.imgUri = d->coverMeta ()->middleUri ();
+                    if (d.path ()== obj.name
+                            && (!d.coverMeta ().middleUri ().isEmpty ())) {
+                        obj.imgUri = d.coverMeta ().middleUri ();
                         break;
                     }
                 } else if(m_type == ModelType::TypeGenre) {
-                    if (d->trackMeta ()->genre () == obj.name
-                            && (!d->coverMeta ()->middleUri ().isEmpty ())) {
-                        obj.imgUri = d->coverMeta ()->middleUri ();
+                    if (d.trackMeta ().genre () == obj.name
+                            && (!d.coverMeta ().middleUri ().isEmpty ())) {
+                        obj.imgUri = d.coverMeta ().middleUri ();
                         break;
                     }
                 } else if(m_type == ModelType::TypeMediaType) {
-                    if (QString::number (d->mediaType ()) == obj.name
-                            && (!d->coverMeta ()->middleUri ().isEmpty ())) {
-                        obj.imgUri = d->coverMeta ()->middleUri ();
+                    if (QString::number (d.mediaType ()) == obj.name
+                            && (!d.coverMeta ().middleUri ().isEmpty ())) {
+                        obj.imgUri = d.coverMeta ().middleUri ();
                         break;
                     }
                 } else if(m_type == ModelType::TypeUserRating) {
-                    if (d->trackMeta ()->userRating () == obj.name
-                            && (!d->coverMeta ()->middleUri ().isEmpty ())) {
-                        obj.imgUri = d->coverMeta ()->middleUri ();
+                    if (d.trackMeta ().userRating () == obj.name
+                            && (!d.coverMeta ().middleUri ().isEmpty ())) {
+                        obj.imgUri = d.coverMeta ().middleUri ();
                         break;
                     }
                 }

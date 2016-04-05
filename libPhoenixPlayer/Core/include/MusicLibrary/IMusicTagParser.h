@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QStringList>
 
+#include "libphoenixplayer_global.h"
+
 namespace PhoenixPlayer {
 class AudioMetaObject;
 namespace MusicLibrary {

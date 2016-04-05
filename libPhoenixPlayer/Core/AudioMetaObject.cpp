@@ -7,6 +7,7 @@
 #include "Util.h"
 #include "AudioMetaObject.h"
 #include "Common.h"
+#include "../AudioMetaObject_p.h"
 
 namespace PhoenixPlayer {
 
@@ -35,40 +36,111 @@ namespace PhoenixPlayer {
 #define KEY_COVER_META "COVER_META"
 #define KEY_TRACK_META "TRACK_META"
 
-class AudioMetaObjectPriv : public QSharedData
-{
-public:
-    AudioMetaObjectPriv() {
-        hash = QString();
-        path = QString();
-        name = QString();
-        size = 0;
-        mediaType = (int)Common::MediaTypeLocalFile;
-        lyricsData = QString();
-        lyricsUri = QUrl();
-        albumMeta = AlbumMeta();
-        artistMeta = ArtistMeta();
-        coverMeta = CoverMeta();
-        trackMeta = TrackMeta();
-    }
+//class AlbumMetaPriv : public QSharedData
+//{
+//public:
+//    AlbumMetaPriv() {
+//        name = QString();
+//        imgUri = QUrl();
+//        description = QString();
+//        date = QDate::currentDate ();
+//    }
+//    QString name;
+//    QUrl imgUri;
+//    QString description;
+//    QVariant date;
+//};
 
-    QString hash;
-    QString path;
-    QString name;
-    quint64 size;
-    int mediaType;
-    QString lyricsData;
-    QUrl lyricsUri;
+//class ArtistMetaPriv : public QSharedData
+//{
+//public:
+//    ArtistMetaPriv() {
+//        name = QString();
+//        imgUri = QUrl();
+//        description = QString();
+//    }
+//    QString name;
+//    QUrl imgUri;
+//    QString description;
+//};
 
-    AlbumMeta albumMeta;
-    ArtistMeta artistMeta;
-    CoverMeta coverMeta;
-    TrackMeta trackMeta;
-};
+//class CoverMetaPriv : public QSharedData
+//{
+//public:
+//    CoverMetaPriv() {
+//        smallUri = QUrl();
+//        middleUri = QUrl();
+//        largeUri = QUrl();
+//    }
+//    QUrl smallUri;
+//    QUrl middleUri;
+//    QUrl largeUri;
+//};
+
+//class TrackMetaPriv : public QSharedData
+//{
+//public:
+//    TrackMetaPriv() {
+//        bitRate = QVariant();
+//        duration = 0;
+//        title = QString();
+//        description = QString();
+//        year = QVariant();
+//        date = QVariant();
+//        genre = QVariant();
+//        sampleRate = QVariant();
+//        userRating = QVariant();
+//    }
+//    QVariant bitRate;
+//    int duration;
+//    QString title;
+//    QString description;
+//    QVariant year;
+//    QVariant date;
+//    QVariant genre;
+//    QVariant sampleRate;
+//    QVariant userRating;
+//};
+
+
+//class AudioMetaObjectPriv : public QSharedData
+//{
+//public:
+//    AudioMetaObjectPriv() {
+//        hash = QString();
+//        path = QString();
+//        name = QString();
+//        size = 0;
+//        mediaType = (int)Common::MediaTypeLocalFile;
+//        lyricsData = QString();
+//        lyricsUri = QUrl();
+//        albumMeta = AlbumMeta();
+//        artistMeta = ArtistMeta();
+//        coverMeta = CoverMeta();
+//        trackMeta = TrackMeta();
+//    }
+
+//    QString hash;
+//    QString path;
+//    QString name;
+//    quint64 size;
+//    int mediaType;
+//    QString lyricsData;
+//    QUrl lyricsUri;
+
+//    AlbumMeta albumMeta;
+//    ArtistMeta artistMeta;
+//    CoverMeta coverMeta;
+//    TrackMeta trackMeta;
+//};
 
 AudioMetaObject::AudioMetaObject()
     : d(new AudioMetaObjectPriv())
 {
+//    d.data ()->albumMeta = AlbumMeta();
+//    d.data ()->artistMeta = ArtistMeta();
+//    d.data ()->coverMeta = CoverMeta();
+//    d.data ()->trackMeta = TrackMeta();
 }
 
 AudioMetaObject::AudioMetaObject(const QString &path, const QString &name, quint64 size)
@@ -78,6 +150,11 @@ AudioMetaObject::AudioMetaObject(const QString &path, const QString &name, quint
     d.data ()->name = name;
     d.data ()->size = size;
     d.data ()->hash = AudioMetaObject::formatHash(path, name, size);
+
+//    d.data ()->albumMeta = AlbumMeta();
+//    d.data ()->artistMeta = ArtistMeta();
+//    d.data ()->coverMeta = CoverMeta();
+//    d.data ()->trackMeta = TrackMeta();
 }
 
 AudioMetaObject::AudioMetaObject(const AudioMetaObject &other)
@@ -91,11 +168,23 @@ AudioMetaObject::AudioMetaObject(const QUrl &url)
     d.data ()->mediaType = (int)Common::MediaTypeUrl;
     d.data ()->path = url.toString ();
     d.data ()->hash = formatHash (url.toString ());
+
+//    d.data ()->albumMeta = AlbumMeta();
+//    d.data ()->artistMeta = ArtistMeta();
+//    d.data ()->coverMeta = CoverMeta();
+//    d.data ()->trackMeta = TrackMeta();
 }
 
 AudioMetaObject::~AudioMetaObject()
 {
 
+}
+
+AudioMetaObject &AudioMetaObject::operator =(const AudioMetaObject &other) {
+    if (*this == other)
+        return *this;
+    d.operator = (other.d);
+    return *this;
 }
 
 bool AudioMetaObject::operator ==(const AudioMetaObject &other)
@@ -113,7 +202,7 @@ bool AudioMetaObject::operator ==(const AudioMetaObject &other)
             && d.data ()->trackMeta == other.d.data ()->trackMeta;
 }
 
-QString AudioMetaObject::keyHash() const
+QString AudioMetaObject::keyHash()
 {
     return QString(KEY_HASH);
 }
@@ -162,21 +251,6 @@ QUrl AudioMetaObject::lyricsUri() const
 {
     return d.data ()->lyricsUri;
 }
-
-//void AudioMetaObject::setPath(const QString &path)
-//{
-//    d.data ()->path = path;
-//}
-
-//void AudioMetaObject::setName(const QString &name)
-//{
-//    d.data ()->name = name;
-//}
-
-//void AudioMetaObject::setSize(quint64 size)
-//{
-//    d.data ()->size = size;
-//}
 
 void AudioMetaObject::setMediaType(int arg)
 {
@@ -232,16 +306,6 @@ void AudioMetaObject::setTrackMeta(const TrackMeta &meta)
 {
     d.data ()->trackMeta = meta;
 }
-
-//void AudioMetaObject::generateHash()
-//{
-//    if (d.data ()->mediaType == (int)Common::MediaTypeLocalFile) {
-//        d.data ()->hash = formatHash (d.data ()->path, d.data ()->name, d.data ()->size);
-//    } else {
-//        /// follow AudioMetaObject(const QUrl &url)
-//        d.data ()->hash = formatHash (d.data ()->path);
-//    }
-//}
 
 QUrl AudioMetaObject::uri() const
 {
@@ -336,72 +400,6 @@ AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
 
     return meta;
 }
-
-class AlbumMetaPriv : public QSharedData
-{
-public:
-    AlbumMetaPriv() {
-        name = QString();
-        imgUri = QUrl();
-        description = QString();
-        date = QDate::currentDate ();
-    }
-    QString name;
-    QUrl imgUri;
-    QString description;
-    QVariant date;
-};
-
-class ArtistMetaPriv : public QSharedData
-{
-public:
-    ArtistMetaPriv() {
-        name = QString();
-        imgUri = QUrl();
-        description = QString();
-    }
-    QString name;
-    QUrl imgUri;
-    QString description;
-};
-
-class CoverMetaPriv : public QSharedData
-{
-public:
-    CoverMetaPriv() {
-        smallUri = QUrl();
-        middleUri = QUrl();
-        largeUri = QUrl();
-    }
-    QUrl smallUri;
-    QUrl middleUri;
-    QUrl largeUri;
-};
-
-class TrackMetaPriv : public QSharedData
-{
-public:
-    TrackMetaPriv() {
-        bitRate = QVariant();
-        duration = 0;
-        title = QString();
-        description = QString();
-        year = QVariant();
-        date = QVariant();
-        genre = QVariant();
-        sampleRate = QVariant();
-        userRating = QVariant();
-    }
-    QVariant bitRate;
-    int duration;
-    QString title;
-    QString description;
-    QVariant year;
-    QVariant date;
-    QVariant genre;
-    QVariant sampleRate;
-    QVariant userRating;
-};
 
 AlbumMeta::AlbumMeta()
     : d(new AlbumMetaPriv())

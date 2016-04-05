@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QStringList>
+
+#include "libphoenixplayer_global.h"
 #include "SingletonPointer.h"
 
 class QSettings;
@@ -10,6 +12,7 @@ class QSettings;
 namespace PhoenixPlayer {
 
 class AudioMetaObject;
+
 class Settings : public QObject
 {
     Q_OBJECT
@@ -34,8 +37,8 @@ public:
 
 //    Q_INVOKABLE bool setLastPlayedSong(const QString &songHash);
 //    Q_INVOKABLE QString lastPlayedSong();
-    void setLastPlayedSong(AudioMetaObject **data);
-    AudioMetaObject *lastPlayedSong();
+    void setLastPlayedSong(const AudioMetaObject &data);
+    AudioMetaObject lastPlayedSong() const;
 
     Q_INVOKABLE bool setCurrentPlayListHash(const QString &hash);
     Q_INVOKABLE QString getPlayListHash();

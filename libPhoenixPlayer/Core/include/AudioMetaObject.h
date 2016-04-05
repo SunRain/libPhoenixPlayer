@@ -5,12 +5,16 @@
 #include <QVariant>
 #include <QDate>
 #include <QUrl>
+
+#include "libphoenixplayer_global.h"
+#include "../AudioMetaObject_p.h"
+
 class QStringList;
 class QDate;
 class QJsonObject;
 namespace PhoenixPlayer {
 
-class AlbumMetaPriv;
+//class AlbumMetaPriv;
 class AlbumMeta
 {
 public:
@@ -47,7 +51,7 @@ private:
     QSharedDataPointer<AlbumMetaPriv> d;
 };
 
-class ArtistMetaPriv;
+//class ArtistMetaPriv;
 class ArtistMeta
 {
 public:
@@ -81,7 +85,7 @@ private:
     QSharedDataPointer<ArtistMetaPriv> d;
 };
 
-class CoverMetaPriv;
+//class CoverMetaPriv;
 class CoverMeta
 {
 public:
@@ -124,7 +128,7 @@ private:
 //    E_Composer,
 //    E_Conductor	,
 //    E_Comment,
-class TrackMetaPriv;
+//class TrackMetaPriv;
 class TrackMeta
 {
 public:
@@ -171,7 +175,37 @@ private:
     QSharedDataPointer<TrackMetaPriv> d;
 };
 
-class AudioMetaObjectPriv;
+class AudioMetaObjectPriv : public QSharedData
+{
+public:
+    AudioMetaObjectPriv() {
+        hash = QString();
+        path = QString();
+        name = QString();
+        size = 0;
+        mediaType = (int)Common::MediaTypeLocalFile;
+        lyricsData = QString();
+        lyricsUri = QUrl();
+        albumMeta = AlbumMeta();
+        artistMeta = ArtistMeta();
+        coverMeta = CoverMeta();
+        trackMeta = TrackMeta();
+    }
+
+    QString hash;
+    QString path;
+    QString name;
+    quint64 size;
+    int mediaType;
+    QString lyricsData;
+    QUrl lyricsUri;
+
+    AlbumMeta albumMeta;
+    ArtistMeta artistMeta;
+    CoverMeta coverMeta;
+    TrackMeta trackMeta;
+};
+
 class AudioMetaObject
 {
 public:
@@ -181,12 +215,7 @@ public:
     explicit AudioMetaObject(const QUrl &url);
     virtual ~AudioMetaObject();
 
-    AudioMetaObject &operator =(const AudioMetaObject &other) {
-        if (*this == other)
-            return *this;
-        d.operator = (other.d);
-        return *this;
-    }
+    AudioMetaObject &operator =(const AudioMetaObject &other);
     bool operator == (const AudioMetaObject &other);
     inline bool operator != (const AudioMetaObject &other) {
         return !operator == (other);
@@ -197,7 +226,7 @@ public:
     /// this should be used for database searching
     /// \return
     ///
-    static QString keyHash() const;
+    static QString keyHash();
 
     static QString formatHash(const QString &value);
     static QString formatHash(const QString &path, const QString &name, quint64 size);

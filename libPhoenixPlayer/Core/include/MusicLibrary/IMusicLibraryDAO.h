@@ -5,9 +5,9 @@
 #include <QVariant>
 
 #include "Common.h"
+#include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
-class AudioMetaObject;
 namespace MusicLibrary {
 
 class IMusicLibraryDAO : public QObject

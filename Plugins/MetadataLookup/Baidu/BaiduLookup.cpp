@@ -29,22 +29,22 @@ BaiduLookup::~BaiduLookup()
     qDebug()<<Q_FUNC_INFO;
 }
 
-void BaiduLookup::lookup(AudioMetaObject **meta)
+void BaiduLookup::lookup(const AudioMetaObject &object)
 {
-    if (!meta) {
+    if (object.isEmpty ()) {
         qDebug()<<Q_FUNC_INFO<<"[BaiduLookup] No meta found";
         emit lookupFailed();
         return;
     }
     m_isLrcidDL = true;
 
-    QString name = (*meta)->trackMeta ()->title ();
+    QString name = object.trackMeta ().title ();//(*object)->trackMeta ()->title ();
     if (name.isEmpty ()) {
-        name = (*meta)->name ();
+        name = object.name ();//(*object)->name ();
         //TODO: quick hack
         name = name.mid (0, name.indexOf ("."));
     }
-    QString artist = (*meta)->artistMeta ()->name ();
+    QString artist = object.artistMeta ().name ();//(*object)->artistMeta ()->name ();
 
     QUrl url("http://box.zhangmen.baidu.com/x");
     QUrlQuery query;

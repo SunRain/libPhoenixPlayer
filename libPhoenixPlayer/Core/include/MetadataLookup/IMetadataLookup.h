@@ -3,13 +3,16 @@
 
 #include <QObject>
 #include <QDebug>
+
+#include "libphoenixplayer_global.h"
+
 class QByteArray;
 
 namespace PhoenixPlayer{
 class AudioMetaObject;
 namespace MetadataLookup {
 
-class IMetadataLookup : public QObject {
+class LIBPHOENIXPLAYER_EXPORT IMetadataLookup : public QObject {
     Q_OBJECT
 public:
     enum LookupType {
@@ -46,7 +49,7 @@ public:
     ///
     LookupType currentLookupFlag();
 
-    virtual void lookup(AudioMetaObject **meta) = 0;
+    virtual void lookup(const AudioMetaObject &object) = 0;
 
 signals:
     void lookupFailed();

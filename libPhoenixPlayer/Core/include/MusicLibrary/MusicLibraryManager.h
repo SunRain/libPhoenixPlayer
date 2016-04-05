@@ -6,16 +6,18 @@
 #include <QStringList>
 #include <QList>
 
+#include "libphoenixplayer_global.h"
 #include "Common.h"
 #include "SingletonPointer.h"
 #include "BaseObject.h"
+#include "AudioMetaObject.h"
 
 class QThread;
 
 namespace PhoenixPlayer {
 class Settings;
 class PluginLoader;
-class AudioMetaObject;
+
 namespace MusicLibrary {
 
 class MusicLibraryDAOHost;
@@ -37,7 +39,7 @@ class IMusicLibraryDAO;
 //    QString m_name;
 //};
 
-class MusicLibraryManager : public BaseObject
+class LIBPHOENIXPLAYER_EXPORT MusicLibraryManager : public BaseObject
 {
     Q_OBJECT
     DECLARE_SINGLETON_POINTER(MusicLibraryManager)
@@ -49,7 +51,6 @@ public:
     /// \return 空列表如果没有曲目
     ///
     Q_INVOKABLE QList<AudioMetaObject> allTracks();
-
 
     ///
     /// \brief empty wether current library is empty
@@ -210,6 +211,7 @@ private:
     IMusicLibraryDAO *m_dao;
     PluginLoader *m_pluginLoader;
     Settings *m_settings;
+//    /*QList<AudioMetaObject> */AudioMetaList m_trackList;
     QList<AudioMetaObject> m_trackList;
 //      AsyncDiskLookup *m_asyncDiskLookup;
 //      AsyncTagParserMgrWrapper *m_tagParserWrapper;

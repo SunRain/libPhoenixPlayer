@@ -53,7 +53,9 @@ HEADERS += \
     $$PWD/include/MusicLibrary/MusicTagParserHost.h \
     $$PWD/include/OutPut/OutPutHost.h \
     $$PWD/MusicLibrary/LocalMusicScannerThread.h \
-    $$PWD/include/AudioMetaObject.h
+    $$PWD/include/AudioMetaObject.h \
+    $$PWD/include/libphoenixplayer_global.h \
+    $$PWD/AudioMetaObject_p.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
@@ -87,7 +89,8 @@ SOURCES += \
     $$PWD/PlayerCore/M3uPlayListFormat.cpp \
 #    $$PWD/PlayerCore/PlayQueueMgr.cpp \
     $$PWD/MusicLibrary/LocalMusicScannerThread.cpp \
-    $$PWD/AudioMetaObject.cpp
+    $$PWD/AudioMetaObject.cpp \
+    $$PWD/AudioMetaObject_p.cpp
 
 
 

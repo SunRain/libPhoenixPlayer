@@ -2,6 +2,8 @@
 #define LASTFMLOOKUP_H
 
 #include <QObject>
+
+#include "libphoenixplayer_global.h"
 #include <MetadataLookup/IMetadataLookup.h>
 
 class QByteArray;
@@ -33,7 +35,7 @@ namespace LastFmLookup {
 
 #define DEFAULT_IMAGE_SIZE_REGEXP IMAGE_SIZE_REGEXP_MEDIA
 
-class LastFmLookup : public IMetadataLookup
+class LIBPHOENIXPLAYER_EXPORT LastFmLookup : public IMetadataLookup
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "PhoenixPlayer.MetadataLookup.LastFmLookup" FILE "lastfmlookup.json")
@@ -45,7 +47,7 @@ public:
     // IMetadataLookup interface
 public:
     bool supportLookup(LookupType type);
-    void lookup(AudioMetaObject **meta);
+    void lookup(const AudioMetaObject &object);
 
 protected:
 //    void parseAlbumDescription(const QByteArray &qba);

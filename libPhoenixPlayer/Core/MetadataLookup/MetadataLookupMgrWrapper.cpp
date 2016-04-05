@@ -50,7 +50,7 @@ MetadataLookupMgrWrapper::~MetadataLookupMgrWrapper()
 
 }
 
-void MetadataLookupMgrWrapper::lookupLyric(AudioMetaObject **data)
+void MetadataLookupMgrWrapper::lookupLyric(const AudioMetaObject &data)
 {
     this->doLookup (data, IMetadataLookup::TypeLyrics);
 }
@@ -61,7 +61,7 @@ void MetadataLookupMgrWrapper::lookupLyric(const QString &uuid, const QString &t
     this->doLookupByDetail (uuid, title, artist, album, IMetadataLookup::TypeLyrics);
 }
 
-void MetadataLookupMgrWrapper::lookupAlbumImage(AudioMetaObject **data)
+void MetadataLookupMgrWrapper::lookupAlbumImage(const AudioMetaObject &data)
 {
     this->doLookup (data, IMetadataLookup::TypeAlbumImage);
 }
@@ -72,7 +72,7 @@ void MetadataLookupMgrWrapper::lookupAlbumImage(const QString &uuid, const QStri
     this->doLookupByDetail (uuid, title, artist, album, IMetadataLookup::TypeAlbumImage);
 }
 
-void MetadataLookupMgrWrapper::lookupAlbumDescription(AudioMetaObject **data)
+void MetadataLookupMgrWrapper::lookupAlbumDescription(const AudioMetaObject &data)
 {
     this->doLookup (data, IMetadataLookup::TypeAlbumDescription);
 }
@@ -83,7 +83,7 @@ void MetadataLookupMgrWrapper::lookupAlbumDescription(const QString &uuid, const
     this->doLookupByDetail (uuid, title, artist, album, IMetadataLookup::TypeAlbumDescription);
 }
 
-void MetadataLookupMgrWrapper::lookupAlbumDate(AudioMetaObject **data)
+void MetadataLookupMgrWrapper::lookupAlbumDate(const AudioMetaObject &data)
 {
     this->doLookup (data, IMetadataLookup::TypeAlbumDate);
 }
@@ -94,7 +94,7 @@ void MetadataLookupMgrWrapper::lookupAlbumDate(const QString &uuid, const QStrin
     this->doLookupByDetail (uuid, title, artist, album, IMetadataLookup::TypeAlbumDate);
 }
 
-void MetadataLookupMgrWrapper::lookupArtistImage(AudioMetaObject **data)
+void MetadataLookupMgrWrapper::lookupArtistImage(const AudioMetaObject &data)
 {
     this->doLookup (data, IMetadataLookup::TypeArtistImage);
 }
@@ -105,7 +105,7 @@ void MetadataLookupMgrWrapper::lookupArtistImage(const QString &uuid, const QStr
     this->doLookupByDetail (uuid, title, artist, album, IMetadataLookup::TypeArtistImage);
 }
 
-void MetadataLookupMgrWrapper::lookupArtistDescription(AudioMetaObject **data)
+void MetadataLookupMgrWrapper::lookupArtistDescription(const AudioMetaObject &data)
 {
     this->doLookup (data, IMetadataLookup::TypeArtistDescription);
 }
@@ -116,7 +116,7 @@ void MetadataLookupMgrWrapper::lookupArtistDescription(const QString &uuid, cons
     this->doLookupByDetail (uuid, title, artist, album, IMetadataLookup::TypeArtistDescription);
 }
 
-void MetadataLookupMgrWrapper::lookupTrackDescription(AudioMetaObject **data)
+void MetadataLookupMgrWrapper::lookupTrackDescription(const AudioMetaObject &data)
 {
     this->doLookup (data, IMetadataLookup::TypeTrackDescription);
 }
@@ -128,13 +128,13 @@ void MetadataLookupMgrWrapper::lookupTrackDescription(const QString &uuid, const
 }
 
 //SongMetaData **data, const IMetadataLookup::LookupType &type
-void MetadataLookupMgrWrapper::doLookupFailed(AudioMetaObject **data, const IMetadataLookup::LookupType &type)
+void MetadataLookupMgrWrapper::doLookupFailed(const AudioMetaObject &data, const IMetadataLookup::LookupType &type)
 {
     this->emitResult (type, data, QString(), false);
 }
 
 //SongMetaData **data, const IMetadataLookup::LookupType &type
-void MetadataLookupMgrWrapper::doLookupSucceed(AudioMetaObject **data,
+void MetadataLookupMgrWrapper::doLookupSucceed(const AudioMetaObject &data,
                                                const IMetadataLookup::LookupType &type)
 {
     qDebug()<<Q_FUNC_INFO;
@@ -154,17 +154,17 @@ void MetadataLookupMgrWrapper::doLookupSucceed(AudioMetaObject **data,
     this->emitResult (type, data, QString(), true);
 }
 
-void MetadataLookupMgrWrapper::doLookup(AudioMetaObject **data, IMetadataLookup::LookupType type)
+void MetadataLookupMgrWrapper::doLookup(const AudioMetaObject &data, IMetadataLookup::LookupType type)
 {
-    if (!data || !*data) {
+    if (data.isEmpty ()) {
         qWarning()<<Q_FUNC_INFO<<"We can't lookup with empty one";
         return;
     }
     bool skip = false;
     foreach (FailNode node, m_failList) {
-        if ((node.hash == (*data)->hash ()) && (node.type == type)) {
+        if ((node.hash == data.hash ()) && (node.type == type)) {
             qDebug()<<Q_FUNC_INFO<<QString("Current hash [%1] with type [%2] has in fail list")
-                      .arg((*data)->hash ()).arg(type);
+                      .arg(data.hash ()).arg(type);
             skip = true;
             break;
         }
@@ -209,12 +209,12 @@ void MetadataLookupMgrWrapper::doLookupByDetail(const QString &uuid, const QStri
 }
 
 void MetadataLookupMgrWrapper::emitResult(MetadataLookup::IMetadataLookup::LookupType type,
-                                          AudioMetaObject **data, const QString &result, bool succeed)
+                                          const AudioMetaObject &data, const QString &result, bool succeed)
 {
     qDebug()<<Q_FUNC_INFO;
     if (!succeed) {
         FailNode node;
-        node.hash = (*data)->hash ();
+        node.hash = data.hash ();//(*data)->hash ();
         node.type = type;
         if (!m_failList.contains(node))
             m_failList.append(node);
