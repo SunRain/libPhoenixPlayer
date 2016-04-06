@@ -9,12 +9,18 @@
 namespace PhoenixPlayer {
 
 class Settings;
-class MusicLibraryManager;
 class VolumeControl;
 class PlayerCore;
-class MetadataLookupMgrWrapper;
 
-class LibPhoenixPlayer : public QObject
+namespace MusicLibrary {
+class MusicLibraryManager;
+}
+
+namespace MetadataLookup {
+class MetadataLookupMgrWrapper;
+}
+
+class LIBPHOENIXPLAYER_EXPORT LibPhoenixPlayer : public QObject
 {
     Q_OBJECT
 
@@ -24,18 +30,18 @@ public:
     void initiate();
 
     Settings *settings();
-    MusicLibraryManager *libraryMgr();
+    MusicLibrary::MusicLibraryManager *libraryMgr();
     VolumeControl *volumeCtrl();
     PlayerCore *playerCore();
-    MetadataLookupMgrWrapper *metaLookupMgr();
+    MetadataLookup::MetadataLookupMgrWrapper *metaLookupMgr();
 
 private:
     bool m_initiated;
     Settings *m_settings;
-    MusicLibraryManager *m_libraryMgr;
+    MusicLibrary::MusicLibraryManager *m_libraryMgr;
     VolumeControl *m_volumeCtrl;
     PlayerCore *m_playerCore;
-    MetadataLookupMgrWrapper *m_lookupMgr;
+    MetadataLookup::MetadataLookupMgrWrapper *m_lookupMgr;
 };
 
 } //PhoenixPlayer

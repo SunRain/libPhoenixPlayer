@@ -1,6 +1,8 @@
 #include "LibPhoenixPlayerMain.h"
 
 namespace PhoenixPlayer {
+using namespace MusicLibrary;
+using namespace MetadataLookup;
 
 LibPhoenixPlayer::LibPhoenixPlayer(QObject *parent)
     : QObject(parent)
@@ -10,6 +12,11 @@ LibPhoenixPlayer::LibPhoenixPlayer(QObject *parent)
     , m_volumeCtrl(nullptr)
     , m_playerCore(nullptr)
     , m_lookupMgr(nullptr)
+{
+
+}
+
+LibPhoenixPlayer::~LibPhoenixPlayer()
 {
 
 }

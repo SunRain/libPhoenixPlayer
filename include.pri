@@ -7,8 +7,8 @@ DEPENDPATH += $$PWD/libPhoenixPlayer/Core/include
 HEADERS += \
     $$PWD/libPhoenixPlayer/Core/include/Common.h \
     $$PWD/libPhoenixPlayer/Core/include/Settings.h \
-    $$PWD/libPhoenixPlayer/Core/include/SongMetaData.h \
-    $$PWD/libPhoenixPlayer/Core/include/Util.h \
+    $$PWD/libPhoenixPlayer/Core/include/AudioMetaObject.h \
+    $$PWD/libPhoenixPlayer/Core/include/Utility.h \
     $$PWD/libPhoenixPlayer/Core/include/Backend/BaseMediaObject.h \
     $$PWD/libPhoenixPlayer/Core/include/Backend/IPlayBackend.h \
     $$PWD/libPhoenixPlayer/Core/include/MusicLibrary/IMusicTagParser.h \
@@ -42,7 +42,9 @@ HEADERS += \
     $$PWD/libPhoenixPlayer/Core/include/MusicLibrary/MusicLibraryDAOHost.h \
     $$PWD/libPhoenixPlayer/Core/include/MusicLibrary/MusicTagParserHost.h \
     $$PWD/libPhoenixPlayer/Core/include/BaseObject.h \
-    $$PWD/libPhoenixPlayer/Core/include/EqualizerMgr.h
+    $$PWD/libPhoenixPlayer/Core/include/EqualizerMgr.h \
+    $$PWD/libPhoenixPlayer/Core/include/libphoenixplayer_global.h \
+    $$PWD/libPhoenixPlayer/Core/include/LibPhoenixPlayerMain.h
 
 contains (CONFIG, WITH_QML_LIB) {
     INCLUDEPATH += $$PWD/libPhoenixPlayer/QtQuick/include
