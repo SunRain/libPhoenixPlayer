@@ -13,7 +13,6 @@ HEADERS += \
     $$PWD/include/SingletonPointer_p.h \
     $$PWD/include/SingletonPointer_sf.h \
     $$PWD/include/SingletonPointer.h \
-    $$PWD/include/Util.h \
     $$PWD/include/Backend/BaseMediaObject.h \
     $$PWD/include/Backend/IPlayBackend.h \
     $$PWD/include/MetadataLookup/BaseNetworkLookup.h \
@@ -55,7 +54,9 @@ HEADERS += \
     $$PWD/MusicLibrary/LocalMusicScannerThread.h \
     $$PWD/include/AudioMetaObject.h \
     $$PWD/include/libphoenixplayer_global.h \
-    $$PWD/AudioMetaObject_p.h
+    $$PWD/AudioMetaObject_p.h \
+    $$PWD/include/LibPhoenixPlayerMain.h \
+    $$PWD/include/Utility.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
@@ -69,7 +70,6 @@ SOURCES += \
     $$PWD/IMusicTagParser.cpp \
     $$PWD/PluginLoader.cpp \
     $$PWD/Settings.cpp \
-    $$PWD/Util.cpp \
     $$PWD/PluginHost.cpp \
     $$PWD/AddonMgr.cpp \
 #    $$PWD/MusicLibrary/AsyncDiskLookup.cpp \
@@ -90,7 +90,10 @@ SOURCES += \
 #    $$PWD/PlayerCore/PlayQueueMgr.cpp \
     $$PWD/MusicLibrary/LocalMusicScannerThread.cpp \
     $$PWD/AudioMetaObject.cpp \
-    $$PWD/AudioMetaObject_p.cpp
+    $$PWD/AudioMetaObject_p.cpp \
+    $$PWD/LibPhoenixPlayerMain.cpp \
+    $$PWD/Utility.cpp \
+    $$PWD/libphoenixplayer_global.cpp
 
 
 

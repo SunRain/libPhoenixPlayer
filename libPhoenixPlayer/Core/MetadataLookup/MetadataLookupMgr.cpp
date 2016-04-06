@@ -8,7 +8,7 @@
 #include <QCoreApplication>
 
 #include "Settings.h"
-#include "Util.h"
+#include "Utility.h"
 #include "PluginLoader.h"
 #include "PluginHost.h"
 #include "SingletonPointer.h"
@@ -22,7 +22,7 @@ MetadataLookupMgr::MetadataLookupMgr(QObject *parent) :
 {
     m_pluginLoader = PluginLoader::instance ();
     m_settings = Settings::instance ();
-    m_util = Util::instance ();
+    m_util = Utility::instance ();
     m_finish = true;
     m_doInternalLoop = true;
     m_useNextHost = true;
@@ -60,7 +60,7 @@ MetadataLookupMgr::~MetadataLookupMgr()
 void MetadataLookupMgr::lookup(const AudioMetaObject &data, IMetadataLookup::LookupType type)
 {
     if (!m_settings->fetchMetadataOnMobileNetwork ()
-            && (m_util->getNetworkType () == Util::NetworkType::TypeMobile)) {
+            && (m_util->getNetworkType () == Utility::NetworkType::TypeMobile)) {
         qWarning()<<"Current network type is mobile type and we disabled fetch metadata here";
         this->emitFinish ();
         return;

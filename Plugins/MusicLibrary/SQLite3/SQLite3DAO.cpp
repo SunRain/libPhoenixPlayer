@@ -14,7 +14,7 @@
 
 #include "SQLite3DAO.h"
 #include "AudioMetaObject.h"
-#include "Util.h"
+#include "Utility.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {

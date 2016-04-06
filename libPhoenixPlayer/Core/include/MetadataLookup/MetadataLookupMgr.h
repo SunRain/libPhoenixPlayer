@@ -15,7 +15,7 @@ namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
 class Settings;
-class Util;
+class Utility;
 class AudioMetaObject;
 
 namespace MetadataLookup {
@@ -75,7 +75,7 @@ private:
     PluginLoader *m_pluginLoader;
 //    IMetadataLookup *m_currentLookup;
     Settings *m_settings;
-    Util *m_util;
+    Utility *m_util;
 
     QList<WorkNode> m_workQueue;
     WorkNode m_currentWork;

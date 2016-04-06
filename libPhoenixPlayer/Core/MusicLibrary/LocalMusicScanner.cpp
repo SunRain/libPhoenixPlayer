@@ -7,7 +7,7 @@
 #include "AsyncTagParserMgrWrapper.h"
 #include "PluginLoader.h"
 #include "Settings.h"
-#include "Util.h"
+#include "Utility.h"
 #include "AudioMetaObject.h"
 #include "SingletonPointer.h"
 #include "AudioMetaObject.h"

@@ -7,7 +7,7 @@
 #include <QJsonValue>
 #include <QJsonDocument>
 
-#include "Util.h"
+#include "Utility.h"
 
 namespace PhoenixPlayer {
 
@@ -40,7 +40,7 @@ QList<AddonMgr::Addon *> AddonMgr::getAddonList()
 
 void AddonMgr::initList()
 {
-    foreach (QString path, Util::getAddonDirList ()) {
+    foreach (QString path, Utility::getAddonDirList ()) {
         qDebug()<<Q_FUNC_INFO<<" search in path "<<path;
         QDir dir(path);
         QStringList aList = dir.entryList (QDir::Dirs);
@@ -71,7 +71,7 @@ void AddonMgr::initList()
             a->maintainer = o.value (KEY_MAINTAINER).toString ();
             a->name = o.value (KEY_NAME).toString (QString("UnKnow Addon"));
             a->version = o.value (KEY_VERSION).toString ();
-            a->hash = Util::calculateHash (a->basePath + a->indexFile);
+            a->hash = Utility::calculateHash (a->basePath + a->indexFile);
             m_addonList.append (a);
         }
     }

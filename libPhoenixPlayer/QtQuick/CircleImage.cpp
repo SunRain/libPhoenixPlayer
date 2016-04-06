@@ -13,7 +13,7 @@
 
 #include "SingletonPointer.h"
 #include "Settings.h"
-#include "Util.h"
+#include "Utility.h"
 
 namespace PhoenixPlayer {
 namespace QmlPlugin {
@@ -169,7 +169,7 @@ void CircleImage::downloadFile(const QUrl &url)
     }
 
     QString path = m_settings->musicImageCachePath ();
-    QString hash = Util::calculateHash (path + url.toString ());
+    QString hash = Utility::calculateHash (path + url.toString ());
     path = QString("%1/%2").arg (path).arg (hash);
 
     ///

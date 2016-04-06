@@ -9,7 +9,7 @@
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "Settings.h"
-#include "Util.h"
+#include "Utility.h"
 #include "AudioMetaObject.h"
 #include "Common.h"
 #include "PluginLoader.h"

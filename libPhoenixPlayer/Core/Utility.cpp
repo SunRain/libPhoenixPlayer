@@ -1,4 +1,4 @@
-#include "Util.h"
+#include "Utility.h"
 
 #include <QCryptographicHash>
 #include <QDebug>
@@ -20,7 +20,7 @@
 
 namespace PhoenixPlayer {
 
-Util::Util(QObject *parent) : QObject(parent)
+Utility::Utility(QObject *parent) : QObject(parent)
 {
     m_QQmlEngine = nullptr;
 }
@@ -41,22 +41,22 @@ Util::Util(QObject *parent) : QObject(parent)
 //}
 //#endif
 
-Util::~Util()
+Utility::~Utility()
 {
 
 }
 
-void Util::setQQmlEngine(QQmlEngine *engine)
+void Utility::setQQmlEngine(QQmlEngine *engine)
 {
     m_QQmlEngine = engine;
 }
 
-QString Util::calculateHash(const QString &str)
+QString Utility::calculateHash(const QString &str)
 {
     return QString (QCryptographicHash::hash (str.toLocal8Bit (), QCryptographicHash::Md5).toHex ());
 }
 
-QTextCodec *Util::localeDefaultCodec()
+QTextCodec *Utility::localeDefaultCodec()
 {
     switch(QLocale::system().country())
        {
@@ -74,7 +74,7 @@ QTextCodec *Util::localeDefaultCodec()
     }
 }
 
-QString Util::formateSongDuration(int time)
+QString Utility::formateSongDuration(int time)
 {
     if (time <= 0)
         return QString("00:00");
@@ -96,7 +96,7 @@ QString Util::formateSongDuration(int time)
     return str;
 }
 
-QString Util::formateFileSize(int size)
+QString Utility::formateFileSize(int size)
 {
     if (size < 0)
         return QString("0B");
@@ -111,7 +111,7 @@ QString Util::formateFileSize(int size)
     return str;
 }
 
-QStringList Util::getAddonDirList()
+QStringList Utility::getAddonDirList()
 {
     QStringList list;
 #ifdef UBUNTU_TOUCH
@@ -124,10 +124,10 @@ QStringList Util::getAddonDirList()
     return list;
 }
 
-Util::NetworkType Util::getNetworkType()
+Utility::NetworkType Utility::getNetworkType()
 {
     if (!m_QQmlEngine)
-        return Util::NetworkType::TypeUnknown;
+        return Utility::NetworkType::TypeUnknown;
 
     QNetworkConfiguration::BearerType t = m_QQmlEngine->networkAccessManager ()
             ->activeConfiguration ().bearerType ();
@@ -135,13 +135,13 @@ Util::NetworkType Util::getNetworkType()
 
     switch (t) {
     case QNetworkConfiguration::BearerEthernet:
-        return Util::NetworkType::TypeEthernet;
+        return Utility::NetworkType::TypeEthernet;
     case QNetworkConfiguration::BearerUnknown:
-        return Util::NetworkType::TypeUnknown;
+        return Utility::NetworkType::TypeUnknown;
     case QNetworkConfiguration::BearerWLAN:
-        return Util::NetworkType::TypeWLAN;
+        return Utility::NetworkType::TypeWLAN;
     default:
-        return Util::NetworkType::TypeMobile;
+        return Utility::NetworkType::TypeMobile;
     }
 }
 

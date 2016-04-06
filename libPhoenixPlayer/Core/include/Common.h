@@ -3,12 +3,12 @@
 #include <QObject>
 #include <QMetaEnum>
 
-
+#include "libphoenixplayer_global.h"
 #include "BaseObject.h"
 
 namespace PhoenixPlayer {
 
-class Common : public BaseObject
+class LIBPHOENIXPLAYER_EXPORT Common : public BaseObject
 {
     Q_OBJECT
     Q_ENUMS(PlayBackendState)

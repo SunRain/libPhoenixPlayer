@@ -18,7 +18,7 @@ namespace PhoenixPlayer {
 ///
 /// \brief The AlbumMeta class
 ///
-class AlbumMeta
+class LIBPHOENIXPLAYER_EXPORT AlbumMeta
 {
 public:
     AlbumMeta();
@@ -56,7 +56,7 @@ private:
 ///
 /// \brief The ArtistMeta class
 ///
-class ArtistMeta
+class LIBPHOENIXPLAYER_EXPORT ArtistMeta
 {
 public:
     ArtistMeta();
@@ -91,7 +91,7 @@ private:
 ///
 /// \brief The CoverMeta class
 ///
-class CoverMeta
+class LIBPHOENIXPLAYER_EXPORT CoverMeta
 {
 public:
     CoverMeta();
@@ -135,7 +135,7 @@ private:
 ///
 /// \brief The TrackMeta class
 ///
-class TrackMeta
+class LIBPHOENIXPLAYER_EXPORT TrackMeta
 {
 public:
     TrackMeta();
@@ -180,7 +180,7 @@ private:
     QSharedDataPointer<TrackMetaPriv> d;
 };
 
-class AudioMetaObjectPriv;
+class LIBPHOENIXPLAYER_EXPORT AudioMetaObjectPriv;
 ///
 /// \brief The AudioMetaObject class
 ///

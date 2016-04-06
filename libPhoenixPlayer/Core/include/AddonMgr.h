@@ -4,9 +4,11 @@
 #include <QObject>
 #include <QList>
 
+#include "libphoenixplayer_global.h"
+
 namespace PhoenixPlayer {
 
-class AddonMgr : public QObject
+class LIBPHOENIXPLAYER_EXPORT AddonMgr : public QObject
 {
     Q_OBJECT
 public:
