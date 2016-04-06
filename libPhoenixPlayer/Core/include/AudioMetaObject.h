@@ -7,6 +7,7 @@
 #include <QUrl>
 
 #include "libphoenixplayer_global.h"
+#include "Common.h"
 #include "../AudioMetaObject_p.h"
 
 class QStringList;
@@ -14,18 +15,19 @@ class QDate;
 class QJsonObject;
 namespace PhoenixPlayer {
 
-//class AlbumMetaPriv;
+///
+/// \brief The AlbumMeta class
+///
 class AlbumMeta
 {
 public:
-    explicit AlbumMeta();
-    explicit AlbumMeta(const AlbumMeta &other);
+    AlbumMeta();
+    AlbumMeta(const AlbumMeta &other);
     virtual ~AlbumMeta(){}
 
-    AlbumMeta &operator =(const AlbumMeta &other) {
-        if (*this == other)
-            return *this;
-        d.operator = (other.d);
+    inline AlbumMeta &operator =(const AlbumMeta &other) {
+        if (this != &other)
+            d.operator = (other.d);
         return *this;
     }
     bool operator == (const AlbumMeta &other);
@@ -36,12 +38,12 @@ public:
     QString name() const;
     QUrl imgUri() const;
     QString description() const;
-    QVariant date() const;
+    QString date() const;
 
     void setName(const QString &name);
     void setImgUri(const QUrl &uri);
     void setDescription(const QString &description);
-    void setDate(const QVariant &date);
+    void setDate(const QString &date);
 
     QJsonObject toObject() const;
     QByteArray toJson() const;
@@ -51,17 +53,18 @@ private:
     QSharedDataPointer<AlbumMetaPriv> d;
 };
 
-//class ArtistMetaPriv;
+///
+/// \brief The ArtistMeta class
+///
 class ArtistMeta
 {
 public:
-    explicit ArtistMeta();
-    explicit ArtistMeta(const ArtistMeta &other);
+    ArtistMeta();
+    ArtistMeta(const ArtistMeta &other);
     virtual ~ArtistMeta() {}
-    ArtistMeta &operator =(const ArtistMeta &other) {
-        if (*this == other)
-            return *this;
-        d.operator = (other.d);
+    inline ArtistMeta &operator =(const ArtistMeta &other) {
+        if (this != &other)
+            d.operator = (other.d);
         return *this;
     }
     bool operator == (const ArtistMeta &other);
@@ -85,17 +88,18 @@ private:
     QSharedDataPointer<ArtistMetaPriv> d;
 };
 
-//class CoverMetaPriv;
+///
+/// \brief The CoverMeta class
+///
 class CoverMeta
 {
 public:
-    explicit CoverMeta();
-    explicit CoverMeta(const CoverMeta &other);
+    CoverMeta();
+    CoverMeta(const CoverMeta &other);
     virtual ~CoverMeta() {}
-    CoverMeta &operator =(const CoverMeta &other) {
-        if (*this == other)
-            return *this;
-        d.operator = (other.d);
+    inline CoverMeta &operator =(const CoverMeta &other) {
+        if (this != &other)
+            d.operator = (other.d);
         return *this;
     }
     bool operator == (const CoverMeta &other);
@@ -128,18 +132,19 @@ private:
 //    E_Composer,
 //    E_Conductor	,
 //    E_Comment,
-//class TrackMetaPriv;
+///
+/// \brief The TrackMeta class
+///
 class TrackMeta
 {
 public:
-    explicit TrackMeta();
-    explicit TrackMeta(const TrackMeta &other);
+    TrackMeta();
+    TrackMeta(const TrackMeta &other);
     virtual ~TrackMeta(){}
 
-    TrackMeta &operator =(const TrackMeta &other) {
-        if (*this == other)
-            return *this;
-        d.operator = (other.d);
+    inline TrackMeta &operator =(const TrackMeta &other) {
+        if (this != &other)
+            d.operator = (other.d);
         return *this;
     }
     bool operator == (const TrackMeta &other);
@@ -147,25 +152,25 @@ public:
         return !operator == (other);
     }
 
-    QVariant bitRate() const;
+    QString bitRate() const;
     int duration() const;
     QString title() const;
     QString description() const;
-    QVariant year() const;
-    QVariant date() const;
-    QVariant genre() const;
-    QVariant sampleRate() const;
-    QVariant userRating() const;
+    QString year() const;
+    QString date() const;
+    QString genre() const;
+    QString sampleRate() const;
+    QString userRating() const;
 
-    void setBitRate(const QVariant &arg);
+    void setBitRate(const QString &arg);
     void setDuration(int arg);
     void setTitle(const QString &arg);
     void setDescription(const QString &arg);
-    void setYear(const QVariant &arg);
-    void setDate(const QVariant &arg);
-    void setGenre(const QVariant &arg);
-    void setSampleRate(const QVariant &arg);
-    void setUserRating(const QVariant &arg);
+    void setYear(const QString &arg);
+    void setDate(const QString &arg);
+    void setGenre(const QString &arg);
+    void setSampleRate(const QString &arg);
+    void setUserRating(const QString &arg);
 
     QJsonObject toObject() const;
     QByteArray toJson() const;
@@ -175,47 +180,25 @@ private:
     QSharedDataPointer<TrackMetaPriv> d;
 };
 
-class AudioMetaObjectPriv : public QSharedData
-{
-public:
-    AudioMetaObjectPriv() {
-        hash = QString();
-        path = QString();
-        name = QString();
-        size = 0;
-        mediaType = (int)Common::MediaTypeLocalFile;
-        lyricsData = QString();
-        lyricsUri = QUrl();
-        albumMeta = AlbumMeta();
-        artistMeta = ArtistMeta();
-        coverMeta = CoverMeta();
-        trackMeta = TrackMeta();
-    }
-
-    QString hash;
-    QString path;
-    QString name;
-    quint64 size;
-    int mediaType;
-    QString lyricsData;
-    QUrl lyricsUri;
-
-    AlbumMeta albumMeta;
-    ArtistMeta artistMeta;
-    CoverMeta coverMeta;
-    TrackMeta trackMeta;
-};
-
+class AudioMetaObjectPriv;
+///
+/// \brief The AudioMetaObject class
+///
 class AudioMetaObject
 {
 public:
-    explicit AudioMetaObject();
-    explicit AudioMetaObject(const QString &path, const QString &name, quint64 size);
-    explicit AudioMetaObject(const AudioMetaObject &other);
-    explicit AudioMetaObject(const QUrl &url);
+    AudioMetaObject();
+    AudioMetaObject(const QString &path, const QString &name, quint64 size);
+    AudioMetaObject(const AudioMetaObject &other);
+    AudioMetaObject(const QUrl &url);
     virtual ~AudioMetaObject();
 
-    AudioMetaObject &operator =(const AudioMetaObject &other);
+    inline AudioMetaObject &operator =(const AudioMetaObject &other) {
+        if (this != &other)
+            d.operator = (other.d);
+        return *this;
+    }
+
     bool operator == (const AudioMetaObject &other);
     inline bool operator != (const AudioMetaObject &other) {
         return !operator == (other);
@@ -239,9 +222,6 @@ public:
     QString lyricsData() const;
     QUrl lyricsUri() const;
 
-//    void setPath(const QString &path);
-//    void setName(const QString &name);
-//    void setSize(quint64 size);
     void setMediaType(int arg);
     void setLyricsData(const QString &arg);
     void setLyricsUri(const QUrl &arg);
@@ -255,11 +235,6 @@ public:
     void setArtistMeta(const ArtistMeta &meta);
     void setCoverMeta(const CoverMeta &meta);
     void setTrackMeta(const TrackMeta &meta);
-
-    ///
-    /// \brief generateHash generate hash by name,path,size
-    ///
-//    void generateHash();
 
     ///
     /// \brief uri
@@ -279,6 +254,37 @@ public:
     static AudioMetaObject fromJson(const QByteArray &json);
 
 private:
+    class AudioMetaObjectPriv : public QSharedData
+    {
+    public:
+        AudioMetaObjectPriv() {
+            hash = QString();
+            path = QString();
+            name = QString();
+            size = 0;
+            mediaType = (int)Common::MediaTypeLocalFile;
+            lyricsData = QString();
+            lyricsUri = QUrl();
+            albumMeta = AlbumMeta();
+            artistMeta = ArtistMeta();
+            coverMeta = CoverMeta();
+            trackMeta = TrackMeta();
+        }
+
+        QString hash;
+        QString path;
+        QString name;
+        quint64 size;
+        int mediaType;
+        QString lyricsData;
+        QUrl lyricsUri;
+
+        AlbumMeta albumMeta;
+        ArtistMeta artistMeta;
+        CoverMeta coverMeta;
+        TrackMeta trackMeta;
+    };
+
     QSharedDataPointer<AudioMetaObjectPriv> d;
 };
 } //PhoenixPlayer

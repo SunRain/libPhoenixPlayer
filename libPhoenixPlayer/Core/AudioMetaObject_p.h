@@ -4,6 +4,7 @@
 #include <QSharedDataPointer>
 #include <QUrl>
 #include <QVariant>
+#include <QDate>
 
 #include "libphoenixplayer_global.h"
 #include "Common.h"
@@ -17,12 +18,12 @@ public:
         name = QString();
         imgUri = QUrl();
         description = QString();
-        date = QDate::currentDate ();
+        date = QDate::currentDate ().toString ();
     }
     QString name;
     QUrl imgUri;
     QString description;
-    QVariant date;
+    QString date;
 };
 
 class ArtistMetaPriv : public QSharedData
@@ -55,25 +56,25 @@ class TrackMetaPriv : public QSharedData
 {
 public:
     TrackMetaPriv() {
-        bitRate = QVariant();
+        bitRate = QString();
         duration = 0;
         title = QString();
         description = QString();
-        year = QVariant();
-        date = QVariant();
-        genre = QVariant();
-        sampleRate = QVariant();
-        userRating = QVariant();
+        year = QString();
+        date = QString();
+        genre = QString();
+        sampleRate = QString();
+        userRating = QString();
     }
-    QVariant bitRate;
+    QString bitRate;
     int duration;
     QString title;
     QString description;
-    QVariant year;
-    QVariant date;
-    QVariant genre;
-    QVariant sampleRate;
-    QVariant userRating;
+    QString year;
+    QString date;
+    QString genre;
+    QString sampleRate;
+    QString userRating;
 };
 
 //class AlbumMeta;

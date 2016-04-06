@@ -188,49 +188,56 @@ void MetadataLookupMgr::doLookupSucceed(const QByteArray &result)
     if (/*(*m_currentWork.data)*/!m_currentWork.data.isEmpty () && !result.isEmpty ()) {
         IMetadataLookup::LookupType type =  (*m_currentHost.lookup)->currentLookupFlag ();
         switch (type) {
-        case IMetadataLookup::TypeAlbumDate:
+        case IMetadataLookup::TypeAlbumDate:{
 //            (*m_currentWork.data)->albumMeta ()->setDate (QString(result));
             AlbumMeta m = m_currentWork.data.albumMeta ();
             m.setDate (QString(result));
             m_currentWork.data.setAlbumMeta (m);
             break;
-        case IMetadataLookup::TypeAlbumDescription:
+        }
+        case IMetadataLookup::TypeAlbumDescription: {
 //            (*m_currentWork.data)->albumMeta ()->setDescription (QString(result));
             AlbumMeta m = m_currentWork.data.albumMeta ();
             m.setDescription (QString(result));
             m_currentWork.data.setAlbumMeta (m);
             break;
-        case IMetadataLookup::TypeAlbumImage:
+        }
+        case IMetadataLookup::TypeAlbumImage: {
 //            (*m_currentWork.data)->albumMeta ()->setImgUri (QString(result));
             AlbumMeta m = m_currentWork.data.albumMeta ();
             m.setImgUri (QString(result));
             m_currentWork.data.setAlbumMeta (m);
             break;
-        case IMetadataLookup::TypeArtistDescription:
+        }
+        case IMetadataLookup::TypeArtistDescription: {
 //            (*m_currentWork.data)->artistMeta ()->setDescription (QString(result));
             ArtistMeta m = m_currentWork.data.artistMeta ();
             m.setDescription (QString(result));
             m_currentWork.data.setArtistMeta (m);
             break;
-        case IMetadataLookup::TypeArtistImage:
+        }
+        case IMetadataLookup::TypeArtistImage: {
 //            (*m_currentWork.data)->artistMeta ()->setImgUri (QString(result));
             ArtistMeta m = m_currentWork.data.artistMeta ();
             m.setImgUri (QString(result));
             m_currentWork.data.setArtistMeta (m);
             break;
+        }
             //TODO 分离lyrics路径或者数据
-        case IMetadataLookup::TypeLyrics:
+        case IMetadataLookup::TypeLyrics: {
 //            (*m_currentWork.data)->setLyricsData (QString(result));
 //            (*m_currentWork.data)->setLyricsUri (QString(result));
             m_currentWork.data.setLyricsData (QString(result));
             m_currentWork.data.setLyricsUri (QString(result));
             break;
-        case IMetadataLookup::TypeTrackDescription:
+        }
+        case IMetadataLookup::TypeTrackDescription: {
 //            (*m_currentWork.data)->trackMeta ()->setDescription (QString(result));
             TrackMeta m = m_currentWork.data.trackMeta ();
             m.setDescription (QString(result));
             m_currentWork.data.setTrackMeta (m);
             break;
+        }
         default:
             break;
         }

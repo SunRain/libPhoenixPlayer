@@ -42,7 +42,7 @@ PlayListMgr::PlayListMgr(QObject *parent)
 PlayListMgr::~PlayListMgr()
 {
     if (!m_trackList.isEmpty ()) {
-        qDeleteAll(m_trackList);
+//        qDeleteAll(m_trackList);
         m_trackList.clear ();
     }
 }

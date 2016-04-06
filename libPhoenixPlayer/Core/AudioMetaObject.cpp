@@ -7,140 +7,38 @@
 #include "Util.h"
 #include "AudioMetaObject.h"
 #include "Common.h"
-#include "../AudioMetaObject_p.h"
+//#include "../AudioMetaObject_p.h"
 
 namespace PhoenixPlayer {
 
-#define KEY_NAME "NAME"
-#define KEY_URI "URI"
-#define KEY_DESCRIPTION "DESCRIPTION"
-#define KEY_DATE "DATE"
-#define KEY_SMALL_IMG "SMALL_URI"
-#define KEY_MIDDLE_IMG "MIDDLE_URI"
-#define KEY_LARGE_IMG "LARGE_URI"
-#define KEY_BIT_RATE "BIT_RATE"
-#define KEY_DURATION "DURATION"
-#define KEY_TITLE "TITLE"
-#define KEY_YEAR "YEAR"
-#define KEY_GENRE "GENRE"
-#define KEY_SAMPLE_RATE "SAMPLE_RATE"
-#define KEY_USER_RATING "USER_RATING"
-#define KEY_HASH "HASH"
-#define KEY_PATH "PATH"
-#define KEY_SIZE "SIZE"
-#define KEY_MEDIA_TYPE "MEDIA_TYPE"
-#define KEY_LYRICS_DATA "LYRICS_DATA"
-#define KEY_LYRICS_URI "LYRICS_URI"
-#define KEY_ALBUM_META "ALBUM_META"
-#define KEY_ARTIST_META "ARTIST_META"
-#define KEY_COVER_META "COVER_META"
-#define KEY_TRACK_META "TRACK_META"
-
-//class AlbumMetaPriv : public QSharedData
-//{
-//public:
-//    AlbumMetaPriv() {
-//        name = QString();
-//        imgUri = QUrl();
-//        description = QString();
-//        date = QDate::currentDate ();
-//    }
-//    QString name;
-//    QUrl imgUri;
-//    QString description;
-//    QVariant date;
-//};
-
-//class ArtistMetaPriv : public QSharedData
-//{
-//public:
-//    ArtistMetaPriv() {
-//        name = QString();
-//        imgUri = QUrl();
-//        description = QString();
-//    }
-//    QString name;
-//    QUrl imgUri;
-//    QString description;
-//};
-
-//class CoverMetaPriv : public QSharedData
-//{
-//public:
-//    CoverMetaPriv() {
-//        smallUri = QUrl();
-//        middleUri = QUrl();
-//        largeUri = QUrl();
-//    }
-//    QUrl smallUri;
-//    QUrl middleUri;
-//    QUrl largeUri;
-//};
-
-//class TrackMetaPriv : public QSharedData
-//{
-//public:
-//    TrackMetaPriv() {
-//        bitRate = QVariant();
-//        duration = 0;
-//        title = QString();
-//        description = QString();
-//        year = QVariant();
-//        date = QVariant();
-//        genre = QVariant();
-//        sampleRate = QVariant();
-//        userRating = QVariant();
-//    }
-//    QVariant bitRate;
-//    int duration;
-//    QString title;
-//    QString description;
-//    QVariant year;
-//    QVariant date;
-//    QVariant genre;
-//    QVariant sampleRate;
-//    QVariant userRating;
-//};
-
-
-//class AudioMetaObjectPriv : public QSharedData
-//{
-//public:
-//    AudioMetaObjectPriv() {
-//        hash = QString();
-//        path = QString();
-//        name = QString();
-//        size = 0;
-//        mediaType = (int)Common::MediaTypeLocalFile;
-//        lyricsData = QString();
-//        lyricsUri = QUrl();
-//        albumMeta = AlbumMeta();
-//        artistMeta = ArtistMeta();
-//        coverMeta = CoverMeta();
-//        trackMeta = TrackMeta();
-//    }
-
-//    QString hash;
-//    QString path;
-//    QString name;
-//    quint64 size;
-//    int mediaType;
-//    QString lyricsData;
-//    QUrl lyricsUri;
-
-//    AlbumMeta albumMeta;
-//    ArtistMeta artistMeta;
-//    CoverMeta coverMeta;
-//    TrackMeta trackMeta;
-//};
+const QString KEY_NAME ("NAME");
+const QString KEY_URI ("URI");
+const QString KEY_DESCRIPTION ("DESCRIPTION");
+const QString KEY_DATE ("DATE");
+const QString KEY_SMALL_IMG ("SMALL_URI");
+const QString KEY_MIDDLE_IMG ("MIDDLE_URI");
+const QString KEY_LARGE_IMG ("LARGE_URI");
+const QString KEY_BIT_RATE ("BIT_RATE");
+const QString KEY_DURATION ("DURATION");
+const QString KEY_TITLE ("TITLE");
+const QString KEY_YEAR ("YEAR");
+const QString KEY_GENRE ("GENRE");
+const QString KEY_SAMPLE_RATE ("SAMPLE_RATE");
+const QString KEY_USER_RATING ("USER_RATING");
+const QString KEY_HASH ("HASH");
+const QString KEY_PATH ("PATH");
+const QString KEY_SIZE ("SIZE");
+const QString KEY_MEDIA_TYPE ("MEDIA_TYPE");
+const QString KEY_LYRICS_DATA ("LYRICS_DATA");
+const QString KEY_LYRICS_URI ("LYRICS_URI");
+const QString KEY_ALBUM_META ("ALBUM_META");
+const QString KEY_ARTIST_META ("ARTIST_META");
+const QString KEY_COVER_META ("COVER_META");
+const QString KEY_TRACK_META ("TRACK_META");
 
 AudioMetaObject::AudioMetaObject()
     : d(new AudioMetaObjectPriv())
 {
-//    d.data ()->albumMeta = AlbumMeta();
-//    d.data ()->artistMeta = ArtistMeta();
-//    d.data ()->coverMeta = CoverMeta();
-//    d.data ()->trackMeta = TrackMeta();
 }
 
 AudioMetaObject::AudioMetaObject(const QString &path, const QString &name, quint64 size)
@@ -150,11 +48,6 @@ AudioMetaObject::AudioMetaObject(const QString &path, const QString &name, quint
     d.data ()->name = name;
     d.data ()->size = size;
     d.data ()->hash = AudioMetaObject::formatHash(path, name, size);
-
-//    d.data ()->albumMeta = AlbumMeta();
-//    d.data ()->artistMeta = ArtistMeta();
-//    d.data ()->coverMeta = CoverMeta();
-//    d.data ()->trackMeta = TrackMeta();
 }
 
 AudioMetaObject::AudioMetaObject(const AudioMetaObject &other)
@@ -168,23 +61,11 @@ AudioMetaObject::AudioMetaObject(const QUrl &url)
     d.data ()->mediaType = (int)Common::MediaTypeUrl;
     d.data ()->path = url.toString ();
     d.data ()->hash = formatHash (url.toString ());
-
-//    d.data ()->albumMeta = AlbumMeta();
-//    d.data ()->artistMeta = ArtistMeta();
-//    d.data ()->coverMeta = CoverMeta();
-//    d.data ()->trackMeta = TrackMeta();
 }
 
 AudioMetaObject::~AudioMetaObject()
 {
 
-}
-
-AudioMetaObject &AudioMetaObject::operator =(const AudioMetaObject &other) {
-    if (*this == other)
-        return *this;
-    d.operator = (other.d);
-    return *this;
 }
 
 bool AudioMetaObject::operator ==(const AudioMetaObject &other)
@@ -204,12 +85,12 @@ bool AudioMetaObject::operator ==(const AudioMetaObject &other)
 
 QString AudioMetaObject::keyHash()
 {
-    return QString(KEY_HASH);
+    return KEY_HASH;
 }
 
 QString AudioMetaObject::formatHash(const QString &value)
 {
-    return QString (QCryptographicHash::hash (str.toUtf8 (), QCryptographicHash::Md5).toHex ());
+    return QString (QCryptographicHash::hash (value.toUtf8 (), QCryptographicHash::Md5).toHex ());
 }
 QString AudioMetaObject::formatHash(const QString &path, const QString &name, quint64 size)
 {
@@ -349,14 +230,14 @@ QJsonObject AudioMetaObject::toObject() const
     o.insert (KEY_HASH, d.data ()->hash);
     o.insert (KEY_PATH, d.data ()->path);
     o.insert (KEY_NAME, d.data ()->name);
-    o.insert (KEY_SIZE, d.data ()->size);
+    o.insert (KEY_SIZE, QString::number (d.data ()->size));
     o.insert (KEY_MEDIA_TYPE, d.data ()->mediaType);
     o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
-    o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri);
-    o.insert (KEY_ALBUM_META, d.data ()->albumMeta.toJson ());
-    o.insert (KEY_ARTIST_META, d.data ()->artistMeta.toJson ());
-    o.insert (KEY_COVER_META, d.data ()->coverMeta.toJson ());
-    o.insert (KEY_TRACK_META, d.data ()->trackMeta.toJson ());
+    o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri.toString ());
+    o.insert (KEY_ALBUM_META, QString(d.data ()->albumMeta.toJson ()));
+    o.insert (KEY_ARTIST_META, QString(d.data ()->artistMeta.toJson ()));
+    o.insert (KEY_COVER_META, QString(d.data ()->coverMeta.toJson ()));
+    o.insert (KEY_TRACK_META,QString( d.data ()->trackMeta.toJson ()));
     return o;
 }
 
@@ -383,7 +264,7 @@ AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
 
     QString name = o.value (KEY_NAME).toString ();
     QString path = o.value (KEY_PATH).toString ();
-    QString size = o.value (KEY_SIZE).toInt ();
+    quint64 size = o.value (KEY_SIZE).toInt ();
     AudioMetaObject m(path, name, size);
     meta = m;
     AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ().toUtf8 ());
@@ -434,7 +315,7 @@ QString AlbumMeta::description() const
     return d.data ()->description;
 }
 
-QVariant AlbumMeta::date() const
+QString AlbumMeta::date() const
 {
     return d.data ()->date;
 }
@@ -454,7 +335,7 @@ void AlbumMeta::setDescription(const QString &description)
     d.data ()->description = description;
 }
 
-void AlbumMeta::setDate(const QVariant &date)
+void AlbumMeta::setDate(const QString &date)
 {
     d.data ()->date = date;
 }
@@ -463,7 +344,7 @@ QJsonObject AlbumMeta::toObject() const
 {
     QJsonObject o;
     o.insert (KEY_NAME, d.data ()->name);
-    o.insert (KEY_URI, d.data ()->imgUri);
+    o.insert (KEY_URI, d.data ()->imgUri.toString ());
     o.insert (KEY_DESCRIPTION, d.data ()->description);
     o.insert (KEY_DATE, d.data ()->date);
     return o;
@@ -489,7 +370,7 @@ AlbumMeta AlbumMeta::fromJson(const QByteArray &json)
     QJsonObject o = doc.object ();
     if (o.isEmpty ())
         return meta;
-    meta.setDate (o.value (KEY_DATE).toVariant ());
+    meta.setDate (o.value (KEY_DATE).toString ());
     meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
     meta.setImgUri (QUrl(o.value (KEY_URI).toString ()));
     meta.setName (o.value (KEY_NAME).toString ());
@@ -547,7 +428,7 @@ QJsonObject ArtistMeta::toObject() const
 {
     QJsonObject o;
     o.insert (KEY_NAME, d.data ()->name);
-    o.insert (KEY_URI, d.data ()->imgUri);
+    o.insert (KEY_URI, d.data ()->imgUri.toString ());
     o.insert (KEY_DESCRIPTION, d.data ()->description);
     return o;
 }
@@ -628,9 +509,9 @@ void CoverMeta::setLargeUri(const QUrl &large)
 QJsonObject CoverMeta::toObject() const
 {
     QJsonObject o;
-    o.insert (KEY_LARGE_IMG, d.data ()->largeUri);
-    o.insert (KEY_MIDDLE_IMG, d.data ()->middleUri);
-    o.insert (KEY_SMALL_IMG, d.data ()->smallUri);
+    o.insert (KEY_LARGE_IMG, d.data ()->largeUri.toString ());
+    o.insert (KEY_MIDDLE_IMG, d.data ()->middleUri.toString ());
+    o.insert (KEY_SMALL_IMG, d.data ()->smallUri.toString ());
     return o;
 }
 
@@ -685,7 +566,7 @@ bool TrackMeta::operator ==(const TrackMeta &other)
             && d.data ()->year == other.d.data ()->year;
 }
 
-QVariant TrackMeta::bitRate() const
+QString TrackMeta::bitRate() const
 {
     return d.data ()->bitRate;
 }
@@ -705,32 +586,32 @@ QString TrackMeta::description() const
     return d.data ()->description;
 }
 
-QVariant TrackMeta::year() const
+QString TrackMeta::year() const
 {
     return d.data ()->year;
 }
 
-QVariant TrackMeta::date() const
+QString TrackMeta::date() const
 {
     return d.data ()->date;
 }
 
-QVariant TrackMeta::genre() const
+QString TrackMeta::genre() const
 {
     return d.data ()->genre;
 }
 
-QVariant TrackMeta::sampleRate() const
+QString TrackMeta::sampleRate() const
 {
     return d.data ()->sampleRate;
 }
 
-QVariant TrackMeta::userRating() const
+QString TrackMeta::userRating() const
 {
     return d.data ()->userRating;
 }
 
-void TrackMeta::setBitRate(const QVariant &arg)
+void TrackMeta::setBitRate(const QString &arg)
 {
     d.data ()->bitRate = arg;
 }
@@ -750,27 +631,27 @@ void TrackMeta::setDescription(const QString &arg)
     d.data ()->description = arg;
 }
 
-void TrackMeta::setYear(const QVariant &arg)
+void TrackMeta::setYear(const QString &arg)
 {
     d.data ()->year = arg;
 }
 
-void TrackMeta::setDate(const QVariant &arg)
+void TrackMeta::setDate(const QString &arg)
 {
     d.data ()->date = arg;
 }
 
-void TrackMeta::setGenre(const QVariant &arg)
+void TrackMeta::setGenre(const QString &arg)
 {
     d.data ()->genre = arg;
 }
 
-void TrackMeta::setSampleRate(const QVariant &arg)
+void TrackMeta::setSampleRate(const QString &arg)
 {
     d.data ()->sampleRate = arg;
 }
 
-void TrackMeta::setUserRating(const QVariant &arg)
+void TrackMeta::setUserRating(const QString &arg)
 {
     d.data ()->userRating = arg;
 }
@@ -810,15 +691,15 @@ TrackMeta TrackMeta::fromJson(const QByteArray &json)
     QJsonObject o = doc.object ();
     if (o.isEmpty ())
         return meta;
-    meta.setBitRate (o.value (KEY_BIT_RATE).toVariant ());
-    meta.setDate (o.value (KEY_DATE).toVariant ());
+    meta.setBitRate (o.value (KEY_BIT_RATE).toString ());
+    meta.setDate (o.value (KEY_DATE).toString ());
     meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
     meta.setDuration (o.value (KEY_DURATION).toInt ());
-    meta.setGenre (o.value (KEY_GENRE).toVariant ());
-    meta.setSampleRate (o.value (KEY_SAMPLE_RATE).toVariant ());
+    meta.setGenre (o.value (KEY_GENRE).toString ());
+    meta.setSampleRate (o.value (KEY_SAMPLE_RATE).toString ());
     meta.setTitle (o.value (KEY_TITLE).toString ());
-    meta.setUserRating (o.value (KEY_USER_RATING).toVariant ());
-    meta.setYear (o.value (KEY_YEAR).toVariant ());
+    meta.setUserRating (o.value (KEY_USER_RATING).toString ());
+    meta.setYear (o.value (KEY_YEAR).toString ());
     return meta;
 }
 

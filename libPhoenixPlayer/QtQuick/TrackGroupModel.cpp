@@ -158,7 +158,7 @@ void TrackGroupModel::queryData()
         }
         case ModelType::TypeGenre: {
             GroupObject obj;
-            obj.name = d.trackMeta ().genre ().toString ();//d->trackMeta ()->genre ().toString ();
+            obj.name = d.trackMeta ().genre ();//d->trackMeta ()->genre ().toString ();
             obj.imgUri = d.coverMeta ().middleUri ();//d->coverMeta ()->middleUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
@@ -174,7 +174,7 @@ void TrackGroupModel::queryData()
         }
         case ModelType::TypeUserRating: {
             GroupObject obj;
-            obj.name = d.trackMeta ().userRating ().toString ();//d->trackMeta ()->userRating ().toString ();
+            obj.name = d.trackMeta ().userRating ();//d->trackMeta ()->userRating ().toString ();
             obj.imgUri = d.coverMeta ().middleUri ();//d->coverMeta ()->middleUri ();
             if (!m_groupList.contains (obj))
                 m_groupList.append (obj);
