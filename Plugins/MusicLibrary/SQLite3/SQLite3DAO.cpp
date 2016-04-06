@@ -277,7 +277,7 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
         QString v = json.value (key).toString ();
         if (v.isEmpty () && skipEmptyValue)
             continue;
-        column += QString ("%1 = \"%2\", ").arg (key).arg (json.value (key));
+        column += QString ("%1 = \"%2\", ").arg (key).arg (json.value (key).toString ());
     }
 //    foreach (QString s, MetaData::AlbumMeta::staticPropertyList ()) {
 //        value = (*obj)->albumMeta ()->property (s.toLocal8Bit ().constData ()).toString ();
@@ -443,7 +443,7 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
         AudioMetaObject audio;
         QJsonObject json;
         foreach (QString key, audio.toObject ().keys ()) {
-            json.insert (key, q.value (key));
+            json.insert (key, q.value (key).toString ());
         }
         QJsonDocument doc(json);
         return AudioMetaObject::fromJson (doc.toJson ());
@@ -618,24 +618,24 @@ bool SQLite3DAO::commitTransaction()
     }
 }
 
-inline QStringList SQLite3DAO::songMetaDataPropertyList()
-{
-    QStringList list(AudioMetaObject::staticPropertyList ());
-    //remove unused value
-//    Q_PROPERTY(MetaData::AlbumMeta* albumMeta READ albumMeta)
-//    Q_PROPERTY(MetaData::ArtistMeta* artistMeta READ artistMeta)
-//    Q_PROPERTY(MetaData::CoverMeta* coverMeta READ coverMeta)
-//    Q_PROPERTY(MetaData::TrackMeta* trackMeta READ trackMeta)
-    if (list.contains ("albumMeta"))
-        list.removeOne ("albumMeta");
-    if (list.contains ("artistMeta"))
-        list.removeOne ("artistMeta");
-    if (list.contains ("coverMeta"))
-        list.removeOne ("coverMeta");
-    if (list.contains ("trackMeta"))
-        list.removeOne ("trackMeta");
-    return list;
-}
+//inline QStringList SQLite3DAO::songMetaDataPropertyList()
+//{
+//    QStringList list(AudioMetaObject::staticPropertyList ());
+//    //remove unused value
+////    Q_PROPERTY(MetaData::AlbumMeta* albumMeta READ albumMeta)
+////    Q_PROPERTY(MetaData::ArtistMeta* artistMeta READ artistMeta)
+////    Q_PROPERTY(MetaData::CoverMeta* coverMeta READ coverMeta)
+////    Q_PROPERTY(MetaData::TrackMeta* trackMeta READ trackMeta)
+//    if (list.contains ("albumMeta"))
+//        list.removeOne ("albumMeta");
+//    if (list.contains ("artistMeta"))
+//        list.removeOne ("artistMeta");
+//    if (list.contains ("coverMeta"))
+//        list.removeOne ("coverMeta");
+//    if (list.contains ("trackMeta"))
+//        list.removeOne ("trackMeta");
+//    return list;
+//}
 
 //bool SQLite3DAO::insertMetaData(SongMetaData *metaData, bool skipDuplicates)
 //{

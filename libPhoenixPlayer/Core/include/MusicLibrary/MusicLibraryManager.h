@@ -50,7 +50,7 @@ public:
     /// \brief allTracks 显示所有曲目
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE QList<AudioMetaObject> allTracks();
+    Q_INVOKABLE AudioMetaList allTracks();
 
     ///
     /// \brief empty wether current library is empty
@@ -64,12 +64,12 @@ public:
     /// \param limitNum 显示个数
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE QList<AudioMetaObject> artistTracks(const QString &artistName,int limitNum = 0);
-    Q_INVOKABLE QList<AudioMetaObject> albumTracks(const QString  &albumName, int limitNum = 0);
-    Q_INVOKABLE QList<AudioMetaObject> genreTracks(const QString &genreName, int limitNum = 0);
-    Q_INVOKABLE QList<AudioMetaObject> mediaTypeTracks(const QString &mediaType, int limitNum = 0);
-    Q_INVOKABLE QList<AudioMetaObject> userRatingTracks(const QString &rating, int limitNum = 0);
-    Q_INVOKABLE QList<AudioMetaObject> folderTracks(const QString &folder, int limitNum = 0);
+    Q_INVOKABLE AudioMetaList artistTracks(const QString &artistName,int limitNum = 0);
+    Q_INVOKABLE AudioMetaList albumTracks(const QString  &albumName, int limitNum = 0);
+    Q_INVOKABLE AudioMetaList genreTracks(const QString &genreName, int limitNum = 0);
+    Q_INVOKABLE AudioMetaList mediaTypeTracks(const QString &mediaType, int limitNum = 0);
+    Q_INVOKABLE AudioMetaList userRatingTracks(const QString &rating, int limitNum = 0);
+    Q_INVOKABLE AudioMetaList folderTracks(const QString &folder, int limitNum = 0);
 
 //    ///
 //    /// \brief playingSong 返回当前播放的歌曲hash,
@@ -211,8 +211,8 @@ private:
     IMusicLibraryDAO *m_dao;
     PluginLoader *m_pluginLoader;
     Settings *m_settings;
-//    /*QList<AudioMetaObject> */AudioMetaList m_trackList;
-    QList<AudioMetaObject> m_trackList;
+//    /*AudioMetaList */AudioMetaList m_trackList;
+    AudioMetaList m_trackList;
 //      AsyncDiskLookup *m_asyncDiskLookup;
 //      AsyncTagParserMgrWrapper *m_tagParserWrapper;
 

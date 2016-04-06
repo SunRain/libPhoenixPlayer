@@ -5,8 +5,8 @@
 #include <QTextCodec>
 
 #include "TagParserID3v1.h"
-#include "SongMetaData.h"
-#include "Util.h"
+#include "AudioMetaObject.h"
+#include "Utility.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {

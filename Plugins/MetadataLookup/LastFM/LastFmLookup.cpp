@@ -135,7 +135,7 @@ void LastFmLookup::lookup(const AudioMetaObject &object)
         QString artist = formatStr (/*(*object)->artistMeta ()->name ()*/object.artistMeta ().name ());
         QString track = formatStr (/*(*object)->trackMeta ()->title ()*/object.trackMeta ().title ());
         if (track.isEmpty ()) {
-            track = (*object)->name ();
+            track = object.name ();
             //TODO: quick hack
             track = track.mid (0, track.indexOf ("."));
         }

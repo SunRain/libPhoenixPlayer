@@ -15,7 +15,6 @@
 
 namespace PhoenixPlayer {
 class AudioMetaObject;
-class LibPhoenixPlayer;
 
 void LibPhoenixPlayer_Init();
 

@@ -103,7 +103,7 @@ MusicLibraryManager::~MusicLibraryManager()
     qDebug()<<">>>>>>>> after "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
 }
 
-QList<AudioMetaObject> MusicLibraryManager::allTracks()
+AudioMetaList MusicLibraryManager::allTracks()
 {
 //    return m_trackList;
 //    QList<QObject*> list;
@@ -121,11 +121,11 @@ bool MusicLibraryManager::empty() const
     return m_trackList.isEmpty ();
 }
 
-QList<AudioMetaObject> MusicLibraryManager::artistTracks(const QString &artistName, int limitNum)
+AudioMetaList MusicLibraryManager::artistTracks(const QString &artistName, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<AudioMetaObject>();
-    QList<AudioMetaObject> list;
+        return AudioMetaList();
+    AudioMetaList list;
     int i = 0;
     foreach (AudioMetaObject d, m_trackList) {
         if (d.artistMeta ().name () == artistName) {
@@ -139,11 +139,11 @@ QList<AudioMetaObject> MusicLibraryManager::artistTracks(const QString &artistNa
     return list;
 }
 
-QList<AudioMetaObject> MusicLibraryManager::albumTracks(const QString &albumName, int limitNum)
+AudioMetaList MusicLibraryManager::albumTracks(const QString &albumName, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<AudioMetaObject>();
-    QList<AudioMetaObject> list;
+        return AudioMetaList();
+    AudioMetaList list;
     int i = 0;
     foreach (AudioMetaObject d, m_trackList) {
         if (d.albumMeta ().name () == albumName) {
@@ -156,11 +156,11 @@ QList<AudioMetaObject> MusicLibraryManager::albumTracks(const QString &albumName
     return list;
 }
 
-QList<AudioMetaObject> MusicLibraryManager::genreTracks(const QString &genreName, int limitNum)
+AudioMetaList MusicLibraryManager::genreTracks(const QString &genreName, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<AudioMetaObject>();
-    QList<AudioMetaObject> list;
+        return AudioMetaList();
+    AudioMetaList list;
     int i = 0;
     foreach (AudioMetaObject d, m_trackList) {
         if (d.trackMeta ().genre () == genreName) {
@@ -173,11 +173,11 @@ QList<AudioMetaObject> MusicLibraryManager::genreTracks(const QString &genreName
     return list;
 }
 
-QList<AudioMetaObject> MusicLibraryManager::mediaTypeTracks(const QString &mediaType, int limitNum)
+AudioMetaList MusicLibraryManager::mediaTypeTracks(const QString &mediaType, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<AudioMetaObject>();
-    QList<AudioMetaObject> list;
+        return AudioMetaList();
+    AudioMetaList list;
     int i = 0;
     foreach (AudioMetaObject d, m_trackList) {
         if (d.mediaType () == mediaType.toInt ()) {
@@ -190,11 +190,11 @@ QList<AudioMetaObject> MusicLibraryManager::mediaTypeTracks(const QString &media
     return list;
 }
 
-QList<AudioMetaObject> MusicLibraryManager::userRatingTracks(const QString &rating, int limitNum)
+AudioMetaList MusicLibraryManager::userRatingTracks(const QString &rating, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<AudioMetaObject>();
-    QList<AudioMetaObject> list;
+        return AudioMetaList();
+    AudioMetaList list;
     int i = 0;
     foreach (AudioMetaObject d, m_trackList) {
         if (d.trackMeta ().userRating () == rating) {
@@ -207,11 +207,11 @@ QList<AudioMetaObject> MusicLibraryManager::userRatingTracks(const QString &rati
     return list;
 }
 
-QList<AudioMetaObject> MusicLibraryManager::folderTracks(const QString &folder, int limitNum)
+AudioMetaList MusicLibraryManager::folderTracks(const QString &folder, int limitNum)
 {
     if (m_trackList.isEmpty ())
-        return QList<AudioMetaObject>();
-    QList<AudioMetaObject> list;
+        return AudioMetaList();
+    AudioMetaList list;
     int i = 0;
     foreach (AudioMetaObject d, m_trackList) {
         if (d.path () == folder) {

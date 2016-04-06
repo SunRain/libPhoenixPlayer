@@ -77,7 +77,7 @@ private:
 //        return cls;
 //    }
 
-    QStringList songMetaDataPropertyList();
+//    QStringList songMetaDataPropertyList();
 //    QString listToString(const QStringList &list);
 //    QStringList stringToList(const QString &str);
     void calcExistSongs();
