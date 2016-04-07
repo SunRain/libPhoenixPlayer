@@ -70,11 +70,6 @@ template <class T>
 class SingletonPointer
 {
 public:
-//    static T& instance()
-//    {
-//        qCallOnce(init, flag);
-//        return *tptr;
-//    }
     static T* instance()
     {
         qCallOnce_p(init, flag);

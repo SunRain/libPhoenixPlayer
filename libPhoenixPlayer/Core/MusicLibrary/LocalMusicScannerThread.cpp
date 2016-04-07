@@ -16,12 +16,12 @@
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
-LocalMusicScannerThread::LocalMusicScannerThread(QObject *parent) :
-    QThread(parent)
+LocalMusicScannerThread::LocalMusicScannerThread(QObject *parent)
+    : QThread(parent)
+    , m_settings(phoenixPlayerLib->settings ())
+    , m_pluginLoader(phoenixPlayerLib->pluginLoader ())
+    , m_dao(nullptr)
 {
-    m_pluginLoader = PluginLoader::instance ();
-    m_settings = Settings::instance ();
-    m_dao = nullptr;
     MusicLibraryDAOHost *dh = m_pluginLoader->curDAOHost ();
     if (dh)
         m_dao = dh->instance<IMusicLibraryDAO>();
@@ -48,13 +48,14 @@ LocalMusicScannerThread::LocalMusicScannerThread(QObject *parent) :
 
 LocalMusicScannerThread::~LocalMusicScannerThread()
 {
-    foreach (IMusicTagParser *p, m_tagParserList) {
-        p = nullptr;
-    }
     foreach (MusicTagParserHost *h, m_tagHostList) {
         if (!h->unLoad ())
             h->forceUnload ();
     }
+//    foreach (IMusicTagParser *p, m_tagParserList) {
+//        p = nullptr;
+//    }
+
     if (!m_tagHostList.isEmpty ()) {
         qDeleteAll(m_tagHostList);
         m_tagHostList.clear ();

@@ -17,11 +17,11 @@
 
 namespace PhoenixPlayer {
 namespace MetadataLookup {
-MetadataLookupMgr::MetadataLookupMgr(QObject *parent) :
-    QThread(parent)
+MetadataLookupMgr::MetadataLookupMgr(QObject *parent)
+    : QThread(parent)
 {
-    m_pluginLoader = PluginLoader::instance ();
-    m_settings = Settings::instance ();
+    m_pluginLoader =  phoenixPlayerLib->pluginLoader ();
+    m_settings = phoenixPlayerLib->settings ();
     m_util = Utility::instance ();
     m_finish = true;
     m_doInternalLoop = true;

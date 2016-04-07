@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QHash>
 
+#include "libphoenixplayer_global.h"
 #include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
@@ -14,8 +15,8 @@ class EqualizerMgr : public QObject
     Q_OBJECT
     DECLARE_SINGLETON_POINTER(EqualizerMgr)
 public:
-//    explicit EqualizerMgr(QObject *parent = 0);
-        virtual ~EqualizerMgr();
+    explicit EqualizerMgr(QObject *parent = 0);
+    virtual ~EqualizerMgr();
 
     void setEnabled(bool enable);
     bool enabled() const;

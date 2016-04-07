@@ -28,7 +28,7 @@ class LIBPHOENIXPLAYER_EXPORT PlayListMgr : public QObject
     Q_PROPERTY(QStringList existPlayLists READ existPlayLists CONSTANT)
 
 public:
-    explicit PlayListMgr(QObject *parent = 0);
+    explicit PlayListMgr(Settings *set, QObject *parent = 0);
     virtual ~PlayListMgr();
     bool addTrack(const AudioMetaObject &song);
     bool addTrack(const /*QList<AudioMetaObject>*/AudioMetaList &list);

@@ -55,8 +55,8 @@ PlayThread::PlayThread(QObject *parent, BaseVisual *v)
     :QThread(parent)
     ,m_visual(v)
 {
-    m_pluginLoader = PluginLoader::instance ();
-    m_settings = Settings::instance ();
+    m_pluginLoader = phoenixPlayerLib->pluginLoader ();
+    m_settings = phoenixPlayerLib->settings ();
     m_handler = StateHandler::instance ();
 
     m_decoderLibs = m_settings->decoderLibraries ();

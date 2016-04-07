@@ -26,8 +26,11 @@ using namespace MetadataLookup;
 using namespace MusicLibrary;
 using namespace PlayBackend;
 
-PlayerCore::PlayerCore(QObject *parent)
+PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager *mgr, QObject *parent)
     : QObject(parent)
+    , m_settings(set)
+    , m_pluginLoader(loader)
+    , m_musicLibraryManager(mgr)
 {
     m_playBackend = nullptr;
     m_pb = nullptr;
@@ -40,15 +43,15 @@ PlayerCore::PlayerCore(QObject *parent)
     m_curTrackDuration = 0;
     m_currentPlayPos = 0;
 
-    m_pluginLoader = PluginLoader::instance ();
-    m_settings = Settings::instance ();
-    m_musicLibraryManager = MusicLibraryManager::instance ();
+//    m_pluginLoader = phoenixPlayerLib->pluginLoader ();//PluginLoader::instance ();
+//    m_settings = phoenixPlayerLib->settings ();//Settings::instance ();
+//    m_musicLibraryManager = phoenixPlayerLib->libraryMgr ();//MusicLibraryManager::instance ();
     MusicLibraryDAOHost *host = m_pluginLoader->curDAOHost ();
     if (host)
         m_dao = host->instance<IMusicLibraryDAO>();
 
     m_playMode = Common::PlayModeOrder;
-    m_playList = new PlayListMgr(this);
+    m_playList = new PlayListMgr(m_settings, this);
 
     connect (m_playList, &PlayListMgr::currentIndexChanged,
              [&](int index) {
@@ -56,7 +59,7 @@ PlayerCore::PlayerCore(QObject *parent)
         AudioMetaObject o = m_playList->get (index);
         playTrack (o);
     });
-    init ();
+//    init ();
 }
 
 PlayerCore::~PlayerCore()

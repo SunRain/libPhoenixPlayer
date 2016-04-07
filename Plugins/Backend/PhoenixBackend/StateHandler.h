@@ -17,7 +17,7 @@ class StateHandler : public QObject
     Q_OBJECT
     DECLARE_SINGLETON_POINTER(StateHandler)
 public:
-//    explicit StateHandler(QObject *parent = 0);
+    explicit StateHandler(QObject *parent = 0);
     virtual ~StateHandler();
 //    static StateHandler *instance();
 

@@ -11,7 +11,7 @@ const static int BANDS_NUM = 10;
 EqualizerMgr::EqualizerMgr(QObject *parent)
     : QObject(parent)
 {
-    m_settings = Settings::instance ();
+    m_settings = phoenixPlayerLib->settings ();//Settings::instance ();
 
     reload ();
 }

@@ -14,7 +14,7 @@ namespace QmlPlugin {
 CoverCircleImage::CoverCircleImage(CircleImage *parent)
     :CircleImage(parent)
 {
-    m_playCore = PlayerCore::instance ();
+    m_playCore = phoenixPlayerLib->playerCore ();//PlayerCore::instance ();
     m_autoChange = false;
 
 //    SongMetaData *d = m_playCore->curTrackMetadata ();

@@ -17,7 +17,7 @@ namespace QmlPlugin {
 TrackGroupModel::TrackGroupModel(QAbstractListModel *parent)
     : QAbstractListModel(parent)
 {
-    m_musicLibraryManager = MusicLibraryManager::instance ();
+    m_musicLibraryManager = phoenixPlayerLib->libraryMgr ();/*MusicLibraryManager::instance ();*/
 }
 
 TrackGroupModel::~TrackGroupModel()

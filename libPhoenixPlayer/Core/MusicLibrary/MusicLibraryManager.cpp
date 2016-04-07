@@ -18,11 +18,13 @@
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-MusicLibraryManager::MusicLibraryManager(QObject *parent)
+MusicLibraryManager::MusicLibraryManager(Settings *set, PluginLoader *loader, QObject *parent)
     : BaseObject(parent)
+    , m_settings(set)
+    , m_pluginLoader(loader)
 {
-    m_settings = Settings::instance ();
-    m_pluginLoader = PluginLoader::instance ();
+//    m_settings = phoenixPlayerLib->settings ();//Settings::instance ();
+//    m_pluginLoader = phoenixPlayerLib->pluginLoader ();//PluginLoader::instance ();
     m_dao = nullptr;
     m_daoHost = m_pluginLoader->curDAOHost ();
     if (m_daoHost)

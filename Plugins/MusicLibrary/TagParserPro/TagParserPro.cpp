@@ -109,7 +109,7 @@ bool TagParserPro::parserTag(AudioMetaObject *target)
     //get cover image
     QImage image = getImage ();
     if (!image.isNull ()) {
-        Settings *s = Settings::instance ();
+        Settings *s = phoenixPlayerLib->settings ();
 
         QString imagePath = s->musicImageCachePath ();
         QString tmp = target->name ();//name;

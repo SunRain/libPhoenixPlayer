@@ -19,16 +19,15 @@
 
 namespace PhoenixPlayer {
 
-PlayListMgr::PlayListMgr(QObject *parent)
+PlayListMgr::PlayListMgr(Settings *set, QObject *parent)
     : QObject(parent)
 //    , m_random(false)
     , m_currentIndex(-1)
 //    , m_count(0)
+    , m_settings(set)
 {
     //TODO support different playlist format
     m_listFormat = new M3uPlayListFormat(this);
-
-    m_settings = Settings::instance ();
     m_playListDir = m_settings->playListDir ();
 
     connect (m_settings, &Settings::playListDirChanged,

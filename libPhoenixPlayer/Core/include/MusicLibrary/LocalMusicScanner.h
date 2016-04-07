@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "libphoenixplayer_global.h"
+
 namespace PhoenixPlayer {
 
 class Settings;
@@ -12,33 +14,24 @@ namespace MusicLibrary {
 
 class IMusicLibraryDAO;
 class LocalMusicScannerThread;
-class LocalMusicScanner : public QObject
+class LIBPHOENIXPLAYER_EXPORT LocalMusicScanner : public QObject
 {
     Q_OBJECT
 public:
+    explicit LocalMusicScanner(Settings *set, QObject *parent = 0);
     explicit LocalMusicScanner(QObject *parent = 0);
     virtual ~LocalMusicScanner();
     Q_INVOKABLE void scanLocalMusic();
+    Q_INVOKABLE void scanDir(const QString &dirname);
 
 signals:
-//    void searching (const QString &path, const QString &file, const qint64 &size);
     void searchingFinished();
 
-public slots:
-
-private slots:
-//    void appendToList(const QString &path, const QString &file, const qint64 &size);
-//    void parserTag(const QList<SongMetaData *> &list);
-
 private:
-//    AsyncDiskLookup *m_asyncDiskLookup;
-//    AsyncTagParserMgrWrapper *m_tagParserWrapper;
-//    QList<PhoenixPlayer::SongMetaData *> m_metaDataList;
+    void doScann(const QString &dirname);
+private:
     Settings *m_settings;
-//    PluginLoader *m_pluginLoader;
-//    IMusicLibraryDAO *m_dao;
     LocalMusicScannerThread *m_scanner;
-
 };
 } //MusicLibrary
 } //PhoenixPlayer

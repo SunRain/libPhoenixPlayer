@@ -30,7 +30,7 @@ CircleImage::CircleImage(QQuickPaintedItem *parent)
     m_requestAborted = false;
     m_cache = true;
     m_byteArray = QByteArray();
-    m_settings = Settings::instance ();
+    m_settings = phoenixPlayerLib->settings ();//Settings::instance ();
 }
 
 CircleImage::~CircleImage()

@@ -41,9 +41,6 @@ protected:
 
 protected:
     void scanDir(const QString &path);
-signals:
-
-public slots:
 
 private:
     QStringList m_pathList;

@@ -3,6 +3,8 @@
 
 #include <Common.h>
 #include <QObject>
+
+#include "libphoenixplayer_global.h"
 #include "SingletonPointer.h"
 
 class QTimer;
@@ -14,10 +16,10 @@ namespace PlayBackend {
 class IPlayBackend;
 class BaseVolume;
 }
-class VolumeControl : public QObject
+class LIBPHOENIXPLAYER_EXPORT VolumeControl : public QObject
 {
     Q_OBJECT
-    DECLARE_SINGLETON_POINTER(VolumeControl)
+//    DECLARE_SINGLETON_POINTER(VolumeControl)
 
     Q_PROPERTY(int leftVolume READ left WRITE setLeftVolume NOTIFY leftVolumeChanged)
     Q_PROPERTY(int rightVolume READ right WRITE setRightVolume NOTIFY rightVolumeChanged)
@@ -25,7 +27,7 @@ class VolumeControl : public QObject
     Q_PROPERTY(int balance READ balance WRITE setBalance NOTIFY balanceChanged)
     Q_PROPERTY(bool muted READ muted WRITE setMuted NOTIFY mutedChanged)
 public:
-//    explicit VolumeControl(QObject *parent = 0);
+    explicit VolumeControl(PluginLoader *loader, QObject *parent = 0);
     virtual ~VolumeControl();
 
     void setVolume(int left, int right);

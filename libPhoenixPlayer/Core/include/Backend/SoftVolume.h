@@ -1,6 +1,7 @@
 #ifndef SOFTVOLUME_H
 #define SOFTVOLUME_H
 
+#include "libphoenixplayer_global.h"
 #include "BaseVolume.h"
 
 #include "AudioParameters.h"
@@ -12,12 +13,12 @@ class Buffer;
 namespace PlayBackend {
 class BaseVolume;
 
-class SoftVolume : public BaseVolume
+class LIBPHOENIXPLAYER_EXPORT SoftVolume : public BaseVolume
 {
     Q_OBJECT
     DECLARE_SINGLETON_POINTER(SoftVolume)
 public:
-//    explicit SoftVolume(QObject *parent = 0);
+    explicit SoftVolume(QObject *parent = 0);
     virtual ~SoftVolume();
     void changeVolume(Buffer *buffer, int chan, AudioParameters::AudioFormat format);
 };

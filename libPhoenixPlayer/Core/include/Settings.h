@@ -23,9 +23,9 @@ class Settings : public QObject
     Q_PROPERTY(QString curPlayBackend READ curPlayBackend WRITE setCurPlayBackend NOTIFY curPlayBackendChanged)
     Q_PROPERTY(QString curMusicLibraryDAO READ curMusicLibraryDAO WRITE setCurMusicLibraryDAO NOTIFY curMusicLibraryDAOChanged)
     Q_PROPERTY(QString curOutPut READ curOutPut WRITE setCurOutPut NOTIFY curOutPutChanged)
-    DECLARE_SINGLETON_POINTER(Settings)
+//    DECLARE_SINGLETON_POINTER(Settings)
 public:
-//    static Settings *getInstance();
+    explicit Settings(QObject *parent = 0);
     virtual ~Settings();
 
     QSettings *settings() const;

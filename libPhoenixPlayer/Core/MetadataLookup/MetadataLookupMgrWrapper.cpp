@@ -15,11 +15,11 @@ namespace MetadataLookup {
 
 using namespace PhoenixPlayer::MusicLibrary;
 
-MetadataLookupMgrWrapper::MetadataLookupMgrWrapper(QObject *parent) :
-    QObject(parent)
+MetadataLookupMgrWrapper::MetadataLookupMgrWrapper(QObject *parent)
+    : QObject(parent)
 {
-    m_pluginLoader = PluginLoader::instance ();
-    m_musicLibraryManager = MusicLibraryManager::instance ();
+    m_pluginLoader = phoenixPlayerLib->pluginLoader ();
+    m_musicLibraryManager = phoenixPlayerLib->libraryMgr ();
 
     m_lookupMgr = new MetadataLookupMgr(this);
 

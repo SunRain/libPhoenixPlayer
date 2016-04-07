@@ -23,7 +23,7 @@ LastFmLookup::LastFmLookup(QObject *parent)
     :IMetadataLookup(parent)
 {
     m_networkLookup = new BaseNetworkLookup(this);
-    Settings *setting = Settings::instance ();
+    Settings *setting = phoenixPlayerLib->settings ();
     m_imageSizeValue = setting->getConfig (CONFIG_KEY, DEFAULT_IMAGE_SIZE_REGEXP);
 
     connect (m_networkLookup, &BaseNetworkLookup::failed,

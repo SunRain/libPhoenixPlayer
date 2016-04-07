@@ -94,7 +94,7 @@ void PhoenixPlayBackend::init()
     m_handler = StateHandler::instance ();
     //set StateHandler's parent to receive dispatch event
     m_handler->setParent (this);
-    m_volumeControl = VolumeControl::instance ();
+    m_volumeControl = phoenixPlayerLib->volumeCtrl ();//VolumeControl::instance ();
 
     connect (m_volumeControl, &VolumeControl::mutedChanged,
              [&] (bool muted) {

@@ -15,10 +15,10 @@
 
 namespace PhoenixPlayer {
 namespace QmlPlugin {
-PluginListModel::PluginListModel(QObject *parent) :
-    QAbstractListModel(parent)
+PluginListModel::PluginListModel(QObject *parent)
+    : QAbstractListModel(parent)
 {
-    m_pluginLoader = PluginLoader::instance ();
+    m_pluginLoader = phoenixPlayerLib->pluginLoader ();//PluginLoader::instance ();
 
     QStringList libs = m_pluginLoader->pluginLibraries (Common::PluginDecoder);
     foreach (QString s, libs) {

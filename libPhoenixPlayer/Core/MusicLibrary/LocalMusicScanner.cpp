@@ -17,11 +17,18 @@
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-LocalMusicScanner::LocalMusicScanner(QObject *parent) :
-    QObject(parent)
+LocalMusicScanner::LocalMusicScanner(Settings *set, QObject *parent)
+    : QObject(parent)
+    , m_settings(set)
 {
     m_scanner = nullptr;
-    m_settings = Settings::instance ();
+}
+
+LocalMusicScanner::LocalMusicScanner(QObject *parent)
+    : QObject(parent)
+{
+    m_scanner = nullptr;
+    m_settings = phoenixPlayerLib->settings ();
 }
 
 LocalMusicScanner::~LocalMusicScanner()
@@ -37,6 +44,23 @@ LocalMusicScanner::~LocalMusicScanner()
 
 void LocalMusicScanner::scanLocalMusic()
 {
+    doScann (QString());
+}
+
+void LocalMusicScanner::scanDir(const QString &dirname)
+{
+    if (dirname.isEmpty ())
+        return;
+    if (dirname.startsWith ("file://")) {
+        QString str = dirname.mid (7);
+        doScann (str);
+    } else {
+        doScann (dirname);
+    }
+}
+
+void LocalMusicScanner::doScann(const QString &dirname)
+{
     if (!m_scanner) {
         m_scanner = new LocalMusicScannerThread(0);
         connect (m_scanner, &QThread::finished,
@@ -48,7 +72,10 @@ void LocalMusicScanner::scanLocalMusic()
             emit searchingFinished ();
         });
     }
-    m_scanner->addLookupDirs (m_settings->musicDirs ());
+    if (dirname.isEmpty ())
+        m_scanner->addLookupDirs (m_settings->musicDirs ());
+    else
+        m_scanner->addLookupDir (dirname);
     m_scanner->start (QThread::HighPriority);
 }
 

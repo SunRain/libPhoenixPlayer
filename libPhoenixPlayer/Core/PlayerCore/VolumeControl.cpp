@@ -16,10 +16,11 @@ namespace PhoenixPlayer {
 using namespace MusicLibrary;
 using namespace PlayBackend;
 
-VolumeControl::VolumeControl(QObject *parent) :
-    QObject(parent)
+VolumeControl::VolumeControl(PluginLoader *loader, QObject *parent)
+    : QObject(parent)
+    , m_pluginLoader(loader)
 {
-    m_pluginLoader = PluginLoader::instance ();
+//    m_pluginLoader = phoenixPlayerLib->pluginLoader ();//PluginLoader::instance ();
 
     m_playBackend = nullptr;
     m_volume = nullptr;

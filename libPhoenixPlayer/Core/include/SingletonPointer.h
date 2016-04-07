@@ -21,10 +21,7 @@
                 mutex.unlock(); \
             } \
             return sp.data(); \
-        } \
-    protected: \
-        explicit Class(QObject *parent = 0);
-
+        }
 #else
     #include "SingletonPointer_p.h"
     #include <QObject>
@@ -34,6 +31,5 @@
         public: \
             static Class *instance() { \
                 return SingletonPointer<Class>::instance (); \
-            } \
-            explicit Class(QObject *parent = 0);
+            }
 #endif

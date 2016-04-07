@@ -31,7 +31,7 @@ namespace MetadataLookup {
 class MetadataLookupMgr;
 }
 
-class PlayerCore : public QObject
+class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(Common::PlayMode playMode READ playMode WRITE setPlayMode NOTIFY playModeChanged)
@@ -42,9 +42,11 @@ class PlayerCore : public QObject
     Q_PROPERTY(int backwardIndex READ backwardIndex CONSTANT)
     Q_PROPERTY(int shuffleIndex READ shuffleIndex CONSTANT)
 
-    DECLARE_SINGLETON_POINTER(PlayerCore)
+//    DECLARE_SINGLETON_POINTER(PlayerCore)
 public:
+    explicit PlayerCore(Settings *set, PluginLoader *loader, MusicLibrary::MusicLibraryManager *mgr, QObject *parent = 0);
     virtual ~PlayerCore();
+    void init();
 
     Common::PlayMode playMode() const;
     Common::PlayBackendState playBackendState() const;
@@ -166,8 +168,6 @@ public slots:
     void setAutoSkipForward(bool autoSkipForward);
 
 private:
-    void init();
-
     void setPluginLoader();
 //    void setMusicLibraryManager();
 //    void setMetaLookupManager();

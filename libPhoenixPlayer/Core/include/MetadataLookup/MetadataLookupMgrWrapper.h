@@ -22,7 +22,9 @@ class LIBPHOENIXPLAYER_EXPORT MetadataLookupMgrWrapper : public QObject
 {
     Q_OBJECT
     DECLARE_SINGLETON_POINTER(MetadataLookupMgrWrapper)
+
 public:
+    explicit MetadataLookupMgrWrapper(QObject *parent = 0);
     virtual ~MetadataLookupMgrWrapper();
 
     void lookupLyric(const AudioMetaObject &data);
@@ -54,7 +56,6 @@ public:
                                             const QString &title, const QString &artist, const QString &album);
 
 protected:
-//    explicit MetadataLookupMgrWrapper(QObject *parent = 0);
     struct FailNode {
         QString hash;
         IMetadataLookup::LookupType type;

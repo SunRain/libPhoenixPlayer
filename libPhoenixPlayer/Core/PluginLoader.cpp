@@ -47,11 +47,12 @@ using namespace OutPut;
     } \
     return p;
 
-PluginLoader::PluginLoader(QObject *parent)
+PluginLoader::PluginLoader(Settings *set, QObject *parent)
     : QObject(parent)
-//    ,m_isInit(false)
+    , m_settings(set)
 {
-    m_settings = Settings::instance ();
+//    m_settings = Settings::instance ();
+//    m_settings = phoenixPlayerLib->settings ();
     m_curBackendHost = nullptr;
     m_curDAOHost = nullptr;
     m_curOutPutHost = nullptr;

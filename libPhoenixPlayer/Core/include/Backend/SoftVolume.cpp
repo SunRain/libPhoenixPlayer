@@ -7,8 +7,8 @@ namespace PhoenixPlayer{
 class Buffer;
 namespace PlayBackend {
 
-SoftVolume::SoftVolume(QObject *parent) :
-    BaseVolume(parent)
+SoftVolume::SoftVolume(QObject *parent)
+    : BaseVolume(parent)
 {
     setVolume (100,100);
     setMuted (false);

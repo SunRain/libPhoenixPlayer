@@ -77,7 +77,7 @@ OutputThread::OutputThread(QObject *parent, BaseVisual *v)
 
     m_handler = StateHandler::instance ();
 
-    m_pluginLoader = PluginLoader::instance ();
+    m_pluginLoader = phoenixPlayerLib->pluginLoader ();//PluginLoader::instance ();
 
     m_eq = EqualizerMgr::instance ();
 

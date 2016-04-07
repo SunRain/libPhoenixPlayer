@@ -42,8 +42,10 @@ class IMusicLibraryDAO;
 class LIBPHOENIXPLAYER_EXPORT MusicLibraryManager : public BaseObject
 {
     Q_OBJECT
-    DECLARE_SINGLETON_POINTER(MusicLibraryManager)
+//    DECLARE_SINGLETON_POINTER(MusicLibraryManager)
+
 public:
+    explicit MusicLibraryManager(Settings *set, PluginLoader *loader, QObject *parent = 0);
     virtual ~MusicLibraryManager();
 
     ///
@@ -207,10 +209,10 @@ private:
 private:
 //      bool m_isInit;
 //      QPointer<IPlayListDAO> m_playListDAO;
+    Settings *m_settings;
+    PluginLoader *m_pluginLoader;
     MusicLibraryDAOHost *m_daoHost;
     IMusicLibraryDAO *m_dao;
-    PluginLoader *m_pluginLoader;
-    Settings *m_settings;
 //    /*AudioMetaList */AudioMetaList m_trackList;
     AudioMetaList m_trackList;
 //      AsyncDiskLookup *m_asyncDiskLookup;
