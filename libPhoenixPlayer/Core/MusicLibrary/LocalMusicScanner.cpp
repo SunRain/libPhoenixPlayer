@@ -11,6 +11,7 @@
 #include "AudioMetaObject.h"
 #include "SingletonPointer.h"
 #include "AudioMetaObject.h"
+#include "LibPhoenixPlayerMain.h"
 
 #include "LocalMusicScannerThread.h"
 

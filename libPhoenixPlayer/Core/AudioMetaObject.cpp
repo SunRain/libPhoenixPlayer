@@ -11,30 +11,30 @@
 
 namespace PhoenixPlayer {
 
-const QString KEY_NAME ("NAME");
-const QString KEY_URI ("URI");
-const QString KEY_DESCRIPTION ("DESCRIPTION");
-const QString KEY_DATE ("DATE");
-const QString KEY_SMALL_IMG ("SMALL_URI");
-const QString KEY_MIDDLE_IMG ("MIDDLE_URI");
-const QString KEY_LARGE_IMG ("LARGE_URI");
-const QString KEY_BIT_RATE ("BIT_RATE");
-const QString KEY_DURATION ("DURATION");
-const QString KEY_TITLE ("TITLE");
-const QString KEY_YEAR ("YEAR");
-const QString KEY_GENRE ("GENRE");
-const QString KEY_SAMPLE_RATE ("SAMPLE_RATE");
-const QString KEY_USER_RATING ("USER_RATING");
-const QString KEY_HASH ("HASH");
-const QString KEY_PATH ("PATH");
-const QString KEY_SIZE ("SIZE");
-const QString KEY_MEDIA_TYPE ("MEDIA_TYPE");
-const QString KEY_LYRICS_DATA ("LYRICS_DATA");
-const QString KEY_LYRICS_URI ("LYRICS_URI");
-const QString KEY_ALBUM_META ("ALBUM_META");
-const QString KEY_ARTIST_META ("ARTIST_META");
-const QString KEY_COVER_META ("COVER_META");
-const QString KEY_TRACK_META ("TRACK_META");
+//const QString KEY_NAME ("NAME");
+//const QString KEY_URI ("URI");
+//const QString KEY_DESCRIPTION ("DESCRIPTION");
+//const QString KEY_DATE ("DATE");
+//const QString KEY_SMALL_IMG ("SMALL_URI");
+//const QString KEY_MIDDLE_IMG ("MIDDLE_URI");
+//const QString KEY_LARGE_IMG ("LARGE_URI");
+//const QString KEY_BIT_RATE ("BIT_RATE");
+//const QString KEY_DURATION ("DURATION");
+//const QString KEY_TITLE ("TITLE");
+//const QString KEY_YEAR ("YEAR");
+//const QString KEY_GENRE ("GENRE");
+//const QString KEY_SAMPLE_RATE ("SAMPLE_RATE");
+//const QString KEY_USER_RATING ("USER_RATING");
+//const QString KEY_HASH ("HASH");
+//const QString KEY_PATH ("PATH");
+//const QString KEY_SIZE ("SIZE");
+//const QString KEY_MEDIA_TYPE ("MEDIA_TYPE");
+//const QString KEY_LYRICS_DATA ("LYRICS_DATA");
+//const QString KEY_LYRICS_URI ("LYRICS_URI");
+//const QString KEY_ALBUM_META ("ALBUM_META");
+//const QString KEY_ARTIST_META ("ARTIST_META");
+//const QString KEY_COVER_META ("COVER_META");
+//const QString KEY_TRACK_META ("TRACK_META");
 
 AudioMetaObject::AudioMetaObject()
     : d(new AudioMetaObjectPriv())

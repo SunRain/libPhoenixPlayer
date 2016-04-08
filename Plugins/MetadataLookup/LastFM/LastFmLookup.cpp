@@ -14,6 +14,7 @@
 #include "MetadataLookup/BaseNetworkLookup.h"
 #include "Common.h"
 #include "Settings.h"
+#include "LibPhoenixPlayerMain.h"
 
 namespace PhoenixPlayer{
 namespace MetadataLookup {

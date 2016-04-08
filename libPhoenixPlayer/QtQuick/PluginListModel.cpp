@@ -6,6 +6,8 @@
 #include "PluginLoader.h"
 #include "PluginHost.h"
 #include "Common.h"
+#include "LibPhoenixPlayerMain.h"
+
 #include "Decoder/DecoderHost.h"
 #include "MetadataLookup/MetadataLookupHost.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"

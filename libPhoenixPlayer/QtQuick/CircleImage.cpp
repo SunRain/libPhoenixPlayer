@@ -14,6 +14,8 @@
 #include "SingletonPointer.h"
 #include "Settings.h"
 #include "Utility.h"
+#include "LibPhoenixPlayerMain.h"
+
 
 namespace PhoenixPlayer {
 namespace QmlPlugin {

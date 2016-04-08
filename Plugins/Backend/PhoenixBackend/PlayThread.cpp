@@ -18,6 +18,7 @@
 #include "Common.h"
 #include "Buffer.h"
 #include "Settings.h"
+#include "LibPhoenixPlayerMain.h"
 
 #include "OutputThread.h"
 #include "StateHandler.h"

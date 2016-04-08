@@ -4,6 +4,8 @@
 
 #include "SingletonPointer.h"
 #include "PluginLoader.h"
+#include "LibPhoenixPlayerMain.h"
+
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryManager.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"

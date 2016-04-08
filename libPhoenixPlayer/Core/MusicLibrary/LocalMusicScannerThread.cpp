@@ -8,6 +8,7 @@
 #include "AudioMetaObject.h"
 #include "PluginLoader.h"
 #include "Settings.h"
+#include "LibPhoenixPlayerMain.h"
 
 #include "MusicLibrary/MusicTagParserHost.h"
 #include "MusicLibrary/IMusicTagParser.h"

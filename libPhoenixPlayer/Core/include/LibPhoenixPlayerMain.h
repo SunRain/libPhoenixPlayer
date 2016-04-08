@@ -7,6 +7,8 @@
 #include "libphoenixplayer_global.h"
 #include "SingletonPointer.h"
 
+#define phoenixPlayerLib PhoenixPlayer::LibPhoenixPlayer::instance()
+
 namespace PhoenixPlayer {
 
 class Settings;

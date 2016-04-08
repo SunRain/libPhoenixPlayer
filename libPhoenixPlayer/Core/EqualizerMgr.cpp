@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "Settings.h"
+#include "LibPhoenixPlayerMain.h"
 
 namespace PhoenixPlayer {
 

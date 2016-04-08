@@ -10,6 +10,7 @@
 #include "Buffer.h"
 #include "SingletonPointer.h"
 #include "EqualizerMgr.h"
+#include "LibPhoenixPlayerMain.h"
 
 #include "Backend/BaseVolume.h"
 #include "Backend/SoftVolume.h"

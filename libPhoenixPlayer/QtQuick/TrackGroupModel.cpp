@@ -7,6 +7,8 @@
 #include <AudioMetaObject.h>
 
 #include "SingletonPointer.h"
+#include "LibPhoenixPlayerMain.h"
+
 #include "MusicLibrary/MusicLibraryManager.h"
 
 namespace PhoenixPlayer {

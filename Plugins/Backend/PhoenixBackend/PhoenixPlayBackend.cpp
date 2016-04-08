@@ -8,6 +8,7 @@
 #include "PlayThread.h"
 #include "OutputThread.h"
 #include "StateChangedEvent.h"
+#include "LibPhoenixPlayerMain.h"
 
 #include "Common.h"
 #include "PlayerCore/VolumeControl.h"

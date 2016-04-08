@@ -11,14 +11,9 @@
 #  define LIBPHOENIXPLAYER_EXPORT Q_DECL_IMPORT
 #endif
 
-#include "LibPhoenixPlayerMain.h"
-#define phoenixPlayerLib PhoenixPlayer::LibPhoenixPlayer::instance()
-
 namespace PhoenixPlayer {
 class AudioMetaObject;
-//class LibPhoenixPlayer;
 void LibPhoenixPlayer_Init();
-
 }
 typedef QList<PhoenixPlayer::AudioMetaObject> AudioMetaList;
 
