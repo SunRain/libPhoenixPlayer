@@ -231,7 +231,7 @@ QJsonObject AudioMetaObject::toObject() const
     o.insert (KEY_PATH, d.data ()->path);
     o.insert (KEY_NAME, d.data ()->name);
     o.insert (KEY_SIZE, QString::number (d.data ()->size));
-    o.insert (KEY_MEDIA_TYPE, d.data ()->mediaType);
+    o.insert (KEY_MEDIA_TYPE, QString::number (d.data ()->mediaType));
     o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
     o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri.toString ());
     o.insert (KEY_ALBUM_META, QString(d.data ()->albumMeta.toJson ()));

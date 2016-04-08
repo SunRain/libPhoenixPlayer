@@ -18,6 +18,7 @@ namespace PhoenixPlayer {
 namespace MusicLibrary {
 LocalMusicScannerThread::LocalMusicScannerThread(QObject *parent)
     : QThread(parent)
+    , m_stopLookupFlag(false)
     , m_settings(phoenixPlayerLib->settings ())
     , m_pluginLoader(phoenixPlayerLib->pluginLoader ())
     , m_dao(nullptr)
@@ -96,7 +97,6 @@ void LocalMusicScannerThread::addLookupDirs(const QStringList &dirList, bool loo
 
 void LocalMusicScannerThread::run()
 {
-    qDebug()<<Q_FUNC_INFO<<m_pathList;
     m_mutex.lock ();
     if (m_pathList.isEmpty ()) {
         QString tmp = QString("%1/%2").arg (QDir::homePath ())
@@ -129,9 +129,10 @@ void LocalMusicScannerThread::scanDir(const QString &path)
         return;
 
     QDir dir(path);
-    if (!dir.exists ())
+    if (!dir.exists ()) {
+        qDebug()<<Q_FUNC_INFO<<"dir "<<path<<" not exists";
         return;
-
+    }
     dir.setFilter (QDir::Dirs | QDir::Files | /*QDir::NoSymLinks |*/ QDir::NoDotAndDotDot);
     QFileInfoList list = dir.entryInfoList ();
     qDebug()<<Q_FUNC_INFO<<QString("scanDir [%1]").arg (path)<<" list "<<dir.entryList ();

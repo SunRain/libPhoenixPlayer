@@ -18,7 +18,7 @@ public:
         name = QString();
         imgUri = QUrl();
         description = QString();
-        date = QDate::currentDate ().toString ();
+        date = QString();
     }
     QString name;
     QUrl imgUri;
