@@ -56,7 +56,8 @@ HEADERS += \
     $$PWD/include/libphoenixplayer_global.h \
     $$PWD/AudioMetaObject_p.h \
     $$PWD/include/LibPhoenixPlayerMain.h \
-    $$PWD/include/Utility.h
+    $$PWD/include/Utility.h \
+    $$PWD/include/AudioMetaObjectKeys.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
