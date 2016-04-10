@@ -2,6 +2,7 @@
 #define AUDIOMETAGROUPOBJECT_H
 
 #include <QSharedDataPointer>
+#include <QVariant>
 
 #include "libphoenixplayer_global.h"
 
@@ -12,20 +13,15 @@ class AudioMetaGroupObject;
 }
 typedef QList<PhoenixPlayer::AudioMetaGroupObject> AudioMetaGroupList;
 
+class QJsonObject;
 namespace PhoenixPlayer {
 
 class LIBPHOENIXPLAYER_EXPORT AudioMetaGroupObject
 {
 public:
-    AudioMetaGroupObject()
-        :d (new Priv())
-    {
-    }
-    AudioMetaGroupObject(const AudioMetaGroupObject &other)
-        :d (other.d)
-    {
-    }
-    virtual ~AudioMetaGroupObject() {}
+    AudioMetaGroupObject();
+    AudioMetaGroupObject(const AudioMetaGroupObject &other);
+    virtual ~AudioMetaGroupObject();
 
     inline AudioMetaGroupObject &operator =(const AudioMetaGroupObject &other) {
         if (this != &other)
@@ -48,7 +44,7 @@ public:
     inline AudioMetaList constList() const {
         return d.data ()->list;
     }
-    int count() const {
+    inline int count() const {
         return d.data ()->list.size ();
     }
     void setName(const QString &name) {
@@ -57,7 +53,12 @@ public:
     void setList(const AudioMetaList &list) {
         d.data ()->list = list;
     }
+    QJsonObject toObject() const;
+    QByteArray toJson() const;
+    QVariantMap toMap() const;
 
+    static QString keyName();
+    static QString keyList();
 private:
     class Priv : public QSharedData
     {

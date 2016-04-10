@@ -95,7 +95,8 @@ SOURCES += \
     $$PWD/AudioMetaObject_p.cpp \
     $$PWD/LibPhoenixPlayerMain.cpp \
     $$PWD/Utility.cpp \
-    $$PWD/libphoenixplayer_global.cpp
+    $$PWD/libphoenixplayer_global.cpp \
+    $$PWD/AudioMetaGroupObject.cpp
 
 
 
