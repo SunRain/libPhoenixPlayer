@@ -10,13 +10,7 @@ include (../libPhoenixPlayer.pri)
 VERSION = $$LIB_VERSION
 
 include (Core/core.pri)
-
-#contains (CONFIG, WITH_QML_LIB) {
-#    include (QtQuick/qml.pri)
-#    QT += quick
-#    DEFINES += WITH_QML_LIB
-#}
-
+include (QtQuick/qml.pri)
 
 #TODO For Ubuntu touch, need test
 load(ubuntu-click)

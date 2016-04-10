@@ -226,6 +226,78 @@ AudioMetaList MusicLibraryManager::folderTracks(const QString &folder, int limit
     return list;
 }
 
+AudioMetaGroupList MusicLibraryManager::artistList() const
+{
+    if (m_trackList.isEmpty ())
+        return AudioMetaGroupList();
+    AudioMetaGroupList list;
+    QStringList nameList;
+    foreach (AudioMetaObject o, m_trackList) {
+        if (nameList.contains (o.artistMeta ().name ()))
+            continue;
+        nameList.append (o.artistMeta ().name ());
+    }
+    foreach (QString name, nameList) {
+        AudioMetaGroupObject g;
+        g.setName (name);
+        foreach (AudioMetaObject o, m_trackList) {
+            if (o.artistMeta ().name () == name) {
+                g.list ().append (o);
+            }
+        }
+        list.append (g);
+    }
+    return list;
+}
+
+AudioMetaGroupList MusicLibraryManager::albumList() const
+{
+    if (m_trackList.isEmpty ())
+        return AudioMetaGroupList();
+    AudioMetaGroupList list;
+    QStringList nameList;
+    foreach (AudioMetaObject o, m_trackList) {
+        if (nameList.contains (o.albumMeta ().name ()))
+            continue;
+        nameList.append (o.albumMeta ().name ());
+    }
+    foreach (QString name, nameList) {
+        AudioMetaGroupObject g;
+        g.setName (name);
+        foreach (AudioMetaObject o, m_trackList) {
+            if (o.albumMeta ().name () == name) {
+                g.list ().append (o);
+            }
+        }
+        list.append (g);
+    }
+    return list;
+}
+
+AudioMetaGroupList MusicLibraryManager::genreList() const
+{
+    if (m_trackList.isEmpty ())
+        return AudioMetaGroupList();
+    AudioMetaGroupList list;
+    QStringList nameList;
+    foreach (AudioMetaObject o, m_trackList) {
+        if (nameList.contains (o.trackMeta ().genre ()))
+            continue;
+        nameList.append (o.trackMeta ().genre ());
+    }
+    foreach (QString name, nameList) {
+        AudioMetaGroupObject g;
+        g.setName (name);
+        foreach (AudioMetaObject o, m_trackList) {
+            if (o.trackMeta ().genre () == name) {
+                g.list ().append (o);
+            }
+        }
+        list.append (g);
+    }
+    return list;
+}
+
 void MusicLibraryManager::initList()
 {
     if (!m_trackList.isEmpty ()) {

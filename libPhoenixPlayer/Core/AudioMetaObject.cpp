@@ -222,6 +222,23 @@ QByteArray AudioMetaObject::toJson() const
     return doc.toJson ();
 }
 
+QVariantMap AudioMetaObject::toMap() const
+{
+    QVariantMap o;
+    o.insert (KEY_HASH, d.data ()->hash);
+    o.insert (KEY_PATH, d.data ()->path);
+    o.insert (KEY_NAME, d.data ()->name);
+    o.insert (KEY_SIZE, QString::number (d.data ()->size));
+    o.insert (KEY_MEDIA_TYPE, QString::number (d.data ()->mediaType));
+    o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
+    o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri.toString ());
+    o.insert (KEY_ALBUM_META, QString(d.data ()->albumMeta.toJson ()));
+    o.insert (KEY_ARTIST_META, QString(d.data ()->artistMeta.toJson ()));
+    o.insert (KEY_COVER_META, QString(d.data ()->coverMeta.toJson ()));
+    o.insert (KEY_TRACK_META,QString( d.data ()->trackMeta.toJson ()));
+    return o;
+}
+
 AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
 {
     AudioMetaObject meta;
@@ -331,6 +348,16 @@ QByteArray AlbumMeta::toJson() const
     return doc.toJson ();
 }
 
+QVariantMap AlbumMeta::toMap() const
+{
+    QVariantMap map;
+    map.insert (KEY_NAME, d.data ()->name);
+    map.insert (KEY_URI, d.data ()->imgUri.toString ());
+    map.insert (KEY_DESCRIPTION, d.data ()->description);
+    map.insert (KEY_DATE, d.data ()->date);
+    return map;
+}
+
 AlbumMeta AlbumMeta::fromJson(const QByteArray &json)
 {
     AlbumMeta meta;
@@ -414,6 +441,15 @@ QByteArray ArtistMeta::toJson() const
     return doc.toJson ();
 }
 
+QVariantMap ArtistMeta::toMap() const
+{
+    QVariantMap o;
+    o.insert (KEY_NAME, d.data ()->name);
+    o.insert (KEY_URI, d.data ()->imgUri.toString ());
+    o.insert (KEY_DESCRIPTION, d.data ()->description);
+    return o;
+}
+
 ArtistMeta ArtistMeta::fromJson(const QByteArray &json)
 {
     ArtistMeta meta;
@@ -494,6 +530,15 @@ QByteArray CoverMeta::toJson() const
 {
     QJsonDocument doc(toObject ());
     return doc.toJson ();
+}
+
+QVariantMap CoverMeta::toMap() const
+{
+    QVariantMap o;
+    o.insert (KEY_LARGE_IMG, d.data ()->largeUri.toString ());
+    o.insert (KEY_MIDDLE_IMG, d.data ()->middleUri.toString ());
+    o.insert (KEY_SMALL_IMG, d.data ()->smallUri.toString ());
+    return o;
 }
 
 CoverMeta CoverMeta::fromJson(const QByteArray &json)
@@ -650,6 +695,21 @@ QByteArray TrackMeta::toJson() const
 {
     QJsonDocument doc(toObject ());
     return doc.toJson ();
+}
+
+QVariantMap TrackMeta::toMap() const
+{
+    QVariantMap o;
+    o.insert (KEY_BIT_RATE, d.data ()->bitRate);
+    o.insert (KEY_DATE, d.data ()->date);
+    o.insert (KEY_DESCRIPTION, d.data ()->description);
+    o.insert (KEY_DURATION, d.data ()->duration);
+    o.insert (KEY_GENRE, d.data ()->genre);
+    o.insert (KEY_SAMPLE_RATE, d.data ()->sampleRate);
+    o.insert (KEY_TITLE, d.data ()->title);
+    o.insert (KEY_USER_RATING, d.data ()->userRating);
+    o.insert (KEY_YEAR, d.data ()->year);
+    return o;
 }
 
 TrackMeta TrackMeta::fromJson(const QByteArray &json)

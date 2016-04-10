@@ -6,11 +6,6 @@ RCC_DIR=./.build/rcc
 
 LIB_VERSION = 0.2.0
 
-#CONFIG += c++11
-#CONFIG += WITH_QML_LIB
-
-contains (CONFIG, WITH_QML_LIB) {
-    include (QtQuick/qml.pri)
-    QT += quick
-    DEFINES += WITH_QML_LIB
-}
+CONFIG += c++11
+CONFIG += WITH_QML_LIB
+DEFINES += WITH_QML_LIB

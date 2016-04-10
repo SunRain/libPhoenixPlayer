@@ -11,8 +11,7 @@
 #include "SingletonPointer.h"
 #include "BaseObject.h"
 #include "AudioMetaObject.h"
-
-class QThread;
+#include "AudioMetaGroupObject.h"
 
 namespace PhoenixPlayer {
 class Settings;
@@ -22,22 +21,6 @@ namespace MusicLibrary {
 
 class MusicLibraryDAOHost;
 class IMusicLibraryDAO;
-
-
-//class TrackGroupObject : public BaseObject
-//{
-//    Q_OBJECT
-//    Q_PROPERTY(QString name READ name CONSTANT)
-//    Q_PROPERTY(QUrl imgUri READ imgUri CONSTANT)
-//public:
-//    explicit TrackGroupObject(const QString &name, const QUrl &imgUri, QObject *parent = 0);
-//    virtual ~TrackGroupObject();
-//    QUrl imgUri() const;
-//    QString name() const;
-//private:
-//    QUrl m_imgUri;
-//    QString m_name;
-//};
 
 class LIBPHOENIXPLAYER_EXPORT MusicLibraryManager : public BaseObject
 {
@@ -52,7 +35,7 @@ public:
     /// \brief allTracks 显示所有曲目
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE AudioMetaList allTracks();
+    AudioMetaList allTracks();
 
     ///
     /// \brief empty wether current library is empty
@@ -66,12 +49,16 @@ public:
     /// \param limitNum 显示个数
     /// \return 空列表如果没有曲目
     ///
-    Q_INVOKABLE AudioMetaList artistTracks(const QString &artistName,int limitNum = 0);
-    Q_INVOKABLE AudioMetaList albumTracks(const QString  &albumName, int limitNum = 0);
-    Q_INVOKABLE AudioMetaList genreTracks(const QString &genreName, int limitNum = 0);
-    Q_INVOKABLE AudioMetaList mediaTypeTracks(const QString &mediaType, int limitNum = 0);
-    Q_INVOKABLE AudioMetaList userRatingTracks(const QString &rating, int limitNum = 0);
-    Q_INVOKABLE AudioMetaList folderTracks(const QString &folder, int limitNum = 0);
+    AudioMetaList artistTracks(const QString &artistName,int limitNum = 0);
+    AudioMetaList albumTracks(const QString  &albumName, int limitNum = 0);
+    AudioMetaList genreTracks(const QString &genreName, int limitNum = 0);
+    AudioMetaList mediaTypeTracks(const QString &mediaType, int limitNum = 0);
+    AudioMetaList userRatingTracks(const QString &rating, int limitNum = 0);
+    AudioMetaList folderTracks(const QString &folder, int limitNum = 0);
+
+    AudioMetaGroupList artistList() const;
+    AudioMetaGroupList albumList() const;
+    AudioMetaGroupList genreList() const;
 
 //    ///
 //    /// \brief playingSong 返回当前播放的歌曲hash,

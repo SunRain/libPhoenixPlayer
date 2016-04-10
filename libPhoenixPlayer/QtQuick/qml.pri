@@ -1,3 +1,5 @@
+QT += quick
+
 INCLUDEPATH += $$PWD/include
 DEPENDPATH += $$PWD/include
 
