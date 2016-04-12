@@ -8,6 +8,7 @@
 
 const static QString KEY_NAME("KEY_NAME");
 const static QString KEY_LIST("KEY_LIST");
+const static QString KEY_IMG_URI("KEY_IMG_URI");
 
 namespace PhoenixPlayer {
 
@@ -34,6 +35,7 @@ QJsonObject AudioMetaGroupObject::toObject() const
         list.append (obj.toObject ());
     }
     o.insert (KEY_LIST, list);
+    o.insert (KEY_IMG_URI, d.data ()->img.toString ());
     return o;
 }
 
@@ -47,11 +49,12 @@ QVariantMap AudioMetaGroupObject::toMap() const
 {
     QVariantMap o;
     o.insert (KEY_NAME, d.data ()->name);
-    QJsonArray list;
+    QVariantList list;
     foreach (AudioMetaObject obj, d.data ()->list) {
-        list.append (obj.toObject ());
+        list.append (obj.toMap ());
     }
     o.insert (KEY_LIST, list);
+    o.insert (KEY_IMG_URI, d.data ()->img);
     return o;
 }
 
@@ -63,6 +66,11 @@ QString AudioMetaGroupObject::keyName()
 QString AudioMetaGroupObject::keyList()
 {
     return KEY_LIST;
+}
+
+QString AudioMetaGroupObject::keyImgUri()
+{
+    return KEY_IMG_URI;
 }
 
 

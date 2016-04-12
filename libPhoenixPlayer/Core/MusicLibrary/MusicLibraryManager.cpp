@@ -240,11 +240,27 @@ AudioMetaGroupList MusicLibraryManager::artistList() const
     foreach (QString name, nameList) {
         AudioMetaGroupObject g;
         g.setName (name);
+        QUrl uri;
+        AudioMetaList ll;
         foreach (AudioMetaObject o, m_trackList) {
             if (o.artistMeta ().name () == name) {
-                g.list ().append (o);
+                ll.append (o);
+                if (!uri.isValid ()) {
+                    uri = o.artistMeta ().imgUri ();
+                }
             }
         }
+        //fallback
+        if (!uri.isValid () && !ll.isEmpty ()) {
+            foreach (AudioMetaObject o, ll) {
+                uri = o.queryImgUri ();
+                if (uri.isValid ()) {
+                    break;
+                }
+            }
+        }
+        g.setImageUri (uri);
+        g.setList (ll);
         list.append (g);
     }
     return list;
@@ -264,11 +280,27 @@ AudioMetaGroupList MusicLibraryManager::albumList() const
     foreach (QString name, nameList) {
         AudioMetaGroupObject g;
         g.setName (name);
+        QUrl uri;
+        AudioMetaList ll;
         foreach (AudioMetaObject o, m_trackList) {
             if (o.albumMeta ().name () == name) {
-                g.list ().append (o);
+                ll.append (o);
+                if (!uri.isValid ()) {
+                    uri = o.albumMeta ().imgUri ();
+                }
             }
         }
+        //fallback
+        if (!uri.isValid () && !ll.isEmpty ()) {
+            foreach (AudioMetaObject o, ll) {
+                uri = o.queryImgUri ();
+                if (uri.isValid ()) {
+                    break;
+                }
+            }
+        }
+        g.setImageUri (uri);
+        g.setList (ll);
         list.append (g);
     }
     return list;
@@ -288,11 +320,30 @@ AudioMetaGroupList MusicLibraryManager::genreList() const
     foreach (QString name, nameList) {
         AudioMetaGroupObject g;
         g.setName (name);
+        QUrl uri;
+        AudioMetaList ll;
         foreach (AudioMetaObject o, m_trackList) {
             if (o.trackMeta ().genre () == name) {
-                g.list ().append (o);
+                ll.append (o);
+                if (!uri.isValid ()) {
+                    uri = o.coverMeta ().middleUri ();
+                    if (!uri.isValid ())
+                        uri = o.coverMeta ().largeUri ();
+                    if (!uri.isValid ())
+                        uri = o.coverMeta ().smallUri ();
+                }
             }
         }
+        //fallback
+        if (!uri.isValid () && !ll.isEmpty ()) {
+            foreach (AudioMetaObject o, ll) {
+                uri = o.queryImgUri ();
+                if (uri.isValid ())
+                    break;
+            }
+        }
+        g.setImageUri (uri);
+        g.setList (ll);
         list.append (g);
     }
     return list;

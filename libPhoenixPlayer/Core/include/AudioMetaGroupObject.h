@@ -5,8 +5,7 @@
 #include <QVariant>
 
 #include "libphoenixplayer_global.h"
-
-typedef QList<PhoenixPlayer::AudioMetaObject> AudioMetaList;
+#include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
 class AudioMetaGroupObject;
@@ -30,6 +29,7 @@ public:
     }
     inline bool operator == (const AudioMetaGroupObject &other) {
         return d.data ()->name == other.d.data ()->name
+                && d.data ()->img == other.d.data ()->img
                 && d.data ()->list == other.d.data ()->list;
     }
     inline bool operator != (const AudioMetaGroupObject &other) {
@@ -38,14 +38,17 @@ public:
     inline QString name() const {
         return d.data ()->name;
     }
-    inline AudioMetaList list() {
-        return d.data ()->list;
+    inline QUrl imageUri() const {
+        return d.data ()->img;
     }
-    inline AudioMetaList constList() const {
+    inline AudioMetaList list() const {
         return d.data ()->list;
     }
     inline int count() const {
         return d.data ()->list.size ();
+    }
+    void setImageUri(const QUrl &uri) {
+        d.data ()->img = uri;
     }
     void setName(const QString &name) {
         d.data ()->name = name;
@@ -59,13 +62,16 @@ public:
 
     static QString keyName();
     static QString keyList();
+    static QString keyImgUri();
 private:
     class Priv : public QSharedData
     {
     public:
         Priv() {
             name = QString();
+            img = QUrl();
         }
+        QUrl img;
         QString name;
         AudioMetaList list;
     };
