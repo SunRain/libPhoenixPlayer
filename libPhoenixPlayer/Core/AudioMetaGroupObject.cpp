@@ -3,12 +3,14 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QCryptographicHash>
 
 #include "AudioMetaObject.h"
 
 const static QString KEY_NAME("KEY_NAME");
 const static QString KEY_LIST("KEY_LIST");
 const static QString KEY_IMG_URI("KEY_IMG_URI");
+const static QString KEY_HASH("KEY_HASH");
 
 namespace PhoenixPlayer {
 
@@ -31,9 +33,12 @@ QJsonObject AudioMetaGroupObject::toObject() const
     QJsonObject o;
     o.insert (KEY_NAME, d.data ()->name);
     QJsonArray list;
+    QString ud;
     foreach (AudioMetaObject obj, d.data ()->list) {
+        ud.append (obj.hash ());
         list.append (obj.toObject ());
     }
+    o.insert (KEY_HASH, QCryptographicHash::hash (ud.toUtf8 (), QCryptographicHash::Sha256).constData ());
     o.insert (KEY_LIST, list);
     o.insert (KEY_IMG_URI, d.data ()->img.toString ());
     return o;
@@ -50,9 +55,12 @@ QVariantMap AudioMetaGroupObject::toMap() const
     QVariantMap o;
     o.insert (KEY_NAME, d.data ()->name);
     QVariantList list;
+    QString ud;
     foreach (AudioMetaObject obj, d.data ()->list) {
         list.append (obj.toMap ());
+        ud.append (obj.hash ());
     }
+    o.insert (KEY_HASH, QCryptographicHash::hash (ud.toUtf8 (), QCryptographicHash::Sha256));
     o.insert (KEY_LIST, list);
     o.insert (KEY_IMG_URI, d.data ()->img);
     return o;
@@ -71,6 +79,11 @@ QString AudioMetaGroupObject::keyList()
 QString AudioMetaGroupObject::keyImgUri()
 {
     return KEY_IMG_URI;
+}
+
+QString AudioMetaGroupObject::keyHash()
+{
+    return KEY_HASH;
 }
 
 
