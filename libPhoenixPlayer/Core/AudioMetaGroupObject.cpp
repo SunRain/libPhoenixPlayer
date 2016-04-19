@@ -38,7 +38,7 @@ QJsonObject AudioMetaGroupObject::toObject() const
         ud.append (obj.hash ());
         list.append (obj.toObject ());
     }
-    o.insert (KEY_HASH, QCryptographicHash::hash (ud.toUtf8 (), QCryptographicHash::Sha256).constData ());
+    o.insert (KEY_HASH, d.data ()->hash);
     o.insert (KEY_LIST, list);
     o.insert (KEY_IMG_URI, d.data ()->img.toString ());
     return o;
@@ -60,7 +60,7 @@ QVariantMap AudioMetaGroupObject::toMap() const
         list.append (obj.toMap ());
         ud.append (obj.hash ());
     }
-    o.insert (KEY_HASH, QCryptographicHash::hash (ud.toUtf8 (), QCryptographicHash::Sha256));
+    o.insert (KEY_HASH, d.data ()->hash);
     o.insert (KEY_LIST, list);
     o.insert (KEY_IMG_URI, d.data ()->img);
     return o;
@@ -84,6 +84,17 @@ QString AudioMetaGroupObject::keyImgUri()
 QString AudioMetaGroupObject::keyHash()
 {
     return KEY_HASH;
+}
+
+void AudioMetaGroupObject::calcHash()
+{
+    QString str;
+    str.append (d.data ()->img.toString ());
+    str.append (d.data ()->name);
+    foreach (AudioMetaObject obj, d.data ()->list) {
+        str.append (obj.hash ());
+    }
+    d.data ()->hash = QString(QCryptographicHash::hash (str.toUtf8 (), QCryptographicHash::Md5).toHex ());
 }
 
 

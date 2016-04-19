@@ -53,12 +53,15 @@ public:
     }
     void setImageUri(const QUrl &uri) {
         d.data ()->img = uri;
+        calcHash ();
     }
     void setName(const QString &name) {
         d.data ()->name = name;
+        calcHash ();
     }
     void setList(const AudioMetaList &list) {
         d.data ()->list = list;
+        calcHash ();
     }
     QJsonObject toObject() const;
     QByteArray toJson() const;
@@ -69,12 +72,15 @@ public:
     static QString keyImgUri();
     static QString keyHash();
 private:
+    void calcHash();
+private:
     class Priv : public QSharedData
     {
     public:
         Priv() {
             name = QString();
             img = QUrl();
+            hash = QString();
         }
         QUrl img;
         QString name;
