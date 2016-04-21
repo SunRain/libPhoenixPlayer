@@ -209,18 +209,18 @@ QJsonObject AudioMetaObject::toObject() const
     o.insert (KEY_MEDIA_TYPE, QString::number (d.data ()->mediaType));
     o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
     o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri.toString ());
-    o.insert (KEY_ALBUM_META, QString(d.data ()->albumMeta.toJson ()));
-    o.insert (KEY_ARTIST_META, QString(d.data ()->artistMeta.toJson ()));
-    o.insert (KEY_COVER_META, QString(d.data ()->coverMeta.toJson ()));
-    o.insert (KEY_TRACK_META,QString( d.data ()->trackMeta.toJson ()));
+    o.insert (KEY_ALBUM_META, QJsonValue::fromVariant (d.data ()->albumMeta.toMap ()));
+    o.insert (KEY_ARTIST_META, QJsonValue::fromVariant(d.data ()->artistMeta.toMap ()));
+    o.insert (KEY_COVER_META, QJsonValue::fromVariant(d.data ()->coverMeta.toMap ()));
+    o.insert (KEY_TRACK_META, QJsonValue::fromVariant(d.data ()->trackMeta.toMap ()));
     return o;
 }
 
-QByteArray AudioMetaObject::toJson() const
-{
-    QJsonDocument doc(toObject ());
-    return doc.toJson ();
-}
+//QByteArray AudioMetaObject::toJson() const
+//{
+//    QJsonDocument doc(toObject ());
+//    return doc.toJson ();
+//}
 
 QVariantMap AudioMetaObject::toMap() const
 {
@@ -232,45 +232,76 @@ QVariantMap AudioMetaObject::toMap() const
     o.insert (KEY_MEDIA_TYPE, QString::number (d.data ()->mediaType));
     o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
     o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri.toString ());
-    o.insert (KEY_ALBUM_META, QString(d.data ()->albumMeta.toJson ()));
-    o.insert (KEY_ARTIST_META, QString(d.data ()->artistMeta.toJson ()));
-    o.insert (KEY_COVER_META, QString(d.data ()->coverMeta.toJson ()));
-    o.insert (KEY_TRACK_META,QString( d.data ()->trackMeta.toJson ()));
+    o.insert (KEY_ALBUM_META, d.data ()->albumMeta.toMap ());
+    o.insert (KEY_ARTIST_META, d.data ()->artistMeta.toMap ());
+    o.insert (KEY_COVER_META, d.data ()->coverMeta.toMap ());
+    o.insert (KEY_TRACK_META, d.data ()->trackMeta.toMap ());
     return o;
 }
 
-AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
-{
-    AudioMetaObject meta;
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
-    if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
-        return meta;
-    }
-    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
-        return meta;
-    QJsonObject o = doc.object ();
-    if (o.isEmpty ())
-        return meta;
+//AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
+//{
+//    AudioMetaObject meta;
+//    QJsonParseError error;
+//    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+//    if (error.error != QJsonParseError::NoError) {
+//        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+//        return meta;
+//    }
+//    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+//        return meta;
+//    QJsonObject o = doc.object ();
+//    if (o.isEmpty ())
+//        return meta;
 
-    QString name = o.value (KEY_NAME).toString ();
-    QString path = o.value (KEY_PATH).toString ();
-    quint64 size = o.value (KEY_SIZE).toInt ();
+//    qDebug()<<Q_FUNC_INFO<<"Json value is "<<json;
+
+//    QString name = o.value (KEY_NAME).toString ();
+//    QString path = o.value (KEY_PATH).toString ();
+//    quint64 size = o.value (KEY_SIZE).toInt ();
+//    AudioMetaObject m(path, name, size);
+//    qDebug()<<Q_FUNC_INFO<<" now hash is "<<m.hash ();
+//    meta = m;
+//    AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ().toUtf8 ());
+//    ArtistMeta ar = ArtistMeta::fromJson (o.value (KEY_ARTIST_META).toString ().toUtf8 ());
+//    CoverMeta co = CoverMeta::fromJson (o.value (KEY_COVER_META).toString ().toUtf8 ());
+//    TrackMeta tr = TrackMeta::fromJson (o.value (KEY_TRACK_META).toString ().toUtf8 ());
+//    meta.setAlbumMeta (al);
+//    meta.setArtistMeta (ar);
+//    meta.setCoverMeta (co);
+//    meta.setTrackMeta (tr);
+//    meta.setLyricsData (o.value (KEY_LYRICS_DATA).toString ());
+//    meta.setLyricsUri (QUrl(o.value (KEY_LYRICS_URI).toString ()));
+//    meta.setMediaType (o.value (KEY_MEDIA_TYPE).toInt ());
+
+//    return meta;
+//}
+
+AudioMetaObject AudioMetaObject::fromMap(const QVariantMap &map)
+{
+    if (map.isEmpty ())
+        return AudioMetaObject();
+
+    qDebug()<<Q_FUNC_INFO<<"map value is "<<map;
+
+    AudioMetaObject meta;
+    QString name = map.value (KEY_NAME).toString ();
+    QString path = map.value (KEY_PATH).toString ();
+    quint64 size = map.value (KEY_SIZE).toInt ();
     AudioMetaObject m(path, name, size);
+    qDebug()<<Q_FUNC_INFO<<" now hash is "<<m.hash ();
     meta = m;
-    AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ().toUtf8 ());
-    ArtistMeta ar = ArtistMeta::fromJson (o.value (KEY_ARTIST_META).toString ().toUtf8 ());
-    CoverMeta co = CoverMeta::fromJson (o.value (KEY_COVER_META).toString ().toUtf8 ());
-    TrackMeta tr = TrackMeta::fromJson (o.value (KEY_TRACK_META).toString ().toUtf8 ());
+    AlbumMeta al = AlbumMeta::fromMap (map.value (KEY_ALBUM_META).toMap ());
+    ArtistMeta ar = ArtistMeta::fromMap (map.value (KEY_ARTIST_META).toMap ());
+    CoverMeta co = CoverMeta::fromMap (map.value (KEY_COVER_META).toMap ());
+    TrackMeta tr = TrackMeta::fromMap (map.value (KEY_TRACK_META).toMap ());
     meta.setAlbumMeta (al);
     meta.setArtistMeta (ar);
     meta.setCoverMeta (co);
     meta.setTrackMeta (tr);
-    meta.setLyricsData (o.value (KEY_LYRICS_DATA).toString ());
-    meta.setLyricsUri (QUrl(o.value (KEY_LYRICS_URI).toString ()));
-    meta.setMediaType (o.value (KEY_MEDIA_TYPE).toInt ());
-
+    meta.setLyricsData (map.value (KEY_LYRICS_DATA).toString ());
+    meta.setLyricsUri (map.value (KEY_LYRICS_URI).toUrl ());
+    meta.setMediaType (map.value (KEY_MEDIA_TYPE).toInt ());
     return meta;
 }
 
@@ -342,11 +373,11 @@ QJsonObject AlbumMeta::toObject() const
     return o;
 }
 
-QByteArray AlbumMeta::toJson() const
-{
-    QJsonDocument doc(toObject ());
-    return doc.toJson ();
-}
+//QByteArray AlbumMeta::toJson() const
+//{
+//    QJsonDocument doc(toObject ());
+//    return doc.toJson ();
+//}
 
 QVariantMap AlbumMeta::toMap() const
 {
@@ -358,26 +389,38 @@ QVariantMap AlbumMeta::toMap() const
     return map;
 }
 
-AlbumMeta AlbumMeta::fromJson(const QByteArray &json)
+AlbumMeta AlbumMeta::fromMap(const QVariantMap &map)
 {
+    if (map.isEmpty ())
+        return AlbumMeta();
     AlbumMeta meta;
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
-    if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
-        return meta;
-    }
-    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
-        return meta;
-    QJsonObject o = doc.object ();
-    if (o.isEmpty ())
-        return meta;
-    meta.setDate (o.value (KEY_DATE).toString ());
-    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
-    meta.setImgUri (QUrl(o.value (KEY_URI).toString ()));
-    meta.setName (o.value (KEY_NAME).toString ());
+    meta.setDate (map.value (KEY_DATE).toString ());
+    meta.setDescription (map.value (KEY_DESCRIPTION).toString ());
+    meta.setImgUri (map.value (KEY_URI).toUrl ());
+    meta.setName (map.value (KEY_NAME).toString ());
     return meta;
 }
+
+//AlbumMeta AlbumMeta::fromJson(const QByteArray &json)
+//{
+//    AlbumMeta meta;
+//    QJsonParseError error;
+//    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+//    if (error.error != QJsonParseError::NoError) {
+//        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+//        return meta;
+//    }
+//    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+//        return meta;
+//    QJsonObject o = doc.object ();
+//    if (o.isEmpty ())
+//        return meta;
+//    meta.setDate (o.value (KEY_DATE).toString ());
+//    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
+//    meta.setImgUri (QUrl(o.value (KEY_URI).toString ()));
+//    meta.setName (o.value (KEY_NAME).toString ());
+//    return meta;
+//}
 
 ArtistMeta::ArtistMeta()
     : d(new ArtistMetaPriv())
@@ -435,11 +478,11 @@ QJsonObject ArtistMeta::toObject() const
     return o;
 }
 
-QByteArray ArtistMeta::toJson() const
-{
-    QJsonDocument doc(toObject ());
-    return doc.toJson ();
-}
+//QByteArray ArtistMeta::toJson() const
+//{
+//    QJsonDocument doc(toObject ());
+//    return doc.toJson ();
+//}
 
 QVariantMap ArtistMeta::toMap() const
 {
@@ -450,23 +493,34 @@ QVariantMap ArtistMeta::toMap() const
     return o;
 }
 
-ArtistMeta ArtistMeta::fromJson(const QByteArray &json)
+//ArtistMeta ArtistMeta::fromJson(const QByteArray &json)
+//{
+//    ArtistMeta meta;
+//    QJsonParseError error;
+//    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+//    if (error.error != QJsonParseError::NoError) {
+//        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+//        return meta;
+//    }
+//    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+//        return meta;
+//    QJsonObject o = doc.object ();
+//    if (o.isEmpty ())
+//        return meta;
+//    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
+//    meta.setImgUri (QUrl(o.value (KEY_URI).toString ()));
+//    meta.setName (o.value (KEY_NAME).toString ());
+//    return meta;
+//}
+
+ArtistMeta ArtistMeta::fromMap(const QVariantMap &map)
 {
+    if (map.isEmpty ())
+        return ArtistMeta();
     ArtistMeta meta;
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
-    if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
-        return meta;
-    }
-    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
-        return meta;
-    QJsonObject o = doc.object ();
-    if (o.isEmpty ())
-        return meta;
-    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
-    meta.setImgUri (QUrl(o.value (KEY_URI).toString ()));
-    meta.setName (o.value (KEY_NAME).toString ());
+    meta.setDescription (map.value (KEY_DESCRIPTION).toString ());
+    meta.setImgUri (map.value (KEY_URI).toUrl ());
+    meta.setName (map.value (KEY_NAME).toString ());
     return meta;
 }
 
@@ -526,11 +580,11 @@ QJsonObject CoverMeta::toObject() const
     return o;
 }
 
-QByteArray CoverMeta::toJson() const
-{
-    QJsonDocument doc(toObject ());
-    return doc.toJson ();
-}
+//QByteArray CoverMeta::toJson() const
+//{
+//    QJsonDocument doc(toObject ());
+//    return doc.toJson ();
+//}
 
 QVariantMap CoverMeta::toMap() const
 {
@@ -541,23 +595,34 @@ QVariantMap CoverMeta::toMap() const
     return o;
 }
 
-CoverMeta CoverMeta::fromJson(const QByteArray &json)
+//CoverMeta CoverMeta::fromJson(const QByteArray &json)
+//{
+//    CoverMeta meta;
+//    QJsonParseError error;
+//    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+//    if (error.error != QJsonParseError::NoError) {
+//        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+//        return meta;
+//    }
+//    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+//        return meta;
+//    QJsonObject o = doc.object ();
+//    if (o.isEmpty ())
+//        return meta;
+//    meta.setLargeUri (QUrl(o.value (KEY_LARGE_IMG).toString ()));
+//    meta.setMiddleUri (QUrl(o.value (KEY_MIDDLE_IMG).toString ()));
+//    meta.setSmallUri (QUrl(o.value (KEY_SMALL_IMG).toString ()));
+//    return meta;
+//}
+
+CoverMeta CoverMeta::fromMap(const QVariantMap &map)
 {
+    if (map.isEmpty ())
+        return CoverMeta();
     CoverMeta meta;
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
-    if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
-        return meta;
-    }
-    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
-        return meta;
-    QJsonObject o = doc.object ();
-    if (o.isEmpty ())
-        return meta;
-    meta.setLargeUri (QUrl(o.value (KEY_LARGE_IMG).toString ()));
-    meta.setMiddleUri (QUrl(o.value (KEY_MIDDLE_IMG).toString ()));
-    meta.setSmallUri (QUrl(o.value (KEY_SMALL_IMG).toString ()));
+    meta.setLargeUri (map.value (KEY_LARGE_IMG).toUrl ());
+    meta.setMiddleUri (map.value (KEY_MIDDLE_IMG).toUrl ());
+    meta.setSmallUri (map.value (KEY_SMALL_IMG).toUrl ());
     return meta;
 }
 
@@ -691,11 +756,11 @@ QJsonObject TrackMeta::toObject() const
     return o;
 }
 
-QByteArray TrackMeta::toJson() const
-{
-    QJsonDocument doc(toObject ());
-    return doc.toJson ();
-}
+//QByteArray TrackMeta::toJson() const
+//{
+//    QJsonDocument doc(toObject ());
+//    return doc.toJson ();
+//}
 
 QVariantMap TrackMeta::toMap() const
 {
@@ -712,29 +777,46 @@ QVariantMap TrackMeta::toMap() const
     return o;
 }
 
-TrackMeta TrackMeta::fromJson(const QByteArray &json)
+//TrackMeta TrackMeta::fromJson(const QByteArray &json)
+//{
+//    TrackMeta meta;
+//    QJsonParseError error;
+//    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
+//    if (error.error != QJsonParseError::NoError) {
+//        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+//        return meta;
+//    }
+//    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
+//        return meta;
+//    QJsonObject o = doc.object ();
+//    if (o.isEmpty ())
+//        return meta;
+//    meta.setBitRate (o.value (KEY_BIT_RATE).toString ());
+//    meta.setDate (o.value (KEY_DATE).toString ());
+//    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
+//    meta.setDuration (o.value (KEY_DURATION).toInt ());
+//    meta.setGenre (o.value (KEY_GENRE).toString ());
+//    meta.setSampleRate (o.value (KEY_SAMPLE_RATE).toString ());
+//    meta.setTitle (o.value (KEY_TITLE).toString ());
+//    meta.setUserRating (o.value (KEY_USER_RATING).toString ());
+//    meta.setYear (o.value (KEY_YEAR).toString ());
+//    return meta;
+//}
+
+TrackMeta TrackMeta::fromMap(const QVariantMap &map)
 {
+    if (map.isEmpty ())
+        return TrackMeta();
     TrackMeta meta;
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
-    if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
-        return meta;
-    }
-    if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
-        return meta;
-    QJsonObject o = doc.object ();
-    if (o.isEmpty ())
-        return meta;
-    meta.setBitRate (o.value (KEY_BIT_RATE).toString ());
-    meta.setDate (o.value (KEY_DATE).toString ());
-    meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
-    meta.setDuration (o.value (KEY_DURATION).toInt ());
-    meta.setGenre (o.value (KEY_GENRE).toString ());
-    meta.setSampleRate (o.value (KEY_SAMPLE_RATE).toString ());
-    meta.setTitle (o.value (KEY_TITLE).toString ());
-    meta.setUserRating (o.value (KEY_USER_RATING).toString ());
-    meta.setYear (o.value (KEY_YEAR).toString ());
+    meta.setBitRate (map.value (KEY_BIT_RATE).toString ());
+    meta.setDate (map.value (KEY_DATE).toString ());
+    meta.setDescription (map.value (KEY_DESCRIPTION).toString ());
+    meta.setDuration (map.value (KEY_DURATION).toInt ());
+    meta.setGenre (map.value (KEY_GENRE).toString ());
+    meta.setSampleRate (map.value (KEY_SAMPLE_RATE).toString ());
+    meta.setTitle (map.value (KEY_TITLE).toString ());
+    meta.setUserRating (map.value (KEY_USER_RATING).toString ());
+    meta.setYear (map.value (KEY_YEAR).toString ());
     return meta;
 }
 

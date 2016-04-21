@@ -377,7 +377,7 @@ void PlayerCore::playFromLibrary(const QString &songHah)
 //    AudioMetaObject *d = m_dao->trackFromHash (songHah);
     AudioMetaObject d = m_dao->trackFromHash (songHah);
 
-    qDebug()<<Q_FUNC_INFO<<"find in library "<<d.toJson ();
+    qDebug()<<Q_FUNC_INFO<<"find in library "<<d.toMap ();
 
     if (!m_playList->addTrack (d)) {
 //        d->deleteLater ();

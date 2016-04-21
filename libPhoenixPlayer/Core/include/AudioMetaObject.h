@@ -48,9 +48,11 @@ public:
     void setDate(const QString &date);
 
     QJsonObject toObject() const;
-    QByteArray toJson() const;
+//    QByteArray toJson() const;
     QVariantMap toMap() const;
-    static AlbumMeta fromJson(const QByteArray &json);
+//    static AlbumMeta fromJson(const QByteArray &json);
+    static AlbumMeta fromMap(const QVariantMap &map);
+
 
 private:
     QSharedDataPointer<AlbumMetaPriv> d;
@@ -84,9 +86,10 @@ public:
     void setDescription(const QString &description);
 
     QJsonObject toObject() const;
-    QByteArray toJson() const;
+//    QByteArray toJson() const;
     QVariantMap toMap() const;
-    static ArtistMeta fromJson(const QByteArray &json);
+//    static ArtistMeta fromJson(const QByteArray &json);
+    static ArtistMeta fromMap(const QVariantMap &map);
 
 private:
     QSharedDataPointer<ArtistMetaPriv> d;
@@ -120,9 +123,10 @@ public:
     void setLargeUri(const QUrl &large);
 
     QJsonObject toObject() const;
-    QByteArray toJson() const;
+//    QByteArray toJson() const;
     QVariantMap toMap() const;
-    static CoverMeta fromJson(const QByteArray &json);
+//    static CoverMeta fromJson(const QByteArray &json);
+    static CoverMeta fromMap(const QVariantMap &map);
 
 private:
     QSharedDataPointer<CoverMetaPriv> d;
@@ -178,9 +182,10 @@ public:
     void setUserRating(const QString &arg);
 
     QJsonObject toObject() const;
-    QByteArray toJson() const;
+//    QByteArray toJson() const;
     QVariantMap toMap() const;
-    static TrackMeta fromJson(const QByteArray &json);
+//    static TrackMeta fromJson(const QByteArray &json);
+    static TrackMeta fromMap(const QVariantMap &map);
 
 private:
     QSharedDataPointer<TrackMetaPriv> d;
@@ -256,9 +261,10 @@ public:
 
     bool isEmpty() const;
     QJsonObject toObject() const;
-    QByteArray toJson() const;
+//    QByteArray toJson() const;
     QVariantMap toMap() const;
-    static AudioMetaObject fromJson(const QByteArray &json);
+//    static AudioMetaObject fromJson(const QByteArray &json);
+    static AudioMetaObject fromMap(const QVariantMap &map);
 
 private:
     class AudioMetaObjectPriv : public QSharedData

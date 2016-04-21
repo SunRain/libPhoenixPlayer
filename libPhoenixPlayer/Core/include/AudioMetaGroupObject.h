@@ -64,7 +64,6 @@ public:
         calcHash ();
     }
     QJsonObject toObject() const;
-    QByteArray toJson() const;
     QVariantMap toMap() const;
 
     static QString keyName();

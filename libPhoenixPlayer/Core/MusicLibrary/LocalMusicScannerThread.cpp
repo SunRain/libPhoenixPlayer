@@ -164,7 +164,7 @@ void LocalMusicScannerThread::scanDir(const QString &path)
                         break;
                     }
                 }
-                qDebug()<<Q_FUNC_INFO<<"SongMetaData values ["<<data.toJson ()<<"]";
+                qDebug()<<Q_FUNC_INFO<<"SongMetaData values ["<<data.toMap ()<<"]";
                 if (m_dao)
                     m_dao->insertMetaData (data);
             }

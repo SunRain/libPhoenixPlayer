@@ -115,6 +115,10 @@ AudioMetaList MusicLibraryManager::allTracks()
 //            list.append (obj);
 //    }
 //    return list;
+    foreach (AudioMetaObject o, m_trackList) {
+        qDebug()<<Q_FUNC_INFO<<">>>>>>>>>>>>>>>> data hash "<<o.hash ();
+
+    }
     return m_trackList;
 }
 
@@ -358,6 +362,8 @@ void MusicLibraryManager::initList()
     if (!m_dao)
         return;
     QStringList list = m_dao->trackHashList ();
+
+    qDebug()<<Q_FUNC_INFO<<">>>>>>>>>>>>> hash list "<<list;
     foreach (QString s, list) {
 //        AudioMetaObject *d = m_dao->trackFromHash (s);
 //        if (d) {
@@ -368,6 +374,9 @@ void MusicLibraryManager::initList()
         AudioMetaObject d = m_dao->trackFromHash (s);
         if (!d.isEmpty ())
             m_trackList.append (d);
+    }
+    foreach (AudioMetaObject o, m_trackList) {
+        qDebug()<<Q_FUNC_INFO<<">>>>>>>>>>>>>>>>> appended hash "<<o.hash ();
     }
 }
 
