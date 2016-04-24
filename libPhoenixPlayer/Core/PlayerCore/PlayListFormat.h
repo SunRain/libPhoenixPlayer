@@ -26,7 +26,7 @@ public:
     /// \param list 歌曲列表
     /// \return 格式化后的文件内容
     ///
-    virtual QString format(const /*QList<AudioMetaObject *>*/AudioMetaList &list);
+    virtual QString format(const AudioMetaList &list);
 //    virtual QString encode(const QStringList &fileList);
 };
 } //PhoenixPlayer

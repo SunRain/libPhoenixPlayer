@@ -17,6 +17,7 @@
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "PlayerCore/PlayListMgr.h"
+#include "PlayerCore/RecentPlayedMgr.h"
 #include "SingletonPointer.h"
 #include "Backend/BackendHost.h"
 
@@ -55,10 +56,19 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
 
     connect (m_playList, &PlayListMgr::currentIndexChanged,
              [&](int index) {
-//        AudioMetaObject *data = m_playList->get (index);
         AudioMetaObject o = m_playList->get (index);
+        m_recentList->addTrack (o);
         playTrack (o);
     });
+
+    m_recentList = new RecentPlayedMgr(this);
+    connect (m_recentList, &RecentPlayedMgr::currentIndexChanged,
+             [&](int idx) {
+        AudioMetaObject o = m_recentList->get (idx);
+        playTrack (o);
+    });
+
+
 //    init ();
 }
 
@@ -67,6 +77,9 @@ PlayerCore::~PlayerCore()
     if (m_playList)
         m_playList->deleteLater ();
     m_playList = nullptr;
+    if (m_recentList)
+        m_recentList->deleteLater ();
+    m_recentList = nullptr;
 }
 
 void PlayerCore::setPluginLoader()
@@ -308,10 +321,15 @@ PlayListMgr *PlayerCore::playList() const
     return m_playList;
 }
 
-QObject *PlayerCore::playListObject() const
+RecentPlayedMgr *PlayerCore::recentList() const
 {
-    return qobject_cast<QObject*>(playList ());
+    return m_recentList;
 }
+
+//QObject *PlayerCore::playListObject() const
+//{
+//    return qobject_cast<QObject*>(playList ());
+//}
 
 AudioMetaObject PlayerCore::curTrackMetadata()
 {
@@ -379,11 +397,7 @@ void PlayerCore::playFromLibrary(const QString &songHah)
 
     qDebug()<<Q_FUNC_INFO<<"find in library "<<d.toMap ();
 
-    if (!m_playList->addTrack (d)) {
-//        d->deleteLater ();
-//        d = nullptr;
-        return;
-    }
+    m_playList->addTrack (d);
     m_playList->setCurrentIndex (m_playList->count () -1);
 }
 
@@ -400,7 +414,7 @@ void PlayerCore::playFromNetwork(const QUrl &url)
     AudioMetaObject d(url);
 //    playTrack (&d);
     m_playList->addTrack (d);
-    m_playList->setCurrentIndex (m_playList->count ());
+    m_playList->setCurrentIndex (m_playList->count () -1);
 }
 
 void PlayerCore::playTrack(const AudioMetaObject &data)
@@ -735,7 +749,7 @@ void PlayerCore::skipShuffle()
 //    }
 //}
 
-void PlayerCore::init()
+void PlayerCore::initiate()
 {
     setPluginLoader();
 //    setMusicLibraryManager();

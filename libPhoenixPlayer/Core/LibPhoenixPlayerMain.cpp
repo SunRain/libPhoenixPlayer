@@ -37,7 +37,7 @@ LibPhoenixPlayer::~LibPhoenixPlayer()
 void LibPhoenixPlayer::initiate()
 {
     qDebug()<<">>>>>>>>>>>>>>>>>>>>>>"<<Q_FUNC_INFO<<"<<<<<<<<<<<<<";
-    m_playerCore->init ();
+    m_playerCore->initiate ();
 }
 
 void LibPhoenixPlayer::registerPlugins(const char *url)

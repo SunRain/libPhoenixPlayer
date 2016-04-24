@@ -58,7 +58,9 @@ HEADERS += \
     $$PWD/include/LibPhoenixPlayerMain.h \
     $$PWD/include/Utility.h \
     $$PWD/include/AudioMetaObjectKeys.h \
-    $$PWD/include/AudioMetaGroupObject.h
+    $$PWD/include/AudioMetaGroupObject.h \
+    $$PWD/include/PlayerCore/MusicQueue.h \
+    $$PWD/include/PlayerCore/RecentPlayedMgr.h
 
 SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
@@ -96,7 +98,9 @@ SOURCES += \
     $$PWD/LibPhoenixPlayerMain.cpp \
     $$PWD/Utility.cpp \
     $$PWD/libphoenixplayer_global.cpp \
-    $$PWD/AudioMetaGroupObject.cpp
+    $$PWD/AudioMetaGroupObject.cpp \
+    $$PWD/PlayerCore/MusicQueue.cpp \
+    $$PWD/PlayerCore/RecentPlayedMgr.cpp
 
 
 

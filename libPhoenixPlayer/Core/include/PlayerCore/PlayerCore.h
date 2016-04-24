@@ -15,6 +15,8 @@ class Settings;
 class PluginLoader;
 class PlayListMgr;
 //class AudioMetaObject;
+//class MusicQueue;
+class RecentPlayedMgr;
 
 namespace PlayBackend {
 class IPlayBackend;
@@ -37,7 +39,7 @@ class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
     Q_PROPERTY(Common::PlayMode playMode READ playMode WRITE setPlayMode NOTIFY playModeChanged)
     Q_PROPERTY(int playBackendState READ playBackendStateInt NOTIFY playBackendStateChanged)
     Q_PROPERTY(bool autoSkipForward READ autoSkipForward WRITE setAutoSkipForward NOTIFY autoSkipForwardChanged)
-    Q_PROPERTY(QObject* playList READ playListObject CONSTANT)
+//    Q_PROPERTY(QObject* playList READ playListObject CONSTANT)
     Q_PROPERTY(int forwardIndex READ forwardIndex CONSTANT)
     Q_PROPERTY(int backwardIndex READ backwardIndex CONSTANT)
     Q_PROPERTY(int shuffleIndex READ shuffleIndex CONSTANT)
@@ -46,14 +48,15 @@ class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
 public:
     explicit PlayerCore(Settings *set, PluginLoader *loader, MusicLibrary::MusicLibraryManager *mgr, QObject *parent = 0);
     virtual ~PlayerCore();
-    void init();
+    void initiate();
 
     Common::PlayMode playMode() const;
     Common::PlayBackendState playBackendState() const;
     int playBackendStateInt() const;
 
     PlayListMgr *playList() const;
-    QObject *playListObject() const;
+    RecentPlayedMgr *recentList() const;
+//    QObject *playListObject() const;
 
     AudioMetaObject curTrackMetadata();
 
@@ -194,6 +197,7 @@ private:
     PlayBackend::BackendHost *m_playBackendHost;
     AudioMetaObject m_curTrack;
     PlayListMgr *m_playList;
+    RecentPlayedMgr *m_recentList;
     MusicLibrary::IMusicLibraryDAO *m_dao;
 
     Common::PlayMode m_playMode;

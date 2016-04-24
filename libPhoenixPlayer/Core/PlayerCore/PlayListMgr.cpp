@@ -20,12 +20,15 @@
 namespace PhoenixPlayer {
 
 PlayListMgr::PlayListMgr(Settings *set, QObject *parent)
-    : QObject(parent)
+    : MusicQueue(parent)
 //    , m_random(false)
-    , m_currentIndex(-1)
+//    , m_currentIndex(-1)
 //    , m_count(0)
     , m_settings(set)
 {
+    sizeLimit (-1);
+    skipDuplicates (false);
+
     //TODO support different playlist format
     m_listFormat = new M3uPlayListFormat(this);
     m_playListDir = m_settings->playListDir ();
@@ -40,142 +43,141 @@ PlayListMgr::PlayListMgr(Settings *set, QObject *parent)
 
 PlayListMgr::~PlayListMgr()
 {
-    if (!m_trackList.isEmpty ()) {
-//        qDeleteAll(m_trackList);
-        m_trackList.clear ();
-    }
+//    if (!m_trackList.isEmpty ()) {
+//        m_trackList.clear ();
+//    }
 }
 
-bool PlayListMgr::addTrack(const AudioMetaObject &song)
-{
-    if (song.isEmpty ())
-        return false;
-//    AudioMetaObject *d = new AudioMetaObject(song, this);
-    m_trackList.append (song);
-    return true;
-}
+//void PlayListMgr::addTrack(const AudioMetaObject &song)
+//{
+//    if (song.isEmpty ())
+//        return
+//    m_trackList.append (song);
+//}
 
-bool PlayListMgr::addTrack(const AudioMetaList &list)
-{
-    if (list.isEmpty ())
-        return false;
-    foreach (AudioMetaObject d, list) {
-//        AudioMetaObject *m = new AudioMetaObject(d, this);
-        m_trackList.append (d);
-    }
-    return true;
-}
+//void PlayListMgr::addTrack(const AudioMetaList &list)
+//{
+//    if (list.isEmpty ())
+//        return;
+//    m_trackList.append (list);
+////    emit trackListAdded (list);
+//}
 
-bool PlayListMgr::removeTrack(const int &index)
-{
-    if (index < 0 || m_trackList.isEmpty () || index >= m_trackList.size ()) {
-        qDebug()<<Q_FUNC_INFO<<"invalid index";
-        return false;
-    }
-    //FIXME is it right to use QList.removeAt(i) function?
-//    QList<AudioMetaObject *> tmp;
+//void PlayListMgr::removeTrack(const int &index)
+//{
+//    if (index < 0 || m_trackList.isEmpty () || index >= m_trackList.size ()) {
+//        qDebug()<<Q_FUNC_INFO<<"invalid index";
+//        return;
+//    }
+//    //FIXME is it right to use QList.removeAt(i) function?
+////    QList<AudioMetaObject *> tmp;
+////    AudioMetaList tmp;
+////    for (int i=0; i<m_trackList.size (); ++i) {
+////        if (i == index) {
+////            AudioMetaObject *d = m_trackList.value (i);
+////            d->deleteLater ();
+////            d = nullptr;
+////            continue;
+////        }
+////        tmp.append (m_trackList.value (i));
+////    }
+////    m_trackList.clear ();
+////    foreach (AudioMetaObject *d, tmp) {
+////        m_trackList.append (d);
+////    }
+////    int pos = -1;
+////    for (int i=0; i<m_trackList.size (); ++i) {
+////        if (index == i) {
+////            pos = i;
+////            break;
+////        }
+////    }
+////    if (pos < 0)
+////        return;
+//    m_trackList.removeAt (index);
+////    emit trackRemoved (index);
+//}
+
+//void PlayListMgr::removeTracks(const int &startPos, const int &endPos)
+//{
+//    if (startPos < 0 || endPos < 0 || startPos > endPos
+//            || m_trackList.isEmpty ()
+//            || startPos >= m_trackList.size () || endPos >= m_trackList.size ()) {
+//        qDebug()<<Q_FUNC_INFO<<"invalid pos";
+//        return false;
+//    }
+
+//    //FIXME is it right to use QList.removeAt(i) function?
+////    QList<AudioMetaObject *> tmp;
 //    AudioMetaList tmp;
 //    for (int i=0; i<m_trackList.size (); ++i) {
-//        if (i == index) {
-//            AudioMetaObject *d = m_trackList.value (i);
-//            d->deleteLater ();
-//            d = nullptr;
+//        if (i >= startPos && i <= endPos) {
+////            AudioMetaObject *d = m_trackList.value (i);
+////            d->deleteLater ();
+////            d = nullptr;
 //            continue;
 //        }
 //        tmp.append (m_trackList.value (i));
 //    }
 //    m_trackList.clear ();
-//    foreach (AudioMetaObject *d, tmp) {
-//        m_trackList.append (d);
+////    foreach (AudioMetaObject d, tmp) {
+////        m_trackList.append (d);
+////    }
+//    m_trackList.append (tmp);
+//}
+
+//void PlayListMgr::clear()
+//{
+//    if (!m_trackList.isEmpty ()) {
+////        qDeleteAll(m_trackList);
+//        m_trackList.clear ();
 //    }
-    int pos = -1;
-    for (int i=0; i<m_trackList.size (); ++i) {
-        if (index == i) {
-            pos = i;
-            break;
-        }
-    }
-    if (pos < 0)
-        return false;
-    m_trackList.removeAt (pos);
-    return true;
-}
+//    m_currentIndex = -1;
+//}
 
-bool PlayListMgr::removeTracks(const int &startPos, const int &endPos)
-{
-    if (startPos < 0 || endPos < 0 || startPos > endPos
-            || m_trackList.isEmpty ()
-            || startPos >= m_trackList.size () || endPos >= m_trackList.size ()) {
-        qDebug()<<Q_FUNC_INFO<<"invalid pos";
-        return false;
-    }
+//bool PlayListMgr::isEmpty()
+//{
+//    return m_trackList.isEmpty ();
+//}
 
-    //FIXME is it right to use QList.removeAt(i) function?
-//    QList<AudioMetaObject *> tmp;
-    AudioMetaList tmp;
-    for (int i=0; i<m_trackList.size (); ++i) {
-        if (i >= startPos && i <= endPos) {
-//            AudioMetaObject *d = m_trackList.value (i);
-//            d->deleteLater ();
-//            d = nullptr;
-            continue;
-        }
-        tmp.append (m_trackList.value (i));
-    }
-    m_trackList.clear ();
-    foreach (AudioMetaObject d, tmp) {
-        m_trackList.append (d);
-    }
-    return true;
-}
+//int PlayListMgr::currentIndex() const
+//{
+//    if (!m_trackList.isEmpty () && m_currentIndex == -1)
+//        return -1;
+//    return m_currentIndex;
+//}
 
-void PlayListMgr::clear()
-{
-    if (!m_trackList.isEmpty ()) {
-//        qDeleteAll(m_trackList);
-        m_trackList.clear ();
-    }
-    m_currentIndex = -1;
-}
+//int PlayListMgr::count() const
+//{
+//    return m_trackList.size ();
+//}
 
-bool PlayListMgr::isEmpty()
-{
-    return m_trackList.isEmpty ();
-}
+//AudioMetaList PlayListMgr::currentList() const
+//{
+//    return m_trackList;
+//}
 
-int PlayListMgr::currentIndex() const
-{
-    if (!m_trackList.isEmpty () && m_currentIndex == -1)
-        return -1;
-    return m_currentIndex;
-}
-
-int PlayListMgr::count() const
-{
-    return m_trackList.size ();
-}
-
-AudioMetaObject PlayListMgr::currentTrack()
-{
-    if (m_trackList.isEmpty ())
-        return AudioMetaObject();
-    if (m_currentIndex >= m_trackList.size () || m_currentIndex < 0) {
-        return AudioMetaObject();
-    }
-    return m_trackList.value (m_currentIndex);
-}
+//AudioMetaObject PlayListMgr::currentTrack()
+//{
+//    if (m_trackList.isEmpty ())
+//        return AudioMetaObject();
+//    if (m_currentIndex >= m_trackList.size () || m_currentIndex < 0) {
+//        return AudioMetaObject();
+//    }
+//    return m_trackList.value (m_currentIndex);
+//}
 
 //QObject *PlayListMgr::currentTrackObject() const
 //{
 //    return qobject_cast<QObject*>(currentTrack ());
 //}
 
-AudioMetaObject PlayListMgr::get(int index) const
-{
-    if (m_trackList.isEmpty () || index >= m_trackList.size () || index < 0)
-        return AudioMetaObject();
-    return m_trackList.value (index);
-}
+//AudioMetaObject PlayListMgr::get(int index) const
+//{
+//    if (m_trackList.isEmpty () || index >= m_trackList.size () || index < 0)
+//        return AudioMetaObject();
+//    return m_trackList.value (index);
+//}
 
 //void PlayListMgr::setRandom(bool random)
 //{
@@ -199,11 +201,13 @@ QStringList PlayListMgr::existPlayLists() const
 
 bool PlayListMgr::open(const QString &name)
 {
-    if (!m_trackList.isEmpty ()) {
-//        qDeleteAll(m_trackList);
-        m_trackList.clear ();
-    }
-    m_currentIndex = -1;
+//    if (!m_trackList.isEmpty ()) {
+////        qDeleteAll(m_trackList);
+//        m_trackList.clear ();
+//    }
+//    m_currentIndex = -1;
+    if (!isEmpty ())
+        clear ();
 
     QString f = QString("%1/%2.%3").arg (m_playListDir).arg (name).arg (m_listFormat->extension ());
     qDebug()<<Q_FUNC_INFO<<"open playlist "<<f;
@@ -221,8 +225,6 @@ bool PlayListMgr::open(const QString &name)
     foreach (QString s, fileList) {
         QUrl url(s);
         QString str;
-//        AudioMetaObject *meta;
-//        AudioMetaObject meta;
         if (url.isLocalFile ()) {
             str = url.toLocalFile ();
             if (!QFile::exists (str)) {
@@ -235,25 +237,27 @@ bool PlayListMgr::open(const QString &name)
             o.setMediaType ((int)Common::MediaTypeLocalFile);
 //            meta->setMediaType ((int)Common::MediaTypeLocalFile);
             //TODO: should fill other SongMetaData properties from music library
-            m_trackList.append (o);
+//            m_trackList.append (o);
+            addTrack (o);
         } else {
 //            str = url.toString ();
 //            meta = new AudioMetaObject(str, "", 0, this);
 //            meta->setMediaType ((int)Common::MediaTypeUrl);
             AudioMetaObject o(url);
             o.setMediaType ((int)Common::MediaTypeUrl);
-            m_trackList.append (o);
+//            m_trackList.append (o);
+            addTrack (o);
         }
 //        m_trackList.append (meta);
     }
     file.close ();
-    qDebug()<<Q_FUNC_INFO<<"get track list size "<<m_trackList.size ();
+    qDebug()<<Q_FUNC_INFO<<"get track list size "<<count ();
     return true;
 }
 
 bool PlayListMgr::save(const QString &fileName)
 {
-    if (m_trackList.isEmpty ()) {
+    if (isEmpty ()) {
         qDebug()<<Q_FUNC_INFO<<"track list is empty!!";
         return false;
     }
@@ -269,7 +273,7 @@ bool PlayListMgr::save(const QString &fileName)
         return false;
     }
     QTextStream s(&file);
-    s << m_listFormat->format (m_trackList);
+    s << m_listFormat->format (currentList ());
     file.close ();
     return true;
 }
@@ -295,18 +299,23 @@ void PlayListMgr::queryPlayLists()
     }
 }
 
-void PlayListMgr::setCurrentIndex(int index)
-{
-    qDebug()<<Q_FUNC_INFO<<QString("set index to [%1], current indext [%2], list size [%3]")
-              .arg (index).arg (m_currentIndex).arg (m_trackList.size ());
+//int PlayListMgr::sizeLimit() const
+//{
+//    return -1;
+//}
 
-    if (index >= m_trackList.size () || index < 0)
-        return;
-    if (m_currentIndex != index) {
-        m_currentIndex = index;
-        emit currentIndexChanged(index);
-    }
-}
+//void PlayListMgr::setCurrentIndex(int index)
+//{
+//    qDebug()<<Q_FUNC_INFO<<QString("set index to [%1], current indext [%2], list size [%3]")
+//              .arg (index).arg (m_currentIndex).arg (m_trackList.size ());
+
+//    if (index >= m_trackList.size () || index < 0)
+//        return;
+//    if (m_currentIndex != index) {
+//        m_currentIndex = index;
+//        emit currentIndexChanged(index);
+//    }
+//}
 
 
 } //PhoenixPlayer

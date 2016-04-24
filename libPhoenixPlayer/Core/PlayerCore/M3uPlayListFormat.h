@@ -19,7 +19,7 @@ public:
 public:
     QString extension() const;
     QStringList fileList(const QString &contents);
-    QString format(const /*QList<AudioMetaObject *>*/ AudioMetaList &list);
+    QString format(const AudioMetaList &list);
 };
 } //PhoenixPlayer
 #endif // M3UPLAYLIST_H
