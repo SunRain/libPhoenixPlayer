@@ -217,9 +217,16 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
     }
     foreach (QString str, keyList) {
         QString key = QString(":%1").arg (str);
-        QString value = json.value (str).toString ();
-        qDebug()<<QString("bindvalues key=[%1], value=[%2]").arg (key).arg (value);
-        q.bindValue (key, value);
+        /*QString*/QJsonValue value = json.value (str);
+        qDebug()<<"bindvalues key="<<key<<"value="<<value;
+        if (value.isObject ()) {
+            QJsonObject o = value.toObject ();
+//            qDebug()<<"bind to json object "<<o.toVariantMap ();
+            QJsonDocument doc(o);
+            q.bindValue (key, QString(doc.toJson ()));
+        } else {
+            q.bindValue (key, value);
+        }
     }
     if (q.exec (/*str*/)) {
         m_existSongHashes.append (obj.hash ());

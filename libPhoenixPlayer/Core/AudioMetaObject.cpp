@@ -281,15 +281,11 @@ AudioMetaObject AudioMetaObject::fromMap(const QVariantMap &map)
 {
     if (map.isEmpty ())
         return AudioMetaObject();
-
-    qDebug()<<Q_FUNC_INFO<<"map value is "<<map;
-
     AudioMetaObject meta;
     QString name = map.value (KEY_NAME).toString ();
     QString path = map.value (KEY_PATH).toString ();
     quint64 size = map.value (KEY_SIZE).toInt ();
     AudioMetaObject m(path, name, size);
-    qDebug()<<Q_FUNC_INFO<<" now hash is "<<m.hash ();
     meta = m;
     AlbumMeta al = AlbumMeta::fromMap (map.value (KEY_ALBUM_META).toMap ());
     ArtistMeta ar = ArtistMeta::fromMap (map.value (KEY_ARTIST_META).toMap ());
