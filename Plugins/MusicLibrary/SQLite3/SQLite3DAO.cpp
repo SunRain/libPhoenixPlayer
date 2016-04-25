@@ -353,13 +353,14 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
         QString str = q.value (AudioMetaObject::keyHash ()).toString ();
         if (str != hash)
             continue;
+
         AudioMetaObject audio; //a tmp object to get the query keys
         QJsonObject json;
         foreach (QString key, audio.toObject ().keys ()) {
-            QByteArray value = q.value (key).toByteArray ();
-            json.insert (key, value.constData ());
+            json.insert (key, q.value (key).toString ());
         }
-        return AudioMetaObject::fromMap (json.toVariantMap ());
+        QJsonDocument doc(json);
+        return AudioMetaObject::fromJson (doc.toJson ());
     }
     qDebug()<<Q_FUNC_INFO<<"Current hash not found in database";
     return AudioMetaObject();

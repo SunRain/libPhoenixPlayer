@@ -145,7 +145,7 @@ void Settings::setLastPlayedSong(const AudioMetaObject &data)
 //    m_settings->sync ();
     if (data.isEmpty ())
         return;
-    m_settings->setValue (KEY_LAST_SONG, data.toMap ());
+    m_settings->setValue (KEY_LAST_SONG, data.toJson ());
     m_settings->sync ();
 }
 
@@ -156,10 +156,10 @@ AudioMetaObject Settings::lastPlayedSong() const
 //    if (!list.isEmpty () && list.size () == 3)
 //        data = new AudioMetaObject(list.at (0), list.at (1), list.at (2).toInt ());
 //    return data;
-    QVariantMap ba = m_settings->value (KEY_LAST_SONG).toMap ();
-    if (ba.isEmpty ())
+    QByteArray ba = m_settings->value (KEY_LAST_SONG).toByteArray ();
+    if (ba.isEmpty () || ba.isNull ())
         return AudioMetaObject();
-    return AudioMetaObject::fromMap (ba);
+    return AudioMetaObject::fromJson (ba);
 }
 
 bool Settings::setCurrentPlayListHash(const QString &hash)

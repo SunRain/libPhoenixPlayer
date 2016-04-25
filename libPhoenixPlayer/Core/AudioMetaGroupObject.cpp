@@ -44,6 +44,12 @@ QJsonObject AudioMetaGroupObject::toObject() const
     return o;
 }
 
+QByteArray AudioMetaGroupObject::toJson() const
+{
+    QJsonDocument doc(toObject ());
+    return doc.toJson ();
+}
+
 QVariantMap AudioMetaGroupObject::toMap() const
 {
     QVariantMap o;
