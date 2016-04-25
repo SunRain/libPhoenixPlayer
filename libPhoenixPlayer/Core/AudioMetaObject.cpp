@@ -216,10 +216,10 @@ QJsonObject AudioMetaObject::toObject() const
     return o;
 }
 
-QString AudioMetaObject::toJson() const
+QByteArray AudioMetaObject::toJson() const
 {
     QJsonDocument doc(toObject ());
-    return QString(doc.toJson ());
+    return doc.toJson ();
 }
 
 QVariantMap AudioMetaObject::toMap() const
@@ -239,11 +239,11 @@ QVariantMap AudioMetaObject::toMap() const
     return o;
 }
 
-AudioMetaObject AudioMetaObject::fromJson(const QString &json)
+AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
 {
     AudioMetaObject meta;
     QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json.toUtf8 (), &error);
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
         qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
         return meta;
@@ -259,10 +259,10 @@ AudioMetaObject AudioMetaObject::fromJson(const QString &json)
     quint64 size = o.value (KEY_SIZE).toString ().toInt ();
     AudioMetaObject m(path, name, size);
     meta = m;
-    AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ());
-    ArtistMeta ar = ArtistMeta::fromJson (o.value (KEY_ARTIST_META).toString ());
-    CoverMeta co = CoverMeta::fromJson (o.value (KEY_COVER_META).toString ());
-    TrackMeta tr = TrackMeta::fromJson (o.value (KEY_TRACK_META).toString ());
+    AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ().toUtf8 ());
+    ArtistMeta ar = ArtistMeta::fromJson (o.value (KEY_ARTIST_META).toString ().toUtf8 ());
+    CoverMeta co = CoverMeta::fromJson (o.value (KEY_COVER_META).toString ().toUtf8 ());
+    TrackMeta tr = TrackMeta::fromJson (o.value (KEY_TRACK_META).toString ().toUtf8 ());
     meta.setAlbumMeta (al);
     meta.setArtistMeta (ar);
     meta.setCoverMeta (co);
@@ -342,10 +342,10 @@ QJsonObject AlbumMeta::toObject() const
     return o;
 }
 
-QString AlbumMeta::toJson() const
+QByteArray AlbumMeta::toJson() const
 {
     QJsonDocument doc(toObject ());
-    return QString(doc.toJson ());
+    return doc.toJson ();
 }
 
 QVariantMap AlbumMeta::toMap() const
@@ -358,11 +358,11 @@ QVariantMap AlbumMeta::toMap() const
     return map;
 }
 
-AlbumMeta AlbumMeta::fromJson(const QString &json)
+AlbumMeta AlbumMeta::fromJson(const QByteArray &json)
 {
     AlbumMeta meta;
     QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json.toUtf8 (), &error);
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
         qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
         return meta;
@@ -435,10 +435,10 @@ QJsonObject ArtistMeta::toObject() const
     return o;
 }
 
-QString ArtistMeta::toJson() const
+QByteArray ArtistMeta::toJson() const
 {
     QJsonDocument doc(toObject ());
-    return QString(doc.toJson ());
+    return doc.toJson ();
 }
 
 QVariantMap ArtistMeta::toMap() const
@@ -450,11 +450,11 @@ QVariantMap ArtistMeta::toMap() const
     return o;
 }
 
-ArtistMeta ArtistMeta::fromJson(const QString &json)
+ArtistMeta ArtistMeta::fromJson(const QByteArray &json)
 {
     ArtistMeta meta;
     QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json.toUtf8 (), &error);
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
         qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
         return meta;
@@ -526,10 +526,10 @@ QJsonObject CoverMeta::toObject() const
     return o;
 }
 
-QString CoverMeta::toJson() const
+QByteArray CoverMeta::toJson() const
 {
     QJsonDocument doc(toObject ());
-    return QString(doc.toJson ());
+    return doc.toJson ();
 }
 
 QVariantMap CoverMeta::toMap() const
@@ -541,11 +541,11 @@ QVariantMap CoverMeta::toMap() const
     return o;
 }
 
-CoverMeta CoverMeta::fromJson(const QString &json)
+CoverMeta CoverMeta::fromJson(const QByteArray &json)
 {
     CoverMeta meta;
     QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json.toUtf8 (), &error);
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
         qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
         return meta;
@@ -691,10 +691,10 @@ QJsonObject TrackMeta::toObject() const
     return o;
 }
 
-QString TrackMeta::toJson() const
+QByteArray TrackMeta::toJson() const
 {
     QJsonDocument doc(toObject ());
-    return QString(doc.toJson ());
+    return doc.toJson ();
 }
 
 QVariantMap TrackMeta::toMap() const
@@ -712,11 +712,11 @@ QVariantMap TrackMeta::toMap() const
     return o;
 }
 
-TrackMeta TrackMeta::fromJson(const QString &json)
+TrackMeta TrackMeta::fromJson(const QByteArray &json)
 {
     TrackMeta meta;
     QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson (json.toUtf8 (), &error);
+    QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
         qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
         return meta;
