@@ -256,7 +256,7 @@ AudioMetaObject AudioMetaObject::fromJson(const QString &json)
 
     QString name = o.value (KEY_NAME).toString ();
     QString path = o.value (KEY_PATH).toString ();
-    quint64 size = o.value (KEY_SIZE).toInt ();
+    quint64 size = o.value (KEY_SIZE).toString ().toInt ();
     AudioMetaObject m(path, name, size);
     meta = m;
     AlbumMeta al = AlbumMeta::fromJson (o.value (KEY_ALBUM_META).toString ());
