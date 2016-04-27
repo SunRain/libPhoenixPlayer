@@ -209,10 +209,10 @@ QJsonObject AudioMetaObject::toObject() const
     o.insert (KEY_MEDIA_TYPE, QString::number (d.data ()->mediaType));
     o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
     o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri.toString ());
-    o.insert (KEY_ALBUM_META, QString(d.data ()->albumMeta.toJson ()));
-    o.insert (KEY_ARTIST_META, QString(d.data ()->artistMeta.toJson ()));
-    o.insert (KEY_COVER_META, QString(d.data ()->coverMeta.toJson ()));
-    o.insert (KEY_TRACK_META,QString( d.data ()->trackMeta.toJson ()));
+    o.insert (KEY_ALBUM_META, d.data ()->albumMeta.toObject ());
+    o.insert (KEY_ARTIST_META, d.data ()->artistMeta.toObject ());
+    o.insert (KEY_COVER_META, d.data ()->coverMeta.toObject ());
+    o.insert (KEY_TRACK_META, d.data ()->trackMeta.toObject ());
     return o;
 }
 
@@ -232,10 +232,10 @@ QVariantMap AudioMetaObject::toMap() const
     o.insert (KEY_MEDIA_TYPE, QString::number (d.data ()->mediaType));
     o.insert (KEY_LYRICS_DATA, d.data ()->lyricsData);
     o.insert (KEY_LYRICS_URI, d.data ()->lyricsUri.toString ());
-    o.insert (KEY_ALBUM_META, QString(d.data ()->albumMeta.toJson ()));
-    o.insert (KEY_ARTIST_META, QString(d.data ()->artistMeta.toJson ()));
-    o.insert (KEY_COVER_META, QString(d.data ()->coverMeta.toJson ()));
-    o.insert (KEY_TRACK_META,QString( d.data ()->trackMeta.toJson ()));
+    o.insert (KEY_ALBUM_META, d.data ()->albumMeta.toMap ());
+    o.insert (KEY_ARTIST_META, d.data ()->artistMeta.toMap ());
+    o.insert (KEY_COVER_META, d.data ()->coverMeta.toMap ());
+    o.insert (KEY_TRACK_META, d.data ()->trackMeta.toMap ());
     return o;
 }
 
