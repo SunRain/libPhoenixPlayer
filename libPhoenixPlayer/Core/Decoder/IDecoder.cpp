@@ -16,17 +16,17 @@ IDecoder::IDecoder(QObject *parent)
     :QObject(parent)
 //    ,mController(nullptr)
 {
-    m_audioParameters = nullptr;
+//    m_audioParameters = nullptr;
 }
 
 IDecoder::~IDecoder()
 {
     qDebug()<<QString("========== %1 =======").arg (Q_FUNC_INFO);
 
-    if (m_audioParameters) {
-        m_audioParameters->deleteLater ();
-        m_audioParameters = nullptr;
-    }
+//    if (m_audioParameters) {
+//        m_audioParameters->deleteLater ();
+//        m_audioParameters = nullptr;
+//    }
 }
 
 void IDecoder::setInputSource(QIODevice *input)
@@ -49,22 +49,27 @@ QString IDecoder::fileUri() const
     return m_uri;
 }
 
-AudioParameters *IDecoder::audioParameters() const
+AudioParameters IDecoder::audioParameters() const
 {
     return m_audioParameters;
 }
 
-void IDecoder::configure(quint32 srate, int chan, AudioParameters::AudioFormat f)
+void IDecoder::setAudioParameters(const AudioParameters &p)
 {
-    if (m_audioParameters) {
-        m_audioParameters->deleteLater ();
-        m_audioParameters = nullptr;
-    }
-    qDebug()<<Q_FUNC_INFO<<QString("sample = [%1], channel = [%2], format = [%3]")
-              .arg (srate).arg (chan).arg (f);
-
-    m_audioParameters = new AudioParameters(srate, chan, f);
+    m_audioParameters = p;
 }
+
+//void IDecoder::configure(quint32 srate, int chan, AudioParameters::AudioFormat f)
+//{
+//    if (m_audioParameters) {
+//        m_audioParameters->deleteLater ();
+//        m_audioParameters = nullptr;
+//    }
+//    qDebug()<<Q_FUNC_INFO<<QString("sample = [%1], channel = [%2], format = [%3]")
+//              .arg (srate).arg (chan).arg (f);
+
+//    m_audioParameters = new AudioParameters(srate, chan, f);
+//}
 
 //void IDecoder::setController(PlayController *controller)
 //{

@@ -2,16 +2,14 @@
 #define AUDIOPARAMETERS_H
 
 #include <QtGlobal>
-#include <QObject>
-#include <QDebug>
+#include <QSharedDataPointer>
 
-#include "BaseObject.h"
+#include "libphoenixplayer_global.h"
 
 namespace PhoenixPlayer {
-class AudioParameters : public BaseObject
+class AudioParametersPriv;
+class LIBPHOENIXPLAYER_EXPORT AudioParameters
 {
-    Q_OBJECT
-    Q_ENUMS(AudioFormat)
 public:
     //Audio formats
     enum AudioFormat {
@@ -22,24 +20,27 @@ public:
         PCM_UNKNOWM         //Unknown format
     };
 public:
-    explicit AudioParameters(QObject *parent = 0);
-    explicit AudioParameters(quint32 srate, int chan, AudioFormat f, QObject *parent = 0);
-    explicit AudioParameters(const AudioParameters *other, QObject *parent = 0);
+    AudioParameters();
+    AudioParameters(quint32 srate = 48000, quint32 chan = 2, AudioFormat f= AudioParameters::PCM_UNKNOWM);
+    AudioParameters(const AudioParameters &other);
+    AudioParameters &operator =(const AudioParameters &other) {
+        if (this != &other)
+            d.operator = (other.d);
+        return *this;
+    }
+    bool operator == (const AudioParameters &other);
+    bool operator != (const AudioParameters &other) {
+        return !operator == (other);
+    }
 
     quint32 sampleRate() const;
-//    void setSampleRate(quint32 srate);
+    void setSampleRate(quint32 srate);
 
-    int channels() const;
-//    void setChannels(int chan);
+    quint32 channels() const;
+    void setChannels(quint32 chan);
 
     AudioFormat format() const;
-//    void setFormat(AudioFormat f);
-
-    bool equals(const AudioParameters *other);
-
-//    void operator = (const AudioParameters &p);
-//    bool operator ==(const AudioParameters &p);
-//    bool operator !=(const AudioParameters &p);
+    void setFormat(AudioFormat f);
 
     int sampleSize() const;
 
@@ -47,11 +48,9 @@ public:
     static int sampleSize(AudioFormat format);
 
     void printInfo();
-    QString parametersInfo();
+    QString parametersInfo() const;
 private:
-    quint32 m_srate;
-    int m_chan;
-    AudioFormat m_format;
+    QSharedDataPointer<AudioParametersPriv> d;
 };
 
 } //PhoenixPlayer

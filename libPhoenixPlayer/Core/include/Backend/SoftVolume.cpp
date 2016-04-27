@@ -4,7 +4,6 @@
 #include "Buffer.h"
 
 namespace PhoenixPlayer{
-class Buffer;
 namespace PlayBackend {
 
 SoftVolume::SoftVolume(QObject *parent)

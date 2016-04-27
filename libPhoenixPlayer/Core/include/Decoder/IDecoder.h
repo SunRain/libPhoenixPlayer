@@ -3,17 +3,19 @@
 
 #include <QObject>
 #include <QtGlobal>
-#include "AudioParameters.h"
+//#include "AudioParameters.h"
+#include "LibPhoenixPlayerMain.h"
 
 class QUrl;
 class QIODevice;
 namespace PhoenixPlayer {
 
+class AudioParameters;
 class Buffer;
-class PlayController;
+//class PlayController;
 namespace Decoder {
 
-class IDecoder : public QObject
+class LIBPHOENIXPLAYER_EXPORT IDecoder : public QObject
 {
     Q_OBJECT
 public:
@@ -49,15 +51,17 @@ public:
 
 //    virtual bool reader() = 0;
 
-    AudioParameters *audioParameters() const;
+    AudioParameters audioParameters() const;
 
 protected:
 //    Buffer *bufferOut;
-    void configure(quint32 srate = 44100, int chan = 2, AudioParameters::AudioFormat f = AudioParameters::PCM_S16LE);
+    void  setAudioParameters(const AudioParameters &p);
+//    void configure(quint32 srate = 44100, int chan = 2, AudioParameters::AudioFormat f = AudioParameters::PCM_S16LE);
 private:
 //    PlayController *mController;
     QIODevice *m_input;
-    AudioParameters *m_audioParameters;
+//    AudioParameters *m_audioParameters;
+    AudioParameters m_audioParameters;
     QString m_uri;
 };
 } //Decoder

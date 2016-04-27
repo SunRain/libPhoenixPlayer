@@ -1,91 +1,83 @@
 #include "AudioParameters.h"
 
 #include <QDebug>
+#include <QSharedData>
 
 namespace PhoenixPlayer {
 
-AudioParameters::AudioParameters(QObject *parent)
-    :BaseObject(parent)
+class AudioParametersPriv : public QSharedData
 {
-    m_srate = 0;
-    m_chan = 0;
-    m_format = AudioFormat::PCM_S16LE;
+public:
+    AudioParametersPriv() {
+        srate = 48000;
+        chan = 2;
+        format = AudioParameters::PCM_UNKNOWM;
+    }
+    quint32 srate;
+    quint32 chan;
+    AudioParameters::AudioFormat format;
+};
+AudioParameters::AudioParameters()
+    : d(new AudioParametersPriv)
+{
 }
 
-AudioParameters::AudioParameters(quint32 srate, int chan, AudioFormat f, QObject *parent)
-    :BaseObject(parent)
+AudioParameters::AudioParameters(quint32 srate, quint32 chan, AudioParameters::AudioFormat f)
+    : d(new AudioParametersPriv)
 {
-    m_srate = srate;
-    m_chan = chan;
-    m_format = f;
+    d.data ()->chan = chan;
+    d.data ()->srate = srate;
+    d.data ()->format = f;
 }
 
-AudioParameters::AudioParameters(const AudioParameters *other, QObject *parent)
-    :BaseObject(parent)
+AudioParameters::AudioParameters(const AudioParameters &other)
+    : d(other.d)
 {
-    m_srate = other->sampleRate ();
-    m_chan = other->channels ();
-    m_format = other->format ();
+
+}
+
+bool AudioParameters::operator ==(const AudioParameters &other)
+{
+    return d.data ()->chan == other.d.data ()->chan
+            && d.data ()->format == other.d.data ()->format
+            && d.data ()->srate == other.d.data ()->srate;
 }
 
 quint32 AudioParameters::sampleRate() const
 {
-    return m_srate;
+    return d.data ()->srate;
 }
 
-//void AudioParameters::setSampleRate(quint32 srate)
-//{
-//    m_srate = srate;
-//}
-
-int AudioParameters::channels() const
+void AudioParameters::setSampleRate(quint32 srate)
 {
-    return m_chan;
+    d.data ()->srate = srate;
 }
 
-//void AudioParameters::setChannels(int chan)
-//{
-//    m_chan = chan;
-//}
+quint32 AudioParameters::channels() const
+{
+    return d.data ()->chan;
+}
+
+void AudioParameters::setChannels(quint32 chan)
+{
+    d.data ()->chan = chan;
+}
 
 AudioParameters::AudioFormat AudioParameters::format() const
 {
-    return m_format;
+    return d.data ()->format;
 }
 
-//void AudioParameters::setFormat(AudioParameters::AudioFormat f)
-//{
-//    m_format = f;
-//}
-
-bool AudioParameters::equals(const AudioParameters *other)
+void AudioParameters::setFormat(AudioParameters::AudioFormat f)
 {
-    return m_srate == other->sampleRate ()
-            && m_chan == other->channels ()
-            && m_format == other->format ();
+    d.data ()->format = f;
 }
+
 
 int AudioParameters::sampleSize() const
 {
     return sampleSize(m_format);
 }
-
-//void AudioParameters::operator =(const AudioParameters &p)
-//{
-//    mSrate = p.sampleRate ();
-//    mChan = p.channels ();
-//    mFormat = p.format ();
-//}
-
-//bool AudioParameters::operator ==(const AudioParameters &p)
-//{
-//    return mSrate == p.sampleRate () && mChan == p.channels () && mFormat == p.format ();
-//}
-
-//bool AudioParameters::operator !=(const AudioParameters &p)
-//{
-//    return !(operator == (p));
-//}
 
 int AudioParameters::sampleSize(AudioParameters::AudioFormat format)
 {
@@ -109,10 +101,27 @@ void AudioParameters::printInfo()
     qDebug()<<Q_FUNC_INFO<<parametersInfo ();
 }
 
-QString AudioParameters::parametersInfo()
+QString AudioParameters::parametersInfo() const
 {
+    QString str;
+    switch (d.data ()->format) {
+    case PCM_S8:
+        str = "PCM_S8";
+        break;
+    case PCM_S16LE:
+    case PCM_UNKNOWM:
+        str = "PCM_S16LE or PCM_UNKNOWM";
+        break;
+    case PCM_S24LE:
+    case PCM_S32LE:
+        str = "PCM_S24LE or PCM_S32LE";
+        break;
+    default:
+        str = "default PCM_S16LE or PCM_UNKNOWM";
+        break;
+    }
     return QString("SampleRate = [%1], Channels = [%2], AudioFormat = [%3]")
-            .arg(m_srate).arg(m_chan).arg (enumToStr ("AudioFormat", (int)m_format));
+            .arg(d.data ()->srate).arg(d.data ()->chan).arg (str);
 }
 
 } //PhoenixPlayer
