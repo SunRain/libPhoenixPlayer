@@ -107,7 +107,7 @@ void PlayerCore::setPluginLoader()
         return;
     }
     m_playBackend = &m_pb;
-    (*m_playBackend)->init ();
+    (*m_playBackend)->initialize ();
     (*m_playBackend)->stop ();
 
 //    connect (m_pluginLoader,

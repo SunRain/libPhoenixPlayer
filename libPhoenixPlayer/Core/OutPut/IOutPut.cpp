@@ -5,42 +5,43 @@
 
 #include "Buffer.h"
 //#include "Player/PlayeController.h"
-#include "AudioParameters.h"
+//#include "AudioParameters.h"
 
 namespace PhoenixPlayer {
 
 namespace OutPut {
 
 IOutPut::IOutPut(QObject *parent)
-    :QObject(parent)
+    : QObject(parent)
 {
 //    mController == nullptr;
 //    mWork = true;
 //    mAudioParameters = new AudioParameters(0,0, AudioParameters::PCM_UNKNOWM);
-    mAudioParameters = nullptr;
+//    mAudioParameters = nullptr;
 }
 
 IOutPut::~IOutPut()
 {
-    //    mController = nullptr;
-    if (mAudioParameters) {
-        mAudioParameters->deleteLater ();
-        mAudioParameters = nullptr;
-    }
+//    //    mController = nullptr;
+//    if (mAudioParameters) {
+//        mAudioParameters->deleteLater ();
+//        mAudioParameters = nullptr;
+//    }
 }
 
-AudioParameters *IOutPut::audioParameters()
+AudioParameters IOutPut::audioParameters() const
 {
-    return mAudioParameters;
+    return m_param;
 }
 
-void IOutPut::configure(quint32 srate, int chan, AudioParameters::AudioFormat f)
+void IOutPut::configure(const AudioParameters &p)
 {
-    if (mAudioParameters) {
-        mAudioParameters->deleteLater ();
-        mAudioParameters = nullptr;
-    }
-    mAudioParameters = new AudioParameters(srate, chan, f, this);
+//    if (mAudioParameters) {
+//        mAudioParameters->deleteLater ();
+//        mAudioParameters = nullptr;
+//    }
+//    mAudioParameters = new AudioParameters(p, chan, f, this);
+    m_param = p;
 }
 
 //void IOutPut::setWork(bool isWork)

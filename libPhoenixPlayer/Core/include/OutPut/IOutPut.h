@@ -9,13 +9,14 @@ namespace PhoenixPlayer {
 //class PlayController;
 class Buffer;
 class AudioParameters;
+
 namespace OutPut {
 
 class IOutPut : public QObject
 {
     Q_OBJECT
 public:
-    IOutPut(QObject *parent = 0);
+    explicit IOutPut(QObject *parent = 0);
     virtual ~IOutPut();
 //    void setWork(bool isWork = false);
 //    bool isWork();
@@ -28,7 +29,7 @@ public:
 //    virtual qint32 getBufferSize() = 0;
 
 //    virtual void initialize(Buffer *in = 0) = 0;
-    virtual bool initialize(quint32 srate, int chan, AudioParameters::AudioFormat f) = 0;
+    virtual bool initialize(quint32 srate, int chan, PhoenixPlayer::AudioParameters::AudioFormat f) = 0;
     /*
      * Returns output interface latency in milliseconds.
      */
@@ -62,7 +63,7 @@ public:
      */
     virtual void resume() {}
 
-     AudioParameters *audioParameters();
+     PhoenixPlayer::AudioParameters audioParameters() const;
 
 protected:
 //    Buffer *bufferIn;
@@ -72,11 +73,12 @@ protected:
       * @param chan Number of channels.
       * @param format Audio format.
       */
-     void configure(quint32 srate, int chan, AudioParameters::AudioFormat f);
+     void configure(const PhoenixPlayer::AudioParameters &p);
 private:
 //    PlayController *mController;
 //    bool mWork;
-     AudioParameters *mAudioParameters;
+//     AudioParameters *mAudioParameters;
+     PhoenixPlayer::AudioParameters m_param;
 //     quint32 mSrate;
 //     int mChan;
 };

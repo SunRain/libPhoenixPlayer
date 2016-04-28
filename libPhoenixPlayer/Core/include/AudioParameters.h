@@ -23,11 +23,7 @@ public:
     AudioParameters();
     AudioParameters(quint32 srate = 48000, quint32 chan = 2, AudioFormat f= AudioParameters::PCM_UNKNOWM);
     AudioParameters(const AudioParameters &other);
-    AudioParameters &operator =(const AudioParameters &other) {
-        if (this != &other)
-            d.operator = (other.d);
-        return *this;
-    }
+    AudioParameters &operator =(const AudioParameters &other);
     bool operator == (const AudioParameters &other);
     bool operator != (const AudioParameters &other) {
         return !operator == (other);

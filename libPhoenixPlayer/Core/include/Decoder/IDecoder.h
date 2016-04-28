@@ -10,6 +10,7 @@ class QUrl;
 class QIODevice;
 namespace PhoenixPlayer {
 
+class MediaResource;
 class AudioParameters;
 class Buffer;
 //class PlayController;
@@ -21,14 +22,18 @@ class LIBPHOENIXPLAYER_EXPORT IDecoder : public QObject
 public:
     IDecoder(QObject *parent = 0);
     virtual ~IDecoder();
-    void setInputSource(QIODevice *input = 0);
-    QIODevice *inputSource();
 
-    void setFileUri(const QString &uri);
-    QString fileUri() const;
+//    void setResource(MediaResource *src);
+//    void setInputSource(QIODevice *input = 0);
+//    QIODevice *inputSource();
+//    QIODevice *inputSource();
 
-    virtual bool initialize() = 0;
-    virtual quint64 getLength() = 0;
+//    QString getUri() const;
+//    void setFileUri(const QString &uri);
+//    QString fileUri() const;
+
+    virtual bool initialize(MediaResource *res) = 0;
+    virtual quint64 durationInSeconds() = 0;
     virtual void setPosition(qreal pos = 0) = 0;
 //    virtual qreal getPosition() = 0;
     /*!
@@ -42,7 +47,7 @@ public:
      * Returns the number of bytes read, or -1 if an error occurred.
      * Subclass should reimplement this function.
      */
-    virtual qint64 read(char *data, qint64 maxSize) = 0;
+    virtual qint64 runDecode(char *data, qint64 maxSize) = 0;
 //    virtual void setController(PlayController *controller = 0);
 //    PlayController *getController();
 //    virtual bool open(const QUrl &url);
@@ -51,18 +56,19 @@ public:
 
 //    virtual bool reader() = 0;
 
-    AudioParameters audioParameters() const;
+    virtual AudioParameters audioParameters() const = 0;
 
 protected:
 //    Buffer *bufferOut;
-    void  setAudioParameters(const AudioParameters &p);
+//    void  setAudioParameters(const AudioParameters &p);
 //    void configure(quint32 srate = 44100, int chan = 2, AudioParameters::AudioFormat f = AudioParameters::PCM_S16LE);
 private:
 //    PlayController *mController;
-    QIODevice *m_input;
+//    QIODevice *m_input;
 //    AudioParameters *m_audioParameters;
-    AudioParameters m_audioParameters;
-    QString m_uri;
+//    AudioParameters m_audioParameters;
+//    MediaResource *m_res;
+//    QString m_uri;
 };
 } //Decoder
 } //PhoenixPlayer

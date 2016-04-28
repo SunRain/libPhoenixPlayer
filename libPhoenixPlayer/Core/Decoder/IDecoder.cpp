@@ -5,6 +5,7 @@
 #include <qlogging.h>
 #include <QIODevice>
 
+#include "MediaResource.h"
 #include "Buffer.h"
 #include "AudioParameters.h"
 
@@ -26,38 +27,53 @@ IDecoder::~IDecoder()
 //    if (m_audioParameters) {
 //        m_audioParameters->deleteLater ();
 //        m_audioParameters = nullptr;
-//    }
+    //    }
 }
 
-void IDecoder::setInputSource(QIODevice *input)
-{
-    m_input = input;
-}
+//void IDecoder::setResource(MediaResource *src)
+//{
+//    m_res = src;
+//}
 
-QIODevice *IDecoder::inputSource()
-{
-    return m_input;
-}
+//QIODevice *IDecoder::inputSource()
+//{
+//    return m_res->device ();
+//}
 
-void IDecoder::setFileUri(const QString &uri)
-{
-    m_uri = uri;
-}
+//QString IDecoder::getUri() const
+//{
+//    return m_res->getUri ();
+//}
 
-QString IDecoder::fileUri() const
-{
-    return m_uri;
-}
+//void IDecoder::setInputSource(QIODevice *input)
+//{
+//    m_input = input;
+//}
 
-AudioParameters IDecoder::audioParameters() const
-{
-    return m_audioParameters;
-}
+//QIODevice *IDecoder::inputSource()
+//{
+//    return m_input;
+//}
 
-void IDecoder::setAudioParameters(const AudioParameters &p)
-{
-    m_audioParameters = p;
-}
+//void IDecoder::setFileUri(const QString &uri)
+//{
+//    m_uri = uri;
+//}
+
+//QString IDecoder::fileUri() const
+//{
+//    return m_uri;
+//}
+
+//AudioParameters IDecoder::audioParameters() const
+//{
+//    return m_audioParameters;
+//}
+
+//void IDecoder::setAudioParameters(const AudioParameters &p)
+//{
+//    m_audioParameters = p;
+//}
 
 //void IDecoder::configure(quint32 srate, int chan, AudioParameters::AudioFormat f)
 //{

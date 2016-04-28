@@ -4,27 +4,32 @@
 #include <QObject>
 
 #include "Common.h"
-#include "BaseMediaObject.h"
-#include "BaseVisual.h"
+//#include "BaseMediaObject.h"
+//#include "MediaResource.h"
+//#include "BaseVisual.h"
+#include "libphoenixplayer_global.h"
 
 namespace PhoenixPlayer{
+class MediaResource;
+
 namespace PlayBackend {
 
+class BaseVisual;
 class BaseVolume;
-class IPlayBackend : public QObject {
+class LIBPHOENIXPLAYER_EXPORT IPlayBackend : public QObject {
     Q_OBJECT
 public:
-    explicit IPlayBackend(QObject *parent = 0) : QObject(parent) {
-        m_visual = nullptr;
+    explicit IPlayBackend(QObject *parent = 0): QObject(parent) {
+//        m_visual = nullptr;
     }
     virtual ~IPlayBackend() {
-        if (m_visual)
-            m_visual = nullptr;
+//        if (m_visual)
+//            m_visual = nullptr;
     }
 
     //    Q_INVOKABLE virtual void 	load_equalizer(vector<EQ_Setting>&)=0;
     virtual Common::PlayBackendState  playBackendState() = 0;
-    virtual void init() = 0;
+    virtual void initialize() = 0;
     // 返回不同playbackend的BaseVolume以供外部调用
     virtual BaseVolume *baseVolume() = 0;
 
@@ -35,19 +40,21 @@ public:
         return false;
     }
 
-    void setVisual(BaseVisual *v) {
-        m_visual = v;
-    }
+//    void setVisual(BaseVisual *v) {
+//        m_visual = v;
+//    }
 protected:
-    BaseVisual *getVisual() {
-        return m_visual;
+    virtual BaseVisual *getVisual() {
+//        return m_visual;
+        return nullptr;
     }
 
 signals:
 //    void positionChanged(quint64 posMs = 0);
 //    void volumeChanged(int vol = 0);
     //     void message(QMessageBox::Icon icon, const QString &title, const QString &msg) = 0;
-    void mediaChanged(PlayBackend::BaseMediaObject *obj = 0);
+//    void mediaChanged(PlayBackend::BaseMediaObject *obj = 0);
+    void resourceChanged(MediaResource *res);
     ///
     /// \brief finished 当前曲目结束
     ///
@@ -76,7 +83,7 @@ public slots:
     virtual void pause() = 0;
 //    virtual void setVolume(int vol = 0) = 0;
     virtual void setPosition(quint64 sec = 0) = 0;
-    virtual void changeMedia(PlayBackend::BaseMediaObject *obj = 0,
+    virtual void changeMedia(MediaResource *res,
                              quint64 startSec = 0,
                              bool startPlay = false) = 0;
     //    virtual void jump(int where, bool percent = true) = 0;
@@ -96,7 +103,7 @@ public slots:
     //    virtual void sr_ended() = 0;
     //    virtual void sr_not_valid() = 0;
 private:
-    BaseVisual *m_visual;
+//    BaseVisual *m_visual;
 
 };
 } //namespace PlayBackend

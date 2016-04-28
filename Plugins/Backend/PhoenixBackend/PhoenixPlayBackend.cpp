@@ -89,7 +89,7 @@ Common::PlayBackendState PhoenixPlayBackend::playBackendState()
     }
 }
 
-void PhoenixPlayBackend::init()
+void PhoenixPlayBackend::initialize()
 {
     m_engine = new PlayThread(this, getVisual ());
     m_handler = StateHandler::instance ();

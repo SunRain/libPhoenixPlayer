@@ -36,6 +36,12 @@ AudioParameters::AudioParameters(const AudioParameters &other)
 
 }
 
+AudioParameters &AudioParameters::operator =(const AudioParameters &other) {
+    if (this != &other)
+        d.operator = (other.d);
+    return *this;
+}
+
 bool AudioParameters::operator ==(const AudioParameters &other)
 {
     return d.data ()->chan == other.d.data ()->chan
@@ -76,7 +82,7 @@ void AudioParameters::setFormat(AudioParameters::AudioFormat f)
 
 int AudioParameters::sampleSize() const
 {
-    return sampleSize(m_format);
+    return sampleSize(d.data ()->format);
 }
 
 int AudioParameters::sampleSize(AudioParameters::AudioFormat format)

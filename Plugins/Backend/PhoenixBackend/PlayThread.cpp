@@ -299,7 +299,7 @@ void PlayThread::changeMedia(BaseMediaObject *obj, quint64 startSec)
 
      qDebug()<<Q_FUNC_INFO<<"current audioParameters "<<m_audioParameters->parametersInfo ();
 
-    if (!m_decoder->getLength ()) {
+    if (!m_decoder->durationInSeconds ()) {
         m_startPos = -1;
     } else if (startSec) {
         m_startPos = startSec * 1000;
@@ -338,7 +338,7 @@ void PlayThread::run()
     m_outputThread->start ();
 
     m_handler->dispatch (PlayState::Playing);
-    m_handler->dispatch (m_decoder->getLength ());
+    m_handler->dispatch (m_decoder->durationInSeconds ());
 
     while (!m_done && !m_finish) {
         m_mutex.lock ();
