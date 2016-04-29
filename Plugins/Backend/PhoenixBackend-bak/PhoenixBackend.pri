@@ -23,5 +23,4 @@ HEADERS += \
     $$PWD/PhoenixPlayBackend.h \
     $$PWD/equ/iir_cfs.h \
     $$PWD/equ/iir_fpu.h \
-    $$PWD/equ/iir.h \
-    $$PWD/RingBuffer.h
+    $$PWD/equ/iir.h

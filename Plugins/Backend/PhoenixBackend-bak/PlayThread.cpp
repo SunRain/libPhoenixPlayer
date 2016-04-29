@@ -201,9 +201,9 @@ void PlayThread::togglePlayPause()
 {
     if (m_outputThread) {
         m_outputThread->togglePlayPause ();
-//        m_outputThread->recycler ()->mutex ()->lock ();
-//        m_outputThread->recycler ()->cond ()->wakeAll ();
-//        m_outputThread->recycler ()->mutex ()->unlock ();
+        m_outputThread->recycler ()->mutex ()->lock ();
+        m_outputThread->recycler ()->cond ()->wakeAll ();
+        m_outputThread->recycler ()->mutex ()->unlock ();
     }
 }
 
@@ -211,9 +211,9 @@ void PlayThread::setMuted(bool muted)
 {
     m_muted = muted;
     if (m_outputThread) {
-//        m_outputThread->mutex ()->lock ();
+        m_outputThread->mutex ()->lock ();
         m_outputThread->setMuted (muted);
-//        m_outputThread->mutex ()->unlock ();
+        m_outputThread->mutex ()->unlock ();
     }
 }
 

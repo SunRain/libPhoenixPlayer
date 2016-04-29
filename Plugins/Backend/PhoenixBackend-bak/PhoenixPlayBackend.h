@@ -21,7 +21,7 @@ public:
 
     // QObject interface
 public:
-//    bool event(QEvent *e);
+    bool event(QEvent *e);
 
     // IPlayBackend interface
 public:
@@ -37,7 +37,7 @@ public slots:
     void pause();
 //    void setVolume(int vol);
     void setPosition(quint64 sec = 0);
-    void changeMedia(MediaResource *res, quint64 startSec = 0, bool startPlay = false);
+    void changeMedia(BaseMediaObject *obj, quint64 startSec = 0, bool startPlay = false);
 
 signals:
 //    void volumeChanged(int vol = 0);

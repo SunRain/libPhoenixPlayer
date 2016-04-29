@@ -1,12 +1,9 @@
 #include "OutputThread.h"
 
 #include <QDebug>
-#include <QAudioDeviceInfo>
-#include <QAudioFormat>
-#include <QAudioOutput>
 
-//#include "PluginLoader.h"
-//#include "PluginHost.h"
+#include "PluginLoader.h"
+#include "PluginHost.h"
 #include "OutPut/IOutPut.h"
 #include "AudioParameters.h"
 #include "Recycler.h"
@@ -54,29 +51,45 @@ static inline void s32_to_s16(qint32 *in, qint16 *out, qint64 samples)
     return;
 }
 
-OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
+OutputThread::OutputThread(QObject *parent, BaseVisual *v)
     : QThread(parent)
-    , m_output(nullptr)
-    , m_eq(EqualizerMgr::instance ())
-    , m_handler(StateHandler::instance ())
     , m_visual(v)
-    , m_ring(ring)
-    , m_visBuffer(nullptr)
-    , m_userStop(false)
-    , m_pause(false)
-    , m_prev_pause(false)
-    , m_finish(false)
-    , m_useEq(false)
-    , m_muted(false)
-    , m_skip(false)
-    , m_kbps(0)
-    , m_frequency(0)
-    , m_bytesPerMillisecond(-1)
-    , m_totalWritten(0)
-    , m_currentMilliseconds(0)
-    , m_visBufferSize(0)
 {
-     connect (m_eq, &EqualizerMgr::changed, this, &OutputThread::updateEQ);
+    m_frequency = 0;
+    m_output = nullptr;
+    m_totalWritten = 0;
+    m_currentMilliseconds = -1;
+    m_bytesPerMillisecond = 0;
+    m_userStop = false;
+    m_finish = false;
+    m_kbps = 0;
+    m_skip = false;
+    m_pause = false;
+    m_prev_pause = false;
+    m_useEq = false;
+    m_muted = false;
+
+//    m_pluginHost = nullptr;
+
+    m_visBuffer = nullptr;
+    m_visBufferSize = 0;
+
+    m_audioParameters = new AudioParameters(0, 0, AudioParameters::PCM_UNKNOWM, this);
+
+    m_handler = StateHandler::instance ();
+
+    m_pluginLoader = phoenixPlayerLib->pluginLoader ();//PluginLoader::instance ();
+
+    m_eq = EqualizerMgr::instance ();
+
+    m_outputHost = m_pluginLoader->curOutPutHost ();
+    if (m_outputHost) {
+        if (m_outputHost->isValid ()) {
+            m_output = m_outputHost->instance<IOutPut>();
+        }
+    }
+
+    connect (m_eq, &EqualizerMgr::changed, this, &OutputThread::updateEQ);
 }
 
 OutputThread::~OutputThread()

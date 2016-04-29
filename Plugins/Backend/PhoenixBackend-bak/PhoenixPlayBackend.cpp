@@ -17,14 +17,13 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
 
-PhoenixPlayBackend::PhoenixPlayBackend(QObject *parent)
-    : IPlayBackend(parent)
-    , m_engine(nullptr)
-    , m_handler(nullptr)
-    , m_volumeControl(nullptr)
-    , m_muted(false)
+PhoenixPlayBackend::PhoenixPlayBackend(QObject *parent) :
+    IPlayBackend(parent)
 {
-
+    m_engine = nullptr;
+    m_handler = nullptr;
+    m_volumeControl = nullptr;
+    m_muted = false;
 }
 
 PhoenixPlayBackend::~PhoenixPlayBackend()
@@ -43,31 +42,31 @@ PhoenixPlayBackend::~PhoenixPlayBackend()
 
 //    void stateChanged(Common::PlayBackendState state);
 //    void tick(quint64 sec = 0);
-//bool PhoenixPlayBackend::event(QEvent *e)
-//{
-//    if (e->type () == EVENT_STATE_CHANGED) {
-//        PlayState st = ((StateChangedEvent *)e)->currentState ();
+bool PhoenixPlayBackend::event(QEvent *e)
+{
+    if (e->type () == EVENT_STATE_CHANGED) {
+        PlayState st = ((StateChangedEvent *)e)->currentState ();
 
-////        QStringList states;
-////        states << "Playing" << "Paused" << "Stopped" << "Buffering" << "NormalError" << "FatalError";
-//        qDebug()<<Q_FUNC_INFO<<"Current event is EVENT_STATE_CHANGED, value is "<<st;
+//        QStringList states;
+//        states << "Playing" << "Paused" << "Stopped" << "Buffering" << "NormalError" << "FatalError";
+        qDebug()<<Q_FUNC_INFO<<"Current event is EVENT_STATE_CHANGED, value is "<<st;
 
-//        if (st == PlayState::Playing)
-//            emit stateChanged (Common::PlayBackendPlaying);
-//        else if (st == PlayState::Paused)
-//            emit stateChanged (Common::PlayBackendPaused);
-//        else if (st == PlayState::NormalError || st == PlayState::FatalError)
-//            emit failed ();
-//        else
-//            emit stateChanged (Common::PlayBackendStopped);
-//    } else if (e->type () == EVENT_NEXT_TRACK_REQUEST
-//               || e->type () == EVENT_FINISHED) {
-//        emit finished ();
-//    } else {
-//        return QObject::event (e);
-//    }
-//    return true;
-//}
+        if (st == PlayState::Playing)
+            emit stateChanged (Common::PlayBackendPlaying);
+        else if (st == PlayState::Paused)
+            emit stateChanged (Common::PlayBackendPaused);
+        else if (st == PlayState::NormalError || st == PlayState::FatalError)
+            emit failed ();
+        else
+            emit stateChanged (Common::PlayBackendStopped);
+    } else if (e->type () == EVENT_NEXT_TRACK_REQUEST
+               || e->type () == EVENT_FINISHED) {
+        emit finished ();
+    } else {
+        return QObject::event (e);
+    }
+    return true;
+}
 
 Common::PlayBackendState PhoenixPlayBackend::playBackendState()
 {
@@ -156,9 +155,9 @@ void PhoenixPlayBackend::play(quint64 startSec)
         if (!m_engine->isRunning ()) {
             m_engine->play ();
         } else {
-//            if (m_engine->output () /*&& m_engine->output ()->isPaused ()*/) {
+            if (m_engine->output () && m_engine->output ()->isPaused ()) {
                     m_engine->togglePlayPause ();
-//            }
+            }
         }
         this->setPosition (startSec);
     }
@@ -183,7 +182,7 @@ void PhoenixPlayBackend::stop()
 
 void PhoenixPlayBackend::pause()
 {
-    if (m_engine /*&& !m_engine->output ()->isPaused ()*/)
+    if (m_engine && !m_engine->output ()->isPaused ())
         m_engine->togglePlayPause ();
 }
 
@@ -194,11 +193,11 @@ void PhoenixPlayBackend::setPosition(quint64 sec)
         m_engine->seek (sec * 1000);
 }
 
-void PhoenixPlayBackend::changeMedia(MediaResource *res, quint64 startSec, bool startPlay)
+void PhoenixPlayBackend::changeMedia(BaseMediaObject *obj, quint64 startSec, bool startPlay)
 {
     stop ();
     //TODO use QtMultimedia to play network stream;
-    m_engine->changeMedia (res, startSec); //don't start play, start later
+    m_engine->changeMedia (obj, startSec); //don't start play, start later
 
     qDebug()<<Q_FUNC_INFO<<"change m_engine Media finish";
 

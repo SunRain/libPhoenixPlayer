@@ -7,8 +7,6 @@ TARGET = $$PLUGINS_PREFIX/PhoenixBackend
 
 include(PhoenixBackend.pri)
 
-QT += multimedia
-
 INCLUDEPATH += \
         $$PWD
 
