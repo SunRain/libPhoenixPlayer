@@ -46,10 +46,13 @@ Common::MediaType MediaResource::type() const {
 
 MediaResource *MediaResource::create(const QString &uri, QObject *parent)
 {
-    if (uri.contains ("://")) { //local file path doesn't contain "://"
-        return new LocalFileMediaResource(uri, parent);
+    QString str = uri;
+    if (str.startsWith ("file://"))
+        str = str.mid (7); //remove file://
+    if (str.contains ("://")) { //local file path doesn't contain "://"
+        return new LocalFileMediaResource(str, parent);
     }
-    return new MediaResource(uri, parent);
+    return new MediaResource(str, parent);
 }
 
 

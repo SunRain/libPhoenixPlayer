@@ -14,6 +14,7 @@ namespace PhoenixPlayer {
 class Settings;
 class PluginLoader;
 class PlayListMgr;
+class MediaResource;
 //class AudioMetaObject;
 //class MusicQueue;
 class RecentPlayedMgr;
@@ -199,6 +200,7 @@ private:
     PlayListMgr *m_playList;
     RecentPlayedMgr *m_recentList;
     MusicLibrary::IMusicLibraryDAO *m_dao;
+    MediaResource *m_resource;
 
     Common::PlayMode m_playMode;
     quint64 m_curTrackDuration;

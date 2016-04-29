@@ -1,58 +1,58 @@
 
 #include "Backend/BaseMediaObject.h"
 
-namespace PhoenixPlayer {
-namespace PlayBackend {
-BaseMediaObject::BaseMediaObject(QObject *parent) : QObject(parent)
-{
-    mFilePath = QString();
-    mFileName = QString();
-    mMediaType = Common::MediaTypeLocalFile;
-}
+//namespace PhoenixPlayer {
+//namespace PlayBackend {
+//BaseMediaObject::BaseMediaObject(QObject *parent) : QObject(parent)
+//{
+//    mFilePath = QString();
+//    mFileName = QString();
+//    mMediaType = Common::MediaTypeLocalFile;
+//}
 
-BaseMediaObject::~BaseMediaObject()
-{
+//BaseMediaObject::~BaseMediaObject()
+//{
 
-}
+//}
 
-BaseMediaObject *BaseMediaObject::create(const QString &filePath, const QString &fileName, Common::MediaType type, QObject *parent)
-{
-    BaseMediaObject *obj = new BaseMediaObject(parent);
-    obj->setFileName(fileName);
-    obj->setFilePath(filePath);
-    obj->setMediaType(type);
-    return obj;
-}
+//BaseMediaObject *BaseMediaObject::create(const QString &filePath, const QString &fileName, Common::MediaType type, QObject *parent)
+//{
+//    BaseMediaObject *obj = new BaseMediaObject(parent);
+//    obj->setFileName(fileName);
+//    obj->setFilePath(filePath);
+//    obj->setMediaType(type);
+//    return obj;
+//}
 
-QString BaseMediaObject::filePath() const
-{
-    return mFilePath;
-}
+//QString BaseMediaObject::filePath() const
+//{
+//    return mFilePath;
+//}
 
-void BaseMediaObject::setFilePath(const QString &filePath)
-{
-    mFilePath = filePath;
-}
+//void BaseMediaObject::setFilePath(const QString &filePath)
+//{
+//    mFilePath = filePath;
+//}
 
-QString BaseMediaObject::fileName() const
-{
-    return mFileName;
-}
+//QString BaseMediaObject::fileName() const
+//{
+//    return mFileName;
+//}
 
-void BaseMediaObject::setFileName(const QString &fileName)
-{
-    mFileName = fileName;
-}
+//void BaseMediaObject::setFileName(const QString &fileName)
+//{
+//    mFileName = fileName;
+//}
 
-Common::MediaType BaseMediaObject::mediaType() const
-{
-    return mMediaType;
-}
+//Common::MediaType BaseMediaObject::mediaType() const
+//{
+//    return mMediaType;
+//}
 
-void BaseMediaObject::setMediaType(const Common::MediaType &mediaType)
-{
-    mMediaType = mediaType;
-}
+//void BaseMediaObject::setMediaType(const Common::MediaType &mediaType)
+//{
+//    mMediaType = mediaType;
+//}
 
-}//PlayBackend
-} //PhoenixPlayer
+//}//PlayBackend
+//} //PhoenixPlayer

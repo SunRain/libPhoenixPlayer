@@ -17,6 +17,7 @@ public:
     quint32 chan;
     AudioParameters::AudioFormat format;
 };
+
 AudioParameters::AudioParameters()
     : d(new AudioParametersPriv)
 {

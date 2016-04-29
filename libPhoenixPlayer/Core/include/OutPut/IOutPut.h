@@ -2,7 +2,7 @@
 #define IOUTPUT_H
 
 #include <QObject>
-#include "AudioParameters.h"
+//#include "AudioParameters.h"
 
 namespace PhoenixPlayer {
 
@@ -29,7 +29,7 @@ public:
 //    virtual qint32 getBufferSize() = 0;
 
 //    virtual void initialize(Buffer *in = 0) = 0;
-    virtual bool initialize(quint32 srate, int chan, PhoenixPlayer::AudioParameters::AudioFormat f) = 0;
+    virtual bool initialize(const AudioParameters &p) = 0;
     /*
      * Returns output interface latency in milliseconds.
      */
@@ -63,7 +63,7 @@ public:
      */
     virtual void resume() {}
 
-     PhoenixPlayer::AudioParameters audioParameters() const;
+    virtual AudioParameters audioParameters() const = 0;
 
 protected:
 //    Buffer *bufferIn;
@@ -73,12 +73,12 @@ protected:
       * @param chan Number of channels.
       * @param format Audio format.
       */
-     void configure(const PhoenixPlayer::AudioParameters &p);
+//     void configure(const PhoenixPlayer::AudioParameters &p);
 private:
 //    PlayController *mController;
 //    bool mWork;
 //     AudioParameters *mAudioParameters;
-     PhoenixPlayer::AudioParameters m_param;
+//     PhoenixPlayer::AudioParameters m_param;
 //     quint32 mSrate;
 //     int mChan;
 };

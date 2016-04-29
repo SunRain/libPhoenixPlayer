@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-#include "Buffer.h"
+//#include "Buffer.h"
 //#include "Player/PlayeController.h"
 //#include "AudioParameters.h"
 
@@ -29,20 +29,20 @@ IOutPut::~IOutPut()
 //    }
 }
 
-AudioParameters IOutPut::audioParameters() const
-{
-    return m_param;
-}
+//AudioParameters IOutPut::audioParameters() const
+//{
+//    return m_param;
+//}
 
-void IOutPut::configure(const AudioParameters &p)
-{
-//    if (mAudioParameters) {
-//        mAudioParameters->deleteLater ();
-//        mAudioParameters = nullptr;
-//    }
-//    mAudioParameters = new AudioParameters(p, chan, f, this);
-    m_param = p;
-}
+//void IOutPut::configure(const AudioParameters &p)
+//{
+////    if (mAudioParameters) {
+////        mAudioParameters->deleteLater ();
+////        mAudioParameters = nullptr;
+////    }
+////    mAudioParameters = new AudioParameters(p, chan, f, this);
+//    m_param = p;
+//}
 
 //void IOutPut::setWork(bool isWork)
 //{

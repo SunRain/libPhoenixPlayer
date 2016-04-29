@@ -20,6 +20,7 @@
 #include "PlayerCore/RecentPlayedMgr.h"
 #include "SingletonPointer.h"
 #include "Backend/BackendHost.h"
+#include "MediaResource.h"
 
 namespace PhoenixPlayer {
 
@@ -32,6 +33,7 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
     , m_settings(set)
     , m_pluginLoader(loader)
     , m_musicLibraryManager(mgr)
+    , m_resource(nullptr)
 {
     m_playBackend = nullptr;
     m_pb = nullptr;
@@ -423,19 +425,19 @@ void PlayerCore::playTrack(const AudioMetaObject &data)
         qWarning()<<Q_FUNC_INFO<<"AudioMetaData is empty";
         return;
     }
-//    if (m_curTrack)
-//        m_curTrack->deleteLater ();
-//    m_curTrack = new AudioMetaObject(data);
     m_curTrack = data;
-    m_curTrackDuration = data.trackMeta ().duration ();//data->trackMeta ()->duration ();
-    //        emit trackChanged ();
-    BaseMediaObject obj;
-    obj.setFilePath (data.path ());
-    obj.setFileName (data.name ());
-    obj.setMediaType ((Common::MediaType)data.mediaType ());
+    m_curTrackDuration = data.trackMeta ().duration ();
+//    BaseMediaObject obj;
+//    obj.setFilePath (data.path ());
+//    obj.setFileName (data.name ());
+//    obj.setMediaType ((Common::MediaType)data.mediaType ());
+    if (m_resource)
+        m_resource->deleteLater ();
+    m_resource = nullptr;
+    m_resource = MediaResource::create (data.uri ().toString (), this);
     qDebug()<<Q_FUNC_INFO<<"change file to "<<data.uri ();
     if (*m_playBackend) {
-        (*m_playBackend)->changeMedia (&obj, 0, true);
+        (*m_playBackend)->changeMedia (m_resource, 0, true);
         m_currentPlayPos = 0;
         (*m_playBackend)->play ();
     }
@@ -661,11 +663,15 @@ void PlayerCore::togglePlayPause()
 //            obj.setMediaType (Common::MediaTypeLocalFile);
 //            qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
 //            m_playBackend->changeMedia (&obj, 0, true);
-            BaseMediaObject obj;
-            obj.setFilePath (/*data->path ()*/data.path ());
-            obj.setFileName (/*data->name ()*/data.name ());
-            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
-            (*m_playBackend)->changeMedia (&obj, 0, true);
+//            BaseMediaObject obj;
+//            obj.setFilePath (/*data->path ()*/data.path ());
+//            obj.setFileName (/*data->name ()*/data.name ());
+//            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
+//            (*m_playBackend)->changeMedia (&obj, 0, true);
+            if (m_resource)
+                m_resource->deleteLater ();
+            m_resource = MediaResource::create (data.uri ().toString (), this);
+            (*m_playBackend)->changeMedia (m_resource, 0, true);
         }
         break;
     }
@@ -923,13 +929,16 @@ void PlayerCore::doPlayByPlayMode()
         if (data.isEmpty ())
             break;
 //        if (data) {
-            BaseMediaObject obj;
-            obj.setFilePath (/*data->path ()*/data.path ());
-            obj.setFileName (/*data->name ()*/data.name ());
-            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
-            (*m_playBackend)->changeMedia (&obj, 0, true);
-            m_currentPlayPos = 0;
-            (*m_playBackend)->play ();
+//            BaseMediaObject obj;
+//            obj.setFilePath (/*data->path ()*/data.path ());
+//            obj.setFileName (/*data->name ()*/data.name ());
+//            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
+        if (m_resource)
+            m_resource->deleteLater ();
+        m_resource = MediaResource::create (data.uri ().toString (), this);
+        (*m_playBackend)->changeMedia (m_resource, 0, true);
+        m_currentPlayPos = 0;
+        (*m_playBackend)->play ();
 //        }
         break;
     }
