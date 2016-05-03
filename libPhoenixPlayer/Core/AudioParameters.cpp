@@ -5,26 +5,21 @@
 
 namespace PhoenixPlayer {
 
-class AudioParametersPriv : public QSharedData
-{
-public:
-    AudioParametersPriv() {
-        srate = 48000;
-        chan = 2;
-        format = AudioParameters::PCM_UNKNOWM;
-    }
-    quint32 srate;
-    quint32 chan;
-    AudioParameters::AudioFormat format;
-};
-
-AudioParameters::AudioParameters()
-    : d(new AudioParametersPriv)
-{
-}
+//class AudioParametersPriv : public QSharedData
+//{
+//public:
+//    AudioParametersPriv() {
+//        srate = 48000;
+//        chan = 2;
+//        format = AudioParameters::PCM_UNKNOWM;
+//    }
+//    quint32 srate;
+//    quint32 chan;
+//    AudioParameters::AudioFormat format;
+//};
 
 AudioParameters::AudioParameters(quint32 srate, quint32 chan, AudioParameters::AudioFormat f)
-    : d(new AudioParametersPriv)
+    : d(new AudioParametersPriv())
 {
     d.data ()->chan = chan;
     d.data ()->srate = srate;

@@ -7,7 +7,6 @@
 #include "libphoenixplayer_global.h"
 
 namespace PhoenixPlayer {
-class AudioParametersPriv;
 class LIBPHOENIXPLAYER_EXPORT AudioParameters
 {
 public:
@@ -20,7 +19,6 @@ public:
         PCM_UNKNOWM         //Unknown format
     };
 public:
-    AudioParameters();
     AudioParameters(quint32 srate = 48000, quint32 chan = 2, AudioFormat f= AudioParameters::PCM_UNKNOWM);
     AudioParameters(const AudioParameters &other);
     AudioParameters &operator =(const AudioParameters &other);
@@ -46,6 +44,18 @@ public:
     void printInfo();
     QString parametersInfo() const;
 private:
+    class AudioParametersPriv : public QSharedData
+    {
+    public:
+        AudioParametersPriv() {
+            srate = 48000;
+            chan = 2;
+            format = AudioParameters::PCM_UNKNOWM;
+        }
+        quint32 srate;
+        quint32 chan;
+        AudioParameters::AudioFormat format;
+    };
     QSharedDataPointer<AudioParametersPriv> d;
 };
 

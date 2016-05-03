@@ -19,14 +19,18 @@
 //}
 //#endif
 
+#include "AudioMetaGroupObject.h"
+
 namespace PhoenixPlayer {
 namespace Decoder {
 namespace FFmpegDecoder {
 
+using namespace PhoenixPlayer;
+
 FFmpeg::FFmpeg(QObject *parent)
     : IDecoder(parent)
     , m_audioFormat(AudioParameters::PCM_UNKNOWM)
-    , m_parameter(AudioParameters())
+//    , m_parameter(AudioParameters())
     , container(nullptr)
     , ctx(nullptr)
     , frame(nullptr)
@@ -37,7 +41,6 @@ FFmpeg::FFmpeg(QObject *parent)
     , m_output_at(0)
     , m_bitrate(0)
 {
-
 }
 
 FFmpeg::~FFmpeg()
@@ -107,10 +110,10 @@ bool FFmpeg::initialize(MediaResource *res)
         ctx->request_channel_layout = AV_CH_LAYOUT_STEREO;
         m_parameter.setChannels (2);
     }
-    m_parameter.setSamplerate (ctx->sample_rate);
+    m_parameter.setSampleRate (ctx->sample_rate);
 
     qDebug()<<" codec ["<<codec->long_name<<"]";
-    qDebug()<<" AudioParameters ["<<m_parameter.toString ()<<"]";
+    qDebug()<<" AudioParameters ["<<m_parameter.parametersInfo ()<<"]";
 
     if(avcodec_open2 (ctx, codec, nullptr) < 0){
         qWarning()<<Q_FUNC_INFO<<"Codec cannot be opened";
@@ -207,15 +210,15 @@ qint64 FFmpeg::runDecode(char *data, qint64 maxSize)
         int bps = av_get_bytes_per_sample (ctx->sample_fmt);
         qDebug()<<" bps "<<bps;
         for (int i=0; i<(len>>1); i+=bps) {
-            memcpy (destBuffer+2*i, frame->extended_data[0]+i, bps);
-            memcpy (destBuffer+2*i+bps, frame->extended_data[1]+i, bps);
+            memcpy (data+2*i, frame->extended_data[0]+i, bps);
+            memcpy (data+2*i+bps, frame->extended_data[1]+i, bps);
         }
         m_output_at -= len;
         qDebug()<<" in planar frame, now out put at "<<m_output_at;
         memmove (frame->extended_data[0], frame->extended_data[0]+len/2, m_output_at/2);
         memmove (frame->extended_data[1], frame->extended_data[1]+len/2, m_output_at/2);
     } else {
-        memcpy (destBuffer, frame->extended_data[0], len);
+        memcpy (data, frame->extended_data[0], len);
         m_output_at -= len;
         qDebug()<<" no planar frame, now out put at "<<m_output_at;
         memmove (frame->extended_data[0], frame->extended_data[0]+len, m_output_at);
@@ -223,8 +226,8 @@ qint64 FFmpeg::runDecode(char *data, qint64 maxSize)
     if (ctx->sample_fmt == AV_SAMPLE_FMT_FLTP || ctx->sample_fmt == AV_SAMPLE_FMT_FLT) {
         qDebug()<<" convert float to signed 32 bit LE ";
         for (int i=0; i<(len>>2); ++i) {
-            int32_t *out = (int32_t*)destBuffer;
-            float *in = (float*)destBuffer;
+            int32_t *out = (int32_t*)data;
+            float *in = (float*)data;
             out[i] = qBound(-1.0f, in[i], +1.0f) * (double) 0x7fffffff;
         }
     }

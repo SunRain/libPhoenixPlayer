@@ -91,7 +91,7 @@ public:
     void setPosition(qreal pos);
     int bitrate();
     qint64 runDecode(char *data, qint64 maxSize);
-    AudioParameters audioParameters() const;
+    PhoenixPlayer::AudioParameters audioParameters() const;
 
 private:
     bool close();
@@ -100,7 +100,7 @@ private:
     AVInputFormat *dumpSourceFormat(const QString &file);
 private:
     AudioParameters::AudioFormat m_audioFormat;
-    AudioParameters m_parameter;
+    PhoenixPlayer::AudioParameters m_parameter;
 
     AVFormatContext* container;
     AVCodecContext *ctx;

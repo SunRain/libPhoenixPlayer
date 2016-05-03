@@ -20,7 +20,8 @@ class RingBuffer
 {
 public:
     RingBuffer(uint bufferSize, uint ringCount = 8)
-        : m_capacity(ringCount+1)
+        : m_bufferSize(bufferSize)
+        , m_capacity(ringCount+1)
         , m_tail(0)
         , m_head(0)
     {
@@ -40,6 +41,9 @@ public:
         m_container = nullptr;
     }
 
+    inline uint bufferSize() const {
+        return m_bufferSize;
+    }
     // Pop by Consumer can only update the head (load with relaxed, store with release)
     // the tail must be accessed with at least aquire
     bool pop(Buffer *other) {
@@ -83,6 +87,10 @@ public:
         const int next_tail = increment (m_tail.load ()); // aquire, we dont know who call
         return next_tail == m_head.load ();
     }
+    void clear() {
+        m_head.storeRelease (0);
+        m_tail.storeRelease (0);
+    }
 
     QMutex *mutex() {
         return &m_mutex;
@@ -118,6 +126,7 @@ private:
         return (idx + 1) % m_capacity;
     }
 private:
+    uint m_bufferSize;
     int m_capacity;
     QAtomicInt m_tail;
     QAtomicInt m_head;

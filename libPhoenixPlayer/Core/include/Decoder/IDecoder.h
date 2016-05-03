@@ -56,7 +56,7 @@ public:
 
 //    virtual bool reader() = 0;
 
-    virtual AudioParameters audioParameters() const = 0;
+    virtual PhoenixPlayer::AudioParameters audioParameters() const = 0;
 
 protected:
 //    Buffer *bufferOut;

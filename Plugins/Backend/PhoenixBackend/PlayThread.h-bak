@@ -10,7 +10,6 @@ namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
 class Settings;
-class MediaResource;
 
 namespace Decoder {
 class IDecoder;
@@ -26,7 +25,6 @@ namespace PhoenixBackend {
 class Recycler;
 class StateHandler;
 class OutputThread;
-class RingBuffer;
 class PlayThread : public QThread
 {
     Q_OBJECT
@@ -42,11 +40,11 @@ public:
     void togglePlayPause();
     void setMuted(bool muted);
 
-    void changeMedia(MediaResource *res = 0, quint64 startSec = 0);
+    void changeMedia(PlayBackend::BaseMediaObject *obj = 0, quint64 startSec = 0);
 
     // QThread interface
     OutputThread *output() const;
-//    void setOutput(OutputThread *output);
+    void setOutput(OutputThread *output);
 
 protected:
     void run();
@@ -54,10 +52,10 @@ protected:
 private:
     void finish();
     void reset();
-//    void setAudioParameters(AudioParameters *other);
-//    void flush(bool final = false);
+    void setAudioParameters(AudioParameters *other);
+    void flush(bool final = false);
     void addOffset();
-//    qint64 produceSound(char *data, qint64 size, quint32 brate);
+    qint64 produceSound(char *data, qint64 size, quint32 brate);
     void createOutput();
 
 private:
@@ -65,18 +63,16 @@ private:
     PluginLoader *m_pluginLoader;
     StateHandler *m_handler;
     Settings *m_settings;
-    RingBuffer *m_ring;
+
     BaseVisual *m_visual;
     OutputThread *m_outputThread;
     Decoder::IDecoder *m_decoder;
     Decoder::DecoderHost *m_decoderHost;
 
-//    AudioParameters *m_audioParameters;
-//    AudioParameters m_audioParameters;
-    PhoenixPlayer::AudioParameters m_audioParameters;
+    AudioParameters *m_audioParameters;
 
     bool m_use16BitOutputConvert;
-//    AudioParameters *m_convertAudioParameters;
+    AudioParameters *m_convertAudioParameters;
 
     QStringList m_decoderLibs;
     bool m_next;
@@ -91,7 +87,7 @@ private:
     qint64 m_output_at;
     qint64 m_output_size;
     int m_bitrate;
-//    unsigned char *m_output_buf;
+    unsigned char *m_output_buf;
 };
 
 } //PhoenixBackend
