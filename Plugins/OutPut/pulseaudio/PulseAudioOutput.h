@@ -22,15 +22,15 @@ public:
 
     // IOutPut interface
 public:
-    bool initialize(quint32 srate, int chan, AudioParameters::AudioFormat f);
+    bool initialize(const AudioParameters &p);
     qint64 latency();
     qint64 writeAudio(unsigned char *data, qint64 maxSize);
     void drain();
     void reset();
+    AudioParameters audioParameters() const;
 private:
     void uninitialize();
     pa_simple *m_connection;
-
 };
 
 } //PulseAudioOutput

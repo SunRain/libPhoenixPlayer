@@ -253,6 +253,9 @@ void PlayThread::changeMedia(MediaResource *res, quint64 startSec)
         qCritical()<<Q_FUNC_INFO<<"No decoder found!!";
         return;
     }
+
+    res->initialize ();
+
     //TODO 判断媒体类型，也许可以添加一个单独的方法？
 //    QString uri;
 //    if (!res->filePath ().isEmpty () && !res->fileName ().isEmpty ()) {
@@ -332,14 +335,21 @@ void PlayThread::run()
     addOffset (); //offset
     m_outputThread->start ();
     while (!m_done) {
-        if (m_ring->full ()) {
-            continue;
+//        if (m_ring->full ()) {
+//            continue;
+//        }
+
+        while (m_ring->full ()) {
+            qApp->processEvents ();
+            QThread::yieldCurrentThread ();
         }
+
 //        int ret = m_decode->runDecode ((char*)b.data, BUFFER_SIZE);
         int ret = m_decoder->runDecode ((char*)buffer.data, m_ring->bufferSize ());
         if (ret <= 0) {
             qDebug()<<"== loop finish";
             m_done = true;
+            break;
         }
         if (m_done) break;
         buffer.nbytes = ret;

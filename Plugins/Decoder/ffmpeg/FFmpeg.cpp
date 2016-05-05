@@ -41,6 +41,12 @@ FFmpeg::FFmpeg(QObject *parent)
     , m_output_at(0)
     , m_bitrate(0)
 {
+    avformat_network_init ();
+    av_register_all ();
+    av_init_packet(&packet);
+    av_init_packet(&m_tmpPacket);
+    m_tmpPacket.size = 0;
+    m_tmpPacket.data = nullptr;
 }
 
 FFmpeg::~FFmpeg()

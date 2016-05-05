@@ -25,20 +25,14 @@ public:
         , m_tail(0)
         , m_head(0)
     {
-        m_container = new Buffer*[m_capacity-1];
-        for (int i=0; i< m_capacity-1; ++i) {
-            m_container[i] = new Buffer(bufferSize);
+        for (int i=0; i< m_capacity; ++i) {
+            m_container.append (new Buffer(bufferSize));
         }
     }
 
     ~RingBuffer() {
-        for (int i=0; i< m_capacity-1; ++i) {
-            delete m_container[i];
-            m_container[i] = nullptr;
-        }
-        if (m_container)
-            delete []m_container;
-        m_container = nullptr;
+        qDeleteAll(m_container);
+        m_container.clear ();
     }
 
     inline uint bufferSize() const {
@@ -73,7 +67,9 @@ public:
 //               <<" current_tail "<<current_tail<<" tail "<<current_tail
 //              <<" next tail "<<next_tail;
 
-        copyBuffers (m_container[current_tail], other);
+        Buffer *b = m_container[current_tail];
+        copyBuffers (b, other);
+        m_container[current_tail] = b;
         m_tail.storeRelease (next_tail);
         return true;
     }
@@ -102,11 +98,11 @@ public:
 
 protected:
     inline bool copyBuffers(Buffer *dest, Buffer *src) {
-        if (!dest) {
+        if (!dest/* || !dest->data || dest->nbytes == 0*/) {
             qWarning()<<Q_FUNC_INFO<<"No dest buffer found";
             return false;
         }
-        if (!src) {
+        if (!src || !src->data || src->nbytes == 0) {
             qWarning()<<Q_FUNC_INFO<<"fill zero to dest buffer";
             memset (dest->data, 0, dest->size);
             dest->nbytes = dest->size;
@@ -130,7 +126,7 @@ private:
     int m_capacity;
     QAtomicInt m_tail;
     QAtomicInt m_head;
-    Buffer **m_container;
+    QList<Buffer *> m_container;
     QMutex m_mutex;
     QWaitCondition m_cnd;
 };

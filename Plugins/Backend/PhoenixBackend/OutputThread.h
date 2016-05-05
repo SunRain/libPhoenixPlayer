@@ -15,10 +15,10 @@ namespace PhoenixPlayer {
 //class PluginHost;
 class EqualizerMgr;
 
-//namespace OutPut {
-//class IOutPut;
-//class OutPutHost;
-//}
+namespace OutPut {
+class IOutPut;
+class OutPutHost;
+}
 
 namespace PlayBackend {
 //class BaseVolume;
@@ -68,8 +68,12 @@ protected:
 private:
     void updateEQ();
 private:
-    QAudioOutput *m_output;
+//    QAudioOutput *m_output;
+    OutPut::OutPutHost *m_outputHost;
+    OutPut::IOutPut *m_output;
+#if 0
     QIODevice *m_device;
+#endif
     EqualizerMgr *m_eq;
 //    StateHandler *m_handler;
 //    AudioParameters *m_audioParameters;

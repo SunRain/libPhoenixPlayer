@@ -5,7 +5,7 @@
 #include <QAudioFormat>
 #include <QAudioOutput>
 
-//#include "OutPut/IOutPut.h"
+#include "OutPut/IOutPut.h"
 #include "AudioParameters.h"
 //#include "Recycler.h"
 #include "Buffer.h"
@@ -19,8 +19,9 @@
 #include "Backend/SoftVolume.h"
 #include "Backend/BaseVisual.h"
 
+#include "PluginLoader.h"
 #include "PhoenixBackend_global.h"
-//#include "OutPut/OutPutHost.h"
+#include "OutPut/OutPutHost.h"
 
 extern "C" {
 #include "equ/iir.h"
@@ -30,10 +31,14 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
 
+using namespace OutPut;
+
 OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
     : QThread(parent)
     , m_output(nullptr)
+#if 0
     , m_device(nullptr)
+#endif
     , m_eq(EqualizerMgr::instance ())
 //    , m_handler(StateHandler::instance ())
     , m_visual(v)
@@ -53,7 +58,11 @@ OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
 //    , m_currentMilliseconds(0)
     , m_visBufferSize(0)
 {
-//    m_audioParameters = AudioParameters();
+    m_outputHost = phoenixPlayerLib->pluginLoader ()->curOutPutHost ();
+    if (m_outputHost) {
+        if (m_outputHost->isValid ())
+            m_output = m_outputHost->instance<IOutPut>();
+    }
     connect (m_eq, &EqualizerMgr::changed, this, &OutputThread::updateEQ);
 }
 
@@ -66,6 +75,7 @@ bool OutputThread::initialize(const AudioParameters &para)
 {
     m_audioParameters = para;
 
+#if 0
     if (m_device) {
         m_device->deleteLater ();
         m_device = nullptr;
@@ -79,11 +89,18 @@ bool OutputThread::initialize(const AudioParameters &para)
     format.setSampleRate (para.sampleRate ());
     format.setChannelCount (para.channels ());
     format.setCodec ("audio/pcm");
-//    format.setSampleType(QAudioFormat::SignedInt);
-//    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setSampleSize(para.sampleSize ());
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleSize(16);
 
     QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+    qDebug()<<Q_FUNC_INFO<<" preferredFormat "<<info.preferredFormat ();
+    qDebug()<<Q_FUNC_INFO<<" supportedByteOrders "<<info.supportedByteOrders ();
+    qDebug()<<Q_FUNC_INFO<<" supportedSampleRates "<<info.supportedSampleRates ();
+    qDebug()<<Q_FUNC_INFO<<" supportedSampleSizes "<<info.supportedSampleSizes ();
+    qDebug()<<Q_FUNC_INFO<<" supportedSampleTypes "<<info.supportedSampleTypes ();
+
+
     if (!info.isFormatSupported(format)) {
         qDebug()<<Q_FUNC_INFO<<"Raw audio format not supported by backend, cannot play audio.";
         return false;
@@ -95,6 +112,28 @@ bool OutputThread::initialize(const AudioParameters &para)
         qDebug()<<Q_FUNC_INFO<<"Open output error, code "<<error;
         return false;
     }
+#endif
+    if (!m_output && m_outputHost) {
+        if (m_outputHost->isValid ())
+            m_output = m_outputHost->instance<IOutPut>();
+    }
+    if (!m_output) {
+        qCritical()<<Q_FUNC_INFO<<"Can't find output!!";
+        return false;
+    }
+
+    if (!m_output->initialize (para)) {
+        qCritical()<<Q_FUNC_INFO<<"Can't init output";
+//        m_pluginHost = m_pluginLoader->getCurrentPluginHost (Common::PluginOutPut);
+//        m_pluginHost->unLoad ();
+        if (m_outputHost) {
+            if (!m_outputHost->unLoad ())
+                m_outputHost->forceUnload ();
+        }
+        m_output = nullptr;
+        return false;
+    }
+
     if (m_visBuffer) {
         delete[] m_visBuffer;
     }
@@ -186,12 +225,17 @@ void OutputThread::run()
             }
             SoftVolume::instance ()->changeVolume (&buffer,
                                                    m_audioParameters.channels (), m_audioParameters.format ());
-//            if (m_muted)
-//                memset(buffer.data, 0, b.nbytes);
+            if (m_muted)
+                memset(buffer.data, 0, buffer.nbytes);
             int write = 0;
             do {
+#if 0
                 int i = m_device->write (((char*)buffer.data + write),
                                          qMin((ulong)m_ring->bufferSize (), buffer.nbytes));
+#else
+                int i = m_output->writeAudio ((buffer.data + write),
+                                         qMin((ulong)m_ring->bufferSize (), buffer.nbytes));
+#endif
                 write += i;
                 buffer.nbytes -= i;
     //            qDebug()<<"write size "<<i<<" all write "<<write<<" left "<<b.nbytes;

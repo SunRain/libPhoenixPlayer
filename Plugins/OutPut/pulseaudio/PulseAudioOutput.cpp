@@ -29,17 +29,17 @@ PulseAudioOutput::~PulseAudioOutput()
 //    }
 }
 
-bool PulseAudioOutput::initialize(quint32 srate, int chan, AudioParameters::AudioFormat f)
+bool PulseAudioOutput::initialize(const AudioParameters &p)
 {
     qDebug()<<Q_FUNC_INFO<<QString("initialize for srate = [%1], chan = [%2], AudioFormat = [%3]")
-              .arg (srate).arg (chan).arg (f);
+              .arg (p.sampleRate ()).arg (p.channels ()).arg (p.format ());
 
     reset ();
     drain ();
     uninitialize ();
     pa_sample_spec ss;
 
-    switch (f) {
+    switch (p.format ()) {
     case AudioParameters::PCM_S8:
         ss.format = PA_SAMPLE_U8;
         break;
@@ -56,8 +56,8 @@ bool PulseAudioOutput::initialize(quint32 srate, int chan, AudioParameters::Audi
         ss.format = PA_SAMPLE_S16LE;
     }
 
-    ss.channels = chan;
-    ss.rate = srate;
+    ss.channels = p.channels ();
+    ss.rate = p.sampleRate ();
     int error;
     m_connection = pa_simple_new(NULL, // Use the default server.
                                  "PhoenixPlayer",               // Our application's name.
@@ -74,7 +74,7 @@ bool PulseAudioOutput::initialize(quint32 srate, int chan, AudioParameters::Audi
         return false;
     }
 //    Output::configure(freq, chan, format);
-    IOutPut::configure (srate, chan, f);
+//    IOutPut::configure (p, chan, f);
     return true;
 }
 
@@ -116,6 +116,11 @@ void PulseAudioOutput::reset()
     int error;
     if (m_connection)
         pa_simple_flush(m_connection, &error);
+}
+
+AudioParameters PulseAudioOutput::audioParameters() const
+{
+
 }
 
 void PulseAudioOutput::uninitialize()

@@ -47,7 +47,7 @@ public:
 //    unsigned long rate;       /*!< Buffer bitrate */
     ulong size;       /*!< Buffer size */
 
-    const static uint BUFFER_PERIOD = 512;
+    const static uint BUFFER_PERIOD = 512 * 2;
 };
 } //PhoenixPlayer
 #endif // BUFFER_H
