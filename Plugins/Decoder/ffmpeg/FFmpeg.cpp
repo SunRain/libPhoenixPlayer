@@ -39,6 +39,7 @@ FFmpeg::FFmpeg(QObject *parent)
     , current_in_seconds(0)
     , duration_in_seconds(0)
     , m_output_at(0)
+    , audio_stream_id(-1)
     , m_bitrate(0)
 {
     avformat_network_init ();
@@ -188,9 +189,19 @@ quint64 FFmpeg::durationInSeconds()
     return duration_in_seconds;
 }
 
-void FFmpeg::setPosition(qreal pos)
+void FFmpeg::setPosition(qreal sec)
 {
-
+    qDebug()<<Q_FUNC_INFO<<"set to pos "<<sec;
+    int64_t timestamp = int64_t(sec)*AV_TIME_BASE/1000;
+    qDebug()<<Q_FUNC_INFO<<"timestamp "<<timestamp;
+    if (container->start_time != (qint64)AV_NOPTS_VALUE)
+        timestamp += container->start_time;
+    m_seekTime = timestamp;
+    qDebug()<<Q_FUNC_INFO<<"now start_time "<<container->start_time<<" seek time "<<m_seekTime;
+    av_seek_frame(container, -1, timestamp, AVSEEK_FLAG_BACKWARD);
+    avcodec_flush_buffers(ctx);
+    av_free_packet(&packet);
+    m_tmpPacket.size = 0;
 }
 
 int FFmpeg::bitrate()

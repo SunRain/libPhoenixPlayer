@@ -34,7 +34,7 @@ public:
 
     virtual bool initialize(MediaResource *res) = 0;
     virtual quint64 durationInSeconds() = 0;
-    virtual void setPosition(qreal pos = 0) = 0;
+    virtual void setPosition(qreal sec = 0) = 0;
 //    virtual qreal getPosition() = 0;
     /*!
      * Returns current bitrate (in kbps).

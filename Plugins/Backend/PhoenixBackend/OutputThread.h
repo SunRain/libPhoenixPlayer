@@ -88,18 +88,18 @@ private:
 
     bool m_userStop;
     bool m_pause;
-//    bool m_prev_pause;
-//    bool m_finish;
+    bool m_prev_pause;
+    bool m_finish;
     bool m_useEq;
     bool m_muted;
-//    bool m_skip;
+    bool m_skip;
 
 //    int m_kbps;
 
 //    quint32 m_frequency;
-//    qint64 m_bytesPerMillisecond;
-//    qint64 m_totalWritten;
-//    qint64 m_currentMilliseconds;
+    qint64 m_bytesPerMillisecond;
+    qint64 m_totalWritten;
+    qint64 m_currentMilliseconds;
     qint64 m_visBufferSize;
 };
 

@@ -75,7 +75,7 @@ private:
 //    AudioParameters m_audioParameters;
     PhoenixPlayer::AudioParameters m_audioParameters;
 
-    bool m_use16BitOutputConvert;
+//    bool m_use16BitOutputConvert;
 //    AudioParameters *m_convertAudioParameters;
 
     QStringList m_decoderLibs;
@@ -88,8 +88,8 @@ private:
     uint m_bks;
     qint64 m_seekTime;
     qint64 m_startPos;
-    qint64 m_output_at;
-    qint64 m_output_size;
+//    qint64 m_output_at;
+//    qint64 m_output_size;
     int m_bitrate;
 //    unsigned char *m_output_buf;
 };

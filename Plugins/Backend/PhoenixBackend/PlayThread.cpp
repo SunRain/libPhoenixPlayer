@@ -72,7 +72,7 @@ PlayThread::PlayThread(QObject *parent, BaseVisual *v)
            <<" all decoderLibs "<<m_pluginLoader->pluginLibraries (Common::PluginDecoder);
 
 //    m_output_buf = 0;
-    m_output_size = 0;
+//    m_output_size = 0;
     m_bks = 0;
     m_startPos = -1;
     m_decoder = nullptr;
@@ -82,7 +82,8 @@ PlayThread::PlayThread(QObject *parent, BaseVisual *v)
     
     //FIXME where should we put the output convert flag?
 //    m_convertAudioParameters = nullptr;
-    m_use16BitOutputConvert = false;
+//    m_use16BitOutputConvert = false;
+    m_finish = false;
     
     m_muted = false;
     reset();
@@ -145,24 +146,26 @@ bool PlayThread::play()
 void PlayThread::seek(qint64 millisecond)
 {
     qDebug()<<Q_FUNC_INFO<<"=== seek to "<<millisecond;
+    m_ring->clear ();
     if (m_outputThread && m_outputThread->isRunning()) {
 //        m_outputThread->mutex()->lock ();
         m_outputThread->seek(millisecond, true);
 //        m_outputThread->mutex()->unlock();
-        if (isRunning()) {
-            mutex()->lock ();
-            m_seekTime = millisecond;
-            mutex()->unlock();
-        }
+//        if (isRunning()) {
+//            mutex()->lock ();
+//            m_seekTime = millisecond;
+//            mutex()->unlock();
+//        }
     }
+    m_seekTime = millisecond;
 }
 
 void PlayThread::stop()
 {
     qDebug()<<Q_FUNC_INFO<<"===";
-    m_mutex.lock ();
+//    m_mutex.lock ();
     m_user_stop = true;
-    m_mutex.unlock ();
+//    m_mutex.unlock ();
 
 //    if (m_outputThread)
 //        m_outputThread->recycler ()->cond ()->wakeAll ();
@@ -193,6 +196,7 @@ void PlayThread::stop()
     }
     //FIXME should clear decoder?
 
+    m_ring->clear ();
     //reset values
     reset ();
 
@@ -298,6 +302,7 @@ void PlayThread::changeMedia(MediaResource *res, quint64 startSec)
         return;
     }
 
+    m_bitrate = m_decoder->bitrate ();
 //    m_audioParameters = m_decoder->audioParameters ();
      qDebug()<<Q_FUNC_INFO<<"m_decoder->audioParameters "<<m_decoder->audioParameters ().parametersInfo ();
 
@@ -334,27 +339,44 @@ void PlayThread::run()
     Buffer buffer(m_ring->bufferSize ());
     addOffset (); //offset
     m_outputThread->start ();
-    while (!m_done) {
+    while (!m_done && !m_finish) {
 //        if (m_ring->full ()) {
 //            continue;
 //        }
+        if (m_seekTime >= 0) {
+            m_ring->clear ();
+            m_decoder->setPosition (m_seekTime);
+            m_seekTime = -1;
+        }
 
         while (m_ring->full ()) {
+            m_done = m_user_stop;
+            if (m_done) break;
             qApp->processEvents ();
             QThread::yieldCurrentThread ();
         }
+        m_done = m_user_stop;
+        if (m_done) break;
 
 //        int ret = m_decode->runDecode ((char*)b.data, BUFFER_SIZE);
         int ret = m_decoder->runDecode ((char*)buffer.data, m_ring->bufferSize ());
         if (ret <= 0) {
             qDebug()<<"== loop finish";
             m_done = true;
+            m_finish = true;
             break;
         }
+        if (m_finish)
+            finish ();
+
         if (m_done) break;
         buffer.nbytes = ret;
+
         while (!m_ring->push (&buffer)) {
             qDebug()<<" >> push buffer fail";
+            m_done = m_user_stop;
+            if (m_done) break;
+            if (m_seekTime >= 0) break;
             qApp->processEvents ();
             QThread::yieldCurrentThread ();
         }
@@ -479,7 +501,7 @@ void PlayThread::reset()
     m_done = false;
     m_finish = false;
     m_seekTime = -1;
-    m_output_at = 0;
+//    m_output_at = 0;
     m_user_stop = false;
     m_bitrate = 0;
     m_next = false;

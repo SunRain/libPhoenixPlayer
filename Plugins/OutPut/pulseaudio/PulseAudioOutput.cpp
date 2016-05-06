@@ -123,6 +123,16 @@ AudioParameters PulseAudioOutput::audioParameters() const
 
 }
 
+void PulseAudioOutput::suspend()
+{
+    //dummy
+}
+
+void PulseAudioOutput::resume()
+{
+    //dummy
+}
+
 void PulseAudioOutput::uninitialize()
 {
     if (m_connection) {

@@ -28,6 +28,8 @@ public:
     void drain();
     void reset();
     AudioParameters audioParameters() const;
+    void suspend();
+    void resume();
 private:
     void uninitialize();
     pa_simple *m_connection;

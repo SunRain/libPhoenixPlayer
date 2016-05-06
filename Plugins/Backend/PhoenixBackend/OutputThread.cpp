@@ -33,6 +33,28 @@ namespace PhoenixBackend {
 
 using namespace OutPut;
 
+//static functions
+static inline void s8_to_s16(qint8 *in, qint16 *out, qint64 samples)
+{
+    for(qint64 i = 0; i < samples; ++i)
+        out[i] = in[i] << 8;
+    return;
+}
+
+static inline void s24_to_s16(qint32 *in, qint16 *out, qint64 samples)
+{
+    for(qint64 i = 0; i < samples; ++i)
+        out[i] = in[i] >> 8;
+    return;
+}
+
+static inline void s32_to_s16(qint32 *in, qint16 *out, qint64 samples)
+{
+    for(qint64 i = 0; i < samples; ++i)
+        out[i] = in[i] >> 16;
+    return;
+}
+
 OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
     : QThread(parent)
     , m_output(nullptr)
@@ -46,16 +68,16 @@ OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
     , m_visBuffer(nullptr)
     , m_userStop(false)
     , m_pause(false)
-//    , m_prev_pause(false)
-//    , m_finish(false)
+    , m_prev_pause(false)
+    , m_finish(false)
     , m_useEq(false)
     , m_muted(false)
-//    , m_skip(false)
+    , m_skip(false)
 //    , m_kbps(0)
 //    , m_frequency(0)
-//    , m_bytesPerMillisecond(-1)
-//    , m_totalWritten(0)
-//    , m_currentMilliseconds(0)
+    , m_bytesPerMillisecond(0)
+    , m_totalWritten(0)
+    , m_currentMilliseconds(0)
     , m_visBufferSize(0)
 {
     m_outputHost = phoenixPlayerLib->pluginLoader ()->curOutPutHost ();
@@ -134,6 +156,8 @@ bool OutputThread::initialize(const AudioParameters &para)
         return false;
     }
 
+    m_bytesPerMillisecond = para.sampleRate () * para.channels () * para.sampleSize () /1000;
+
     if (m_visBuffer) {
         delete[] m_visBuffer;
     }
@@ -154,50 +178,65 @@ bool OutputThread::isPaused()
 
 void OutputThread::togglePlayPause()
 {
-
+    qDebug()<<Q_FUNC_INFO<<"==== change ======== ";
+//    m_mutex.lock ();
+    m_pause = !m_pause;
+    qDebug()<<Q_FUNC_INFO<<"==== change2 ======== ";
+//    m_mutex.unlock ();
+    //TODO change play state
 }
 
 void OutputThread::reset()
 {
 //    m_frequency = 0;
-//    m_totalWritten = 0;
-//    m_currentMilliseconds = -1;
-//    m_bytesPerMillisecond = 0;
+    m_totalWritten = 0;
+    m_currentMilliseconds = 0;
+    m_bytesPerMillisecond = 0;
 //    m_userStop = false;
-//    m_finish = false;
+    m_finish = false;
 //    m_kbps = 0;
-//    m_skip = false;
+    m_skip = false;
     m_pause = false;
-//    m_prev_pause = false;
+    m_prev_pause = false;
     m_useEq = false;
 }
 
 void OutputThread::stop()
 {
     m_userStop = true;
+    reset ();
 }
 
 void OutputThread::setMuted(bool muted)
 {
-
+    m_muted = muted;
 }
 
 void OutputThread::finish()
 {
-
+    m_finish = true;
 }
 
 void OutputThread::seek(qint64 pos, bool reset)
 {
-
+    qDebug()<<Q_FUNC_INFO<<"seek to "<<pos<<" should reset "<<reset;
+    m_totalWritten = pos * m_bytesPerMillisecond;
+    m_currentMilliseconds = 0;
+    m_skip = this->isRunning () && reset;
+    qDebug()<<Q_FUNC_INFO<<" m_skip "<<m_skip;
 }
 
 void OutputThread::run()
 {
+    qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<<<<<<";
     Buffer buffer(m_ring->bufferSize ());
     bool done = false;
     while (!done) {
+//        if (m_pause) {
+//            continue;
+//        }
         if (m_ring->empty ()) {
+            qDebug()<<"###### wait";
             continue;
         }
         if (!m_ring->pop (&buffer)) {
@@ -206,7 +245,34 @@ void OutputThread::run()
         if (m_muted) {
             continue;
         }
-        done = m_userStop;
+        qDebug()<<"########### step 1";
+
+        //check if pause or resume when start a new wirte loop
+        m_mutex.lock ();
+        if (m_pause != m_prev_pause) {
+            if (m_pause) {
+                m_output->suspend ();
+                m_mutex.unlock ();
+                m_prev_pause = m_pause;
+                continue;
+            } else {
+                m_output->resume ();
+            }
+            m_prev_pause = m_pause;
+        }
+        done = m_userStop || m_finish;
+
+        //if pause, loop to wait for resume
+        while (!done && m_pause) {
+//            QThread::yieldCurrentThread ();
+//            qDebug()<<"loop in pause";
+//            m_mutex.lock ();
+            done = m_userStop || m_finish;
+//            m_mutex.unlock ();
+            continue;
+        }
+        m_mutex.unlock ();
+
         if (buffer.nbytes >0 && buffer.data) {
             if (m_useEq) {
                 switch(m_audioParameters.format ()) {
@@ -227,22 +293,65 @@ void OutputThread::run()
                                                    m_audioParameters.channels (), m_audioParameters.format ());
             if (m_muted)
                 memset(buffer.data, 0, buffer.nbytes);
+
+            //change audio to 16bit
+            switch (m_audioParameters.format ()) {
+            case AudioParameters::PCM_S8: {
+                unsigned char *out = new unsigned char[buffer.nbytes*2];
+                s8_to_s16((qint8 *)buffer.data, (qint16 *) out, buffer.nbytes);
+                delete [] buffer.data;
+                buffer.data = out;
+                buffer.nbytes <<= 1;
+                break;
+            }
+            case AudioParameters::PCM_S24LE: {
+                s24_to_s16((qint32 *)buffer.data, (qint16 *)buffer.data, buffer.nbytes >> 2);
+                buffer.nbytes >>= 1;
+                break;
+            }
+            case AudioParameters::PCM_S32LE: {
+                s32_to_s16((qint32 *)buffer.data, (qint16 *)buffer.data, buffer.nbytes >> 2);
+                buffer.nbytes >>= 1;
+                break;
+            }
+            default:
+                break;
+            }
+
+            //write to output
             int write = 0;
-            do {
+            while (buffer.nbytes > 0 && !m_pause && !m_prev_pause) {
+                if (m_skip) {
+                    m_skip = false;
+                    m_output->reset ();
+                    break;
+                }
+                if (m_muted) break;
+
+                //when pause in write loop
+                if (m_pause) {
+                    continue;
+                }
+                qDebug()<<"##### write to output";
 #if 0
                 int i = m_device->write (((char*)buffer.data + write),
                                          qMin((ulong)m_ring->bufferSize (), buffer.nbytes));
 #else
                 int i = m_output->writeAudio ((buffer.data + write),
-                                         qMin((ulong)m_ring->bufferSize (), buffer.nbytes));
+                                              qMin((ulong)m_ring->bufferSize (), buffer.nbytes));
 #endif
                 write += i;
                 buffer.nbytes -= i;
-    //            qDebug()<<"write size "<<i<<" all write "<<write<<" left "<<b.nbytes;
+                qDebug()<<"write size "<<i<<" all write "<<write<<" left "<<buffer.nbytes;
 //                qApp->processEvents ();
-            } while (buffer.nbytes > 0);
+            }
         }
     }
+    //write remain data
+    if (m_finish) {
+        m_output->drain ();
+    }
+    //TODO emit play stoped
 
 }
 
