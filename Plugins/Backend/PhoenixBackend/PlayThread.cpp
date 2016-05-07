@@ -174,6 +174,9 @@ void PlayThread::stop()
         this->quit ();
         this->wait ();
     }
+    if (this->isRunning ()) {
+        qDebug()<<Q_FUNC_INFO<<"PlayThread still running";
+    }
     if (m_outputThread) {
 //        m_outputThread->mutex ()->lock ();
         m_outputThread->finish ();

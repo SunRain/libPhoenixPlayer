@@ -156,6 +156,8 @@ bool OutputThread::initialize(const AudioParameters &para)
         return false;
     }
 
+    reset ();
+
     m_bytesPerMillisecond = para.sampleRate () * para.channels () * para.sampleSize () /1000;
 
     if (m_visBuffer) {
@@ -192,7 +194,7 @@ void OutputThread::reset()
     m_totalWritten = 0;
     m_currentMilliseconds = 0;
     m_bytesPerMillisecond = 0;
-//    m_userStop = false;
+    m_userStop = false;
     m_finish = false;
 //    m_kbps = 0;
     m_skip = false;
@@ -204,7 +206,7 @@ void OutputThread::reset()
 void OutputThread::stop()
 {
     m_userStop = true;
-    reset ();
+//    reset ();
 }
 
 void OutputThread::setMuted(bool muted)
@@ -248,7 +250,7 @@ void OutputThread::run()
         qDebug()<<"########### step 1";
 
         //check if pause or resume when start a new wirte loop
-        m_mutex.lock ();
+//        m_mutex.lock ();
         if (m_pause != m_prev_pause) {
             if (m_pause) {
                 m_output->suspend ();
@@ -271,7 +273,7 @@ void OutputThread::run()
 //            m_mutex.unlock ();
             continue;
         }
-        m_mutex.unlock ();
+//        m_mutex.unlock ();
 
         if (buffer.nbytes >0 && buffer.data) {
             if (m_useEq) {
