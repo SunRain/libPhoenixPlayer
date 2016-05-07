@@ -181,10 +181,12 @@ bool OutputThread::isPaused()
 void OutputThread::togglePlayPause()
 {
     qDebug()<<Q_FUNC_INFO<<"==== change ======== ";
-//    m_mutex.lock ();
+    m_mutex.lock ();
     m_pause = !m_pause;
     qDebug()<<Q_FUNC_INFO<<"==== change2 ======== ";
-//    m_mutex.unlock ();
+    m_mutex.unlock ();
+//    m_ring->cond ()->wakeAll ();
+    m_wait.wakeAll ();
     //TODO change play state
 }
 
@@ -233,24 +235,38 @@ void OutputThread::run()
     qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<<<<<<";
     Buffer buffer(m_ring->bufferSize ());
     bool done = false;
+    bool poped = true;
     while (!done) {
 //        if (m_pause) {
 //            continue;
 //        }
-        if (m_ring->empty ()) {
-            qDebug()<<"###### wait";
-            continue;
+//        if (m_ring->empty ()) {
+//            qDebug()<<"###### wait";
+//            continue;
+//        }
+//        if (!m_ring->pop (&buffer)) {
+//            continue;
+//        }
+        qDebug()<<" xxxxxxxxxxxxxxxxxx "<<Q_FUNC_INFO<<" xxxxxxxxxx";
+        m_ring->mutex ()->lock ();
+        poped = m_ring->pop (&buffer);
+        if (m_ring->empty () || !poped) {
+            m_ring->fullCond ()->wakeAll ();
+            m_ring->emptyCond ()->wait (m_ring->mutex ());
+//            continue;
         }
-        if (!m_ring->pop (&buffer)) {
-            continue;
+        if (poped) {
+            m_ring->fullCond ()->wakeAll ();
         }
+        m_ring->mutex ()->unlock ();
+
         if (m_muted) {
             continue;
         }
         qDebug()<<"########### step 1";
 
         //check if pause or resume when start a new wirte loop
-//        m_mutex.lock ();
+        m_mutex.lock ();
         if (m_pause != m_prev_pause) {
             if (m_pause) {
                 m_output->suspend ();
@@ -262,6 +278,9 @@ void OutputThread::run()
             }
             m_prev_pause = m_pause;
         }
+
+//        m_ring->mutex ()->lock ();
+
         done = m_userStop || m_finish;
 
         //if pause, loop to wait for resume
@@ -269,11 +288,16 @@ void OutputThread::run()
 //            QThread::yieldCurrentThread ();
 //            qDebug()<<"loop in pause";
 //            m_mutex.lock ();
+//            m_mutex.unlock ();
+//            m_ring->cond ()->wait (m_ring->mutex ());
+            m_wait.wait (&m_mutex);
+//            m_mutex.lock ();
             done = m_userStop || m_finish;
 //            m_mutex.unlock ();
-            continue;
+//            continue;
         }
-//        m_mutex.unlock ();
+//        m_ring->mutex ()->unlock ();
+        m_mutex.unlock ();
 
         if (buffer.nbytes >0 && buffer.data) {
             if (m_useEq) {
@@ -322,7 +346,7 @@ void OutputThread::run()
 
             //write to output
             int write = 0;
-            while (buffer.nbytes > 0 && !m_pause && !m_prev_pause) {
+            while (buffer.nbytes > 0 /*&& !m_pause && !m_prev_pause*/) {
                 if (m_skip) {
                     m_skip = false;
                     m_output->reset ();
@@ -331,9 +355,15 @@ void OutputThread::run()
                 if (m_muted) break;
 
                 //when pause in write loop
+//                m_ring->mutex ()->lock ();
+                m_mutex.lock ();
                 if (m_pause) {
-                    continue;
+//                    continue;
+//                    m_ring->cond ()->wait (m_ring->mutex ());
+                    m_wait.wait (&m_mutex);
                 }
+//                m_ring->mutex ()->unlock ();
+                m_mutex.unlock ();
                 qDebug()<<"##### write to output";
 #if 0
                 int i = m_device->write (((char*)buffer.data + write),

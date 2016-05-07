@@ -352,12 +352,21 @@ void PlayThread::run()
             m_seekTime = -1;
         }
 
-        while (m_ring->full ()) {
-            m_done = m_user_stop;
-            if (m_done) break;
-            qApp->processEvents ();
-            QThread::yieldCurrentThread ();
+//        while (m_ring->full ()) {
+//            m_done = m_user_stop;
+//            if (m_done) break;
+//            qApp->processEvents ();
+//            QThread::yieldCurrentThread ();
+//        }
+        qDebug()<<"************ "<<Q_FUNC_INFO<<" ******************";
+
+        m_ring->mutex ()->lock ();
+        if (m_ring->full ()) {
+            m_ring->emptyCond ()->wakeAll ();
+            m_ring->fullCond ()->wait (m_ring->mutex ());
         }
+        m_ring->mutex ()->unlock ();
+
         m_done = m_user_stop;
         if (m_done) break;
 
@@ -380,8 +389,14 @@ void PlayThread::run()
             m_done = m_user_stop;
             if (m_done) break;
             if (m_seekTime >= 0) break;
-            qApp->processEvents ();
-            QThread::yieldCurrentThread ();
+
+            m_mutex.lock ();
+            m_ring->emptyCond ()->wakeAll ();
+            m_ring->fullCond ()->wait (&m_mutex);
+            m_mutex.unlock ();
+
+//            qApp->processEvents ();
+//            QThread::yieldCurrentThread ();
         }
     }
 }

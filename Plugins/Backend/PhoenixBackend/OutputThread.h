@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QWaitCondition>
 
 #include "PhoenixBackend_global.h"
 #include "AudioParameters.h"
@@ -83,6 +84,7 @@ private:
     PhoenixPlayer::AudioParameters m_audioParameters;
 
     QMutex m_mutex;
+    QWaitCondition m_wait;
 
     unsigned char *m_visBuffer;
 

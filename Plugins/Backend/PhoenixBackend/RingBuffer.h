@@ -92,8 +92,11 @@ public:
         return &m_mutex;
     }
 
-    QWaitCondition *cond() {
+    QWaitCondition *fullCond() {
         return &m_cnd;
+    }
+    QWaitCondition *emptyCond() {
+        return &m_cnd2;
     }
 
 protected:
@@ -129,6 +132,7 @@ private:
     QList<Buffer *> m_container;
     QMutex m_mutex;
     QWaitCondition m_cnd;
+    QWaitCondition m_cnd2;
 };
 
 } //PhoenixBackend
