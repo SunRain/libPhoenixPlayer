@@ -94,6 +94,7 @@ public:
     PhoenixPlayer::AudioParameters audioParameters() const;
 
 private:
+    void reset();
     bool close();
     void fillBuffer();
     qint64 tryDecode();

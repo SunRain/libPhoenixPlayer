@@ -67,6 +67,7 @@ bool FFmpeg::initialize(MediaResource *res)
     if (container) {
         close ();
     }
+    reset();
 
     QString file = m_resource->getUri ();
 
@@ -175,8 +176,10 @@ bool FFmpeg::initialize(MediaResource *res)
     //    remainder_read=0;
     //    remainder_counter=0;
 
-    if (!frame)
+    if (!frame) {
+        qDebug()<<Q_FUNC_INFO<<"re initialize frame";
         frame = av_frame_alloc();
+    }
 
     current_in_seconds = 0;
     qDebug()<<">>>>>>>>>>> "<<Q_FUNC_INFO<<" opend <<<<<<<<<";
@@ -255,6 +258,17 @@ qint64 FFmpeg::runDecode(char *data, qint64 maxSize)
 AudioParameters FFmpeg::audioParameters() const
 {
     return m_parameter;
+}
+
+void FFmpeg::reset()
+{
+    current_in_seconds = 0;
+    duration_in_seconds = 0;
+    m_output_at = 0;
+    audio_stream_id = -1;
+    m_bitrate = 0;
+    m_tmpPacket.size = 0;
+    m_tmpPacket.data = nullptr;
 }
 
 bool FFmpeg::close()
