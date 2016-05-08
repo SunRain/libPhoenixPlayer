@@ -23,6 +23,8 @@
 #include "PhoenixBackend_global.h"
 #include "OutPut/OutPutHost.h"
 
+#include "StateHandler.h"
+
 extern "C" {
 #include "equ/iir.h"
 }
@@ -85,6 +87,8 @@ OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
         if (m_outputHost->isValid ())
             m_output = m_outputHost->instance<IOutPut>();
     }
+    m_handler = StateHandler::instance();
+
     connect (m_eq, &EqualizerMgr::changed, this, &OutputThread::updateEQ);
 }
 
@@ -180,14 +184,15 @@ bool OutputThread::isPaused()
 
 void OutputThread::togglePlayPause()
 {
-    qDebug()<<Q_FUNC_INFO<<"==== change ======== ";
+//    qDebug()<<Q_FUNC_INFO<<"==== change ======== ";
     m_mutex.lock ();
     m_pause = !m_pause;
-    qDebug()<<Q_FUNC_INFO<<"==== change2 ======== ";
+//    qDebug()<<Q_FUNC_INFO<<"==== change2 ======== ";
     m_mutex.unlock ();
 //    m_ring->cond ()->wakeAll ();
     m_wait.wakeAll ();
-    //TODO change play state
+    PlayState state = m_pause ? PlayState::Paused : PlayState::Playing;
+    m_handler->dispatch(state);
 }
 
 void OutputThread::reset()
@@ -236,6 +241,7 @@ void OutputThread::run()
     Buffer buffer(m_ring->bufferSize ());
     bool done = false;
     bool poped = true;
+    m_handler->dispatch(PlayState::Playing);
     while (!done) {
 //        if (m_pause) {
 //            continue;
@@ -263,7 +269,7 @@ void OutputThread::run()
         if (m_muted) {
             continue;
         }
-        qDebug()<<"########### step 1";
+//        qDebug()<<"########### step 1";
 
         //check if pause or resume when start a new wirte loop
         m_mutex.lock ();
@@ -297,6 +303,9 @@ void OutputThread::run()
 //            continue;
         }
 //        m_ring->mutex ()->unlock ();
+
+        status ();
+
         m_mutex.unlock ();
 
         if (buffer.nbytes >0 && buffer.data) {
@@ -343,6 +352,7 @@ void OutputThread::run()
             default:
                 break;
             }
+            m_audioParameters.setFormat (AudioParameters::PCM_S16LE);
 
             //write to output
             int write = 0;
@@ -373,6 +383,7 @@ void OutputThread::run()
                                               qMin((ulong)m_ring->bufferSize (), buffer.nbytes));
 #endif
                 write += i;
+                m_totalWritten += i;
                 buffer.nbytes -= i;
                 qDebug()<<"write size "<<i<<" all write "<<write<<" left "<<buffer.nbytes;
 //                qApp->processEvents ();
@@ -383,8 +394,8 @@ void OutputThread::run()
     if (m_finish) {
         m_output->drain ();
     }
-    //TODO emit play stoped
 
+    m_handler->dispatch(PlayState::Stopped);
 }
 
 void OutputThread::updateEQ()
@@ -405,6 +416,20 @@ void OutputThread::updateEQ()
         }
     }
     m_useEq = m_eq->enabled ();
+}
+
+void OutputThread::status()
+{
+    qint64 ct = m_totalWritten / m_bytesPerMillisecond - m_output->latency();
+
+    if (ct < 0)
+        ct = 0;
+
+    if (ct > m_currentMilliseconds) {
+        m_currentMilliseconds = ct;
+        m_handler->dispatchElapsed(m_currentMilliseconds);
+    }
+//    qDebug()<<Q_FUNC_INFO<<">>>>>>> m_currentMilliseconds "<<m_currentMilliseconds;
 }
 
 

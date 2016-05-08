@@ -342,6 +342,8 @@ void PlayThread::run()
     Buffer buffer(m_ring->bufferSize ());
     addOffset (); //offset
     m_outputThread->start ();
+    m_handler->dispatch(PlayState::Playing);
+    m_handler->dispatch(m_decoder->durationInSeconds() * 1000);
     while (!m_done && !m_finish) {
 //        if (m_ring->full ()) {
 //            continue;

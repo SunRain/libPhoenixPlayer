@@ -28,6 +28,7 @@ class BaseVisual;
 namespace PhoenixBackend {
 
 class RingBuffer;
+class StateHandler;
 class OutputThread : public QThread
 {
     Q_OBJECT
@@ -68,6 +69,7 @@ protected:
 
 private:
     void updateEQ();
+    void status();
 private:
 //    QAudioOutput *m_output;
     OutPut::OutPutHost *m_outputHost;
@@ -80,6 +82,7 @@ private:
 //    AudioParameters *m_audioParameters;
     BaseVisual *m_visual;
     RingBuffer *m_ring;
+    StateHandler *m_handler;
 
     PhoenixPlayer::AudioParameters m_audioParameters;
 

@@ -211,7 +211,7 @@ int FFmpeg::bitrate()
 
 qint64 FFmpeg::runDecode(char *data, qint64 maxSize)
 {
-    qDebug()<<" >>>> "<<Q_FUNC_INFO<<" <<<<";
+//    qDebug()<<" >>>> "<<Q_FUNC_INFO<<" <<<<";
     if (!m_output_at)
         fillBuffer ();
 
@@ -220,24 +220,24 @@ qint64 FFmpeg::runDecode(char *data, qint64 maxSize)
         return 0;
     }
     qint64 len = qMin(m_output_at, maxSize);
-    qDebug()<<"try to copy buffer size "<<len;
+//    qDebug()<<"try to copy buffer size "<<len;
 
     if (av_sample_fmt_is_planar (ctx->sample_fmt) && m_parameter.channels () > 1) {
-        qDebug()<<" try to decode planar frame ";
+//        qDebug()<<" try to decode planar frame ";
         int bps = av_get_bytes_per_sample (ctx->sample_fmt);
-        qDebug()<<" bps "<<bps;
+//        qDebug()<<" bps "<<bps;
         for (int i=0; i<(len>>1); i+=bps) {
             memcpy (data+2*i, frame->extended_data[0]+i, bps);
             memcpy (data+2*i+bps, frame->extended_data[1]+i, bps);
         }
         m_output_at -= len;
-        qDebug()<<" in planar frame, now out put at "<<m_output_at;
+//        qDebug()<<" in planar frame, now out put at "<<m_output_at;
         memmove (frame->extended_data[0], frame->extended_data[0]+len/2, m_output_at/2);
         memmove (frame->extended_data[1], frame->extended_data[1]+len/2, m_output_at/2);
     } else {
         memcpy (data, frame->extended_data[0], len);
         m_output_at -= len;
-        qDebug()<<" no planar frame, now out put at "<<m_output_at;
+//        qDebug()<<" no planar frame, now out put at "<<m_output_at;
         memmove (frame->extended_data[0], frame->extended_data[0]+len, m_output_at);
     }
     if (ctx->sample_fmt == AV_SAMPLE_FMT_FLTP || ctx->sample_fmt == AV_SAMPLE_FMT_FLT) {
@@ -248,7 +248,7 @@ qint64 FFmpeg::runDecode(char *data, qint64 maxSize)
             out[i] = qBound(-1.0f, in[i], +1.0f) * (double) 0x7fffffff;
         }
     }
-    qDebug()<<" >>>> "<<Q_FUNC_INFO<<" finish <<<<";
+//    qDebug()<<" >>>> "<<Q_FUNC_INFO<<" finish <<<<";
     return len;
 }
 
@@ -279,10 +279,10 @@ bool FFmpeg::close()
 
 void FFmpeg::fillBuffer()
 {
-    qDebug()<<" >>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<< ";
+//    qDebug()<<" >>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<< ";
 
     while (!m_output_at) {
-        qDebug()<<"loop , current tmpPacket.size "<<m_tmpPacket.size;
+//        qDebug()<<"loop , current tmpPacket.size "<<m_tmpPacket.size;
         if (!m_tmpPacket.size) {
             int packetFinishRet = av_read_frame(container, &packet);
             if (packetFinishRet < 0) {
@@ -302,12 +302,12 @@ void FFmpeg::fillBuffer()
             m_tmpPacket.size = packet.size;
             m_tmpPacket.data = packet.data;
         }
-        qDebug()<<"packet size "<<packet.size<<" pts "<<packet.pts<<" dts "<<packet.dts
-               <<" streamIndext "<<packet.stream_index<<" side_data_elems "<<packet.side_data_elems
-              <<" duration "<<packet.duration<<" pos "<<packet.pos;
+//        qDebug()<<"packet size "<<packet.size<<" pts "<<packet.pts<<" dts "<<packet.dts
+//               <<" streamIndext "<<packet.stream_index<<" side_data_elems "<<packet.side_data_elems
+//              <<" duration "<<packet.duration<<" pos "<<packet.pos;
 
         m_output_at = tryDecode ();
-        qDebug()<<" get m_output_at "<<m_output_at;
+//        qDebug()<<" get m_output_at "<<m_output_at;
 
         if (m_output_at < 0) {
             m_output_at = 0;
@@ -328,23 +328,23 @@ void FFmpeg::fillBuffer()
             continue;
         }
     }
-    qDebug()<<" >>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" finish <<<<<<<<<<<<<<<<<<< ";
+//    qDebug()<<" >>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" finish <<<<<<<<<<<<<<<<<<< ";
 }
 
 qint64 FFmpeg::tryDecode()
 {
     int out_size = 0;
     int got_frame = 0;
-    qDebug()<<">>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<< ";
+//    qDebug()<<">>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<< ";
 
-    qDebug()<<" current m_tmpPacket size is "<<m_tmpPacket.size;
+//    qDebug()<<" current m_tmpPacket size is "<<m_tmpPacket.size;
     if (packet.stream_index == audio_stream_id) {
         int l = avcodec_decode_audio4 (ctx, frame, &got_frame, &m_tmpPacket);
         if (l < 0) {
             qCritical()<<Q_FUNC_INFO<<"Decode audio error, error code="<<l;
             return l;
         }
-        qDebug()<<" bytes consumed from the input m_tmpPacket is "<<l;
+//        qDebug()<<" bytes consumed from the input m_tmpPacket is "<<l;
 
         if (got_frame) {
             out_size = av_samples_get_buffer_size (0, ctx->channels,
@@ -353,16 +353,16 @@ qint64 FFmpeg::tryDecode()
             qWarning()<<Q_FUNC_INFO<<"no frame could be decoded, maybe this is an error!!";
             out_size = 0;
         }
-        qDebug()<<" required buffer size "<<out_size;
+//        qDebug()<<" required buffer size "<<out_size;
         m_tmpPacket.data += l;
         m_tmpPacket.size -= l;
 
-        qDebug()<<" after m_tmpPacket size is "<<m_tmpPacket.size;
+//        qDebug()<<" after m_tmpPacket size is "<<m_tmpPacket.size;
     }
     if (!m_tmpPacket.size && packet.data)
         av_free_packet(&packet);
 
-    qDebug()<<">>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" finish <<<<<<<<<<<<<<< ";
+//    qDebug()<<">>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" finish <<<<<<<<<<<<<<< ";
 
     return out_size;
 }

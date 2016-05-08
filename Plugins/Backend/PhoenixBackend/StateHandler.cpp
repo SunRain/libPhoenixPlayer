@@ -10,11 +10,12 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
 
-#define TICK_INTERVAL 250
+#define TICK_INTERVAL 500
 #define PREFINISH_TIME 7000
 
 StateHandler::StateHandler(QObject *parent)
-    : QObject(parent), m_mutex(QMutex::Recursive)
+    : QObject(parent)
+    , m_mutex(QMutex::Recursive)
 {
     m_elapsed = -1;
     m_length = 0;
@@ -31,6 +32,17 @@ StateHandler::~StateHandler()
 
 }
 
+//currentMilliseconds
+void StateHandler::dispatchElapsed(qint64 currentMilliseconds)
+{
+    m_mutex.lock();
+    if (qAbs(m_elapsed - currentMilliseconds) > TICK_INTERVAL) {
+        m_elapsed = currentMilliseconds;
+        emit elapsedChanged(currentMilliseconds);
+    }
+    m_mutex.unlock();
+}
+
 //StateHandler *StateHandler::instance()
 //{
 //    static QMutex mutex;
@@ -45,41 +57,41 @@ StateHandler::~StateHandler()
 //    return scp.data();
 //}
 
-void StateHandler::dispatch(qint64 elapsed, int bitrate, quint32 frequency, int precision, int channels)
-{
-    m_mutex.lock();
-    if (qAbs(m_elapsed - elapsed) > TICK_INTERVAL) {
-        m_elapsed = elapsed;
-        emit (elapsedChanged(elapsed));
+//void StateHandler::dispatch(qint64 elapsed, int bitrate, quint32 frequency, int precision, int channels)
+//{
+//    m_mutex.lock();
+//    if (qAbs(m_elapsed - elapsed) > TICK_INTERVAL) {
+//        m_elapsed = elapsed;
+//        emit (elapsedChanged(elapsed));
 
-        if (m_bitrate != bitrate) {
-            m_bitrate = bitrate;
-            emit (bitrateChanged(bitrate));
-        }
-        //TODO:  EVENT_NEXT_TRACK_REQUEST
-//        if((SoundCore::instance()->totalTime() > PREFINISH_TIME)
-//                 && (m_length - m_elapsed < PREFINISH_TIME)
-//                 && m_sendAboutToFinish)
-//        {
-//            m_sendAboutToFinish = false;
-//            if(m_length - m_elapsed > PREFINISH_TIME/2)
-//                qApp->postEvent(parent(), new QEvent(EVENT_NEXT_TRACK_REQUEST));
+//        if (m_bitrate != bitrate) {
+//            m_bitrate = bitrate;
+//            emit (bitrateChanged(bitrate));
 //        }
-    }
-    if (m_frequency != frequency) {
-        m_frequency = frequency;
-        emit frequencyChanged(frequency);
-    }
-    if (m_precision != precision) {
-        m_precision = precision;
-        emit sampleSizeChanged(precision);
-    }
-    if (m_channels != channels) {
-        m_channels = channels;
-        emit channelsChanged(channels);
-    }
-    m_mutex.unlock();
-}
+//        //TODO:  EVENT_NEXT_TRACK_REQUEST
+////        if((SoundCore::instance()->totalTime() > PREFINISH_TIME)
+////                 && (m_length - m_elapsed < PREFINISH_TIME)
+////                 && m_sendAboutToFinish)
+////        {
+////            m_sendAboutToFinish = false;
+////            if(m_length - m_elapsed > PREFINISH_TIME/2)
+////                qApp->postEvent(parent(), new QEvent(EVENT_NEXT_TRACK_REQUEST));
+////        }
+//    }
+//    if (m_frequency != frequency) {
+//        m_frequency = frequency;
+//        emit frequencyChanged(frequency);
+//    }
+//    if (m_precision != precision) {
+//        m_precision = precision;
+//        emit sampleSizeChanged(precision);
+//    }
+//    if (m_channels != channels) {
+//        m_channels = channels;
+//        emit channelsChanged(channels);
+//    }
+//    m_mutex.unlock();
+//}
 
 void StateHandler::dispatch(qint64 length)
 {
@@ -91,32 +103,37 @@ void StateHandler::dispatch(qint64 length)
 void StateHandler::dispatch(PlayState state)
 {
     m_mutex.lock ();
-    QList<PlayState> clearStates;
-    clearStates <<PlayState::Stopped <<PlayState::NormalError <<PlayState::FatalError;
-    if (clearStates.contains (state)) {
-        m_elapsed = -1;
-        m_bitrate = 0;
-        m_frequency = 0;
-        m_precision = 0;
-        m_channels = 0;
-        m_sendAboutToFinish = true;
-    }
+//    QList<PlayState> clearStates;
+//    clearStates <<PlayState::Stopped <<PlayState::NormalError <<PlayState::FatalError;
+//    if (clearStates.contains (state)) {
+//        m_elapsed = -1;
+//        m_bitrate = 0;
+//        m_frequency = 0;
+//        m_precision = 0;
+//        m_channels = 0;
+//        m_sendAboutToFinish = true;
+//    }
+//    if (m_state != state) {
+//        //TODO maybe should use class in PhoenixBackend_global
+////        QStringList states;
+////        states << "Playing" << "Paused" << "Stopped" << "Buffering" << "NormalError" << "FatalError";
+//        qDebug()<<Q_FUNC_INFO<<QString("Current state: [%1]; previous state: [%2]")
+//                  .arg (state).arg (m_state);
+//        PlayState prevState = state;
+//        m_state = state;
+//        qApp->postEvent (parent (), new StateChangedEvent(m_state, prevState));
+//    }
     if (m_state != state) {
-        //TODO maybe should use class in PhoenixBackend_global
-//        QStringList states;
-//        states << "Playing" << "Paused" << "Stopped" << "Buffering" << "NormalError" << "FatalError";
-        qDebug()<<Q_FUNC_INFO<<QString("Current state: [%1]; previous state: [%2]")
-                  .arg (state).arg (m_state);
-        PlayState prevState = state;
         m_state = state;
-        qApp->postEvent (parent (), new StateChangedEvent(m_state, prevState));
+        emit stateChanged(m_state);
     }
     m_mutex.unlock ();
 }
 
 void StateHandler::sendFinished()
 {
-    qApp->postEvent (parent (), new QEvent(EVENT_FINISHED));
+//    qApp->postEvent (parent (), new QEvent(EVENT_FINISHED));
+    emit finished();
 }
 
 PlayState StateHandler::state()
@@ -127,8 +144,7 @@ PlayState StateHandler::state()
 void StateHandler::sendNextTrackRequest()
 {
     m_mutex.lock();
-    if(m_sendAboutToFinish)
-    {
+    if(m_sendAboutToFinish) {
         m_sendAboutToFinish = false;
         qApp->postEvent(parent(), new QEvent(EVENT_NEXT_TRACK_REQUEST));
     }

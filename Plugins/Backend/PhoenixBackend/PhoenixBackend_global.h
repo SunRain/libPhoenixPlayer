@@ -7,7 +7,7 @@ namespace PhoenixBackend {
 
 //TODO change this to a  c++ class ?
 
-#define BUFFER_MSEC 1000 //buffer size in milliseconds
+//#define BUFFER_MSEC 1000 //buffer size in milliseconds
 
 enum PlayState
 {

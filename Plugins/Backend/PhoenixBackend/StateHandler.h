@@ -11,7 +11,7 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
 
-class StateChangedEvent;
+//class StateChangedEvent;
 class StateHandler : public QObject
 {
     Q_OBJECT
@@ -29,7 +29,8 @@ public:
      * @param precision Sample size (in bits).
      * @param channels Number of channels.
      */
-    void dispatch(qint64 elapsed, int bitrate, quint32 frequency, int precision, int channels);
+//    void dispatch(qint64 elapsed, int bitrate, quint32 frequency, int precision, int channels);
+    void dispatchElapsed(qint64 currentMilliseconds);
     /*!
      * Sends information about song length
      * @param length song length in milliseconds
@@ -64,6 +65,9 @@ signals:
      * @param time New track position in milliseconds.
      */
     void elapsedChanged(qint64 time);
+
+    void stateChanged(PlayState state);
+    void finished();
     /*!
      * Emitted when bitrate has changed.
      * @param bitrate New bitrate (in kbps)

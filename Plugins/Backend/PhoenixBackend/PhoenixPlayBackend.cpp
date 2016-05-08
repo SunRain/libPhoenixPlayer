@@ -95,7 +95,7 @@ void PhoenixPlayBackend::initialize()
     m_engine = new PlayThread(this, getVisual ());
     m_handler = StateHandler::instance ();
     //set StateHandler's parent to receive dispatch event
-    m_handler->setParent (this);
+//    m_handler->setParent (this);
     m_volumeControl = phoenixPlayerLib->volumeCtrl ();//VolumeControl::instance ();
 
     connect (m_volumeControl, &VolumeControl::mutedChanged,
@@ -131,6 +131,23 @@ void PhoenixPlayBackend::initialize()
     connect (m_handler, &StateHandler::bufferingProgress,
              [&](int progress) {
         //TODO bufferingProgress
+    });
+
+    connect(m_handler, &StateHandler::finished,
+            [&](){
+        emit finished ();
+    });
+
+    connect(m_handler, &StateHandler::stateChanged,
+            [&](PlayState st){
+        if (st == PlayState::Playing)
+            emit stateChanged (Common::PlayBackendPlaying);
+        else if (st == PlayState::Paused)
+            emit stateChanged (Common::PlayBackendPaused);
+        else if (st == PlayState::NormalError || st == PlayState::FatalError)
+            emit failed ();
+        else
+            emit stateChanged (Common::PlayBackendStopped);
     });
 }
 
