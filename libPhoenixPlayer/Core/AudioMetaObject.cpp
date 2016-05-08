@@ -269,7 +269,7 @@ AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
     meta.setTrackMeta (tr);
     meta.setLyricsData (o.value (KEY_LYRICS_DATA).toString ());
     meta.setLyricsUri (QUrl(o.value (KEY_LYRICS_URI).toString ()));
-    meta.setMediaType (o.value (KEY_MEDIA_TYPE).toInt ());
+    meta.setMediaType (o.value (KEY_MEDIA_TYPE).toString().toInt());
 
     return meta;
 }
