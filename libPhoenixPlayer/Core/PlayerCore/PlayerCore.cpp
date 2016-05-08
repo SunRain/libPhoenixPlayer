@@ -404,8 +404,9 @@ void PlayerCore::playFromLibrary(const QString &songHah)
 
     qDebug()<<Q_FUNC_INFO<<"find in library "<<d.toMap();
 
-    m_playList->addTrack (d);
-    m_playList->setCurrentIndex (m_playList->count () -1);
+//    m_playList->addTrack (d);
+//    m_playList->setCurrentIndex (m_playList->count () -1);
+    m_playList->addAndFocus(d);
 }
 
 void PlayerCore::playFromNetwork(const QUrl &url)
@@ -420,8 +421,9 @@ void PlayerCore::playFromNetwork(const QUrl &url)
 //    (*m_playBackend)->changeMedia (&obj, 0, true);
     AudioMetaObject d(url);
 //    playTrack (&d);
-    m_playList->addTrack (d);
-    m_playList->setCurrentIndex (m_playList->count () -1);
+//    m_playList->addTrack (d);
+//    m_playList->setCurrentIndex (m_playList->count () -1);
+    m_playList->addAndFocus(d);
 }
 
 void PlayerCore::playTrack(const AudioMetaObject &data)

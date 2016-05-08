@@ -34,6 +34,22 @@ void MusicQueue::addTrack(const AudioMetaObject &song)
     emit queueChanged ();
 }
 
+void MusicQueue::addAndFocus(const AudioMetaObject &song)
+{
+    if (song.isEmpty())
+        return;
+    if (m_skipDuplicates && m_trackList.contains (song)) {
+        int idx = m_trackList.indexOf(song);
+        setCurrentIndex(idx);
+        return;
+    }
+    if (m_limitSize >0 && m_trackList.size () >= m_limitSize)
+        m_trackList.removeFirst ();
+    m_trackList.append (song);
+    emit queueChanged ();
+    setCurrentIndex(m_trackList.count() -1);
+}
+
 void MusicQueue::addTrack(const AudioMetaList &list)
 {
     if (list.isEmpty ())

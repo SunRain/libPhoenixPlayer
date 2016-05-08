@@ -24,6 +24,11 @@ public:
     virtual ~MusicQueue();
 
     void addTrack(const AudioMetaObject &song);
+    ///
+    /// \brief addAndFocus add track to list and set index to current track
+    /// \param song
+    ///
+    void addAndFocus(const AudioMetaObject &song);
     void addTrack(const AudioMetaList &list);
     void removeTrack(const int &index);
     void removeTracks(const int &startPos, const int &endPos);
