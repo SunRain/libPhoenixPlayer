@@ -212,8 +212,13 @@ void OutputThread::reset()
 
 void OutputThread::stop()
 {
+    if (m_pause) {
+        m_mutex.lock ();
+        m_pause = !m_pause;
+        m_mutex.unlock ();
+        m_wait.wakeAll ();
+    }
     m_userStop = true;
-//    reset ();
 }
 
 void OutputThread::setMuted(bool muted)
