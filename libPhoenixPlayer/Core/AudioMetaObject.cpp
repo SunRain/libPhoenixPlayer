@@ -682,7 +682,7 @@ QJsonObject TrackMeta::toObject() const
     o.insert (KEY_BIT_RATE, d.data ()->bitRate);
     o.insert (KEY_DATE, d.data ()->date);
     o.insert (KEY_DESCRIPTION, d.data ()->description);
-    o.insert (KEY_DURATION, d.data ()->duration);
+    o.insert (KEY_DURATION, QString::number(d.data ()->duration));
     o.insert (KEY_GENRE, d.data ()->genre);
     o.insert (KEY_SAMPLE_RATE, d.data ()->sampleRate);
     o.insert (KEY_TITLE, d.data ()->title);
@@ -703,7 +703,7 @@ QVariantMap TrackMeta::toMap() const
     o.insert (KEY_BIT_RATE, d.data ()->bitRate);
     o.insert (KEY_DATE, d.data ()->date);
     o.insert (KEY_DESCRIPTION, d.data ()->description);
-    o.insert (KEY_DURATION, d.data ()->duration);
+    o.insert (KEY_DURATION, QString::number(d.data ()->duration));
     o.insert (KEY_GENRE, d.data ()->genre);
     o.insert (KEY_SAMPLE_RATE, d.data ()->sampleRate);
     o.insert (KEY_TITLE, d.data ()->title);
@@ -729,7 +729,7 @@ TrackMeta TrackMeta::fromJson(const QByteArray &json)
     meta.setBitRate (o.value (KEY_BIT_RATE).toString ());
     meta.setDate (o.value (KEY_DATE).toString ());
     meta.setDescription (o.value (KEY_DESCRIPTION).toString ());
-    meta.setDuration (o.value (KEY_DURATION).toInt ());
+    meta.setDuration (o.value (KEY_DURATION).toString().toInt());
     meta.setGenre (o.value (KEY_GENRE).toString ());
     meta.setSampleRate (o.value (KEY_SAMPLE_RATE).toString ());
     meta.setTitle (o.value (KEY_TITLE).toString ());

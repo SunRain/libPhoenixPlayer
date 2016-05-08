@@ -237,7 +237,7 @@ void OutputThread::seek(qint64 pos, bool reset)
 
 void OutputThread::run()
 {
-    qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<<<<<<";
+//    qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<<<<<<";
     Buffer buffer(m_ring->bufferSize ());
     bool done = false;
     bool poped = true;
@@ -253,7 +253,7 @@ void OutputThread::run()
 //        if (!m_ring->pop (&buffer)) {
 //            continue;
 //        }
-        qDebug()<<" xxxxxxxxxxxxxxxxxx "<<Q_FUNC_INFO<<" xxxxxxxxxx";
+//        qDebug()<<" xxxxxxxxxxxxxxxxxx "<<Q_FUNC_INFO<<" xxxxxxxxxx";
         m_ring->mutex ()->lock ();
         poped = m_ring->pop (&buffer);
         if (m_ring->empty () || !poped) {
@@ -374,7 +374,7 @@ void OutputThread::run()
                 }
 //                m_ring->mutex ()->unlock ();
                 m_mutex.unlock ();
-                qDebug()<<"##### write to output";
+//                qDebug()<<"##### write to output";
 #if 0
                 int i = m_device->write (((char*)buffer.data + write),
                                          qMin((ulong)m_ring->bufferSize (), buffer.nbytes));
@@ -385,7 +385,7 @@ void OutputThread::run()
                 write += i;
                 m_totalWritten += i;
                 buffer.nbytes -= i;
-                qDebug()<<"write size "<<i<<" all write "<<write<<" left "<<buffer.nbytes;
+//                qDebug()<<"write size "<<i<<" all write "<<write<<" left "<<buffer.nbytes;
 //                qApp->processEvents ();
             }
         }

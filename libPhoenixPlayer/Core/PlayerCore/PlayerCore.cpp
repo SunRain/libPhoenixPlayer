@@ -135,12 +135,12 @@ void PlayerCore::setPluginLoader()
 //    }
 
     // 播放状态改变信号
-//    connect (*m_playBackend, &IPlayBackend::stateChanged,
-//             [&](Common::PlayBackendState state) {
-//        emit playBackendStateChanged (state);
-////        emit playBackendStateChanged ((int)state);
-//    });
-    connect(*m_playBackend, &IPlayBackend::stateChanged, this, &PlayerCore::playBackendStateChanged);
+    connect (*m_playBackend, &IPlayBackend::stateChanged,
+             [&](Common::PlayBackendState state) {
+        emit playBackendStateChanged (state);
+//        emit playBackendStateChanged ((int)state);
+    });
+//    connect(*m_playBackend, &IPlayBackend::stateChanged, this, &PlayerCore::playBackendStateChanged);
 
     //当一首曲目播放结束后
     connect (*m_playBackend,
@@ -338,6 +338,11 @@ AudioMetaObject PlayerCore::curTrackMetadata()
     return m_curTrack;
 }
 
+QVariantMap PlayerCore::currentTrack() const
+{
+    return m_curTrack.toMap();
+}
+
 bool PlayerCore::autoSkipForward() const
 {
     return m_autoSkipForward;
@@ -443,7 +448,7 @@ void PlayerCore::playTrack(const AudioMetaObject &data)
     }
     else
         qCritical("No playBackend found");
-    emit trackChanged ();
+    emit trackChanged (m_curTrack.toMap());
 }
 
 int PlayerCore::forwardIndex() const
@@ -515,6 +520,8 @@ int PlayerCore::shuffleIndex() const
     int n = qrand ();
     return n % m_playList->count ();
 }
+
+
 
 //void PlayerCore::addToQueue(const QString &songHash, bool skipDuplicates)
 //{

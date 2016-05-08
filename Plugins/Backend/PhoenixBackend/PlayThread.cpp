@@ -163,14 +163,16 @@ void PlayThread::seek(qint64 millisecond)
 void PlayThread::stop()
 {
     qDebug()<<Q_FUNC_INFO<<"===";
-//    m_mutex.lock ();
+    m_mutex.lock ();
     m_user_stop = true;
-//    m_mutex.unlock ();
+    m_mutex.unlock ();
+    m_ring->emptyCond()->wakeAll();
+    m_ring->fullCond()->wakeAll();
 
 //    if (m_outputThread)
 //        m_outputThread->recycler ()->cond ()->wakeAll ();
     if (this->isRunning ()) {
-        qDebug()<<Q_FUNC_INFO<<"Wait for PlayThread finish";
+        qDebug()<<Q_FUNC_INFO<<"Wait for PlayThread quit";
         this->quit ();
         this->wait ();
     }
@@ -360,7 +362,7 @@ void PlayThread::run()
 //            qApp->processEvents ();
 //            QThread::yieldCurrentThread ();
 //        }
-        qDebug()<<"************ "<<Q_FUNC_INFO<<" ******************";
+//        qDebug()<<"************ "<<Q_FUNC_INFO<<" ******************";
 
         m_ring->mutex ()->lock ();
         if (m_ring->full ()) {
@@ -369,8 +371,13 @@ void PlayThread::run()
         }
         m_ring->mutex ()->unlock ();
 
+        m_mutex.lock();
         m_done = m_user_stop;
-        if (m_done) break;
+//        m_mutex.unlock();
+        if (m_done) {
+            m_mutex.unlock();
+            break;
+        }
 
 //        int ret = m_decode->runDecode ((char*)b.data, BUFFER_SIZE);
         int ret = m_decoder->runDecode ((char*)buffer.data, m_ring->bufferSize ());
@@ -378,17 +385,22 @@ void PlayThread::run()
             qDebug()<<"== loop finish";
             m_done = true;
             m_finish = true;
+            m_mutex.unlock();
             break;
         }
+        buffer.nbytes = ret;
+        m_mutex.unlock();
+
         if (m_finish)
             finish ();
 
-        if (m_done) break;
-        buffer.nbytes = ret;
+//        if (m_done) break;
 
         while (!m_ring->push (&buffer)) {
             qDebug()<<" >> push buffer fail";
+            m_mutex.lock();
             m_done = m_user_stop;
+            m_mutex.unlock();
             if (m_done) break;
             if (m_seekTime >= 0) break;
 
@@ -396,7 +408,6 @@ void PlayThread::run()
             m_ring->emptyCond ()->wakeAll ();
             m_ring->fullCond ()->wait (&m_mutex);
             m_mutex.unlock ();
-
 //            qApp->processEvents ();
 //            QThread::yieldCurrentThread ();
         }

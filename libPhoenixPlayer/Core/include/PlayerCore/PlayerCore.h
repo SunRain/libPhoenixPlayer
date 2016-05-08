@@ -41,6 +41,7 @@ class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
     Q_PROPERTY(int playBackendState READ playBackendStateInt NOTIFY playBackendStateChanged)
     Q_PROPERTY(bool autoSkipForward READ autoSkipForward WRITE setAutoSkipForward NOTIFY autoSkipForwardChanged)
 //    Q_PROPERTY(QObject* playList READ playListObject CONSTANT)
+    Q_PROPERTY(QVariantMap currentTrack READ currentTrack NOTIFY trackChanged)
     Q_PROPERTY(int forwardIndex READ forwardIndex CONSTANT)
     Q_PROPERTY(int backwardIndex READ backwardIndex CONSTANT)
     Q_PROPERTY(int shuffleIndex READ shuffleIndex CONSTANT)
@@ -60,6 +61,7 @@ public:
 //    QObject *playListObject() const;
 
     AudioMetaObject curTrackMetadata();
+    QVariantMap currentTrack() const;
 
     ///
     /// \brief setAutoSkipForward 是否在播放结束或者播放失败后自动跳转到下一首歌曲，跳转的歌曲由Common::PlayMode决定
@@ -122,7 +124,7 @@ signals:
     ///
     /// \brief trackChanged 当切换歌曲的时候发送此信号
     ///
-    void trackChanged();
+    void trackChanged(QVariantMap currentTrack);
     void playTrackFinished();
     void playTrackFailed();
     ///

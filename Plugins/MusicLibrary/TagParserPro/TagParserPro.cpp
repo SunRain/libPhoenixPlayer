@@ -93,7 +93,7 @@ bool TagParserPro::parserTag(AudioMetaObject *target)
     TagLib::AudioProperties *ap = m_tagRef->audioProperties ();
 
     if (ap) {
-        target->trackMeta ().setDuration (ap->length ());
+        track.setDuration(ap->length());
 
         str = QString::number(ap->sampleRate ());
         if (!str.isEmpty ()) {

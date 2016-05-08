@@ -173,9 +173,9 @@ void PhoenixPlayBackend::play(quint64 startSec)
         if (!m_engine->isRunning ()) {
             m_engine->play ();
         } else {
-//            if (m_engine->output () /*&& m_engine->output ()->isPaused ()*/) {
-                    m_engine->togglePlayPause ();
-//            }
+            if (m_engine->output () && m_engine->output ()->isPaused ()) {
+                m_engine->togglePlayPause ();
+            }
         }
         this->setPosition (startSec);
     }
@@ -183,11 +183,11 @@ void PhoenixPlayBackend::play(quint64 startSec)
 
 void PhoenixPlayBackend::stop()
 {
-    qApp->sendPostedEvents (this, 0);
+//    qApp->sendPostedEvents (this, 0);
     m_url.clear ();
     if (m_engine) {
         m_engine->stop ();
-        qApp->sendPostedEvents (this, 0);
+//        qApp->sendPostedEvents (this, 0);
     }
     m_volumeControl->reload ();
 
