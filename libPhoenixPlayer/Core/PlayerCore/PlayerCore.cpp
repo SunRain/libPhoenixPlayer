@@ -300,6 +300,11 @@ Common::PlayMode PlayerCore::playMode() const
     return m_playMode;
 }
 
+int PlayerCore::playModeInt() const
+{
+    return (int)m_playMode;
+}
+
 Common::PlayBackendState PlayerCore::playBackendState() const
 {
 //    return m_playBackendState;
@@ -353,7 +358,18 @@ void PlayerCore::setPlayMode(Common::PlayMode mode)
     if (m_playMode != mode) {
         m_playMode = mode;
         emit playModeChanged(mode);
+        emit playModeChanged((int)mode);
     }
+}
+
+void PlayerCore::setPlayMode(int mode)
+{
+//    if ((int)m_playMode != mode) {
+//        Common::PlayMode m = Common::PlayMode(mode);
+//        m_playMode = m;
+//        emit playModeIntChanged(mode);
+//    }
+    setPlayMode(Common::PlayMode(mode));
 }
 
 void PlayerCore::setAutoSkipForward(bool autoSkipForward)

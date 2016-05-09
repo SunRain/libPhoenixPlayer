@@ -27,7 +27,7 @@ PlayListMgr::PlayListMgr(Settings *set, QObject *parent)
     , m_settings(set)
 {
     sizeLimit (-1);
-    skipDuplicates (false);
+    skipDuplicates (true);
 
     //TODO support different playlist format
     m_listFormat = new M3uPlayListFormat(this);

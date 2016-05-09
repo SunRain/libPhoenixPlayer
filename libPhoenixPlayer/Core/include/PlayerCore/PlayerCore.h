@@ -37,7 +37,7 @@ class MetadataLookupMgr;
 class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(Common::PlayMode playMode READ playMode WRITE setPlayMode NOTIFY playModeChanged)
+    Q_PROPERTY(int playMode READ playModeInt WRITE setPlayMode NOTIFY playModeChanged)
     Q_PROPERTY(int playBackendState READ playBackendStateInt NOTIFY playBackendStateChanged)
     Q_PROPERTY(bool autoSkipForward READ autoSkipForward WRITE setAutoSkipForward NOTIFY autoSkipForwardChanged)
 //    Q_PROPERTY(QObject* playList READ playListObject CONSTANT)
@@ -53,6 +53,8 @@ public:
     void initiate();
 
     Common::PlayMode playMode() const;
+    int playModeInt() const;
+
     Common::PlayBackendState playBackendState() const;
     int playBackendStateInt() const;
 
@@ -141,6 +143,7 @@ signals:
 //    void autoSkipForwardChanged();
 
     void playModeChanged(Common::PlayMode mode);
+    void playModeChanged(int mode);
 
     void playBackendStateChanged(int state);
 
@@ -170,6 +173,7 @@ public slots:
     void skipShuffle();
 
     void setPlayMode(Common::PlayMode mode);
+    void setPlayMode(int mode);
 
     void setAutoSkipForward(bool autoSkipForward);
 
