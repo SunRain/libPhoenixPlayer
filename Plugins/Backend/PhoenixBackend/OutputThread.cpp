@@ -57,7 +57,7 @@ static inline void s32_to_s16(qint32 *in, qint16 *out, qint64 samples)
     return;
 }
 
-OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
+OutputThread::OutputThread(RingBuffer *ring, StateHandler *handle, BaseVisual *v, QObject *parent)
     : QThread(parent)
     , m_output(nullptr)
 #if 0
@@ -66,8 +66,9 @@ OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
     , m_eq(EqualizerMgr::instance ())
 //    , m_handler(StateHandler::instance ())
     , m_visual(v)
-    , m_ring(ring)
     , m_visBuffer(nullptr)
+    , m_ring(ring)
+    , m_handler(handle)
     , m_userStop(false)
     , m_pause(false)
     , m_prev_pause(false)
@@ -87,7 +88,7 @@ OutputThread::OutputThread(RingBuffer *ring, BaseVisual *v, QObject *parent)
         if (m_outputHost->isValid ())
             m_output = m_outputHost->instance<IOutPut>();
     }
-    m_handler = StateHandler::instance();
+//    m_handler = StateHandler::instance();
 
     connect (m_eq, &EqualizerMgr::changed, this, &OutputThread::updateEQ);
 }

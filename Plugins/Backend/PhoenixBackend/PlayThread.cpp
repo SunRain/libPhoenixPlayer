@@ -5,6 +5,7 @@
 #include <QUrl>
 #include <QThread>
 #include <QCoreApplication>
+#include <QTimer>
 
 #include "OutPut/IOutPut.h"
 #include "Decoder/IDecoder.h"
@@ -55,13 +56,14 @@ static inline void s32_to_s16(qint32 *in, qint16 *out, qint64 samples)
     return;
 }
 
-PlayThread::PlayThread(QObject *parent, BaseVisual *v)
+PlayThread::PlayThread(StateHandler *handle, BaseVisual *v, QObject *parent)
     : QThread(parent)
+    , m_handler(handle)
 {
     m_visual = v;
     m_pluginLoader = phoenixPlayerLib->pluginLoader ();
     m_settings = phoenixPlayerLib->settings ();
-    m_handler = StateHandler::instance ();
+//    m_handler = StateHandler::instance ();
 
     m_decoderLibs = m_settings->decoderLibraries ();
     if (m_decoderLibs.isEmpty ())
@@ -79,6 +81,13 @@ PlayThread::PlayThread(QObject *parent, BaseVisual *v)
     m_outputThread = nullptr;
     m_ring = new RingBuffer(Buffer::BUFFER_PERIOD);
 //    m_audioParameters = nullptr;
+//    m_finishSignalDelaytimer = new QTimer(this);
+//    m_finishSignalDelaytimer->setSingleShot(true);
+//    m_finishSignalDelaytimer->setInterval(100);
+//    connect(m_finishSignalDelaytimer, &QTimer::timeout,
+//            [&]() {
+//        m_handler->sendFinished();
+//    });
     
     //FIXME where should we put the output convert flag?
 //    m_convertAudioParameters = nullptr;
@@ -108,7 +117,7 @@ QMutex *PlayThread::mutex()
 bool PlayThread::play()
 {
     if (this->isRunning () || !m_decoder || (m_outputThread && m_outputThread->isRunning ())) {
-        qDebug()<<Q_FUNC_INFO<<"Can't start play due to"
+        qWarning()<<Q_FUNC_INFO<<"Can't start play due to"
                <<QString("current thread running [%1], decoder [%2] || m_ouputThread && m_ouputThread->isRunning [%3]")
                  .arg (this->isRunning ()).arg ((m_decoder == nullptr)).arg ((m_outputThread && m_outputThread->isRunning ()));
         return false;
@@ -171,14 +180,33 @@ void PlayThread::stop()
 
 //    if (m_outputThread)
 //        m_outputThread->recycler ()->cond ()->wakeAll ();
+//    if (this->isRunning ()) {
+//        qDebug()<<Q_FUNC_INFO<<"Wait for PlayThread quit";
+//        this->quit ();
+//        this->wait ();
+//    }
+//    if (this->isRunning ()) {
+//        qDebug()<<Q_FUNC_INFO<<"PlayThread still running";
+//    }
+    int loopOut = 3;
+    do {
+        m_mutex.lock ();
+        m_user_stop = true;
+        m_mutex.unlock ();
+//        m_ring->emptyCond()->wakeAll();
+//        m_ring->fullCond()->wakeAll();
+
+        this->quit();
+//        this->wait();
+        qDebug()<<Q_FUNC_INFO<<"======= PlayThread is runnging, loopout "<<loopOut;
+        loopOut--;
+        qApp->processEvents();
+    } while (this->isRunning() && loopOut>0);
+
     if (this->isRunning ()) {
-        qDebug()<<Q_FUNC_INFO<<"Wait for PlayThread quit";
-        this->quit ();
-        this->wait ();
+        qDebug()<<Q_FUNC_INFO<<"======== PlayThread still running";
     }
-    if (this->isRunning ()) {
-        qDebug()<<Q_FUNC_INFO<<"PlayThread still running";
-    }
+
     if (m_outputThread) {
 //        m_outputThread->mutex ()->lock ();
         m_outputThread->finish ();
@@ -188,16 +216,22 @@ void PlayThread::stop()
         m_outputThread->quit ();
     }
     // wake up threads
-    qDebug()<<Q_FUNC_INFO<<"wake up threads";
+//    qDebug()<<Q_FUNC_INFO<<"wake up threads";
     if (m_outputThread) {
 //        m_outputThread->mutex ()->lock ();
 //        m_outputThread->recycler ()->cond ()->wakeAll ();
 //        m_outputThread->mutex ()->unlock ();
         if (m_outputThread->isRunning ()) {
-            qDebug()<<Q_FUNC_INFO<<"wait m_ouputThread to finish";
+            qDebug()<<Q_FUNC_INFO<<"======= wait m_ouputThread to finish";
             m_outputThread->quit ();
             m_outputThread->wait ();
         }
+    }
+
+    if (m_outputThread && m_outputThread->isRunning ()) {
+        qDebug()<<Q_FUNC_INFO<<"m_outputThread still runnging";
+        m_outputThread->quit ();
+        m_outputThread->wait ();
     }
     //FIXME should clear decoder?
 
@@ -231,6 +265,8 @@ void PlayThread::setMuted(bool muted)
 void PlayThread::changeMedia(MediaResource *res, quint64 startSec)
 {
     stop ();
+//    //HACK send finish signal to tell backend that new audio will be played
+//    m_handler->sendFinished();
 
     if (m_ring) {
         m_ring->clear ();
@@ -346,23 +382,15 @@ void PlayThread::run()
     m_outputThread->start ();
     m_handler->dispatch(PlayState::Playing);
     m_handler->dispatch(m_decoder->durationInSeconds() * 1000);
-    while (!m_done && !m_finish) {
-//        if (m_ring->full ()) {
-//            continue;
-//        }
+    bool done = false;
+//    bool finish = false;
+    while (!done && !m_finish) {
+
         if (m_seekTime >= 0) {
             m_ring->clear ();
             m_decoder->setPosition (m_seekTime);
             m_seekTime = -1;
         }
-
-//        while (m_ring->full ()) {
-//            m_done = m_user_stop;
-//            if (m_done) break;
-//            qApp->processEvents ();
-//            QThread::yieldCurrentThread ();
-//        }
-//        qDebug()<<"************ "<<Q_FUNC_INFO<<" ******************";
 
         m_ring->mutex ()->lock ();
         if (m_ring->full ()) {
@@ -372,36 +400,35 @@ void PlayThread::run()
         m_ring->mutex ()->unlock ();
 
         m_mutex.lock();
-        m_done = m_user_stop;
-//        m_mutex.unlock();
-        if (m_done) {
+        done = m_user_stop;
+        if (done) {
             m_mutex.unlock();
             break;
         }
 
-//        int ret = m_decode->runDecode ((char*)b.data, BUFFER_SIZE);
         int ret = m_decoder->runDecode ((char*)buffer.data, m_ring->bufferSize ());
         if (ret <= 0) {
-            qDebug()<<"== loop finish";
-            m_done = true;
+            qDebug()<<"======== loop done";
+            done = true;
             m_finish = true;
             m_mutex.unlock();
+//            m_handler->sendFinished();
             break;
         }
         buffer.nbytes = ret;
         m_mutex.unlock();
 
-        if (m_finish)
-            finish ();
-
-//        if (m_done) break;
+        if (done || m_finish) {
+            qDebug()<<Q_FUNC_INFO<<" ====== bibibi loop done";
+            break;
+        }
 
         while (!m_ring->push (&buffer)) {
             qDebug()<<" >> push buffer fail";
             m_mutex.lock();
-            m_done = m_user_stop;
+            done = m_user_stop;
             m_mutex.unlock();
-            if (m_done) break;
+            if (done) break;
             if (m_seekTime >= 0) break;
 
             m_mutex.lock ();
@@ -412,6 +439,11 @@ void PlayThread::run()
 //            QThread::yieldCurrentThread ();
         }
     }
+    if (m_finish) {
+        finish();
+    }
+
+    qDebug()<<">>>>>>>>>>>>>> FINISH "<<Q_FUNC_INFO<<" FINISH <<<<<<<<<<<<<<<<<<";
 }
 
 //void PlayThread::run()
@@ -519,17 +551,21 @@ void PlayThread::run()
 
 void PlayThread::finish()
 {
+    qDebug()<<"**************** "<<Q_FUNC_INFO;
     if (m_outputThread) {
 //        m_outputThread->mutex ()->lock ();
         m_outputThread->finish ();
 //        m_outputThread->mutex ()->unlock ();
     }
-    m_handler->sendFinished ();
+    if (m_finish) {
+        m_handler->sendFinished ();
+//        m_finishSignalDelaytimer->start();
+    }
 }
 
 void PlayThread::reset()
 {
-    m_done = false;
+//    m_done = false;
     m_finish = false;
     m_seekTime = -1;
 //    m_output_at = 0;
@@ -639,7 +675,7 @@ void PlayThread::createOutput()
 {
 //    OutputThread *m_ouputThread = new OutputThread(0, m_visual);
     if (!m_outputThread)
-        m_outputThread = new OutputThread(m_ring, m_visual);
+        m_outputThread = new OutputThread(m_ring, m_handler, m_visual);
 
     m_outputThread->reset ();
     m_outputThread->setMuted (m_muted);

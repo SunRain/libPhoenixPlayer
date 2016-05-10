@@ -457,7 +457,7 @@ void PlayerCore::playTrack(const AudioMetaObject &data)
     if (m_resource)
         m_resource->deleteLater ();
     m_resource = nullptr;
-    m_resource = MediaResource::create (data.uri ().toString (), this);
+    m_resource = MediaResource::create (data.uri ().toString (), 0);
     qDebug()<<Q_FUNC_INFO<<"change file to "<<data.uri ();
     if (*m_playBackend) {
         (*m_playBackend)->changeMedia (m_resource, 0, true);
@@ -496,6 +496,8 @@ int PlayerCore::forwardIndex() const
     default:
         break;
     }
+    qDebug()<<Q_FUNC_INFO<<" new index is "<<index;
+
     return index;
 }
 
@@ -920,12 +922,10 @@ void PlayerCore::doPlayByPlayMode()
         qDebug()<<Q_FUNC_INFO<<"Stop due to no playBackend";
         return;
     }
+    qDebug()<<">>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<";
     switch (m_playMode) {
     case Common::PlayModeOrder: { //顺序播放
-//        if (this->forwardTrackHash (false).isEmpty ())
-//            m_playBackend->stop ();
-//        else
-//            this->skipForward ();
+        qDebug()<<Q_FUNC_INFO<<" PlayModeOrder";
         if (m_playList->isEmpty ())
             break;
         if (m_playList->currentIndex () >= m_playList->count ()-1)
@@ -935,21 +935,8 @@ void PlayerCore::doPlayByPlayMode()
         break;
     }
     case Common::PlayModeRepeatCurrent: { //单曲播放
-//        QString playingHash = m_musicLibraryManager->playingSongHash ();
-//        PlayBackend::BaseMediaObject obj;
+        qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatCurrent";
 
-//        QStringList list = m_musicLibraryManager->querySongMetaElement (Common::E_FileName, playingHash);
-//        if (!list.isEmpty ())
-//            obj.setFileName (list.first ());
-
-//        list = m_musicLibraryManager->querySongMetaElement (Common::E_FilePath, playingHash);
-//        if (!list.isEmpty ())
-//            obj.setFilePath (list.first ());
-
-//        obj.setMediaType (Common::MediaTypeLocalFile);
-//        m_playBackend->changeMedia (&obj, 0, true);
-
-//        AudioMetaObject *data = m_playList->currentTrack ();
         AudioMetaObject data = m_playList->currentTrack ();
         if (data.isEmpty ())
             break;
@@ -968,12 +955,12 @@ void PlayerCore::doPlayByPlayMode()
         break;
     }
     case Common::PlayModeRepeatAll:  { //循环播放
-        //                mMusicLibraryManager->nextSong ();
+        qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatAll";
         this->skipForward ();
         break;
     }
     case Common::PlayModeShuffle: { //随机播放
-        //                mMusicLibraryManager->randomSong ();
+        qDebug()<<Q_FUNC_INFO<<" PlayModeShuffle";
         this->skipShuffle ();
         break;
     }

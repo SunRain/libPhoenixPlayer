@@ -33,7 +33,7 @@ class OutputThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit OutputThread(RingBuffer *ring, BaseVisual *v = 0, QObject *parent = 0);
+    explicit OutputThread(RingBuffer *ring, StateHandler *handle, BaseVisual *v = 0, QObject *parent = 0);
     virtual ~OutputThread();
 
     bool initialize(const PhoenixPlayer::AudioParameters &para);

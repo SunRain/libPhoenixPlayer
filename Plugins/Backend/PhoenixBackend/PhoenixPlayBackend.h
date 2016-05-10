@@ -21,7 +21,7 @@ public:
 
     // QObject interface
 public:
-//    bool event(QEvent *e);
+    bool event(QEvent *e);
 
     // IPlayBackend interface
 public:

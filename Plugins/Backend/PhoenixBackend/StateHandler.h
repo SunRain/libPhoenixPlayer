@@ -15,7 +15,7 @@ namespace PhoenixBackend {
 class StateHandler : public QObject
 {
     Q_OBJECT
-    DECLARE_SINGLETON_POINTER(StateHandler)
+//    DECLARE_SINGLETON_POINTER(StateHandler)
 public:
     explicit StateHandler(QObject *parent = 0);
     virtual ~StateHandler();
@@ -66,8 +66,8 @@ signals:
      */
     void elapsedChanged(qint64 time);
 
-    void stateChanged(PlayState state);
-    void finished();
+//    void stateChanged(PlayState state);
+//    void finished();
     /*!
      * Emitted when bitrate has changed.
      * @param bitrate New bitrate (in kbps)

@@ -124,16 +124,21 @@ void StateHandler::dispatch(PlayState state)
 //        qApp->postEvent (parent (), new StateChangedEvent(m_state, prevState));
 //    }
     if (m_state != state) {
+//        m_state = state;
+//        emit stateChanged(m_state);
+        qDebug()<<Q_FUNC_INFO<<QString("Current state: [%1]; previous state: [%2]")
+                  .arg (state).arg (m_state);
+        PlayState prevState = state;
         m_state = state;
-        emit stateChanged(m_state);
+        qApp->postEvent (parent (), new StateChangedEvent(m_state, prevState));
     }
     m_mutex.unlock ();
 }
 
 void StateHandler::sendFinished()
 {
-//    qApp->postEvent (parent (), new QEvent(EVENT_FINISHED));
-    emit finished();
+    qApp->postEvent (parent (), new QEvent(EVENT_FINISHED));
+//    emit finished();
 }
 
 PlayState StateHandler::state()

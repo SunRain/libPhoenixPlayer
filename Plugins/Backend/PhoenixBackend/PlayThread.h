@@ -6,6 +6,7 @@
 
 #include "AudioParameters.h"
 
+class QTimer;
 namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
@@ -31,7 +32,7 @@ class PlayThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit PlayThread(QObject *parent = 0, BaseVisual *v = 0);
+    explicit PlayThread(StateHandler *handle, BaseVisual *v = 0, QObject *parent = 0);
     virtual ~PlayThread();
 
     QMutex *mutex();
@@ -70,6 +71,7 @@ private:
     OutputThread *m_outputThread;
     Decoder::IDecoder *m_decoder;
     Decoder::DecoderHost *m_decoderHost;
+//    QTimer *m_finishSignalDelaytimer;
 
 //    AudioParameters *m_audioParameters;
 //    AudioParameters m_audioParameters;
@@ -82,7 +84,7 @@ private:
     bool m_next;
     bool m_muted;
 
-    bool m_done;
+//    bool m_done;
     bool m_finish;
     bool m_user_stop;
     uint m_bks;
