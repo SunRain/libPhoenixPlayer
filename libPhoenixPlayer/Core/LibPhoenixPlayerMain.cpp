@@ -9,6 +9,7 @@
 #include "PlayerCore/VolumeControl.h"
 #include "PlayerCore/PlayerCore.h"
 #include "MusicLibrary/LocalMusicScanner.h"
+#include "AudioMetaObjectKeys.h"
 
 #include "Common.h"
 
@@ -44,7 +45,9 @@ void LibPhoenixPlayer::registerPlugins(const char *url)
 {
     checkInitiate ();
 
-    qmlRegisterUncreatableType<Common>(url, 1, 0, "Common", "Cannot be created");
+    qmlRegisterUncreatableType<Common>(url, 1, 0, "Common", "Common cannot be created");
+    qmlRegisterSingletonType<AudioMetaObjectKeyName>(url, 1, 0, "MetaKey", AudioMetaObjectKeyName::qmlSingleton);
+
     qmlRegisterType<LocalMusicScanner>(url, 1, 0, "LocalMusicScanner");
 }
 

@@ -3,7 +3,11 @@
 
 #include <QString>
 #include <QObject>
+#include <QDebug>
 #include <QtQml>
+#include <QQuickWindow>
+
+#include "libphoenixplayer_global.h"
 
 namespace PhoenixPlayer {
 // keys for AudioMetaObject
@@ -32,7 +36,7 @@ const static QString KEY_ARTIST_META ("ARTIST_META");
 const static QString KEY_COVER_META ("COVER_META");
 const static QString KEY_TRACK_META ("TRACK_META");
 
-class AudioMetaObjectKeyName : public QObject
+class LIBPHOENIXPLAYER_EXPORT AudioMetaObjectKeyName : public QObject
 {
     Q_OBJECT
 
@@ -66,6 +70,13 @@ public:
     {
     }
     virtual ~AudioMetaObjectKeyName() {}
+
+    static QObject *qmlSingleton(QQmlEngine *engine, QJSEngine *scriptEngine) {
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
+        return new AudioMetaObjectKeyName();
+    }
+
     QString KeyName() const
     {
         return KEY_NAME;
