@@ -201,11 +201,9 @@ QStringList PlayListMgr::existPlayLists() const
 
 bool PlayListMgr::open(const QString &name)
 {
-//    if (!m_trackList.isEmpty ()) {
-////        qDeleteAll(m_trackList);
-//        m_trackList.clear ();
-//    }
-//    m_currentIndex = -1;
+    if (name.isEmpty())
+        return false;
+
     if (!isEmpty ())
         clear ();
 
