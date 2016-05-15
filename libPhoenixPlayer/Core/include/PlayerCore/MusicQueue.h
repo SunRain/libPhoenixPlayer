@@ -62,18 +62,17 @@ public:
     ///
     int count() const;
 
-protected:
     ///
     /// \brief sizeLimit limited size of the queue
     /// \param size <=0 if no limited
     ///
-    void sizeLimit(int size = 20);
+    void setSizeLimit(int size = 20);
 
     ///
     /// \brief skipDuplicates default true
     /// \param skip
     ///
-    void skipDuplicates(bool skip = true);
+    void setSkipDuplicates(bool skip = true);
 
 public slots:
     void setCurrentIndex(int index);

@@ -18,6 +18,7 @@ class MediaResource;
 //class AudioMetaObject;
 //class MusicQueue;
 class RecentPlayedMgr;
+class MusicQueue;
 
 namespace PlayBackend {
 class IPlayBackend;
@@ -58,8 +59,9 @@ public:
     Common::PlayBackendState playBackendState() const;
     int playBackendStateInt() const;
 
-    PlayListMgr *playList() const;
+    PlayListMgr *listMgr() const;
     RecentPlayedMgr *recentList() const;
+    MusicQueue *playQueue() const;
 //    QObject *playListObject() const;
 
     AudioMetaObject curTrackMetadata();
@@ -71,8 +73,22 @@ public:
     ///
     bool autoSkipForward() const;
 
+    ///
+    /// \brief playAt play at current current playQueue index
+    /// \param idx
+    ///
+    Q_INVOKABLE void playAt(int idx);
 
+    ///
+    /// \brief playFromLibrary play from music library and add to current playQueue
+    /// \param songHash
+    ///
     Q_INVOKABLE void playFromLibrary(const QString &songHash);
+
+    ///
+    /// \brief playFromNetwork play from network and add to current playQueue
+    /// \param url
+    ///
     Q_INVOKABLE void playFromNetwork(const QUrl &url);
     void playTrack(const AudioMetaObject &data);
 
@@ -203,7 +219,8 @@ private:
     PlayBackend::IPlayBackend *m_pb;
     PlayBackend::BackendHost *m_playBackendHost;
     AudioMetaObject m_curTrack;
-    PlayListMgr *m_playList;
+    PlayListMgr *m_listMgr;
+    MusicQueue *m_playQueue;
     RecentPlayedMgr *m_recentList;
     MusicLibrary::IMusicLibraryDAO *m_dao;
     MediaResource *m_resource;

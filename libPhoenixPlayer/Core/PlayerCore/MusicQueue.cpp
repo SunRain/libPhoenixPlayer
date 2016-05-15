@@ -150,12 +150,12 @@ int MusicQueue::count() const
     return m_trackList.size ();
 }
 
-void MusicQueue::sizeLimit(int size)
+void MusicQueue::setSizeLimit(int size)
 {
     m_limitSize = size;
 }
 
-void MusicQueue::skipDuplicates(bool skip)
+void MusicQueue::setSkipDuplicates(bool skip)
 {
     m_skipDuplicates = skip;
 }

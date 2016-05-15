@@ -21,6 +21,7 @@
 #include "SingletonPointer.h"
 #include "Backend/BackendHost.h"
 #include "MediaResource.h"
+#include "PlayerCore/MusicQueue.h"
 
 namespace PhoenixPlayer {
 
@@ -54,11 +55,10 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
         m_dao = host->instance<IMusicLibraryDAO>();
 
     m_playMode = Common::PlayModeOrder;
-    m_playList = new PlayListMgr(m_settings, this);
-
-    connect (m_playList, &PlayListMgr::currentIndexChanged,
+    m_listMgr = new PlayListMgr(m_settings, this);
+    connect (m_listMgr, &PlayListMgr::currentIndexChanged,
              [&](int index) {
-        AudioMetaObject o = m_playList->get (index);
+        AudioMetaObject o = m_listMgr->get (index);
         m_recentList->addTrack (o);
         playTrack (o);
     });
@@ -70,112 +70,39 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
         playTrack (o);
     });
 
+    m_playQueue = new MusicQueue(this);
+    m_playQueue->setSizeLimit(-1);
+    m_playQueue->setSkipDuplicates(false);
+    connect(m_playQueue, &MusicQueue::currentIndexChanged,
+            [&](int idx) {
+        AudioMetaObject o = m_playQueue->get (idx);
+        m_recentList->addTrack(o);
+        playTrack (o);
+    });
 
 //    init ();
 }
 
 PlayerCore::~PlayerCore()
 {
-    if (m_playList)
-        m_playList->deleteLater ();
-    m_playList = nullptr;
+    if (m_listMgr)
+        m_listMgr->deleteLater ();
+    m_listMgr = nullptr;
     if (m_recentList)
         m_recentList->deleteLater ();
     m_recentList = nullptr;
+    if (m_playQueue)
+        m_playQueue->deleteLater();
+    m_playQueue = nullptr;
 }
 
-void PlayerCore::setPluginLoader()
+void PlayerCore::initiate()
 {
-    if (!m_pluginLoader) {
-        qFatal("[%s] No mPluginLoader", Q_FUNC_INFO);
-        return;
-    }
-//    if (!m_playBackend) {
-//        m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
-//        if (!PointerValid (EPointer::PPlaybackend))
-//            return;
-////        qDebug()<<"[PlayerCore] user playbackend "<<mPlayBackend->getPluginName ();
-//        m_playBackend->init ();
-//        m_playBackend->stop ();
-//    }
-    m_playBackendHost = m_pluginLoader->curBackendHost ();
-    if (!m_playBackendHost || !m_playBackendHost->isValid ()) {
-        qCritical()<<Q_FUNC_INFO<<"No playBackendHost or playBackendHost invalid!!";
-        return;
-    }
-    m_pb = m_playBackendHost->instance<IPlayBackend>();
-    if (!m_pb) {
-        qCritical()<<Q_FUNC_INFO<<"PlayBackend instance fail";
-        return;
-    }
-    m_playBackend = &m_pb;
-    (*m_playBackend)->initialize ();
-    (*m_playBackend)->stop ();
-
-//    connect (m_pluginLoader,
-//             &PluginLoader::signalPluginChanged,
-//             [this](Common::PluginType type) {
-//        if (type == Common::PluginPlayBackend) {
-//            if (m_playBackend) {
-//                m_playBackend->stop ();
-//                m_playBackend->deleteLater ();
-//            }
-//            m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
-//            if (!PointerValid (EPointer::PPlaybackend))
-//                return;
-////            qDebug()<<"change playbackend to"<<mPlayBackend->getPluginName ();
-//            m_playBackend->init ();
-//            m_playBackend->stop ();
-//        }
-//    });
-
-//    if (!PointerValid (EPointer::PPlaybackend)) {
-//        qDebug()<<"[PlayerCore] No Playbackend found";
-//        return;
-//    }
-
-    // 播放状态改变信号
-    connect (*m_playBackend, &IPlayBackend::stateChanged,
-             [&](Common::PlayBackendState state) {
-        emit playBackendStateChanged (state);
-//        emit playBackendStateChanged ((int)state);
-    });
-//    connect(*m_playBackend, &IPlayBackend::stateChanged, this, &PlayerCore::playBackendStateChanged);
-
-    //当一首曲目播放结束后
-    connect (*m_playBackend,
-             &IPlayBackend::finished,
-             [&]() {
-        emit playTrackFinished ();
-        if (m_autoSkipForward)
-            doPlayByPlayMode ();
-    });
-
-    //播放失败
-    connect (*m_playBackend,
-             &IPlayBackend::failed,
-             [&]() {
-        emit playTrackFailed ();
-        if (m_autoSkipForward)
-            doPlayByPlayMode ();
-    });
-
-    //tick
-    connect (*m_playBackend,
-             &IPlayBackend::tick,
-             [&] (quint64 sec) {
-        qDebug()<<Q_FUNC_INFO<<"Tick "<<sec<<" duration "<<m_curTrackDuration;
-        m_currentPlayPos = sec;
-        emit playTickActual (sec);
-        if (m_curTrackDuration > 0) {
-//            qreal v = sec / m_curTrackDuration;
-//            int p = v *1000;
-            int p = sec/m_curTrackDuration * 100;
-            qDebug()<<Q_FUNC_INFO<<" Percent "<<p;
-            emit playTickPercent (p);
-        }
-    });
+    setPluginLoader();
+//    setMusicLibraryManager();
+//    setMetaLookupManager ();
 }
+
 
 //void PlayerCore::setMusicLibraryManager()
 //{
@@ -323,14 +250,19 @@ int PlayerCore::playBackendStateInt() const
 //    return m_autoSkipForward;
 //}
 
-PlayListMgr *PlayerCore::playList() const
+PlayListMgr *PlayerCore::listMgr() const
 {
-    return m_playList;
+    return m_listMgr;
 }
 
 RecentPlayedMgr *PlayerCore::recentList() const
 {
     return m_recentList;
+}
+
+MusicQueue *PlayerCore::playQueue() const
+{
+    return m_playQueue;
 }
 
 //QObject *PlayerCore::playListObject() const
@@ -353,76 +285,29 @@ bool PlayerCore::autoSkipForward() const
     return m_autoSkipForward;
 }
 
-void PlayerCore::setPlayMode(Common::PlayMode mode)
+void PlayerCore::playAt(int idx)
 {
-    if (m_playMode != mode) {
-        m_playMode = mode;
-        emit playModeChanged(mode);
-        emit playModeChanged((int)mode);
-    }
+    if (idx < 0 || idx >= m_playQueue->count())
+        return;
+    m_playQueue->setCurrentIndex(idx);
 }
 
-void PlayerCore::setPlayMode(int mode)
-{
-//    if ((int)m_playMode != mode) {
-//        Common::PlayMode m = Common::PlayMode(mode);
-//        m_playMode = m;
-//        emit playModeIntChanged(mode);
-//    }
-    setPlayMode(Common::PlayMode(mode));
-}
-
-void PlayerCore::setAutoSkipForward(bool autoSkipForward)
-{
-    if (m_autoSkipForward != autoSkipForward) {
-        m_autoSkipForward = autoSkipForward;
-        emit autoSkipForwardChanged(autoSkipForward);
-    }
-}
-
-//Common::PlayBackendState PlayerCore::getPlayBackendState()
-//{
-//    if (!PointerValid((EPointer::PPlaybackend))) {
-//        Common::PlayBackendState s = Common::PlayBackendStopped;
-//        return s;
-//    }
-//    return m_playBackend.data()->getPlayBackendState();
-//}
-
-//int PlayerCore::getPlayBackendStateInt()
-//{
-//    return (int)getPlayBackendState();
-//}
-
-//void PlayerCore::setAutoSkipForward(bool autoSkipForward)
-//{
-//    if (m_autoSkipForward == autoSkipForward)
-//        return;
-//    m_autoSkipForward = autoSkipForward;
-//    emit autoSkipForwardChanged ();
-//}
-
-//bool PlayerCore::getAutoSkipForward()
-//{
-//    return m_autoSkipForward;
-//}
-
-void PlayerCore::playFromLibrary(const QString &songHah)
+void PlayerCore::playFromLibrary(const QString &songHash)
 {
     if (!m_dao) {
         qCritical("%s : no IMusicLibraryDAO, can't play from library", Q_FUNC_INFO);
         return;
     }
-    qDebug()<<Q_FUNC_INFO<<"play for hash "<<songHah;
+    qDebug()<<Q_FUNC_INFO<<"play for hash "<<songHash;
 
 //    AudioMetaObject *d = m_dao->trackFromHash (songHah);
-    AudioMetaObject d = m_dao->trackFromHash (songHah);
+    AudioMetaObject d = m_dao->trackFromHash (songHash);
 
     qDebug()<<Q_FUNC_INFO<<"find in library "<<d.toMap();
 
 //    m_playList->addTrack (d);
 //    m_playList->setCurrentIndex (m_playList->count () -1);
-    m_playList->addAndFocus(d);
+    m_playQueue->addAndFocus(d);
 }
 
 void PlayerCore::playFromNetwork(const QUrl &url)
@@ -439,7 +324,7 @@ void PlayerCore::playFromNetwork(const QUrl &url)
 //    playTrack (&d);
 //    m_playList->addTrack (d);
 //    m_playList->setCurrentIndex (m_playList->count () -1);
-    m_playList->addAndFocus(d);
+    m_playQueue->addAndFocus(d);
 }
 
 void PlayerCore::playTrack(const AudioMetaObject &data)
@@ -471,19 +356,19 @@ void PlayerCore::playTrack(const AudioMetaObject &data)
 
 int PlayerCore::forwardIndex() const
 {
-    if (m_playList->isEmpty ())
+    if (m_playQueue->isEmpty ())
         return -1;
 
-    int index = m_playList->currentIndex () + 1;
+    int index = m_playQueue->currentIndex () + 1;
 
     switch (m_playMode) {
     case Common::PlayModeOrder: {
-        if (index >= m_playList->count ())
+        if (index >= m_playQueue->count ())
             index = -1;
         break;
     }
     case Common::PlayModeRepeatAll: {
-        if (index >= m_playList->count ())
+        if (index >= m_playQueue->count ())
             index = 0;
         break;
     }
@@ -503,10 +388,10 @@ int PlayerCore::forwardIndex() const
 
 int PlayerCore::backwardIndex() const
 {
-    if (m_playList->isEmpty ())
+    if (m_playQueue->isEmpty ())
         return -1;
 
-    int index = m_playList->currentIndex () -1;
+    int index = m_playQueue->currentIndex () -1;
 
     switch (m_playMode) {
     case Common::PlayModeOrder: {
@@ -516,7 +401,7 @@ int PlayerCore::backwardIndex() const
     }
     case Common::PlayModeRepeatAll: {
         if (index < 0)
-            index = m_playList->count () -1;
+            index = m_playQueue->count () -1;
         break;
     }
     case Common::PlayModeRepeatCurrent:
@@ -533,13 +418,461 @@ int PlayerCore::backwardIndex() const
 
 int PlayerCore::shuffleIndex() const
 {
-    if (m_playList->isEmpty ())
+    if (m_playQueue->isEmpty ())
         return -1;
     QTime time = QTime::currentTime ();
     qsrand(time.second () * 1000 + time.msec ());
     int n = qrand ();
-    return n % m_playList->count ();
+    return n % m_playQueue->count ();
 }
+
+void PlayerCore::togglePlayPause()
+{
+    if (!m_playBackend)
+        return;
+
+    switch ((*m_playBackend)->playBackendState ()) {
+    case Common::PlayBackendPlaying:
+        (*m_playBackend)->pause ();
+        break;
+    case Common::PlayBackendPaused:
+        (*m_playBackend)->play (m_currentPlayPos);
+        break;
+    case Common::PlayBackendStopped: {
+        if (m_autoSkipForward) {
+            qDebug()<<Q_FUNC_INFO<<"playbackend stopped";
+//            QString playingHash = m_musicLibraryManager->playingSongHash ();
+
+//            AudioMetaObject *data = m_playList->currentTrack ();
+            AudioMetaObject data = m_playQueue->currentTrack ();
+//            if (!data)
+//                break;
+            if (data.isEmpty ())
+                break;
+            m_curTrackDuration = data.trackMeta ().duration ();//data->trackMeta ()->duration ();//getSongLength (data->trackMeta ()->duration ());
+            m_currentPlayPos = 0;
+
+//            //设置播放歌曲的hash,使得MusicLibraryManager发送playingSongChanged信号
+//            //此处是为了使得前端qml界面能够在初始化时候刷新
+//            m_musicLibraryManager->setPlayingSongHash (playingHash);
+
+//            PlayBackend::BaseMediaObject obj;
+//            QStringList list = m_musicLibraryManager
+//                    ->querySongMetaElement (Common::E_FileName, playingHash);
+//            if (!list.isEmpty ())
+//                obj.setFileName (list.first ());
+//            list = m_musicLibraryManager
+//                    ->querySongMetaElement (Common::E_FilePath, playingHash);
+//            if (!list.isEmpty ())
+//                obj.setFilePath (list.first ());
+//            obj.setMediaType (Common::MediaTypeLocalFile);
+//            qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
+//            m_playBackend->changeMedia (&obj, 0, true);
+//            BaseMediaObject obj;
+//            obj.setFilePath (/*data->path ()*/data.path ());
+//            obj.setFileName (/*data->name ()*/data.name ());
+//            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
+//            (*m_playBackend)->changeMedia (&obj, 0, true);
+            if (m_resource)
+                m_resource->deleteLater ();
+            m_resource = MediaResource::create (data.uri ().toString (), this);
+            (*m_playBackend)->changeMedia (m_resource, 0, true);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+void PlayerCore::play()
+{
+    if (m_playBackend)
+        (*m_playBackend)->play (m_currentPlayPos);
+}
+
+void PlayerCore::stop()
+{
+    if (m_playBackend)
+        //TODO: 是否需要记住最后播放的歌曲(待后续开发情况决定)
+        (*m_playBackend)->stop ();
+}
+
+void PlayerCore::pause()
+{
+    if (m_playBackend)
+        (*m_playBackend)->pause ();
+}
+
+void PlayerCore::setPosition(qreal pos, bool isPercent)
+{
+    if (!m_playBackend)
+        return;
+
+    qDebug()<<Q_FUNC_INFO<<"setPosition to "<<pos<<" isPercent "<<isPercent;
+
+
+    m_currentPlayPos = isPercent
+            ? m_curTrackDuration <= 0 ? m_currentPlayPos : m_currentPlayPos * pos/100
+            : pos;
+//    if (isPercent) {
+//        if (m_curTrackDuration <= 0)
+//            return;
+//        (*m_playBackend)->setPosition (m_curTrackDuration * pos/100);
+//    } else {
+//        (*m_playBackend)->setPosition (pos);
+//    }
+    (*m_playBackend)->setPosition (m_currentPlayPos);
+}
+
+void PlayerCore::skipForward()
+{
+    m_playQueue->setCurrentIndex (this->forwardIndex ());
+}
+
+void PlayerCore::skipBackward()
+{
+    m_playQueue->setCurrentIndex (this->backwardIndex ());
+}
+
+void PlayerCore::skipShuffle()
+{
+    m_playQueue->setCurrentIndex (this->shuffleIndex ());
+}
+void PlayerCore::setPlayMode(Common::PlayMode mode)
+{
+    if (m_playMode != mode) {
+        m_playMode = mode;
+        emit playModeChanged(mode);
+        emit playModeChanged((int)mode);
+    }
+}
+
+void PlayerCore::setPlayMode(int mode)
+{
+//    if ((int)m_playMode != mode) {
+//        Common::PlayMode m = Common::PlayMode(mode);
+//        m_playMode = m;
+//        emit playModeIntChanged(mode);
+//    }
+    setPlayMode(Common::PlayMode(mode));
+}
+
+void PlayerCore::setAutoSkipForward(bool autoSkipForward)
+{
+    if (m_autoSkipForward != autoSkipForward) {
+        m_autoSkipForward = autoSkipForward;
+        emit autoSkipForwardChanged(autoSkipForward);
+    }
+}
+
+void PlayerCore::setPluginLoader()
+{
+    if (!m_pluginLoader) {
+        qFatal("[%s] No mPluginLoader", Q_FUNC_INFO);
+        return;
+    }
+//    if (!m_playBackend) {
+//        m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
+//        if (!PointerValid (EPointer::PPlaybackend))
+//            return;
+////        qDebug()<<"[PlayerCore] user playbackend "<<mPlayBackend->getPluginName ();
+//        m_playBackend->init ();
+//        m_playBackend->stop ();
+//    }
+    m_playBackendHost = m_pluginLoader->curBackendHost ();
+    if (!m_playBackendHost || !m_playBackendHost->isValid ()) {
+        qCritical()<<Q_FUNC_INFO<<"No playBackendHost or playBackendHost invalid!!";
+        return;
+    }
+    m_pb = m_playBackendHost->instance<IPlayBackend>();
+    if (!m_pb) {
+        qCritical()<<Q_FUNC_INFO<<"PlayBackend instance fail";
+        return;
+    }
+    m_playBackend = &m_pb;
+    (*m_playBackend)->initialize ();
+    (*m_playBackend)->stop ();
+
+//    connect (m_pluginLoader,
+//             &PluginLoader::signalPluginChanged,
+//             [this](Common::PluginType type) {
+//        if (type == Common::PluginPlayBackend) {
+//            if (m_playBackend) {
+//                m_playBackend->stop ();
+//                m_playBackend->deleteLater ();
+//            }
+//            m_playBackend = m_pluginLoader->getCurrentPlayBackend ();
+//            if (!PointerValid (EPointer::PPlaybackend))
+//                return;
+////            qDebug()<<"change playbackend to"<<mPlayBackend->getPluginName ();
+//            m_playBackend->init ();
+//            m_playBackend->stop ();
+//        }
+//    });
+
+//    if (!PointerValid (EPointer::PPlaybackend)) {
+//        qDebug()<<"[PlayerCore] No Playbackend found";
+//        return;
+//    }
+
+    // 播放状态改变信号
+    connect (*m_playBackend, &IPlayBackend::stateChanged,
+             [&](Common::PlayBackendState state) {
+        emit playBackendStateChanged (state);
+//        emit playBackendStateChanged ((int)state);
+    });
+//    connect(*m_playBackend, &IPlayBackend::stateChanged, this, &PlayerCore::playBackendStateChanged);
+
+    //当一首曲目播放结束后
+    connect (*m_playBackend,
+             &IPlayBackend::finished,
+             [&]() {
+        emit playTrackFinished ();
+        if (m_autoSkipForward)
+            doPlayByPlayMode ();
+    });
+
+    //播放失败
+    connect (*m_playBackend,
+             &IPlayBackend::failed,
+             [&]() {
+        emit playTrackFailed ();
+        if (m_autoSkipForward)
+            doPlayByPlayMode ();
+    });
+
+    //tick
+    connect (*m_playBackend,
+             &IPlayBackend::tick,
+             [&] (quint64 sec) {
+        qDebug()<<Q_FUNC_INFO<<"Tick "<<sec<<" duration "<<m_curTrackDuration;
+        m_currentPlayPos = sec;
+        emit playTickActual (sec);
+        if (m_curTrackDuration > 0) {
+//            qreal v = sec / m_curTrackDuration;
+//            int p = v *1000;
+            int p = sec/m_curTrackDuration * 100;
+            qDebug()<<Q_FUNC_INFO<<" Percent "<<p;
+            emit playTickPercent (p);
+        }
+    });
+}
+
+void PlayerCore::doPlayByPlayMode()
+{
+    if (!m_playBackend) {
+        qDebug()<<Q_FUNC_INFO<<"Stop due to no playBackend";
+        return;
+    }
+    qDebug()<<">>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<";
+    switch (m_playMode) {
+    case Common::PlayModeOrder: { //顺序播放
+        qDebug()<<Q_FUNC_INFO<<" PlayModeOrder";
+        if (m_playQueue->isEmpty ())
+            break;
+        if (m_playQueue->currentIndex () >= m_playQueue->count ()-1)
+            (*m_playBackend)->stop ();
+        else
+            this->skipForward ();
+        break;
+    }
+    case Common::PlayModeRepeatCurrent: { //单曲播放
+        qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatCurrent";
+
+        AudioMetaObject data = m_playQueue->currentTrack ();
+        if (data.isEmpty ())
+            break;
+//        if (data) {
+//            BaseMediaObject obj;
+//            obj.setFilePath (/*data->path ()*/data.path ());
+//            obj.setFileName (/*data->name ()*/data.name ());
+//            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
+        if (m_resource)
+            m_resource->deleteLater ();
+        m_resource = MediaResource::create (data.uri ().toString (), this);
+        (*m_playBackend)->changeMedia (m_resource, 0, true);
+        m_currentPlayPos = 0;
+        (*m_playBackend)->play ();
+//        }
+        break;
+    }
+    case Common::PlayModeRepeatAll:  { //循环播放
+        qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatAll";
+        this->skipForward ();
+        break;
+    }
+    case Common::PlayModeShuffle: { //随机播放
+        qDebug()<<Q_FUNC_INFO<<" PlayModeShuffle";
+        this->skipShuffle ();
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+
+//Common::PlayBackendState PlayerCore::getPlayBackendState()
+//{
+//    if (!PointerValid((EPointer::PPlaybackend))) {
+//        Common::PlayBackendState s = Common::PlayBackendStopped;
+//        return s;
+//    }
+//    return m_playBackend.data()->getPlayBackendState();
+//}
+
+//int PlayerCore::getPlayBackendStateInt()
+//{
+//    return (int)getPlayBackendState();
+//}
+
+//void PlayerCore::setAutoSkipForward(bool autoSkipForward)
+//{
+//    if (m_autoSkipForward == autoSkipForward)
+//        return;
+//    m_autoSkipForward = autoSkipForward;
+//    emit autoSkipForwardChanged ();
+//}
+
+//bool PlayerCore::getAutoSkipForward()
+//{
+//    return m_autoSkipForward;
+//}
+
+//void PlayerCore::playFromLibrary(const QString &songHah)
+//{
+//    if (!m_dao) {
+//        qCritical("%s : no IMusicLibraryDAO, can't play from library", Q_FUNC_INFO);
+//        return;
+//    }
+//    qDebug()<<Q_FUNC_INFO<<"play for hash "<<songHah;
+
+////    AudioMetaObject *d = m_dao->trackFromHash (songHah);
+//    AudioMetaObject d = m_dao->trackFromHash (songHah);
+
+//    qDebug()<<Q_FUNC_INFO<<"find in library "<<d.toMap();
+
+////    m_playList->addTrack (d);
+////    m_playList->setCurrentIndex (m_playList->count () -1);
+//    m_playQueue->addAndFocus(d);
+//}
+
+//void PlayerCore::playFromNetwork(const QUrl &url)
+//{
+//    if (!m_playBackend || url.isEmpty () || !url.isValid ())
+//        return;
+//    qDebug()<<Q_FUNC_INFO<<url;
+
+////    PlayBackend::BaseMediaObject obj;
+////    obj.setFilePath (url.toString ());
+////    obj.setMediaType (Common::MediaTypeUrl);
+////    (*m_playBackend)->changeMedia (&obj, 0, true);
+//    AudioMetaObject d(url);
+////    playTrack (&d);
+////    m_playList->addTrack (d);
+////    m_playList->setCurrentIndex (m_playList->count () -1);
+//    m_playQueue->addAndFocus(d);
+//}
+
+//void PlayerCore::playTrack(const AudioMetaObject &data)
+//{
+//    if (data.isEmpty ()) {
+//        qWarning()<<Q_FUNC_INFO<<"AudioMetaData is empty";
+//        return;
+//    }
+//    m_curTrack = data;
+//    m_curTrackDuration = data.trackMeta ().duration ();
+////    BaseMediaObject obj;
+////    obj.setFilePath (data.path ());
+////    obj.setFileName (data.name ());
+////    obj.setMediaType ((Common::MediaType)data.mediaType ());
+//    if (m_resource)
+//        m_resource->deleteLater ();
+//    m_resource = nullptr;
+//    m_resource = MediaResource::create (data.uri ().toString (), 0);
+//    qDebug()<<Q_FUNC_INFO<<"change file to "<<data.uri ();
+//    if (*m_playBackend) {
+//        (*m_playBackend)->changeMedia (m_resource, 0, true);
+//        m_currentPlayPos = 0;
+//        (*m_playBackend)->play ();
+//    }
+//    else
+//        qCritical("No playBackend found");
+//    emit trackChanged (m_curTrack.toMap());
+//}
+
+//int PlayerCore::forwardIndex() const
+//{
+//    if (m_playQueue->isEmpty ())
+//        return -1;
+
+//    int index = m_playQueue->currentIndex () + 1;
+
+//    switch (m_playMode) {
+//    case Common::PlayModeOrder: {
+//        if (index >= m_playQueue->count ())
+//            index = -1;
+//        break;
+//    }
+//    case Common::PlayModeRepeatAll: {
+//        if (index >= m_playQueue->count ())
+//            index = 0;
+//        break;
+//    }
+//    case Common::PlayModeRepeatCurrent:
+//        index--;
+//        break;
+//    case Common::PlayModeShuffle:
+//        index = - 1;//m_playList->randomIndex ();
+//        break;
+//    default:
+//        break;
+//    }
+//    qDebug()<<Q_FUNC_INFO<<" new index is "<<index;
+
+//    return index;
+//}
+
+//int PlayerCore::backwardIndex() const
+//{
+//    if (m_playQueue->isEmpty ())
+//        return -1;
+
+//    int index = m_playQueue->currentIndex () -1;
+
+//    switch (m_playMode) {
+//    case Common::PlayModeOrder: {
+//        if (index < 0)
+//            index = -1;
+//        break;
+//    }
+//    case Common::PlayModeRepeatAll: {
+//        if (index < 0)
+//            index = m_playQueue->count () -1;
+//        break;
+//    }
+//    case Common::PlayModeRepeatCurrent:
+//        index++;
+//        break;
+//    case Common::PlayModeShuffle:
+//        index = -1;//m_playList->randomIndex ();
+//        break;
+//    default:
+//        break;
+//    }
+//    return index;
+//}
+
+//int PlayerCore::shuffleIndex() const
+//{
+//    if (m_playQueue->isEmpty ())
+//        return -1;
+//    QTime time = QTime::currentTime ();
+//    qsrand(time.second () * 1000 + time.msec ());
+//    int n = qrand ();
+//    return n % m_playQueue->count ();
+//}
 
 
 
@@ -648,84 +981,83 @@ int PlayerCore::shuffleIndex() const
 //    doMetadataLookup (songHash, IMetadataLookup::TypeTrackDescription);
 //}
 
-void PlayerCore::togglePlayPause()
-{
-    if (!m_playBackend)
-        return;
+//void PlayerCore::togglePlayPause()
+//{
+//    if (!m_playBackend)
+//        return;
 
-    switch ((*m_playBackend)->playBackendState ()) {
-    case Common::PlayBackendPlaying:
-        (*m_playBackend)->pause ();
-        break;
-    case Common::PlayBackendPaused:
-        (*m_playBackend)->play (m_currentPlayPos);
-        break;
-    case Common::PlayBackendStopped: {
-        if (m_autoSkipForward) {
-            qDebug()<<Q_FUNC_INFO<<"playbackend stopped";
-//            QString playingHash = m_musicLibraryManager->playingSongHash ();
+//    switch ((*m_playBackend)->playBackendState ()) {
+//    case Common::PlayBackendPlaying:
+//        (*m_playBackend)->pause ();
+//        break;
+//    case Common::PlayBackendPaused:
+//        (*m_playBackend)->play (m_currentPlayPos);
+//        break;
+//    case Common::PlayBackendStopped: {
+//        if (m_autoSkipForward) {
+//            qDebug()<<Q_FUNC_INFO<<"playbackend stopped";
+////            QString playingHash = m_musicLibraryManager->playingSongHash ();
 
-//            AudioMetaObject *data = m_playList->currentTrack ();
-            AudioMetaObject data = m_playList->currentTrack ();
-//            if (!data)
+////            AudioMetaObject *data = m_playList->currentTrack ();
+//            AudioMetaObject data = m_playQueue->currentTrack ();
+////            if (!data)
+////                break;
+//            if (data.isEmpty ())
 //                break;
-            if (data.isEmpty ())
-                break;
-            m_curTrackDuration = data.trackMeta ().duration ();//data->trackMeta ()->duration ();//getSongLength (data->trackMeta ()->duration ());
-            m_currentPlayPos = 0;
+//            m_curTrackDuration = data.trackMeta ().duration ();//data->trackMeta ()->duration ();//getSongLength (data->trackMeta ()->duration ());
+//            m_currentPlayPos = 0;
 
-//            //设置播放歌曲的hash,使得MusicLibraryManager发送playingSongChanged信号
-//            //此处是为了使得前端qml界面能够在初始化时候刷新
-//            m_musicLibraryManager->setPlayingSongHash (playingHash);
+////            //设置播放歌曲的hash,使得MusicLibraryManager发送playingSongChanged信号
+////            //此处是为了使得前端qml界面能够在初始化时候刷新
+////            m_musicLibraryManager->setPlayingSongHash (playingHash);
 
-//            PlayBackend::BaseMediaObject obj;
-//            QStringList list = m_musicLibraryManager
-//                    ->querySongMetaElement (Common::E_FileName, playingHash);
-//            if (!list.isEmpty ())
-//                obj.setFileName (list.first ());
-//            list = m_musicLibraryManager
-//                    ->querySongMetaElement (Common::E_FilePath, playingHash);
-//            if (!list.isEmpty ())
-//                obj.setFilePath (list.first ());
-//            obj.setMediaType (Common::MediaTypeLocalFile);
-//            qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
-//            m_playBackend->changeMedia (&obj, 0, true);
-//            BaseMediaObject obj;
-//            obj.setFilePath (/*data->path ()*/data.path ());
-//            obj.setFileName (/*data->name ()*/data.name ());
-//            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
-//            (*m_playBackend)->changeMedia (&obj, 0, true);
-            if (m_resource)
-                m_resource->deleteLater ();
-            m_resource = MediaResource::create (data.uri ().toString (), this);
-            (*m_playBackend)->changeMedia (m_resource, 0, true);
-        }
-        break;
-    }
-    default:
-        break;
-    }
+////            PlayBackend::BaseMediaObject obj;
+////            QStringList list = m_musicLibraryManager
+////                    ->querySongMetaElement (Common::E_FileName, playingHash);
+////            if (!list.isEmpty ())
+////                obj.setFileName (list.first ());
+////            list = m_musicLibraryManager
+////                    ->querySongMetaElement (Common::E_FilePath, playingHash);
+////            if (!list.isEmpty ())
+////                obj.setFilePath (list.first ());
+////            obj.setMediaType (Common::MediaTypeLocalFile);
+////            qDebug()<<"Change song to " << obj.filePath ()<<"  "<<obj.fileName ();
+////            m_playBackend->changeMedia (&obj, 0, true);
+////            BaseMediaObject obj;
+////            obj.setFilePath (/*data->path ()*/data.path ());
+////            obj.setFileName (/*data->name ()*/data.name ());
+////            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
+////            (*m_playBackend)->changeMedia (&obj, 0, true);
+//            if (m_resource)
+//                m_resource->deleteLater ();
+//            m_resource = MediaResource::create (data.uri ().toString (), this);
+//            (*m_playBackend)->changeMedia (m_resource, 0, true);
+//        }
+//        break;
+//    }
+//    default:
+//        break;
+//    }
+//}
 
-}
+//void PlayerCore::play()
+//{
+//    if (m_playBackend)
+//        (*m_playBackend)->play (m_currentPlayPos);
+//}
 
-void PlayerCore::play()
-{
-    if (m_playBackend)
-        (*m_playBackend)->play (m_currentPlayPos);
-}
+//void PlayerCore::stop()
+//{
+//    if (m_playBackend)
+//        //TODO: 是否需要记住最后播放的歌曲(待后续开发情况决定)
+//        (*m_playBackend)->stop ();
+//}
 
-void PlayerCore::stop()
-{
-    if (m_playBackend)
-        //TODO: 是否需要记住最后播放的歌曲(待后续开发情况决定)
-        (*m_playBackend)->stop ();
-}
-
-void PlayerCore::pause()
-{
-    if (m_playBackend)
-        (*m_playBackend)->pause ();
-}
+//void PlayerCore::pause()
+//{
+//    if (m_playBackend)
+//        (*m_playBackend)->pause ();
+//}
 
 //void PlayerCore::setVolume(int vol)
 //{
@@ -733,41 +1065,27 @@ void PlayerCore::pause()
 //        mPlayBackend.data ()->setVolume (vol);
 //}
 
-void PlayerCore::setPosition(qreal pos, bool isPercent)
-{
-    if (!m_playBackend)
-        return;
+//void PlayerCore::setPosition(qreal pos, bool isPercent)
+//{
+//    if (!m_playBackend)
+//        return;
 
-    qDebug()<<Q_FUNC_INFO<<"setPosition to "<<pos<<" isPercent "<<isPercent;
+//    qDebug()<<Q_FUNC_INFO<<"setPosition to "<<pos<<" isPercent "<<isPercent;
 
 
-    m_currentPlayPos = isPercent
-            ? m_curTrackDuration <= 0 ? m_currentPlayPos : m_currentPlayPos * pos/100
-            : pos;
-//    if (isPercent) {
-//        if (m_curTrackDuration <= 0)
-//            return;
-//        (*m_playBackend)->setPosition (m_curTrackDuration * pos/100);
-//    } else {
-//        (*m_playBackend)->setPosition (pos);
-//    }
-    (*m_playBackend)->setPosition (m_currentPlayPos);
-}
+//    m_currentPlayPos = isPercent
+//            ? m_curTrackDuration <= 0 ? m_currentPlayPos : m_currentPlayPos * pos/100
+//            : pos;
+////    if (isPercent) {
+////        if (m_curTrackDuration <= 0)
+////            return;
+////        (*m_playBackend)->setPosition (m_curTrackDuration * pos/100);
+////    } else {
+////        (*m_playBackend)->setPosition (pos);
+////    }
+//    (*m_playBackend)->setPosition (m_currentPlayPos);
+//}
 
-void PlayerCore::skipForward()
-{
-    m_playList->setCurrentIndex (this->forwardIndex ());
-}
-
-void PlayerCore::skipBackward()
-{
-    m_playList->setCurrentIndex (this->backwardIndex ());
-}
-
-void PlayerCore::skipShuffle()
-{
-    m_playList->setCurrentIndex (this->shuffleIndex ());
-}
 
 //void PlayerCore::skipShuffle()
 //{
@@ -782,12 +1100,12 @@ void PlayerCore::skipShuffle()
 //    }
 //}
 
-void PlayerCore::initiate()
-{
-    setPluginLoader();
-//    setMusicLibraryManager();
-//    setMetaLookupManager ();
-}
+//void PlayerCore::initiate()
+//{
+//    setPluginLoader();
+////    setMusicLibraryManager();
+////    setMetaLookupManager ();
+//}
 
 //bool PlayerCore::PointerValid(PlayerCore::EPointer pointer)
 //{
@@ -916,58 +1234,7 @@ void PlayerCore::initiate()
 //    }
 //}
 
-void PlayerCore::doPlayByPlayMode()
-{
-    if (!m_playBackend) {
-        qDebug()<<Q_FUNC_INFO<<"Stop due to no playBackend";
-        return;
-    }
-    qDebug()<<">>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<";
-    switch (m_playMode) {
-    case Common::PlayModeOrder: { //顺序播放
-        qDebug()<<Q_FUNC_INFO<<" PlayModeOrder";
-        if (m_playList->isEmpty ())
-            break;
-        if (m_playList->currentIndex () >= m_playList->count ()-1)
-            (*m_playBackend)->stop ();
-        else
-            this->skipForward ();
-        break;
-    }
-    case Common::PlayModeRepeatCurrent: { //单曲播放
-        qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatCurrent";
 
-        AudioMetaObject data = m_playList->currentTrack ();
-        if (data.isEmpty ())
-            break;
-//        if (data) {
-//            BaseMediaObject obj;
-//            obj.setFilePath (/*data->path ()*/data.path ());
-//            obj.setFileName (/*data->name ()*/data.name ());
-//            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
-        if (m_resource)
-            m_resource->deleteLater ();
-        m_resource = MediaResource::create (data.uri ().toString (), this);
-        (*m_playBackend)->changeMedia (m_resource, 0, true);
-        m_currentPlayPos = 0;
-        (*m_playBackend)->play ();
-//        }
-        break;
-    }
-    case Common::PlayModeRepeatAll:  { //循环播放
-        qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatAll";
-        this->skipForward ();
-        break;
-    }
-    case Common::PlayModeShuffle: { //随机播放
-        qDebug()<<Q_FUNC_INFO<<" PlayModeShuffle";
-        this->skipShuffle ();
-        break;
-    }
-    default:
-        break;
-    }
-}
 
 
 
