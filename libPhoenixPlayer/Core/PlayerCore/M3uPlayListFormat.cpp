@@ -42,7 +42,10 @@ QString M3uPlayListFormat::format(const AudioMetaList &list)
     out.append ("#EXTM3U");
     foreach (AudioMetaObject d, list) {
         //TODO add EXTINF
-        out.append (d.uri ().toString ());
+        QString str = d.uri().toString();
+        if (str.startsWith("file://"))
+            str = str.mid(7);
+        out.append (str);
     }
     return out.join ("\n");
 }

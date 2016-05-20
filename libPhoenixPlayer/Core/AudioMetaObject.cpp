@@ -239,13 +239,34 @@ QVariantMap AudioMetaObject::toMap() const
     return o;
 }
 
+AudioMetaObject AudioMetaObject::fromMap(const QVariantMap &map)
+{
+
+    QString name = map.value (KEY_NAME).toString ();
+    QString path = map.value (KEY_PATH).toString ();
+    quint64 size = map.value (KEY_SIZE).toString ().toInt ();
+    AudioMetaObject meta(path, name, size);
+    AlbumMeta al = AlbumMeta::fromMap(map.value (KEY_ALBUM_META).toMap());
+    ArtistMeta ar = ArtistMeta::fromMap(map.value (KEY_ARTIST_META).toMap());
+    CoverMeta co = CoverMeta::fromMap(map.value (KEY_COVER_META).toMap());
+    TrackMeta tr = TrackMeta::fromMap(map.value (KEY_TRACK_META).toMap());
+    meta.setAlbumMeta (al);
+    meta.setArtistMeta (ar);
+    meta.setCoverMeta (co);
+    meta.setTrackMeta (tr);
+    meta.setLyricsData (map.value (KEY_LYRICS_DATA).toString ());
+    meta.setLyricsUri (QUrl(map.value (KEY_LYRICS_URI).toString ()));
+    meta.setMediaType (map.value (KEY_MEDIA_TYPE).toString().toInt());
+    return meta;
+}
+
 AudioMetaObject AudioMetaObject::fromJson(const QByteArray &json)
 {
     AudioMetaObject meta;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error ["<<error.errorString()<<"]";
         return meta;
     }
     if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
@@ -358,13 +379,23 @@ QVariantMap AlbumMeta::toMap() const
     return map;
 }
 
+AlbumMeta AlbumMeta::fromMap(const QVariantMap &map)
+{
+    AlbumMeta meta;
+    meta.setDate (map.value (KEY_DATE).toString ());
+    meta.setDescription (map.value (KEY_DESCRIPTION).toString ());
+    meta.setImgUri (QUrl(map.value (KEY_URI).toString ()));
+    meta.setName (map.value (KEY_NAME).toString ());
+    return meta;
+}
+
 AlbumMeta AlbumMeta::fromJson(const QByteArray &json)
 {
     AlbumMeta meta;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error ["<<error.errorString()<<"]";
         return meta;
     }
     if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
@@ -450,13 +481,22 @@ QVariantMap ArtistMeta::toMap() const
     return o;
 }
 
+ArtistMeta ArtistMeta::fromMap(const QVariantMap &map)
+{
+    ArtistMeta meta;
+    meta.setDescription (map.value (KEY_DESCRIPTION).toString ());
+    meta.setImgUri (QUrl(map.value (KEY_URI).toString ()));
+    meta.setName (map.value (KEY_NAME).toString ());
+    return meta;
+}
+
 ArtistMeta ArtistMeta::fromJson(const QByteArray &json)
 {
     ArtistMeta meta;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error ["<<error.errorString()<<"]";
         return meta;
     }
     if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
@@ -541,13 +581,22 @@ QVariantMap CoverMeta::toMap() const
     return o;
 }
 
+CoverMeta CoverMeta::fromMap(const QVariantMap &map)
+{
+    CoverMeta meta;
+    meta.setLargeUri (QUrl(map.value (KEY_LARGE_IMG).toString ()));
+    meta.setMiddleUri (QUrl(map.value (KEY_MIDDLE_IMG).toString ()));
+    meta.setSmallUri (QUrl(map.value (KEY_SMALL_IMG).toString ()));
+    return meta;
+}
+
 CoverMeta CoverMeta::fromJson(const QByteArray &json)
 {
     CoverMeta meta;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error ["<<error.errorString()<<"]";
         return meta;
     }
     if (doc.isEmpty () || doc.isNull () || !doc.isObject ())
@@ -712,13 +761,28 @@ QVariantMap TrackMeta::toMap() const
     return o;
 }
 
+TrackMeta TrackMeta::fromMap(const QVariantMap &map)
+{
+    TrackMeta meta;
+    meta.setBitRate (map.value (KEY_BIT_RATE).toString ());
+    meta.setDate (map.value (KEY_DATE).toString ());
+    meta.setDescription (map.value (KEY_DESCRIPTION).toString ());
+    meta.setDuration (map.value (KEY_DURATION).toString().toInt());
+    meta.setGenre (map.value (KEY_GENRE).toString ());
+    meta.setSampleRate (map.value (KEY_SAMPLE_RATE).toString ());
+    meta.setTitle (map.value (KEY_TITLE).toString ());
+    meta.setUserRating (map.value (KEY_USER_RATING).toString ());
+    meta.setYear (map.value (KEY_YEAR).toString ());
+    return meta;
+}
+
 TrackMeta TrackMeta::fromJson(const QByteArray &json)
 {
     TrackMeta meta;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson (json, &error);
     if (error.error != QJsonParseError::NoError) {
-        qDebug()<<Q_FUNC_INFO<<"Parse main json content error";
+        qDebug()<<Q_FUNC_INFO<<"Parse main json content error ["<<error.errorString()<<"]";
         return meta;
     }
     if (doc.isEmpty () || doc.isNull () || !doc.isObject ())

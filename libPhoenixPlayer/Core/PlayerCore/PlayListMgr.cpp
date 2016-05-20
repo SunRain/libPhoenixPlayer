@@ -45,7 +45,12 @@ PlayListMgr::~PlayListMgr()
 {
 //    if (!m_trackList.isEmpty ()) {
 //        m_trackList.clear ();
-//    }
+    //    }
+}
+
+void PlayListMgr::refreshExistPlayLists()
+{
+    queryPlayLists();
 }
 
 //void PlayListMgr::addTrack(const AudioMetaObject &song)
@@ -223,30 +228,34 @@ bool PlayListMgr::open(const QString &name)
     foreach (QString s, fileList) {
         QUrl url(s);
         QString str;
-        if (url.isLocalFile ()) {
-            str = url.toLocalFile ();
+        if (url.isLocalFile ()
+                || !s.toLower().startsWith("http://")
+                || !s.toLower().startsWith("ftp://")) { // local files
+            str = url.toLocalFile (); //if scheme is "file"
+            //TODO url.toLocalFile will return schemes, like "file://path/to/file" ??
+            if (str.isEmpty()) { //no "file://" scheme
+                str = s;
+            }
             if (!QFile::exists (str)) {
                 qDebug()<<Q_FUNC_INFO<<QString("file [%1] not exist").arg (str);
                 continue;
             }
             QFileInfo info(str);
-//            meta = new AudioMetaObject(info.absolutePath (), info.fileName (), info.size (),this);
+            QString path = info.absolutePath();
+            QString name = info.fileName();
+            quint64 size = info.size();
+
             AudioMetaObject o(info.absolutePath (), info.fileName (), info.size ());
+//            qDebug()<<Q_FUNC_INFO<<QString("===== Add file name=[%1],path=[%2],size=[%3],hash=[%4]")
+//                      .arg(name).arg(path).arg(QString::number(size)).arg(o.hash());
             o.setMediaType ((int)Common::MediaTypeLocalFile);
-//            meta->setMediaType ((int)Common::MediaTypeLocalFile);
             //TODO: should fill other SongMetaData properties from music library
-//            m_trackList.append (o);
             addTrack (o);
-        } else {
-//            str = url.toString ();
-//            meta = new AudioMetaObject(str, "", 0, this);
-//            meta->setMediaType ((int)Common::MediaTypeUrl);
+        } else { //network stream
             AudioMetaObject o(url);
             o.setMediaType ((int)Common::MediaTypeUrl);
-//            m_trackList.append (o);
             addTrack (o);
         }
-//        m_trackList.append (meta);
     }
     file.close ();
     qDebug()<<Q_FUNC_INFO<<"get track list size "<<count ();
@@ -278,9 +287,6 @@ bool PlayListMgr::save(const QString &fileName)
 
 void PlayListMgr::queryPlayLists()
 {
-    if (!m_playListDir.isEmpty ())
-        m_playListDir.clear ();
-
     QDir dir(m_playListDir);
     if (!dir.exists ()) {
         qWarning()<<Q_FUNC_INFO<<"No playList dir exist!!";
@@ -288,13 +294,24 @@ void PlayListMgr::queryPlayLists()
     }
     dir.setFilter (QDir::Files | QDir::NoDotAndDotDot | QDir::Readable);
     QFileInfoList list = dir.entryInfoList ();
+    QStringList plst;
     foreach (QFileInfo info, list) {
         QString s = info.completeSuffix ().toLower ();
         if (s.contains (m_listFormat->extension ().toLower ())
                 || m_listFormat->extension ().toLower ().contains (s)) {
-            m_existPlayLists.append (info.baseName ());
+            plst.append (info.baseName ());
         }
     }
+    setExistPlayLists(plst);
+}
+
+void PlayListMgr::setExistPlayLists(QStringList existPlayLists)
+{
+    if (m_existPlayLists == existPlayLists)
+        return;
+
+    m_existPlayLists = existPlayLists;
+    emit existPlayListsChanged(existPlayLists);
 }
 
 //int PlayListMgr::sizeLimit() const

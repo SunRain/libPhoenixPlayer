@@ -50,6 +50,7 @@ public:
     QJsonObject toObject() const;
     QByteArray toJson() const;
     QVariantMap toMap() const;
+    static AlbumMeta fromMap(const QVariantMap &map);
     static AlbumMeta fromJson(const QByteArray &json);
 
 private:
@@ -86,6 +87,7 @@ public:
     QJsonObject toObject() const;
     QByteArray toJson() const;
     QVariantMap toMap() const;
+    static ArtistMeta fromMap(const QVariantMap &map);
     static ArtistMeta fromJson(const QByteArray &json);
 
 private:
@@ -122,6 +124,7 @@ public:
     QJsonObject toObject() const;
     QByteArray toJson() const;
     QVariantMap toMap() const;
+    static CoverMeta fromMap(const QVariantMap &map);
     static CoverMeta fromJson(const QByteArray &json);
 
 private:
@@ -180,6 +183,7 @@ public:
     QJsonObject toObject() const;
     QByteArray toJson() const;
     QVariantMap toMap() const;
+    static TrackMeta fromMap(const QVariantMap &map);
     static TrackMeta fromJson(const QByteArray &json);
 
 private:
@@ -258,6 +262,7 @@ public:
     QJsonObject toObject() const;
     QByteArray toJson() const;
     QVariantMap toMap() const;
+    static AudioMetaObject fromMap(const QVariantMap &map);
     static AudioMetaObject fromJson(const QByteArray &json);
 
 private:

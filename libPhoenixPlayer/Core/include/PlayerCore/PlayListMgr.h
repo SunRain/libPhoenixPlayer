@@ -24,50 +24,16 @@ class LIBPHOENIXPLAYER_EXPORT PlayListMgr : public MusicQueue
     Q_OBJECT
 //    Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
 //    Q_PROPERTY(int count READ count CONSTANT)
-    Q_PROPERTY(QStringList existPlayLists READ existPlayLists CONSTANT)
+    Q_PROPERTY(QStringList existPlayLists READ existPlayLists WRITE setExistPlayLists NOTIFY existPlayListsChanged)
 
 public:
     explicit PlayListMgr(Settings *set, QObject *parent = 0);
     virtual ~PlayListMgr();
-//    void addTrack(const AudioMetaObject &song);
-//    void addTrack(const AudioMetaList &list);
-//    void removeTrack(const int &index);
-//    void removeTracks(const int &startPos, const int &endPos);
-//    void clear();
-//    bool isEmpty();
-    ///
-    /// \brief currentIndex
-    /// \return -1 if current playlist is empty
-    ///
-//    int currentIndex() const;
-    ///
-    /// \brief count
-    /// \return playlist size
-    ///
-//    int count() const;
-
-//    AudioMetaList currentList() const;
 
     ///
-    /// \brief currentTrack
-    /// \return nullptr if no track exists
+    /// \brief refreshExistPlayLists
     ///
-//    AudioMetaObject currentTrack() const;
-//    QObject *currentTrackObject() const;
-    ///
-    /// \brief get
-    /// \param index
-    /// \return nullptr if no track exists
-    ///
-//    AudioMetaObject get(int index) const;
-
-//    void setRandom(bool random);
-    ///
-    /// \brief randomIndex
-    /// \return -1 if no tracks in current playlist
-    ///
-//    int randomIndex() const;
-
+    Q_INVOKABLE void refreshExistPlayLists();
     ///
     /// \brief existPlayLists
     /// \return  返回当前目录下支持的播放列表文件，不包括播放列表的扩展名和路径
@@ -94,11 +60,13 @@ signals:
 //    void trackRemoved(int index);
 //    void trackListRemoved(const AudioMetaList &list);
 
+    void existPlayListsChanged(const QStringList &existPlayLists);
+
 protected:
     virtual void queryPlayLists();
 
 public slots:
-//    void setCurrentIndex(int index);
+    void setExistPlayLists(QStringList existPlayLists);
 
 private:
 //    int m_currentIndex;
