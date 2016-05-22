@@ -262,7 +262,7 @@ bool PlayListMgr::open(const QString &name)
     return true;
 }
 
-bool PlayListMgr::save(const QString &fileName)
+bool PlayListMgr::save(const QString &fileName, bool override)
 {
     if (isEmpty ()) {
         qDebug()<<Q_FUNC_INFO<<"track list is empty!!";
@@ -271,8 +271,15 @@ bool PlayListMgr::save(const QString &fileName)
     QString f = QString("%1/%2.%3").arg (m_playListDir).arg (fileName).arg (m_listFormat->extension ());
     qDebug()<<Q_FUNC_INFO<<"try to save playlist "<<f;
     if (QFile::exists (f)) {
-        qWarning()<<Q_FUNC_INFO<<"playlist already exists";
-        return false;
+        if (override) {
+            if (!QFile::remove(f)) {
+                qWarning()<<Q_FUNC_INFO<<"override playlist fail";
+                return false;
+            }
+        } else {
+            qWarning()<<Q_FUNC_INFO<<"playlist already exists";
+            return false;
+        }
     }
     QFile file(f);
     if (!file.open (QIODevice::WriteOnly)) {

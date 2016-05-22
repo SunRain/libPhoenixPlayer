@@ -51,7 +51,7 @@ public:
     /// \param playListName
     /// \return
     ///
-    Q_INVOKABLE bool save(const QString &fileName);
+    Q_INVOKABLE bool save(const QString &fileName, bool override = false);
 
 signals:
 //    void currentIndexChanged(int index);
