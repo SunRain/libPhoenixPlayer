@@ -2,10 +2,10 @@ OTHER_FILES += \
     $$PWD/ffmpeg_decoder.json
 
 HEADERS += \
-    FFmpeg.h
+    $$PWD/FFmpeg.h
 
 SOURCES += \
-    FFmpeg.cpp
+    $$PWD/FFmpeg.cpp
 
 
 

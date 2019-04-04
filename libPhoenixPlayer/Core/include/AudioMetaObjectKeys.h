@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QtQml>
-#include <QQuickWindow>
+//#include <QQuickWindow>
 
 #include "libphoenixplayer_global.h"
 

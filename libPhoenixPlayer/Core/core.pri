@@ -2,7 +2,7 @@
 INCLUDEPATH += $$PWD/include
 DEPENDPATH += $$PWD/include
 
-#QT += network core
+QT += network core
 ##Enable c++11
 #CONFIG += c++11
 
