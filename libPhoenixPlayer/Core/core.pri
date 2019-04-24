@@ -8,6 +8,7 @@ QT += network core
 
 HEADERS += \
     $$PWD/include/Common.h \
+    $$PWD/include/PlayerCore/PlayListObject.h \
     $$PWD/include/PluginLoader.h \
     $$PWD/include/Settings.h \
     $$PWD/include/SingletonPointer_p.h \
@@ -41,7 +42,6 @@ HEADERS += \
     $$PWD/include/BaseObject.h \
     $$PWD/include/Backend/BaseVisual.h \
     $$PWD/include/EqualizerMgr.h \
-    $$PWD/include/PlayerCore/PlayListMgr.h \
     $$PWD/PlayerCore/PlayListFormat.h \
     $$PWD/PlayerCore/M3uPlayListFormat.h \
 #    $$PWD/include/PlayerCore/PlayQueueMgr.h \
@@ -71,6 +71,7 @@ SOURCES += \
 #    $$PWD/MusicLibrary/DiskLookup.cpp \
     $$PWD/MusicLibrary/MusicLibraryManager.cpp \
 #    $$PWD/MusicLibrary/TagParserManager.cpp \
+    $$PWD/PlayerCore/PlayListObject.cpp \
     $$PWD/PlayerCore/PlayerCore.cpp \
     $$PWD/BaseMediaObject.cpp \
     $$PWD/IMusicTagParser.cpp \
@@ -90,7 +91,6 @@ SOURCES += \
     $$PWD/PlayerCore/VolumeControl.cpp \
     $$PWD/include/Backend/SoftVolume.cpp \
     $$PWD/EqualizerMgr.cpp \
-    $$PWD/PlayerCore/PlayListMgr.cpp \
     $$PWD/PlayerCore/PlayListFormat.cpp \
     $$PWD/PlayerCore/M3uPlayListFormat.cpp \
 #    $$PWD/PlayerCore/PlayQueueMgr.cpp \

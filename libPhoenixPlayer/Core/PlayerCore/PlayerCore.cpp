@@ -16,7 +16,7 @@
 #include "AudioMetaObject.h"
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
-#include "PlayerCore/PlayListMgr.h"
+#include "PlayerCore/PlayListObject.h"
 #include "PlayerCore/RecentPlayedMgr.h"
 #include "SingletonPointer.h"
 #include "Backend/BackendHost.h"
@@ -55,10 +55,10 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
         m_dao = host->instance<IMusicLibraryDAO>();
 
     m_playMode = Common::PlayModeOrder;
-    m_listMgr = new PlayListMgr(m_settings, this);
-    connect (m_listMgr, &PlayListMgr::currentIndexChanged,
+    m_playlistObject = new PlayListObject(m_settings, this);
+    connect (m_playlistObject, &PlayListObject::currentIndexChanged,
              [&](int index) {
-        AudioMetaObject o = m_listMgr->get (index);
+        AudioMetaObject o = m_playlistObject->get (index);
         m_recentList->addTrack (o);
         playTrack (o);
     });
@@ -85,9 +85,9 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
 
 PlayerCore::~PlayerCore()
 {
-    if (m_listMgr)
-        m_listMgr->deleteLater ();
-    m_listMgr = nullptr;
+    if (m_playlistObject)
+        m_playlistObject->deleteLater ();
+    m_playlistObject = nullptr;
     if (m_recentList)
         m_recentList->deleteLater ();
     m_recentList = nullptr;
@@ -250,9 +250,9 @@ int PlayerCore::playBackendStateInt() const
 //    return m_autoSkipForward;
 //}
 
-PlayListMgr *PlayerCore::listMgr() const
+PlayListObject *PlayerCore::playList() const
 {
-    return m_listMgr;
+    return m_playlistObject;
 }
 
 RecentPlayedMgr *PlayerCore::recentList() const

@@ -1,4 +1,4 @@
-#include "PlayerCore/PlayListMgr.h"
+#include "PlayerCore/PlayListObject.h"
 
 #include <QDebug>
 #include <QDir>
@@ -19,39 +19,41 @@
 
 namespace PhoenixPlayer {
 
-PlayListMgr::PlayListMgr(Settings *set, QObject *parent)
+PlayListObject::PlayListObject(const QString &playlistDir, QObject *parent)
     : MusicQueue(parent)
 //    , m_random(false)
 //    , m_currentIndex(-1)
 //    , m_count(0)
-    , m_settings(set)
+//    , m_settings(set)
+    , m_playListDir(playlistDir)
+    , m_fileName(QString())
 {
     setSizeLimit (-1);
     setSkipDuplicates (true);
 
-    //TODO support different playlist format
+    //TODO support different playlist format and use global(singtone) format function
     m_listFormat = new M3uPlayListFormat(this);
-    m_playListDir = m_settings->playListDir ();
+//    m_playListDir = m_settings->playListDir ();
 
-    connect (m_settings, &Settings::playListDirChanged,
-             [&](QString arg) {
-        m_playListDir = arg;
-        queryPlayLists ();
-    });
-    queryPlayLists ();
+//    connect (m_settings, &Settings::playListDirChanged,
+//             [&](QString arg) {
+//        m_playListDir = arg;
+//        queryPlayLists ();
+//    });
+//    queryPlayLists ();
 }
 
-PlayListMgr::~PlayListMgr()
+PlayListObject::~PlayListObject()
 {
 //    if (!m_trackList.isEmpty ()) {
 //        m_trackList.clear ();
     //    }
 }
 
-void PlayListMgr::refreshExistPlayLists()
-{
-    queryPlayLists();
-}
+//void PlayListObject::refreshExistPlayLists()
+//{
+//    queryPlayLists();
+//}
 
 //void PlayListMgr::addTrack(const AudioMetaObject &song)
 //{
@@ -199,18 +201,19 @@ void PlayListMgr::refreshExistPlayLists()
 //    return n % m_trackList.size ();
 //}
 
-QStringList PlayListMgr::existPlayLists() const
-{
-    return m_existPlayLists;
-}
+//QStringList PlayListObject::existPlayLists() const
+//{
+//    return m_existPlayLists;
+//}
 
-bool PlayListMgr::open(const QString &name)
+bool PlayListObject::open(const QString &name)
 {
     if (name.isEmpty())
         return false;
 
     if (!isEmpty ())
         clear ();
+    m_fileName = name;
 
     QString f = QString("%1/%2.%3").arg (m_playListDir).arg (name).arg (m_listFormat->extension ());
     qDebug()<<Q_FUNC_INFO<<"open playlist "<<f;
@@ -262,22 +265,26 @@ bool PlayListMgr::open(const QString &name)
     return true;
 }
 
-bool PlayListMgr::save(const QString &fileName, bool override)
+bool PlayListObject::save(/*const QString &fileName, bool override*/)
 {
     if (isEmpty ()) {
         qDebug()<<Q_FUNC_INFO<<"track list is empty!!";
         return false;
     }
-    QString f = QString("%1/%2.%3").arg (m_playListDir).arg (fileName).arg (m_listFormat->extension ());
+    QString f = QString("%1/%2.%3").arg (m_playListDir).arg (m_fileName).arg (m_listFormat->extension ());
     qDebug()<<Q_FUNC_INFO<<"try to save playlist "<<f;
     if (QFile::exists (f)) {
-        if (override) {
-            if (!QFile::remove(f)) {
-                qWarning()<<Q_FUNC_INFO<<"override playlist fail";
-                return false;
-            }
-        } else {
-            qWarning()<<Q_FUNC_INFO<<"playlist already exists";
+//        if (override) {
+//            if (!QFile::remove(f)) {
+//                qWarning()<<Q_FUNC_INFO<<"override playlist fail";
+//                return false;
+//            }
+//        } else {
+//            qWarning()<<Q_FUNC_INFO<<"playlist already exists";
+//            return false;
+//        }
+        if (!QFile::remove(f)) {
+            qWarning()<<Q_FUNC_INFO<<"override playlist fail";
             return false;
         }
     }
@@ -292,34 +299,44 @@ bool PlayListMgr::save(const QString &fileName, bool override)
     return true;
 }
 
-void PlayListMgr::queryPlayLists()
+QString PlayListObject::playListDir() const
 {
-    QDir dir(m_playListDir);
-    if (!dir.exists ()) {
-        qWarning()<<Q_FUNC_INFO<<"No playList dir exist!!";
-        return;
-    }
-    dir.setFilter (QDir::Files | QDir::NoDotAndDotDot | QDir::Readable);
-    QFileInfoList list = dir.entryInfoList ();
-    QStringList plst;
-    foreach (QFileInfo info, list) {
-        QString s = info.completeSuffix ().toLower ();
-        if (s.contains (m_listFormat->extension ().toLower ())
-                || m_listFormat->extension ().toLower ().contains (s)) {
-            plst.append (info.baseName ());
-        }
-    }
-    setExistPlayLists(plst);
+    return m_playListDir;
 }
 
-void PlayListMgr::setExistPlayLists(QStringList existPlayLists)
+void PlayListObject::setPlayListDir(const QString &playListDir)
 {
-    if (m_existPlayLists == existPlayLists)
-        return;
-
-    m_existPlayLists = existPlayLists;
-    emit existPlayListsChanged(existPlayLists);
+    m_playListDir = playListDir;
 }
+
+//void PlayListObject::queryPlayLists()
+//{
+//    QDir dir(m_playListDir);
+//    if (!dir.exists ()) {
+//        qWarning()<<Q_FUNC_INFO<<"No playList dir exist!!";
+//        return;
+//    }
+//    dir.setFilter (QDir::Files | QDir::NoDotAndDotDot | QDir::Readable);
+//    QFileInfoList list = dir.entryInfoList ();
+//    QStringList plst;
+//    foreach (QFileInfo info, list) {
+//        QString s = info.completeSuffix ().toLower ();
+//        if (s.contains (m_listFormat->extension ().toLower ())
+//                || m_listFormat->extension ().toLower ().contains (s)) {
+//            plst.append (info.baseName ());
+//        }
+//    }
+//    setExistPlayLists(plst);
+//}
+
+//void PlayListObject::setExistPlayLists(QStringList existPlayLists)
+//{
+//    if (m_existPlayLists == existPlayLists)
+//        return;
+
+//    m_existPlayLists = existPlayLists;
+//    emit existPlayListsChanged(existPlayLists);
+//}
 
 //int PlayListMgr::sizeLimit() const
 //{

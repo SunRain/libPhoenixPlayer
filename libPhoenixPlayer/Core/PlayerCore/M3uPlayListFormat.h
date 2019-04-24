@@ -17,9 +17,9 @@ public:
 
     // PlayList interface
 public:
-    QString extension() const;
-    QStringList fileList(const QString &contents);
-    QString format(const AudioMetaList &list);
+    QString extension() const override;
+    QStringList fileList(const QString &contents) override;
+    QString format(const AudioMetaList &list) override;
 };
 } //PhoenixPlayer
 #endif // M3UPLAYLIST_H

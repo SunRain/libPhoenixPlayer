@@ -13,7 +13,7 @@
 namespace PhoenixPlayer {
 class Settings;
 class PluginLoader;
-class PlayListMgr;
+class PlayListObject;
 class MediaResource;
 //class AudioMetaObject;
 //class MusicQueue;
@@ -59,7 +59,7 @@ public:
     Common::PlayBackendState playBackendState() const;
     int playBackendStateInt() const;
 
-    PlayListMgr *listMgr() const;
+    PlayListObject *playList() const;
     RecentPlayedMgr *recentList() const;
     MusicQueue *playQueue() const;
 //    QObject *playListObject() const;
@@ -219,7 +219,7 @@ private:
     PlayBackend::IPlayBackend *m_pb;
     PlayBackend::BackendHost *m_playBackendHost;
     AudioMetaObject m_curTrack;
-    PlayListMgr *m_listMgr;
+    PlayListObject *m_playlistObject;
     MusicQueue *m_playQueue;
     RecentPlayedMgr *m_recentList;
     MusicLibrary::IMusicLibraryDAO *m_dao;
