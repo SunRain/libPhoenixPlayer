@@ -39,6 +39,16 @@ MetadataLookupMgrWrapper::MetadataLookupMgrWrapper(QObject *parent)
     });
 }
 
+//MetadataLookupMgrWrapper *MetadataLookupMgrWrapper::createInstance()
+//{
+//    return new MetadataLookupMgrWrapper();
+//}
+
+//MetadataLookupMgrWrapper *MetadataLookupMgrWrapper::instance()
+//{
+//     return Singleton<MetadataLookupMgrWrapper>::instance(MetadataLookupMgrWrapper::createInstance);
+//}
+
 MetadataLookupMgrWrapper::~MetadataLookupMgrWrapper()
 {
     if (m_lookupMgr->isRunning ()) {

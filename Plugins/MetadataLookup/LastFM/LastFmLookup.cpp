@@ -13,7 +13,7 @@
 #include "AudioMetaObject.h"
 #include "MetadataLookup/BaseNetworkLookup.h"
 #include "Common.h"
-#include "Settings.h"
+#include "PPSettings.h"
 #include "LibPhoenixPlayerMain.h"
 
 namespace PhoenixPlayer{
@@ -24,7 +24,7 @@ LastFmLookup::LastFmLookup(QObject *parent)
     :IMetadataLookup(parent)
 {
     m_networkLookup = new BaseNetworkLookup(this);
-    Settings *setting = phoenixPlayerLib->settings ();
+    PPSettings *setting = phoenixPlayerLib->settings ();
     m_imageSizeValue = setting->getConfig (CONFIG_KEY, DEFAULT_IMAGE_SIZE_REGEXP);
 
     connect (m_networkLookup, &BaseNetworkLookup::failed,

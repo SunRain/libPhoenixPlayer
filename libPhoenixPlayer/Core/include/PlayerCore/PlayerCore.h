@@ -11,7 +11,7 @@
 #include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
-class Settings;
+class PPSettings;
 class PluginLoader;
 class PlayListObject;
 class PlayListObjectMgr;
@@ -48,9 +48,11 @@ class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
     Q_PROPERTY(int backwardIndex READ backwardIndex CONSTANT)
     Q_PROPERTY(int shuffleIndex READ shuffleIndex CONSTANT)
 
-//    DECLARE_SINGLETON_POINTER(PlayerCore)
+    friend class LibPhoenixPlayer;
+protected:
+    explicit PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibrary::MusicLibraryManager *mgr, QObject *parent = 0);
+
 public:
-    explicit PlayerCore(Settings *set, PluginLoader *loader, MusicLibrary::MusicLibraryManager *mgr, QObject *parent = 0);
     virtual ~PlayerCore();
     void initiate();
 
@@ -213,7 +215,7 @@ private:
 
 private:
 //    bool m_isInit;
-    Settings                                *m_settings;
+    PPSettings                                *m_settings;
     PluginLoader *m_pluginLoader;
     MusicLibrary::MusicLibraryManager       *m_musicLibraryManager;
     PlayBackend::IPlayBackend               **m_playBackend;

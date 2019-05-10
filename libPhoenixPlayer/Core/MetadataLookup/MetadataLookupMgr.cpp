@@ -7,7 +7,7 @@
 #include <QList>
 #include <QCoreApplication>
 
-#include "Settings.h"
+#include "PPSettings.h"
 #include "Utility.h"
 #include "PluginLoader.h"
 #include "PluginHost.h"

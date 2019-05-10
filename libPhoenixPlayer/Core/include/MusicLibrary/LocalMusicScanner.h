@@ -7,7 +7,7 @@
 
 namespace PhoenixPlayer {
 
-class Settings;
+class PPSettings;
 class PluginLoader;
 class AudioMetaObject;
 namespace MusicLibrary {
@@ -18,7 +18,7 @@ class LIBPHOENIXPLAYER_EXPORT LocalMusicScanner : public QObject
 {
     Q_OBJECT
 public:
-    explicit LocalMusicScanner(Settings *set, QObject *parent = 0);
+    explicit LocalMusicScanner(PPSettings *set, QObject *parent = 0);
     explicit LocalMusicScanner(QObject *parent = 0);
     virtual ~LocalMusicScanner();
     Q_INVOKABLE void scanLocalMusic();
@@ -30,7 +30,7 @@ signals:
 private:
     void doScann(const QString &dirname);
 private:
-    Settings *m_settings;
+    PPSettings *m_settings;
     LocalMusicScannerThread *m_scanner;
 };
 } //MusicLibrary

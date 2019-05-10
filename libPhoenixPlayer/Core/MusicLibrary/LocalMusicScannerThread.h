@@ -11,7 +11,7 @@ class QStringList;
 
 namespace PhoenixPlayer {
 
-class Settings;
+class PPSettings;
 class PluginLoader;
 class AudioMetaObject;
 namespace MusicLibrary {
@@ -48,7 +48,7 @@ private:
     QMimeDatabase m_QMimeDatabase;
     QMutex m_mutex;
 
-    Settings *m_settings;
+    PPSettings *m_settings;
     PluginLoader *m_pluginLoader;
     IMusicLibraryDAO *m_dao;
     QList<MusicTagParserHost *> m_tagHostList;

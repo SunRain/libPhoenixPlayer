@@ -8,6 +8,7 @@ QT += network core
 
 HEADERS += \
     $$PWD/include/Common.h \
+    $$PWD/include/PPUtility.h \
     $$PWD/include/PlayerCore/PlayListObject.h \
     $$PWD/include/PlayerCore/PlayListObjectMgr.h \
     $$PWD/include/PluginLoader.h \
@@ -57,7 +58,6 @@ HEADERS += \
     $$PWD/include/libphoenixplayer_global.h \
     $$PWD/AudioMetaObject_p.h \
     $$PWD/include/LibPhoenixPlayerMain.h \
-    $$PWD/include/Utility.h \
     $$PWD/include/AudioMetaObjectKeys.h \
     $$PWD/include/AudioMetaGroupObject.h \
     $$PWD/include/PlayerCore/MusicQueue.h \
@@ -72,13 +72,14 @@ SOURCES += \
 #    $$PWD/MusicLibrary/DiskLookup.cpp \
     $$PWD/MusicLibrary/MusicLibraryManager.cpp \
 #    $$PWD/MusicLibrary/TagParserManager.cpp \
+    $$PWD/PPSettings.cpp \
+    $$PWD/PPUtility.cpp \
     $$PWD/PlayerCore/PlayListObject.cpp \
     $$PWD/PlayerCore/PlayListObjectMgr.cpp \
     $$PWD/PlayerCore/PlayerCore.cpp \
     $$PWD/BaseMediaObject.cpp \
     $$PWD/IMusicTagParser.cpp \
     $$PWD/PluginLoader.cpp \
-    $$PWD/Settings.cpp \
     $$PWD/PluginHost.cpp \
     $$PWD/AddonMgr.cpp \
 #    $$PWD/MusicLibrary/AsyncDiskLookup.cpp \
@@ -100,7 +101,6 @@ SOURCES += \
     $$PWD/AudioMetaObject.cpp \
     $$PWD/AudioMetaObject_p.cpp \
     $$PWD/LibPhoenixPlayerMain.cpp \
-    $$PWD/Utility.cpp \
     $$PWD/libphoenixplayer_global.cpp \
     $$PWD/AudioMetaGroupObject.cpp \
     $$PWD/PlayerCore/MusicQueue.cpp \

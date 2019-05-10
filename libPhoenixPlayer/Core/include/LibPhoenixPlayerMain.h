@@ -11,7 +11,7 @@
 
 namespace PhoenixPlayer {
 
-class Settings;
+class PPSettings;
 class VolumeControl;
 class PlayerCore;
 class PluginLoader;
@@ -28,15 +28,17 @@ class MetadataLookupMgrWrapper;
 class LIBPHOENIXPLAYER_EXPORT LibPhoenixPlayer : public QObject
 {
     Q_OBJECT
+private:
+    explicit LibPhoenixPlayer(QObject *parent = Q_NULLPTR);
+    static LibPhoenixPlayer *createInstance();
 
-    DECLARE_SINGLETON_POINTER(LibPhoenixPlayer)
 public:
-    explicit LibPhoenixPlayer(QObject *parent = 0);
+    static LibPhoenixPlayer *instance();
     virtual ~LibPhoenixPlayer();
     void initiate();
     void registerPlugins(const char *url);
 
-    Settings *settings();
+    PPSettings *settings();
     MusicLibrary::MusicLibraryManager *libraryMgr();
     VolumeControl *volumeCtrl();
     PlayerCore *playerCore();
@@ -50,7 +52,7 @@ private:
     }
 private:
     bool m_initiated;
-    Settings *m_settings;
+    PPSettings *m_settings;
     MusicLibrary::MusicLibraryManager *m_libraryMgr;
     VolumeControl *m_volumeCtrl;
     PlayerCore *m_playerCore;

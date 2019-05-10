@@ -3,17 +3,18 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QDebug>
 
-#include "Settings.h"
+#include "PPSettings.h"
 #include "M3uPlayListFormat.h"
 
-PhoenixPlayer::PlayListObjectMgr::PlayListObjectMgr(Settings *set, QObject *parent)
+PhoenixPlayer::PlayListObjectMgr::PlayListObjectMgr(PPSettings *set, QObject *parent)
     : QObject(parent),
       m_settings(set)
 {
     m_playListDir = m_settings->playListDir();
 
-    connect(m_settings, &Settings::playListDirChanged,
+    connect(m_settings, &PPSettings::playListDirChanged,
              [&](QString arg) {
         m_playListDir = arg;
         queryPlayLists();

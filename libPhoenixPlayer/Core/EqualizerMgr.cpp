@@ -2,7 +2,7 @@
 
 #include <QDebug>
 
-#include "Settings.h"
+#include "PPSettings.h"
 #include "LibPhoenixPlayerMain.h"
 
 namespace PhoenixPlayer {
@@ -15,6 +15,16 @@ EqualizerMgr::EqualizerMgr(QObject *parent)
     m_settings = phoenixPlayerLib->settings ();//Settings::instance ();
 
     reload ();
+}
+
+EqualizerMgr *EqualizerMgr::createInstance()
+{
+    return new EqualizerMgr();
+}
+
+EqualizerMgr *EqualizerMgr::instance()
+{
+     return Singleton<EqualizerMgr>::instance(EqualizerMgr::createInstance);
 }
 
 EqualizerMgr::~EqualizerMgr()

@@ -11,7 +11,7 @@
 #include "PluginLoader.h"
 #include "MusicLibrary/IMusicLibraryDAO.h"
 
-#include "Settings.h"
+#include "PPSettings.h"
 #include "AudioMetaObject.h"
 
 #include "PlayListFormat.h"

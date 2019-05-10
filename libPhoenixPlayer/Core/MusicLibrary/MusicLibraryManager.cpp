@@ -8,8 +8,8 @@
 
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
-#include "Settings.h"
-#include "Utility.h"
+#include "PPSettings.h"
+#include "PPUtility.h"
 #include "AudioMetaObject.h"
 #include "Common.h"
 #include "PluginLoader.h"
@@ -18,7 +18,7 @@
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-MusicLibraryManager::MusicLibraryManager(Settings *set, PluginLoader *loader, QObject *parent)
+MusicLibraryManager::MusicLibraryManager(PPSettings *set, PluginLoader *loader, QObject *parent)
     : BaseObject(parent)
     , m_settings(set)
     , m_pluginLoader(loader)

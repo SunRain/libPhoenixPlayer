@@ -15,9 +15,11 @@ class StateChangedEvent;
 class StateHandler : public QObject
 {
     Q_OBJECT
-    DECLARE_SINGLETON_POINTER(StateHandler)
-public:
+private:
     explicit StateHandler(QObject *parent = 0);
+    static StateHandler *createInstance();
+public:
+    static StateHandler *instance();
     virtual ~StateHandler();
 //    static StateHandler *instance();
 

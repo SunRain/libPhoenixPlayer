@@ -5,7 +5,7 @@
 
 #include "TagParserPro.h"
 #include "AudioMetaObject.h"
-#include "Settings.h"
+#include "PPSettings.h"
 #include "SingletonPointer.h"
 #include "Common.h"
 #include "LibPhoenixPlayerMain.h"
@@ -110,7 +110,7 @@ bool TagParserPro::parserTag(AudioMetaObject *target)
     //get cover image
     QImage image = getImage ();
     if (!image.isNull ()) {
-        Settings *s = phoenixPlayerLib->settings ();
+        PPSettings *s = phoenixPlayerLib->settings ();
 
         QString imagePath = s->musicImageCachePath ();
         QString tmp = target->name ();//name;

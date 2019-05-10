@@ -1,20 +1,12 @@
 #ifndef SINGLETONPOINTER_P_H
 #define SINGLETONPOINTER_P_H
 
-#include <cstddef>
-#include <QDebug>
-
-#include <QtCore/QtGlobal>
-#include <QtCore/QAtomicInt>
-#include <QtCore/QMutex>
-#include <QtCore/QWaitCondition>
-#include <QtCore/QThreadStorage>
-#include <QtCore/QThread>
-#include <QtCore/QtGlobal>
-#include <QtCore/QScopedPointer>
-
-namespace PhoenixPlayer {
-
+#include <QtGlobal>
+#include <QAtomicInt>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QThreadStorage>
+#include <QThread>
 
 namespace CallOnce {
 enum ECallOnce {
@@ -22,23 +14,20 @@ enum ECallOnce {
     CO_InProgress,
     CO_Finished
 };
-}
 
 Q_GLOBAL_STATIC(QThreadStorage<QAtomicInt*>, once_flag)
+}
 
 template <class Function>
-inline static void qCallOnce_p(Function func, QBasicAtomicInt& flag)
+inline static void qCallOnce(Function func, QBasicAtomicInt& flag)
 {
     using namespace CallOnce;
 
 #if QT_VERSION < 0x050000
     int protectFlag = flag.fetchAndStoreAcquire(flag);
-#endif
-#if QT_VERSION >= 0x050000
+#elif QT_VERSION >= 0x050000
     int protectFlag = flag.fetchAndStoreAcquire(flag.load());
 #endif
-
-//   qDebug()<<"protectFlag is "<<protectFlag;
 
     if (protectFlag == CO_Finished)
         return;
@@ -56,115 +45,70 @@ inline static void qCallOnce_p(Function func, QBasicAtomicInt& flag)
 }
 
 template <class Function>
-inline static void qCallOncePerThread_p(Function func)
+inline static void qCallOncePerThread(Function func)
 {
     using namespace CallOnce;
     if (!once_flag()->hasLocalData()) {
         once_flag()->setLocalData(new QAtomicInt(CO_Request));
-        qCallOnce_p(func, *once_flag()->localData());
+        qCallOnce(func, *once_flag()->localData());
     }
 }
 
-
 template <class T>
-class SingletonPointer
+class Singleton
 {
-public:
-    static T* instance()
-    {
-        qCallOnce_p(init, flag);
-        return tptr.data ();
-    }
-    static void init()
-    {
-        qDebug()<<"SingletonPointer init";
-        tptr.reset(new T);
-    }
-
 private:
-    SingletonPointer() {
+    typedef T* (*CreateInstanceFunction)();
+public:
+    static T* instance(CreateInstanceFunction create);
+private:
+    static void init();
 
-    }
-    ~SingletonPointer() {
-
-    }
-    Q_DISABLE_COPY(SingletonPointer)
-
-    static QScopedPointer<T> tptr;
+    Singleton();
+    ~Singleton();
+    Q_DISABLE_COPY(Singleton)
+    static QBasicAtomicPointer<void> create;
     static QBasicAtomicInt flag;
+    static QBasicAtomicPointer<void> tptr;
+    bool inited;
 };
 
-template<class T> QScopedPointer<T> SingletonPointer<T>::tptr(0);
-template<class T> QBasicAtomicInt SingletonPointer<T>::flag
-= Q_BASIC_ATOMIC_INITIALIZER(CallOnce::CO_Request);
+template <class T>
+T* Singleton<T>::instance(CreateInstanceFunction create)
+{
+    Singleton::create.store(create);
+    qCallOnce(init, flag);
+    return (T*)tptr.load();
+}
+
+template <class T>
+void Singleton<T>::init()
+{
+    static Singleton singleton;
+    if (singleton.inited) {
+        CreateInstanceFunction createFunction = (CreateInstanceFunction)Singleton::create.load();
+        tptr.store(createFunction());
+    }
+}
+
+template <class T>
+Singleton<T>::Singleton() {
+    inited = true;
+};
+
+template <class T>
+Singleton<T>::~Singleton() {
+    T* createdTptr = (T*)tptr.fetchAndStoreOrdered(nullptr);
+    if (createdTptr) {
+        delete createdTptr;
+    }
+    create.store(nullptr);
+}
+
+template<class T> QBasicAtomicPointer<void> Singleton<T>::create = Q_BASIC_ATOMIC_INITIALIZER(nullptr);
+template<class T> QBasicAtomicInt Singleton<T>::flag = Q_BASIC_ATOMIC_INITIALIZER(CallOnce::CO_Request);
+template<class T> QBasicAtomicPointer<void> Singleton<T>::tptr = Q_BASIC_ATOMIC_INITIALIZER(nullptr);
 
 
-//template <typename T>
-//class SingletonPointer
-//{
-//public:
-//    SingletonPointer(void)
-//    {
-//        if (m_pInstance == nullptr)
-//        {
-//            try
-//            {
-//                m_pInstance = new T();
-//            }
-//            catch (...) //防止new分配内存可能出错的问题，内存分配错误异常为std::bad_alloc
-//            {
-//                m_pInstance = nullptr;
-//            }
-//        }
-
-//        m_uiReference++;
-//    }
-
-//    ~SingletonPointer(void)
-//    {
-//        m_uiReference--;
-//        if (m_uiReference == 0)
-//        {
-//            if (m_pInstance != nullptr)
-//            {
-//                delete m_pInstance;
-//                m_pInstance = nullptr; //非常重要，不然下次再次建立单例的对象的时候错误
-//            }
-//        }
-//    }
-
-//public:
-//    T *getInstance() const throw()
-//    {
-//        return m_pInstance;
-//    }
-
-//    T& operator*() const
-//    {
-//        return *m_pInstance;
-//    }
-
-//    T *operator->() const throw()
-//    {
-//        return m_pInstance;
-//    }
-
-//    operator T *() const throw()        //转换操作符，转化为具体类的指针类型
-//    {
-//        return m_pInstance;
-//    }
-
-//private:
-//    static T *m_pInstance;
-//    static  std::size_t m_uiReference;
-//};
-
-//template <typename T>
-//T *SingletonPointer<T>::m_pInstance = nullptr;
-
-//template <typename T>
-//std::size_t SingletonPointer<T>::m_uiReference = 0;
-
-} //PhoenixPlayer
 #endif // SINGLETONPOINTER_P_H
 

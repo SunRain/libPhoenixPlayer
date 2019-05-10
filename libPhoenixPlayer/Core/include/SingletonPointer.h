@@ -24,12 +24,12 @@
         }
 #else
     #include "SingletonPointer_p.h"
-    #include <QObject>
+//    #include <QObject>
 
-    #define DECLARE_SINGLETON_POINTER(Class) \
-        Q_DISABLE_COPY(Class) \
-        public: \
-            static Class *instance() { \
-                return SingletonPointer<Class>::instance (); \
-            }
+//    #define DECLARE_SINGLETON_POINTER(Class) \
+//        Q_DISABLE_COPY(Class) \
+//        public: \
+//            static Class *instance() { \
+//                return SingletonPointer<Class>::instance (); \
+//            }
 #endif

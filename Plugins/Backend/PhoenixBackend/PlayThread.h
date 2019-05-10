@@ -10,7 +10,7 @@ class QTimer;
 namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
-class Settings;
+class PPSettings;
 class MediaResource;
 
 namespace Decoder {
@@ -65,7 +65,7 @@ private:
     QMutex m_mutex;
     PluginLoader *m_pluginLoader;
     StateHandler *m_handler;
-    Settings *m_settings;
+    PPSettings *m_settings;
     RingBuffer *m_ring;
     BaseVisual *m_visual;
     OutputThread *m_outputThread;

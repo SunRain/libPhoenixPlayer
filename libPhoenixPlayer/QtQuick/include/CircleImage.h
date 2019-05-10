@@ -11,7 +11,7 @@ class QImage;
 class QFile;
 class QByteArray;
 namespace PhoenixPlayer {
-class Settings;
+class PPSettings;
 namespace QmlPlugin {
 class CircleImage : public QQuickPaintedItem
 {
@@ -65,7 +65,7 @@ private:
     QImage *m_image;
     QMutex m_lock;
     QFile *m_file;
-    Settings *m_settings;
+    PPSettings *m_settings;
     QByteArray m_byteArray;
     bool m_requestAborted;
     bool m_cache;

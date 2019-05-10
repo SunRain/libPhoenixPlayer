@@ -24,14 +24,17 @@ namespace OutPut {
 class OutPutHost;
 }
 
-class Settings;
+class PPSettings;
 class PluginHost;
 class LIBPHOENIXPLAYER_EXPORT PluginLoader : public QObject
 {
     Q_OBJECT
-//    DECLARE_SINGLETON_POINTER(PluginLoader)
+
+    friend class LibPhoenixPlayer;
+protected:
+    explicit PluginLoader(PPSettings *set, QObject *parent = Q_NULLPTR);
+
 public:
-    explicit PluginLoader(Settings *set, QObject *parent = 0);
     virtual ~PluginLoader();
 
     void addPluginPath(const QString &path);
@@ -96,7 +99,7 @@ signals:
     ///
 //    void signalPluginChanged(Common::PluginType type);
 private:
-     Settings *m_settings;
+     PPSettings *m_settings;
      PlayBackend::BackendHost *m_curBackendHost;
      OutPut::OutPutHost *m_curOutPutHost;
      MusicLibrary::MusicLibraryDAOHost *m_curDAOHost;

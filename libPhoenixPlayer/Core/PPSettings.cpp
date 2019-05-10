@@ -7,7 +7,7 @@
 #include <QMutex>
 #include <QScopedPointer>
 
-#include "Settings.h"
+#include "PPSettings.h"
 #include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
@@ -27,7 +27,7 @@ const char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
 const char *KEY_FETCH_METADATA_MOBILE_NETWORK = "fetchMetaDataMobileNetwork";
 const char *KEY_PLAY_LIST_DIR = "PlayListDir";
 
-Settings::Settings(QObject *parent) : QObject(parent)
+PPSettings::PPSettings(QObject *parent) : QObject(parent)
 {
     m_settings = new QSettings(qApp->organizationName(), qApp->applicationName(),
                               parent);
@@ -69,18 +69,18 @@ Settings::Settings(QObject *parent) : QObject(parent)
 }
 
 
-Settings::~Settings()
+PPSettings::~PPSettings()
 {
     m_settings->sync ();
     m_settings->deleteLater ();
 }
 
-QSettings *Settings::settings() const
+QSettings *PPSettings::settings() const
 {
     return m_settings;
 }
 
-bool Settings::setMusicDir(const QStringList &dirList)
+bool PPSettings::setMusicDir(const QStringList &dirList)
 {
     if (dirList.isEmpty ())
         return false;
@@ -104,7 +104,7 @@ bool Settings::setMusicDir(const QStringList &dirList)
     return true;
 }
 
-bool Settings::addMusicDir(const QString &dir)
+bool PPSettings::addMusicDir(const QString &dir)
 {
     if (dir.isEmpty ())
         return false;
@@ -116,7 +116,7 @@ bool Settings::addMusicDir(const QString &dir)
 }
 
 
-bool Settings::deleteMusicDir(const QString &target)
+bool PPSettings::deleteMusicDir(const QString &target)
 {
     if (target.isEmpty ())
         return false;
@@ -127,13 +127,13 @@ bool Settings::deleteMusicDir(const QString &target)
 
 }
 
-QStringList Settings::musicDirs()
+QStringList PPSettings::musicDirs()
 {
     return m_settings->value (KEY_MUSIC_DIR, QString()).toString ().split ("||");
 }
 
 
-void Settings::setLastPlayedSong(const AudioMetaObject &data)
+void PPSettings::setLastPlayedSong(const AudioMetaObject &data)
 {
 //    if (!data)
 //        return;
@@ -149,7 +149,7 @@ void Settings::setLastPlayedSong(const AudioMetaObject &data)
     m_settings->sync ();
 }
 
-AudioMetaObject Settings::lastPlayedSong() const
+AudioMetaObject PPSettings::lastPlayedSong() const
 {
 //    AudioMetaObject *data = nullptr;
 //    QStringList list = m_settings->value (KEY_LAST_SONG, QString()).toString ().split ("||");
@@ -162,14 +162,14 @@ AudioMetaObject Settings::lastPlayedSong() const
     return AudioMetaObject::fromJson (ba);
 }
 
-bool Settings::setCurrentPlayListHash(const QString &hash)
+bool PPSettings::setCurrentPlayListHash(const QString &hash)
 {
     m_settings->setValue (KEY_PLAY_LIST, hash);
     m_settings->sync ();
     return true;
 }
 
-QString Settings::getPlayListHash()
+QString PPSettings::getPlayListHash()
 {
     return m_settings->value (KEY_PLAY_LIST, QString()).toString ();
 }
@@ -186,7 +186,7 @@ QString Settings::getPlayListHash()
 //    return m_settings->value (KEY_PLAY_BACKEND, QString()).toString ();
 //}
 
-bool Settings::setMusicImageCachePath(const QString &absolutePath)
+bool PPSettings::setMusicImageCachePath(const QString &absolutePath)
 {
     QDir dir(absolutePath);
     if (!dir.exists ())
@@ -197,24 +197,24 @@ bool Settings::setMusicImageCachePath(const QString &absolutePath)
     return true;
 }
 
-QString Settings::musicImageCachePath()
+QString PPSettings::musicImageCachePath()
 {
     return m_settings->value (KEY_MUSIC_IMAGE_CACHE, m_defaultMusicImageDir).toString ();
 }
 
-bool Settings::setTraceLog(bool trace)
+bool PPSettings::setTraceLog(bool trace)
 {
     m_settings->setValue(KEY_TRACE_LOG, trace);
     m_settings->sync();
     return true;
 }
 
-bool Settings::traceLog()
+bool PPSettings::traceLog()
 {
     return m_settings->value(KEY_TRACE_LOG, false).toBool();
 }
 
-void Settings::setConfig(const QString &key, const QString &value)
+void PPSettings::setConfig(const QString &key, const QString &value)
 {
     if (key.isEmpty () || value.isEmpty ())
         return;
@@ -222,14 +222,14 @@ void Settings::setConfig(const QString &key, const QString &value)
     m_settings->sync ();
 }
 
-QString Settings::getConfig(const QString &key, const QString &defaultValue)
+QString PPSettings::getConfig(const QString &key, const QString &defaultValue)
 {
     if (key.isEmpty ())
         return defaultValue;
     return m_settings->value (key, defaultValue).toString ();
 }
 
-void Settings::setConfig(const QString &key, bool value)
+void PPSettings::setConfig(const QString &key, bool value)
 {
     if (key.isEmpty ())
         return;
@@ -237,19 +237,19 @@ void Settings::setConfig(const QString &key, bool value)
     m_settings->sync ();
 }
 
-bool Settings::getConfig(const QString &key, bool defaultValue)
+bool PPSettings::getConfig(const QString &key, bool defaultValue)
 {
     if (key.isEmpty ())
         return defaultValue;
     return m_settings->value (key, defaultValue).toBool ();
 }
 
-bool Settings::autoFetchMetaData()
+bool PPSettings::autoFetchMetaData()
 {
     return m_autoFetchMetadata;
 }
 
-void Settings::setAutoFetchMetaData(bool autoFetch)
+void PPSettings::setAutoFetchMetaData(bool autoFetch)
 {
     if (m_autoFetchMetadata == autoFetch)
         return;
@@ -259,12 +259,12 @@ void Settings::setAutoFetchMetaData(bool autoFetch)
     emit autoFetchMetaDataChanged ();
 }
 
-bool Settings::fetchMetadataOnMobileNetwork()
+bool PPSettings::fetchMetadataOnMobileNetwork()
 {
     return m_fetchMetaDataMobileNetwork;
 }
 
-void Settings::setFetchMetadataOnMobileNetwork(bool fetch)
+void PPSettings::setFetchMetadataOnMobileNetwork(bool fetch)
 {
     if (m_fetchMetaDataMobileNetwork == fetch)
         return;
@@ -274,27 +274,27 @@ void Settings::setFetchMetadataOnMobileNetwork(bool fetch)
     emit fetchMetaDataMobileNetworkChanged ();
 }
 
-QString Settings::playListDir() const
+QString PPSettings::playListDir() const
 {
     return m_settings->value (KEY_PLAY_LIST_DIR, m_defaultPlayListDir).toString ();
 }
 
-QString Settings::curPlayBackend() const
+QString PPSettings::curPlayBackend() const
 {
     return m_settings->value (KEY_PLUGIN_PLAY_BACKEND, QString()).toString ();
 }
 
-QString Settings::curMusicLibraryDAO() const
+QString PPSettings::curMusicLibraryDAO() const
 {
     return m_settings->value (KEY_PLUGIN_MUSIC_LIBRARY_DAO, QString()).toString ();
 }
 
-QString Settings::curOutPut() const
+QString PPSettings::curOutPut() const
 {
     return m_settings->value (KEY_PLUGIN_OUTPUT, QString()).toString ();
 }
 
-void Settings::enableDecoder(const QString &libraryFile)
+void PPSettings::enableDecoder(const QString &libraryFile)
 {
     QStringList decoders = decoderLibraries ();
     if (!decoders.contains (libraryFile)) {
@@ -304,7 +304,7 @@ void Settings::enableDecoder(const QString &libraryFile)
     }
 }
 
-void Settings::disableDecoder(const QString &libraryFile)
+void PPSettings::disableDecoder(const QString &libraryFile)
 {
     QStringList decoders = decoderLibraries ();
     if (decoders.contains (libraryFile)) {
@@ -314,7 +314,7 @@ void Settings::disableDecoder(const QString &libraryFile)
     }
 }
 
-QStringList Settings::decoderLibraries() const
+QStringList PPSettings::decoderLibraries() const
 {
     QString v = m_settings->value (KEY_PLUGIN_DECODERS, QString()).toString ();
     if (v.isEmpty ())
@@ -323,7 +323,7 @@ QStringList Settings::decoderLibraries() const
         return v.split ("||");
 }
 
-void Settings::enableMetadataLookup(const QString &libraryFile)
+void PPSettings::enableMetadataLookup(const QString &libraryFile)
 {
     QStringList list = metadataLookupLibraries ();
     if (!list.contains (libraryFile)) {
@@ -333,7 +333,7 @@ void Settings::enableMetadataLookup(const QString &libraryFile)
     }
 }
 
-void Settings::disableMetadataLookup(const QString &libraryFile)
+void PPSettings::disableMetadataLookup(const QString &libraryFile)
 {
     QStringList list = metadataLookupLibraries ();
     if (list.contains (libraryFile)) {
@@ -343,7 +343,7 @@ void Settings::disableMetadataLookup(const QString &libraryFile)
     }
 }
 
-QStringList Settings::metadataLookupLibraries() const
+QStringList PPSettings::metadataLookupLibraries() const
 {
     QString v = m_settings->value (KEY_PLUGIN_METADATA_LOOKUP, QString()).toString ();
     if (v.isEmpty ())
@@ -352,7 +352,7 @@ QStringList Settings::metadataLookupLibraries() const
         return v.split ("||");
 }
 
-void Settings::enableTagPaser(const QString &libraryFile)
+void PPSettings::enableTagPaser(const QString &libraryFile)
 {
     QStringList list = tagPaserLibraries ();
     if (!list.contains (libraryFile)) {
@@ -362,7 +362,7 @@ void Settings::enableTagPaser(const QString &libraryFile)
     }
 }
 
-void Settings::disableTagPaser(const QString &libraryFile)
+void PPSettings::disableTagPaser(const QString &libraryFile)
 {
     QStringList list = tagPaserLibraries ();
     if (list.contains (libraryFile)) {
@@ -372,7 +372,7 @@ void Settings::disableTagPaser(const QString &libraryFile)
     }
 }
 
-QStringList Settings::tagPaserLibraries() const
+QStringList PPSettings::tagPaserLibraries() const
 {
     QString v = m_settings->value (KEY_PLUGIN_TAG_PASER, QString()).toString ();
     if (v.isEmpty ())
@@ -381,7 +381,7 @@ QStringList Settings::tagPaserLibraries() const
         return v.split ("||");
 }
 
-void Settings::setPlayListDir(QString arg)
+void PPSettings::setPlayListDir(QString arg)
 {
     if (m_defaultPlayListDir != arg) {
         m_defaultPlayListDir = arg;
@@ -391,7 +391,7 @@ void Settings::setPlayListDir(QString arg)
     }
 }
 
-void Settings::setCurPlayBackend(const QString &libraryFile)
+void PPSettings::setCurPlayBackend(const QString &libraryFile)
 {
     if (curPlayBackend () != libraryFile) {
         m_settings->setValue (KEY_PLUGIN_PLAY_BACKEND, libraryFile);
@@ -400,7 +400,7 @@ void Settings::setCurPlayBackend(const QString &libraryFile)
     }
 }
 
-void Settings::setCurMusicLibraryDAO(const QString &libraryFile)
+void PPSettings::setCurMusicLibraryDAO(const QString &libraryFile)
 {
     if (curMusicLibraryDAO () != libraryFile) {
         m_settings->setValue (KEY_PLUGIN_MUSIC_LIBRARY_DAO, libraryFile);
@@ -409,7 +409,7 @@ void Settings::setCurMusicLibraryDAO(const QString &libraryFile)
     }
 }
 
-void Settings::setCurOutPut(const QString &libraryFile)
+void PPSettings::setCurOutPut(const QString &libraryFile)
 {
     if (curOutPut ()!= libraryFile) {
         m_settings->setValue (KEY_PLUGIN_OUTPUT, libraryFile);
@@ -418,7 +418,7 @@ void Settings::setCurOutPut(const QString &libraryFile)
     }
 }
 
-void Settings::checkInit()
+void PPSettings::checkInit()
 {
     QStringList list = m_settings->allKeys ();
     if (!list.contains (KEY_MUSIC_DIR))

@@ -17,7 +17,7 @@
 #include "Decoder/IDecoder.h"
 #include "OutPut/IOutPut.h"
 #include "OutPut/OutPutHost.h"
-#include "Settings.h"
+#include "PPSettings.h"
 
 namespace PhoenixPlayer {
 using namespace MetadataLookup;
@@ -47,7 +47,7 @@ using namespace OutPut;
     } \
     return p;
 
-PluginLoader::PluginLoader(Settings *set, QObject *parent)
+PluginLoader::PluginLoader(PPSettings *set, QObject *parent)
     : QObject(parent)
     , m_settings(set)
 {

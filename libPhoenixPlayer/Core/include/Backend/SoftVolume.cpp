@@ -13,6 +13,16 @@ SoftVolume::SoftVolume(QObject *parent)
     setMuted (false);
 }
 
+SoftVolume *SoftVolume::createInstance()
+{
+    return new SoftVolume;
+}
+
+SoftVolume *SoftVolume::instance()
+{
+     return Singleton<SoftVolume>::instance(SoftVolume::createInstance);
+}
+
 SoftVolume::~SoftVolume()
 {
 }

@@ -3,7 +3,7 @@
 #include <QtQml>
 #include <QDebug>
 
-#include "Settings.h"
+#include "PPSettings.h"
 #include "PluginLoader.h"
 #include "MusicLibrary/MusicLibraryManager.h"
 #include "PlayerCore/VolumeControl.h"
@@ -22,12 +22,22 @@ LibPhoenixPlayer::LibPhoenixPlayer(QObject *parent)
 {
 
     //TODO do not use PluginLoader as paramater, this may confront with initiate order problem
-    m_settings = new Settings();
+    m_settings = new PPSettings();
     m_pluginLoader = new PluginLoader(m_settings);
     m_libraryMgr = new MusicLibraryManager(m_settings, m_pluginLoader);
     m_volumeCtrl = new VolumeControl(m_pluginLoader);
     m_playerCore = new PlayerCore(m_settings, m_pluginLoader, m_libraryMgr);
     m_initiated = true;
+}
+
+LibPhoenixPlayer *LibPhoenixPlayer::createInstance()
+{
+    return new LibPhoenixPlayer();
+}
+
+LibPhoenixPlayer *LibPhoenixPlayer::instance()
+{
+    return Singleton<LibPhoenixPlayer>::instance(LibPhoenixPlayer::createInstance);
 }
 
 LibPhoenixPlayer::~LibPhoenixPlayer()
@@ -51,7 +61,7 @@ void LibPhoenixPlayer::registerPlugins(const char *url)
     qmlRegisterType<LocalMusicScanner>(url, 1, 0, "LocalMusicScanner");
 }
 
-Settings *LibPhoenixPlayer::settings()
+PPSettings *LibPhoenixPlayer::settings()
 {
     checkInitiate ();
     return m_settings;

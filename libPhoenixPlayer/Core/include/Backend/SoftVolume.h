@@ -16,9 +16,13 @@ class BaseVolume;
 class LIBPHOENIXPLAYER_EXPORT SoftVolume : public BaseVolume
 {
     Q_OBJECT
-    DECLARE_SINGLETON_POINTER(SoftVolume)
+private:
+    explicit SoftVolume(QObject *parent = Q_NULLPTR);
+    static SoftVolume *createInstance();
+
 public:
-    explicit SoftVolume(QObject *parent = 0);
+    static SoftVolume *instance();
+
     virtual ~SoftVolume();
     void changeVolume(Buffer *buffer, int chan, AudioParameters::AudioFormat format);
 };

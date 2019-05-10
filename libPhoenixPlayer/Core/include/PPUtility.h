@@ -8,13 +8,11 @@
 class QQmlEngine;
 namespace PhoenixPlayer {
 
-class Utility : public QObject
+class PPUtility : public QObject
 {
     Q_OBJECT
     Q_ENUMS(NetworkType)
     Q_PROPERTY(NetworkType networkType READ getNetworkType)
-
-    DECLARE_SINGLETON_POINTER(Utility)
 public:
     enum NetworkType {
         TypeUnknown = 0x00,
@@ -23,10 +21,14 @@ public:
         TypeWLAN
     };
 
+private:
+    explicit PPUtility(QObject *parent = Q_NULLPTR);
+    static PPUtility *createInstance();
+
 public:
-    explicit Utility(QObject *parent = 0);
-    virtual ~Utility();
-    void setQQmlEngine(QQmlEngine *engine = 0);
+    static PPUtility *instance();
+    virtual ~PPUtility();
+    void setQQmlEngine(QQmlEngine *engine = Q_NULLPTR);
 
     Q_INVOKABLE static QString calculateHash(const QString &str);
 

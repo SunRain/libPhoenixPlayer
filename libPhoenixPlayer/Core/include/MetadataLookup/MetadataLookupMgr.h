@@ -14,8 +14,8 @@ class QTimer;
 namespace PhoenixPlayer {
 class PluginLoader;
 class PluginHost;
-class Settings;
-class Utility;
+class PPSettings;
+class PPUtility;
 class AudioMetaObject;
 
 namespace MetadataLookup {
@@ -74,8 +74,8 @@ private:
 private:
     PluginLoader *m_pluginLoader;
 //    IMetadataLookup *m_currentLookup;
-    Settings *m_settings;
-    Utility *m_util;
+    PPSettings *m_settings;
+    PPUtility *m_util;
 
     QList<WorkNode> m_workQueue;
     WorkNode m_currentWork;

@@ -6,8 +6,8 @@
 #include "AsyncDiskLookup.h"
 #include "AsyncTagParserMgrWrapper.h"
 #include "PluginLoader.h"
-#include "Settings.h"
-#include "Utility.h"
+#include "PPSettings.h"
+#include "PPUtility.h"
 #include "AudioMetaObject.h"
 #include "SingletonPointer.h"
 #include "AudioMetaObject.h"
@@ -18,7 +18,7 @@
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-LocalMusicScanner::LocalMusicScanner(Settings *set, QObject *parent)
+LocalMusicScanner::LocalMusicScanner(PPSettings *set, QObject *parent)
     : QObject(parent)
     , m_settings(set)
 {

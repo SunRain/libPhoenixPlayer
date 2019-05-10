@@ -21,10 +21,12 @@ class MetadataLookupMgr;
 class LIBPHOENIXPLAYER_EXPORT MetadataLookupMgrWrapper : public QObject
 {
     Q_OBJECT
-    DECLARE_SINGLETON_POINTER(MetadataLookupMgrWrapper)
+private:
+    explicit MetadataLookupMgrWrapper(QObject *parent = Q_NULLPTR);
+//    static MetadataLookupMgrWrapper *createInstance();
 
 public:
-    explicit MetadataLookupMgrWrapper(QObject *parent = 0);
+//    static MetadataLookupMgrWrapper *instance();
     virtual ~MetadataLookupMgrWrapper();
 
     void lookupLyric(const AudioMetaObject &data);

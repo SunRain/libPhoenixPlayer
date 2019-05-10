@@ -1,4 +1,4 @@
-#include "Utility.h"
+#include "PPUtility.h"
 
 #include <QCryptographicHash>
 #include <QDebug>
@@ -20,9 +20,19 @@
 
 namespace PhoenixPlayer {
 
-Utility::Utility(QObject *parent) : QObject(parent)
+PPUtility::PPUtility(QObject *parent) : QObject(parent)
 {
     m_QQmlEngine = nullptr;
+}
+
+PPUtility *PPUtility::createInstance()
+{
+    return new PPUtility;
+}
+
+PPUtility *PPUtility::instance()
+{
+     return Singleton<PPUtility>::instance(PPUtility::createInstance);
 }
 
 //#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
@@ -41,22 +51,22 @@ Utility::Utility(QObject *parent) : QObject(parent)
 //}
 //#endif
 
-Utility::~Utility()
+PPUtility::~PPUtility()
 {
 
 }
 
-void Utility::setQQmlEngine(QQmlEngine *engine)
+void PPUtility::setQQmlEngine(QQmlEngine *engine)
 {
     m_QQmlEngine = engine;
 }
 
-QString Utility::calculateHash(const QString &str)
+QString PPUtility::calculateHash(const QString &str)
 {
     return QString (QCryptographicHash::hash (str.toLocal8Bit (), QCryptographicHash::Md5).toHex ());
 }
 
-QTextCodec *Utility::localeDefaultCodec()
+QTextCodec *PPUtility::localeDefaultCodec()
 {
     switch(QLocale::system().country())
        {
@@ -74,7 +84,7 @@ QTextCodec *Utility::localeDefaultCodec()
     }
 }
 
-QString Utility::formateSongDuration(int time)
+QString PPUtility::formateSongDuration(int time)
 {
     if (time <= 0)
         return QString("00:00");
@@ -96,7 +106,7 @@ QString Utility::formateSongDuration(int time)
     return str;
 }
 
-QString Utility::formateFileSize(int size)
+QString PPUtility::formateFileSize(int size)
 {
     if (size < 0)
         return QString("0B");
@@ -111,7 +121,7 @@ QString Utility::formateFileSize(int size)
     return str;
 }
 
-QStringList Utility::getAddonDirList()
+QStringList PPUtility::getAddonDirList()
 {
     QStringList list;
 #ifdef UBUNTU_TOUCH
@@ -124,10 +134,10 @@ QStringList Utility::getAddonDirList()
     return list;
 }
 
-Utility::NetworkType Utility::getNetworkType()
+PPUtility::NetworkType PPUtility::getNetworkType()
 {
     if (!m_QQmlEngine)
-        return Utility::NetworkType::TypeUnknown;
+        return PPUtility::NetworkType::TypeUnknown;
 
     QNetworkConfiguration::BearerType t = m_QQmlEngine->networkAccessManager ()
             ->activeConfiguration ().bearerType ();
@@ -135,13 +145,13 @@ Utility::NetworkType Utility::getNetworkType()
 
     switch (t) {
     case QNetworkConfiguration::BearerEthernet:
-        return Utility::NetworkType::TypeEthernet;
+        return PPUtility::NetworkType::TypeEthernet;
     case QNetworkConfiguration::BearerUnknown:
-        return Utility::NetworkType::TypeUnknown;
+        return PPUtility::NetworkType::TypeUnknown;
     case QNetworkConfiguration::BearerWLAN:
-        return Utility::NetworkType::TypeWLAN;
+        return PPUtility::NetworkType::TypeWLAN;
     default:
-        return Utility::NetworkType::TypeMobile;
+        return PPUtility::NetworkType::TypeMobile;
     }
 }
 

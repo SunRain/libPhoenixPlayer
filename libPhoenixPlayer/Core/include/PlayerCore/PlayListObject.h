@@ -12,7 +12,7 @@ namespace PhoenixPlayer {
 class AudioMetaObject;
 class PluginLoader;
 class PluginHost;
-class Settings;
+class PPSettings;
 
 namespace MusicLibrary {
 class IMusicLibraryDAO;

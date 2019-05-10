@@ -1,5 +1,5 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef PPSETTINGS_H
+#define PPSETTINGS_H
 
 #include <QObject>
 #include <QStringList>
@@ -13,7 +13,7 @@ namespace PhoenixPlayer {
 
 class AudioMetaObject;
 
-class Settings : public QObject
+class PPSettings : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool autoFetchMetaData READ autoFetchMetaData WRITE setAutoFetchMetaData NOTIFY autoFetchMetaDataChanged)
@@ -23,10 +23,12 @@ class Settings : public QObject
     Q_PROPERTY(QString curPlayBackend READ curPlayBackend WRITE setCurPlayBackend NOTIFY curPlayBackendChanged)
     Q_PROPERTY(QString curMusicLibraryDAO READ curMusicLibraryDAO WRITE setCurMusicLibraryDAO NOTIFY curMusicLibraryDAOChanged)
     Q_PROPERTY(QString curOutPut READ curOutPut WRITE setCurOutPut NOTIFY curOutPutChanged)
-//    DECLARE_SINGLETON_POINTER(Settings)
+
+    friend class LibPhoenixPlayer;
+protected:
+    explicit PPSettings(QObject *parent = Q_NULLPTR);
 public:
-    explicit Settings(QObject *parent = 0);
-    virtual ~Settings();
+    virtual ~PPSettings();
 
     QSettings *settings() const;
 
@@ -126,4 +128,4 @@ private:
 //    QString m_curOutPut;
 };
 } //PhoenixPlayer
-#endif // SETTINGS_H
+#endif // PPSETTINGS_H

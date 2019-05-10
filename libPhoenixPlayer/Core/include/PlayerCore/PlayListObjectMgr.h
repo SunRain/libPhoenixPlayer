@@ -12,7 +12,7 @@ namespace PhoenixPlayer {
 class AudioMetaObject;
 class PluginLoader;
 class PluginHost;
-class Settings;
+class PPSettings;
 
 namespace MusicLibrary {
 class IMusicLibraryDAO;
@@ -23,7 +23,7 @@ class LIBPHOENIXPLAYER_EXPORT PlayListObjectMgr : public QObject
 {
     Q_OBJECT
 public:
-    explicit PlayListObjectMgr(Settings *set, QObject *parent = Q_NULLPTR);
+    explicit PlayListObjectMgr(PPSettings *set, QObject *parent = Q_NULLPTR);
     virtual ~PlayListObjectMgr();
 
     Q_INVOKABLE void refreshExistPlayLists();
@@ -44,7 +44,7 @@ signals:
     void existPlayListsChanged(const QStringList &existPlayLists);
 
 private:
-    Settings   *m_settings;
+    PPSettings   *m_settings;
     QString     m_playListDir;
     QStringList m_existPlayLists;
 };

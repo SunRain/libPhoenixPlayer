@@ -9,13 +9,16 @@
 
 namespace PhoenixPlayer {
 
-class Settings;
+class PPSettings;
 class EqualizerMgr : public QObject
 {
     Q_OBJECT
-    DECLARE_SINGLETON_POINTER(EqualizerMgr)
+private:
+    explicit EqualizerMgr(QObject *parent = Q_NULLPTR);
+    static EqualizerMgr *createInstance();
 public:
-    explicit EqualizerMgr(QObject *parent = 0);
+    static EqualizerMgr *instance();
+
     virtual ~EqualizerMgr();
 
     void setEnabled(bool enable);
@@ -46,7 +49,7 @@ public slots:
 private:
     void save();
 private:
-    Settings *m_settings;
+    PPSettings *m_settings;
     bool m_enabled;
     double m_preamp;
     QHash<int, double> m_values;

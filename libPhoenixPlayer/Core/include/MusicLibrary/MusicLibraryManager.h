@@ -14,8 +14,9 @@
 #include "AudioMetaGroupObject.h"
 
 namespace PhoenixPlayer {
-class Settings;
+class PPSettings;
 class PluginLoader;
+class LibPhoenixPlayer;
 
 namespace MusicLibrary {
 
@@ -25,12 +26,11 @@ class IMusicLibraryDAO;
 class LIBPHOENIXPLAYER_EXPORT MusicLibraryManager : public BaseObject
 {
     Q_OBJECT
-//    DECLARE_SINGLETON_POINTER(MusicLibraryManager)
-
-public:
-    explicit MusicLibraryManager(Settings *set, PluginLoader *loader, QObject *parent = 0);
+    friend class PhoenixPlayer::LibPhoenixPlayer;
+protected:
+    explicit MusicLibraryManager(PPSettings *set, PluginLoader *loader, QObject *parent = Q_NULLPTR);
     virtual ~MusicLibraryManager();
-
+public:
     ///
     /// \brief allTracks 显示所有曲目
     /// \return 空列表如果没有曲目
@@ -196,7 +196,7 @@ private:
 private:
 //      bool m_isInit;
 //      QPointer<IPlayListDAO> m_playListDAO;
-    Settings *m_settings;
+    PPSettings *m_settings;
     PluginLoader *m_pluginLoader;
     MusicLibraryDAOHost *m_daoHost;
     IMusicLibraryDAO *m_dao;

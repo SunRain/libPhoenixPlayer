@@ -19,7 +19,7 @@
 #include "SingletonPointer.h"
 #include "Common.h"
 #include "Buffer.h"
-#include "Settings.h"
+#include "PPSettings.h"
 #include "LibPhoenixPlayerMain.h"
 #include "MediaResource.h"
 

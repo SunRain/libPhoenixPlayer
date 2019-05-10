@@ -6,7 +6,7 @@
 #include <QUrl>
 
 #include "Common.h"
-#include "Settings.h"
+#include "PPSettings.h"
 #include "MusicLibrary/MusicLibraryManager.h"
 #include "Backend/BaseMediaObject.h"
 #include "Backend/IPlayBackend.h"
@@ -30,7 +30,7 @@ using namespace MetadataLookup;
 using namespace MusicLibrary;
 using namespace PlayBackend;
 
-PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager *mgr, QObject *parent)
+PlayerCore::PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibraryManager *mgr, QObject *parent)
     : QObject(parent)
     , m_settings(set)
     , m_pluginLoader(loader)
@@ -64,7 +64,7 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
         m_recentList->addTrack (o);
         playTrack (o);
     });
-    connect(m_settings, &Settings::playListDirChanged,
+    connect(m_settings, &PPSettings::playListDirChanged,
              [&](QString arg) {
         m_playlistObject->setPlayListDir(arg);
     });
