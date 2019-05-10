@@ -56,6 +56,15 @@ public:
     QString playListDir() const;
     void setPlayListDir(const QString &playListDir);
 
+    ///
+    /// \brief create create new playlist object with given name
+    /// \param name
+    /// \return
+    ///
+    bool create(const QString &name);
+
+    bool create(const QString &name, const AudioMetaList &list);
+
 signals:
     //    void currentIndexChanged(int index);
     //    void trackAdded(const AudioMetaObject &object);

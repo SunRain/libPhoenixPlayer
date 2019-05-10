@@ -18,6 +18,7 @@
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "PlayerCore/PlayListObject.h"
 #include "PlayerCore/RecentPlayedMgr.h"
+#include "PlayerCore/PlayListObjectMgr.h"
 #include "SingletonPointer.h"
 #include "Backend/BackendHost.h"
 #include "MediaResource.h"
@@ -55,13 +56,20 @@ PlayerCore::PlayerCore(Settings *set, PluginLoader *loader, MusicLibraryManager 
         m_dao = host->instance<IMusicLibraryDAO>();
 
     m_playMode = Common::PlayModeOrder;
-    m_playlistObject = new PlayListObject(m_settings, this);
+//    m_playlistObject = new PlayListObject(m_settings, this);
+    m_playlistObject = new PlayListObject(m_settings->playListDir(), this);
     connect (m_playlistObject, &PlayListObject::currentIndexChanged,
              [&](int index) {
         AudioMetaObject o = m_playlistObject->get (index);
         m_recentList->addTrack (o);
         playTrack (o);
     });
+    connect(m_settings, &Settings::playListDirChanged,
+             [&](QString arg) {
+        m_playlistObject->setPlayListDir(arg);
+    });
+
+    m_plstObjMgr = new PlayListObjectMgr(m_settings, this);
 
     m_recentList = new RecentPlayedMgr(this);
     connect (m_recentList, &RecentPlayedMgr::currentIndexChanged,

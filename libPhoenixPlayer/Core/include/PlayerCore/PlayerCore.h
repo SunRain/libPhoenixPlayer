@@ -14,6 +14,7 @@ namespace PhoenixPlayer {
 class Settings;
 class PluginLoader;
 class PlayListObject;
+class PlayListObjectMgr;
 class MediaResource;
 //class AudioMetaObject;
 //class MusicQueue;
@@ -212,27 +213,28 @@ private:
 
 private:
 //    bool m_isInit;
-    Settings *m_settings;
+    Settings                                *m_settings;
     PluginLoader *m_pluginLoader;
-    MusicLibrary::MusicLibraryManager *m_musicLibraryManager;
-    PlayBackend::IPlayBackend **m_playBackend;
-    PlayBackend::IPlayBackend *m_pb;
-    PlayBackend::BackendHost *m_playBackendHost;
-    AudioMetaObject m_curTrack;
-    PlayListObject *m_playlistObject;
-    MusicQueue *m_playQueue;
-    RecentPlayedMgr *m_recentList;
-    MusicLibrary::IMusicLibraryDAO *m_dao;
-    MediaResource *m_resource;
+    MusicLibrary::MusicLibraryManager       *m_musicLibraryManager;
+    PlayBackend::IPlayBackend               **m_playBackend;
+    PlayBackend::IPlayBackend               *m_pb;
+    PlayBackend::BackendHost                *m_playBackendHost;
+    AudioMetaObject                         m_curTrack;
+    PlayListObject                          *m_playlistObject;
+    PlayListObjectMgr                       *m_plstObjMgr;
+    MusicQueue                              *m_playQueue;
+    RecentPlayedMgr                         *m_recentList;
+    MusicLibrary::IMusicLibraryDAO          *m_dao;
+    MediaResource                           *m_resource;
 
-    Common::PlayMode m_playMode;
-    quint64 m_curTrackDuration;
-    quint64 m_currentPlayPos;
+    Common::PlayMode                        m_playMode;
+    quint64                                 m_curTrackDuration;
+    quint64                                 m_currentPlayPos;
 
     //临时播放器队列
 //    QStringList m_playQueue;
-    bool m_autoSkipForward;
-    int m_shuffleIndex;
+    bool                                    m_autoSkipForward;
+    int                                     m_shuffleIndex;
 };
 
 } //PhoenixPlayer

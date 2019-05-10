@@ -268,8 +268,8 @@ bool PlayListObject::open(const QString &name)
 bool PlayListObject::save(/*const QString &fileName, bool override*/)
 {
     if (isEmpty ()) {
-        qDebug()<<Q_FUNC_INFO<<"track list is empty!!";
-        return false;
+        qWarning()<<Q_FUNC_INFO<<"track list is empty!!";
+//        return false;
     }
     QString f = QString("%1/%2.%3").arg (m_playListDir).arg (m_fileName).arg (m_listFormat->extension ());
     qDebug()<<Q_FUNC_INFO<<"try to save playlist "<<f;
@@ -307,6 +307,25 @@ QString PlayListObject::playListDir() const
 void PlayListObject::setPlayListDir(const QString &playListDir)
 {
     m_playListDir = playListDir;
+}
+
+bool PlayListObject::create(const QString &name)
+{
+    if (name.isEmpty()) {
+        return false;
+    }
+    m_fileName = name;
+    return this->save();
+}
+
+bool PlayListObject::create(const QString &name, const AudioMetaList &list)
+{
+    if (name.isEmpty()) {
+        return false;
+    }
+    m_fileName = name;
+    addTrack(list);
+    return this->save();
 }
 
 //void PlayListObject::queryPlayLists()
