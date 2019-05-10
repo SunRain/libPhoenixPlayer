@@ -8,7 +8,7 @@
 #include <QCoreApplication>
 
 #include "PPSettings.h"
-#include "Utility.h"
+#include "PPUtility.h"
 #include "PluginLoader.h"
 #include "PluginHost.h"
 #include "SingletonPointer.h"
@@ -23,7 +23,7 @@ MetadataLookupMgr::MetadataLookupMgr(QObject *parent)
 {
     m_pluginLoader =  phoenixPlayerLib->pluginLoader ();
     m_settings = phoenixPlayerLib->settings ();
-    m_util = Utility::instance ();
+    m_util = PPUtility::instance ();
     m_finish = true;
     m_doInternalLoop = true;
     m_useNextHost = true;
@@ -61,7 +61,7 @@ MetadataLookupMgr::~MetadataLookupMgr()
 void MetadataLookupMgr::lookup(const AudioMetaObject &data, IMetadataLookup::LookupType type)
 {
     if (!m_settings->fetchMetadataOnMobileNetwork ()
-            && (m_util->getNetworkType () == Utility::NetworkType::TypeMobile)) {
+            && (m_util->getNetworkType () == PPUtility::NetworkType::TypeMobile)) {
         qWarning()<<"Current network type is mobile type and we disabled fetch metadata here";
         this->emitFinish ();
         return;
