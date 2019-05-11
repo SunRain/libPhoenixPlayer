@@ -27,7 +27,7 @@ LibPhoenixPlayer::LibPhoenixPlayer(QObject *parent)
     m_libraryMgr = new MusicLibraryManager(m_settings, m_pluginLoader);
     m_volumeCtrl = new VolumeControl(m_pluginLoader);
     m_playerCore = new PlayerCore(m_settings, m_pluginLoader, m_libraryMgr);
-    m_playerCore->initiate();
+//    m_playerCore->initiate();
     m_initiated = true;
 }
 
@@ -49,7 +49,7 @@ LibPhoenixPlayer::~LibPhoenixPlayer()
 void LibPhoenixPlayer::initiate()
 {
     qDebug()<<">>>>>>>>>>>>>>>>>>>>>>"<<Q_FUNC_INFO<<"<<<<<<<<<<<<<";
-//    m_playerCore->initiate ();
+    m_playerCore->initiate ();
 }
 
 void LibPhoenixPlayer::registerPlugins(const char *url)

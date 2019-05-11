@@ -7,6 +7,7 @@
 
 #include "libphoenixplayer_global.h"
 #include "PlayerCore/MusicQueue.h"
+#include "PlayerCore/PlayListMeta.h"
 
 namespace PhoenixPlayer {
 class AudioMetaObject;
@@ -27,7 +28,7 @@ class LIBPHOENIXPLAYER_EXPORT PlayListObject : public MusicQueue
 //    Q_PROPERTY(QStringList existPlayLists READ existPlayLists WRITE setExistPlayLists NOTIFY existPlayListsChanged)
 
 public:
-    explicit PlayListObject(const QString &playlistDir, QObject *parent = Q_NULLPTR);
+    explicit PlayListObject(const PlayListMeta &meta, QObject *parent = Q_NULLPTR);
 //    explicit PlayListObject(const QString &playlistDir, QObject *parent = Q_NULLPTR);
     virtual ~PlayListObject();
 
@@ -41,29 +42,30 @@ public:
     /// /path/to/xxx.m3u ==> xxx
     ///
 //    QStringList existPlayLists() const;
+
     ///
     /// \brief open 打开播放列表
     /// \param name 不包括扩展名和路径的播放列表名称
     /// \return
     ///
-    Q_INVOKABLE bool open(const QString &name);
+    Q_INVOKABLE bool open();
     ///
     /// \brief save 保存播放列表
     /// \return
     ///
-    Q_INVOKABLE bool save(/*const QString &fileName = QString(), bool override = false*/);
+    Q_INVOKABLE bool save();
 
-    QString playListDir() const;
-    void setPlayListDir(const QString &playListDir);
+//    QString playListDir() const;
+//    void setPlayListDir(const QString &playListDir);
 
     ///
     /// \brief create create new playlist object with given name
     /// \param name
     /// \return
     ///
-    bool create(const QString &name);
+//    bool create(const QString &name);
 
-    bool create(const QString &name, const AudioMetaList &list);
+//    bool create(const QString &name, const AudioMetaList &list);
 
 signals:
     //    void currentIndexChanged(int index);
@@ -84,13 +86,15 @@ private:
 //    int m_currentIndex;
 ////    bool m_random;
 
-    QString m_playListDir;
-    QString m_fileName;
+//    QString m_playListDir;
+//    QString m_fileName;
 //    QStringList m_existPlayLists;
 //    AudioMetaList m_trackList;
 
 //    Settings *m_settings;
     PlayListFormat *m_listFormat;
+
+    PlayListMeta m_meta;
 
 };
 } //PhoenixPlayer

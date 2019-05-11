@@ -9,6 +9,7 @@ QT += network core
 HEADERS += \
     $$PWD/include/Common.h \
     $$PWD/include/PPUtility.h \
+    $$PWD/include/PlayerCore/PlayListMeta.h \
     $$PWD/include/PlayerCore/PlayListObject.h \
     $$PWD/include/PlayerCore/PlayListObjectMgr.h \
     $$PWD/include/PluginLoader.h \
@@ -74,6 +75,7 @@ SOURCES += \
 #    $$PWD/MusicLibrary/TagParserManager.cpp \
     $$PWD/PPSettings.cpp \
     $$PWD/PPUtility.cpp \
+    $$PWD/PlayerCore/PlayListMeta.cpp \
     $$PWD/PlayerCore/PlayListObject.cpp \
     $$PWD/PlayerCore/PlayListObjectMgr.cpp \
     $$PWD/PlayerCore/PlayerCore.cpp \

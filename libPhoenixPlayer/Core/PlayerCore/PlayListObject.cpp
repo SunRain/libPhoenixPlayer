@@ -19,14 +19,14 @@
 
 namespace PhoenixPlayer {
 
-PlayListObject::PlayListObject(const QString &playlistDir, QObject *parent)
+PlayListObject::PlayListObject(const PlayListMeta &meta, QObject *parent)
     : MusicQueue(parent)
 //    , m_random(false)
 //    , m_currentIndex(-1)
 //    , m_count(0)
 //    , m_settings(set)
-    , m_playListDir(playlistDir)
-    , m_fileName(QString())
+//    , m_playListDir(meta)
+    , m_meta(meta)
 {
     setSizeLimit (-1);
     setSkipDuplicates (true);
@@ -206,16 +206,15 @@ PlayListObject::~PlayListObject()
 //    return m_existPlayLists;
 //}
 
-bool PlayListObject::open(const QString &name)
+bool PlayListObject::open()
 {
-    if (name.isEmpty())
-        return false;
 
     if (!isEmpty ())
         clear ();
-    m_fileName = name;
 
-    QString f = QString("%1/%2.%3").arg (m_playListDir).arg (name).arg (m_listFormat->extension ());
+    //TODO choose best listformat if more supported listformat exist
+    //TODO m_listFormat->extension() is same as meta->getFileSuffix() currently
+    QString f = QString("%1/%2.%3").arg(m_meta.getDir()).arg(m_meta.getFileName()).arg(m_listFormat->extension());
     qDebug()<<Q_FUNC_INFO<<"open playlist "<<f;
     if (!QFile::exists (f)) {
         qWarning()<<Q_FUNC_INFO<<"playlist not exists";
@@ -265,24 +264,16 @@ bool PlayListObject::open(const QString &name)
     return true;
 }
 
-bool PlayListObject::save(/*const QString &fileName, bool override*/)
+bool PlayListObject::save()
 {
     if (isEmpty ()) {
         qWarning()<<Q_FUNC_INFO<<"track list is empty!!";
-//        return false;
     }
-    QString f = QString("%1/%2.%3").arg (m_playListDir).arg (m_fileName).arg (m_listFormat->extension ());
+    //TODO choose best listformat if more supported listformat exist
+    //TODO m_listFormat->extension() is same as meta->getFileSuffix() currently
+    QString f = QString("%1/%2.%3").arg (m_meta.getDir()).arg(m_meta.getFileName()).arg(m_listFormat->extension ());
     qDebug()<<Q_FUNC_INFO<<"try to save playlist "<<f;
     if (QFile::exists (f)) {
-//        if (override) {
-//            if (!QFile::remove(f)) {
-//                qWarning()<<Q_FUNC_INFO<<"override playlist fail";
-//                return false;
-//            }
-//        } else {
-//            qWarning()<<Q_FUNC_INFO<<"playlist already exists";
-//            return false;
-//        }
         if (!QFile::remove(f)) {
             qWarning()<<Q_FUNC_INFO<<"override playlist fail";
             return false;
@@ -299,34 +290,25 @@ bool PlayListObject::save(/*const QString &fileName, bool override*/)
     return true;
 }
 
-QString PlayListObject::playListDir() const
-{
-    return m_playListDir;
-}
 
-void PlayListObject::setPlayListDir(const QString &playListDir)
-{
-    m_playListDir = playListDir;
-}
+//bool PlayListObject::create(const QString &name)
+//{
+//    if (name.isEmpty()) {
+//        return false;
+//    }
+//    m_fileName = name;
+//    return this->save();
+//}
 
-bool PlayListObject::create(const QString &name)
-{
-    if (name.isEmpty()) {
-        return false;
-    }
-    m_fileName = name;
-    return this->save();
-}
-
-bool PlayListObject::create(const QString &name, const AudioMetaList &list)
-{
-    if (name.isEmpty()) {
-        return false;
-    }
-    m_fileName = name;
-    addTrack(list);
-    return this->save();
-}
+//bool PlayListObject::create(const QString &name, const AudioMetaList &list)
+//{
+//    if (name.isEmpty()) {
+//        return false;
+//    }
+//    m_fileName = name;
+//    addTrack(list);
+//    return this->save();
+//}
 
 //void PlayListObject::queryPlayLists()
 //{
