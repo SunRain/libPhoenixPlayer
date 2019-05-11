@@ -45,7 +45,6 @@ public:
 
     ///
     /// \brief open 打开播放列表
-    /// \param name 不包括扩展名和路径的播放列表名称
     /// \return
     ///
     Q_INVOKABLE bool open();
@@ -54,6 +53,8 @@ public:
     /// \return
     ///
     Q_INVOKABLE bool save();
+
+    PlayListMeta meta() const;
 
 //    QString playListDir() const;
 //    void setPlayListDir(const QString &playListDir);

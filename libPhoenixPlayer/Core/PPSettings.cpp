@@ -44,6 +44,7 @@ PPSettings::PPSettings(QObject *parent) : QObject(parent)
 //            .arg (QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
 
     m_defaultPlayListDir = QString("%1/PlayList").arg (dataPath);
+    m_playListDBPath = m_defaultPlayListDir;
 
     QDir dir(m_defaultMusicImageDir);
     if (!dir.exists ()) {
@@ -277,6 +278,11 @@ void PPSettings::setFetchMetadataOnMobileNetwork(bool fetch)
 QString PPSettings::playListDir() const
 {
     return m_settings->value (KEY_PLAY_LIST_DIR, m_defaultPlayListDir).toString ();
+}
+
+QString PPSettings::playListDBPath() const
+{
+    return m_playListDBPath;
 }
 
 QString PPSettings::curPlayBackend() const

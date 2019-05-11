@@ -57,19 +57,19 @@ PlayerCore::PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibraryManage
 
     m_playMode = Common::PlayModeOrder;
 //    m_playlistObject = new PlayListObject(m_settings, this);
-    m_playlistObject = new PlayListObject(m_settings->playListDir(), this);
-    connect (m_playlistObject, &PlayListObject::currentIndexChanged,
-             [&](int index) {
-        AudioMetaObject o = m_playlistObject->get (index);
-        m_recentList->addTrack (o);
-        playTrack (o);
-    });
-    connect(m_settings, &PPSettings::playListDirChanged,
-             [&](QString arg) {
-        m_playlistObject->setPlayListDir(arg);
-    });
+//    m_playlistObject = new PlayListObject(m_settings->playListDir(), this);
+//    connect (m_playlistObject, &PlayListObject::currentIndexChanged,
+//             [&](int index) {
+//        AudioMetaObject o = m_playlistObject->get (index);
+//        m_recentList->addTrack (o);
+//        playTrack (o);
+//    });
+//    connect(m_settings, &PPSettings::playListDirChanged,
+//             [&](QString arg) {
+//        m_playlistObject->setPlayListDir(arg);
+//    });
 
-    m_plstObjMgr = new PlayListObjectMgr(m_settings, this);
+//    m_plstObjMgr = new PlayListObjectMgr(m_settings, this);
 
     m_recentList = new RecentPlayedMgr(this);
     connect (m_recentList, &RecentPlayedMgr::currentIndexChanged,
@@ -93,9 +93,9 @@ PlayerCore::PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibraryManage
 
 PlayerCore::~PlayerCore()
 {
-    if (m_playlistObject)
-        m_playlistObject->deleteLater ();
-    m_playlistObject = nullptr;
+//    if (m_playlistObject)
+//        m_playlistObject->deleteLater ();
+//    m_playlistObject = nullptr;
     if (m_recentList)
         m_recentList->deleteLater ();
     m_recentList = nullptr;
@@ -258,10 +258,10 @@ int PlayerCore::playBackendStateInt() const
 //    return m_autoSkipForward;
 //}
 
-PlayListObject *PlayerCore::playList() const
-{
-    return m_playlistObject;
-}
+//PlayListObject *PlayerCore::playList() const
+//{
+//    return m_playlistObject;
+//}
 
 RecentPlayedMgr *PlayerCore::recentList() const
 {

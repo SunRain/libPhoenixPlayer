@@ -45,7 +45,30 @@ public:
     QString getAnnotation() const;
     void setAnnotation(const QString &value);
 
+    QVariantMap toMap() const;
+
+    static PlayListMeta fromMap(const QVariantMap &map);
+
 private:
+    class PlayListMetaPriv : public QSharedData
+    {
+    public:
+        PlayListMetaPriv()
+        {
+            dir = QString();
+            fileName = QString();
+            fileSuffix = QString();
+            timeStamp = QString();
+            tag = QString();
+            annotation = QString();
+        }
+        QString dir;
+        QString fileName;
+        QString fileSuffix;
+        QString timeStamp;
+        QString tag;
+        QString annotation;
+    };
     QSharedDataPointer<PlayListMetaPriv> d;
 };
 

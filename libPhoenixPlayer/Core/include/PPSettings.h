@@ -25,6 +25,7 @@ class PPSettings : public QObject
     Q_PROPERTY(QString curOutPut READ curOutPut WRITE setCurOutPut NOTIFY curOutPutChanged)
 
     friend class LibPhoenixPlayer;
+    friend class PlayListObjectMgr;
 protected:
     explicit PPSettings(QObject *parent = Q_NULLPTR);
 public:
@@ -68,6 +69,8 @@ public:
     void setFetchMetadataOnMobileNetwork(bool fetch);
 
     QString playListDir() const;
+
+    QString playListDBPath() const;
 
     ///
     /// \brief curPlayBackend
@@ -123,6 +126,7 @@ private:
     bool m_autoFetchMetadata;
     bool m_fetchMetaDataMobileNetwork;
     QString m_defaultPlayListDir;
+    QString m_playListDBPath;
     //    QString m_curPlayBackend;
     //    QString m_curMusicLibraryDAO;
 //    QString m_curOutPut;

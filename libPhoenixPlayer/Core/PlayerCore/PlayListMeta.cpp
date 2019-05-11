@@ -1,32 +1,15 @@
 #include "PlayerCore/PlayListMeta.h"
 
+#include "M3uPlayListFormat.h"
+
 namespace PhoenixPlayer {
-
-
-class PlayListMetaPriv : public QSharedData
-{
-public:
-    PlayListMetaPriv()
-    {
-        dir = QString();
-        fileName = QString();
-        fileSuffix = QString();
-        timeStamp = QString();
-        tag = QString();
-        annotation = QString();
-    }
-    QString dir;
-    QString fileName;
-    QString fileSuffix;
-    QString timeStamp;
-    QString tag;
-    QString annotation;
-};
 
 PlayListMeta::PlayListMeta()
     : d(new PlayListMetaPriv())
 {
-
+    //TODO use m3u as default suffix atm
+    M3uPlayListFormat f;
+    d.data()->fileSuffix = f.extension();
 }
 
 PlayListMeta::PlayListMeta(const PlayListMeta &other)
@@ -103,6 +86,37 @@ QString PlayListMeta::getAnnotation() const
 void PlayListMeta::setAnnotation(const QString &value)
 {
     d.data()->annotation = value;
+}
+
+const static char *KEY_DIR = "DIR";
+const static char *KEY_FILE_NAME = "FILE_NAME";
+const static char *KEY_FILE_SUFFIX = "FILE_SUFFIX";
+const static char *KEY_TIME_STAMP = "TIME_STAMP";
+const static char *KEY_TAG = "TAG";
+const static char *KEY_ANNOTATION = "ANNOTATION";
+
+QVariantMap PlayListMeta::toMap() const
+{
+    QVariantMap map;
+    map.insert(KEY_DIR, d.data()->dir);
+    map.insert(KEY_TAG, d.data()->tag);
+    map.insert(KEY_FILE_NAME, d.data()->fileName);
+    map.insert(KEY_ANNOTATION, d.data()->annotation);
+    map.insert(KEY_TIME_STAMP, d.data()->timeStamp);
+    map.insert(KEY_FILE_SUFFIX, d.data()->fileSuffix);
+    return map;
+}
+
+PlayListMeta PlayListMeta::fromMap(const QVariantMap &map)
+{
+    PlayListMeta meta;
+    meta.setDir(map.value(KEY_DIR).toString());
+    meta.setTag(map.value(KEY_TAG).toString());
+    meta.setFileName(map.value(KEY_FILE_NAME).toString());
+    meta.setTimeStamp(map.value(KEY_TIME_STAMP).toString());
+    meta.setAnnotation(map.value(KEY_ANNOTATION).toString());
+    meta.setFileSuffix(map.value(KEY_FILE_SUFFIX).toString());
+    return meta;
 }
 
 

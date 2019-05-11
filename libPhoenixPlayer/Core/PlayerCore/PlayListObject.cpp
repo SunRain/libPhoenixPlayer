@@ -21,11 +21,6 @@ namespace PhoenixPlayer {
 
 PlayListObject::PlayListObject(const PlayListMeta &meta, QObject *parent)
     : MusicQueue(parent)
-//    , m_random(false)
-//    , m_currentIndex(-1)
-//    , m_count(0)
-//    , m_settings(set)
-//    , m_playListDir(meta)
     , m_meta(meta)
 {
     setSizeLimit (-1);
@@ -33,21 +28,11 @@ PlayListObject::PlayListObject(const PlayListMeta &meta, QObject *parent)
 
     //TODO support different playlist format and use global(singtone) format function
     m_listFormat = new M3uPlayListFormat(this);
-//    m_playListDir = m_settings->playListDir ();
-
-//    connect (m_settings, &Settings::playListDirChanged,
-//             [&](QString arg) {
-//        m_playListDir = arg;
-//        queryPlayLists ();
-//    });
-//    queryPlayLists ();
 }
 
 PlayListObject::~PlayListObject()
 {
-//    if (!m_trackList.isEmpty ()) {
-//        m_trackList.clear ();
-    //    }
+
 }
 
 //void PlayListObject::refreshExistPlayLists()
@@ -288,6 +273,11 @@ bool PlayListObject::save()
     s << m_listFormat->format (currentList ());
     file.close ();
     return true;
+}
+
+PlayListMeta PlayListObject::meta() const
+{
+    return m_meta;
 }
 
 

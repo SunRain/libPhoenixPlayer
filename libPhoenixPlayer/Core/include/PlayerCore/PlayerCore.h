@@ -62,7 +62,7 @@ public:
     Common::PlayBackendState playBackendState() const;
     int playBackendStateInt() const;
 
-    PlayListObject *playList() const;
+//    PlayListObject *playList() const;
     RecentPlayedMgr *recentList() const;
     MusicQueue *playQueue() const;
 //    QObject *playListObject() const;
@@ -222,8 +222,8 @@ private:
     PlayBackend::IPlayBackend               *m_pb;
     PlayBackend::BackendHost                *m_playBackendHost;
     AudioMetaObject                         m_curTrack;
-    PlayListObject                          *m_playlistObject;
-    PlayListObjectMgr                       *m_plstObjMgr;
+//    PlayListObject                          *m_playlistObject;
+//    PlayListObjectMgr                       *m_plstObjMgr;
     MusicQueue                              *m_playQueue;
     RecentPlayedMgr                         *m_recentList;
     MusicLibrary::IMusicLibraryDAO          *m_dao;
