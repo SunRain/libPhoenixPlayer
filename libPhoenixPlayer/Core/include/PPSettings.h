@@ -25,7 +25,7 @@ class PPSettings : public QObject
     Q_PROPERTY(QString curOutPut READ curOutPut WRITE setCurOutPut NOTIFY curOutPutChanged)
 
     friend class LibPhoenixPlayer;
-    friend class PlayListObjectMgr;
+    friend class PlayListMetaMgr;
 protected:
     explicit PPSettings(QObject *parent = Q_NULLPTR);
 public:

@@ -14,7 +14,7 @@ namespace PhoenixPlayer {
 class PPSettings;
 class PluginLoader;
 class PlayListObject;
-class PlayListObjectMgr;
+class PlayListMetaMgr;
 class MediaResource;
 //class AudioMetaObject;
 //class MusicQueue;

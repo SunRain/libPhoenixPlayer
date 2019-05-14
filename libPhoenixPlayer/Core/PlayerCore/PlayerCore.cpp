@@ -18,7 +18,7 @@
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "PlayerCore/PlayListObject.h"
 #include "PlayerCore/RecentPlayedMgr.h"
-#include "PlayerCore/PlayListObjectMgr.h"
+#include "PlayerCore/PlayListMetaMgr.h"
 #include "SingletonPointer.h"
 #include "Backend/BackendHost.h"
 #include "MediaResource.h"

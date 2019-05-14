@@ -1,4 +1,4 @@
-#include "PlayerCore/PlayListObjectMgr.h"
+#include "PlayerCore/PlayListMetaMgr.h"
 
 #include <QDir>
 #include <QFile>
@@ -7,6 +7,7 @@
 #include <QJsonParseError>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QDateTime>
 
 #include "PPSettings.h"
 #include "M3uPlayListFormat.h"
@@ -23,69 +24,110 @@ const static char *KEY_TAG = "TAG";
 const static char *KEY_ANNOTATION = "ANNOTATION";
 
 
-PhoenixPlayer::PlayListObjectMgr::PlayListObjectMgr(QObject *parent)
-    : QObject(parent)
+PhoenixPlayer::PlayListMetaMgr::PlayListMetaMgr(QObject *parent)
+    : QObject(parent),
+      m_nameSuffix(0)
 {
     PPSettings set;
     m_dbPath = set.playListDBPath();
     readDatabase();
 }
 
-PhoenixPlayer::PlayListObjectMgr *PhoenixPlayer::PlayListObjectMgr::createInstance()
+PhoenixPlayer::PlayListMetaMgr *PhoenixPlayer::PlayListMetaMgr::createInstance()
 {
-    return new PlayListObjectMgr;
+    return new PlayListMetaMgr;
 }
 
-PhoenixPlayer::PlayListObjectMgr *PhoenixPlayer::PlayListObjectMgr::instance()
+PhoenixPlayer::PlayListMetaMgr *PhoenixPlayer::PlayListMetaMgr::instance()
 {
-    return Singleton<PlayListObjectMgr>::instance(PlayListObjectMgr::createInstance);
+    return Singleton<PlayListMetaMgr>::instance(PlayListMetaMgr::createInstance);
 }
 
-PhoenixPlayer::PlayListObjectMgr::~PlayListObjectMgr()
+PhoenixPlayer::PlayListMetaMgr::~PlayListMetaMgr()
 {
     saveToDatabase();
 }
 
-QList<PhoenixPlayer::PlayListMeta> PhoenixPlayer::PlayListObjectMgr::metaList() const
+QList<PhoenixPlayer::PlayListMeta> PhoenixPlayer::PlayListMetaMgr::metaList() const
 {
-    return m_metaMap.values();
+    return m_metaList;
 }
 
-bool PhoenixPlayer::PlayListObjectMgr::addMeta(const PhoenixPlayer::PlayListMeta &meta)
+bool PhoenixPlayer::PlayListMetaMgr::addMeta(const PhoenixPlayer::PlayListMeta &meta)
 {
-    const QString key = QString("%1.%2").arg(meta.getFileName()).arg(meta.getFileSuffix());
-    if (m_metaMap.contains(key)) {
-        return false;
+    foreach(const PlayListMeta &m, m_metaList) {
+        if (m.getFileName() == meta.getFileName() && m.getFileSuffix() == meta.getFileSuffix()) {
+            return false;
+        }
     }
-    m_metaMap.insert(key, meta);
+    m_metaList.insert(0, meta);
     return true;
 }
 
-void PhoenixPlayer::PlayListObjectMgr::tryAdd(const PhoenixPlayer::PlayListMeta &meta)
+void PhoenixPlayer::PlayListMetaMgr::tryAdd(const PhoenixPlayer::PlayListMeta &meta)
 {
     if(addMeta(meta)) {
         emit addedMeta(meta);
     }
 }
 
-void PhoenixPlayer::PlayListObjectMgr::deleteMeta(const PhoenixPlayer::PlayListMeta &meta)
+void PhoenixPlayer::PlayListMetaMgr::deleteMeta(const PhoenixPlayer::PlayListMeta &meta)
 {
-    const QString key = QString("%1.%2").arg(meta.getFileName()).arg(meta.getFileSuffix());
-    if (m_metaMap.contains(key)) {
-        m_metaMap.remove(key);
-        emit deleteMeta(meta);
+    if (m_metaList.removeOne(meta)) {
+        emit deletedMeta(meta);
     }
 }
 
-void PhoenixPlayer::PlayListObjectMgr::updateMeta(const PlayListMeta &old, const PhoenixPlayer::PlayListMeta &newMeta)
+void PhoenixPlayer::PlayListMetaMgr::updateMeta(const PlayListMeta &old, const PhoenixPlayer::PlayListMeta &newMeta)
 {
-    const QString oldKey = QString("%1.%2").arg(old.getFileName()).arg(old.getFileSuffix());
-    const QString newKey = QString("%1.%2").arg(newMeta.getFileName()).arg(newMeta.getFileSuffix());
-    if (oldKey != newKey) {
-        m_metaMap.remove(oldKey);
+//    const QString oldKey = QString("%1.%2").arg(old.getFileName()).arg(old.getFileSuffix());
+//    const QString newKey = QString("%1.%2").arg(newMeta.getFileName()).arg(newMeta.getFileSuffix());
+//    if (oldKey != newKey) {
+//        m_metaMap.remove(oldKey);
+//    }
+//    m_metaMap.insert(newKey, newMeta);
+    //    emit metaDataChanged(old, newMeta);
+    const int idx = m_metaList.indexOf(old);
+    if (idx < 0) {
+        qDebug()<<Q_FUNC_INFO<<"can't find meta "<<old.getFileName();
+        return;
     }
-    m_metaMap.insert(newKey, newMeta);
-    emit metaDataChanged(old, newMeta);
+    if (m_metaList.contains(newMeta)) {
+        emit metaDataChanged(NameConflict, old, newMeta);
+        return;
+    }
+    m_metaList.removeAt(idx);
+    m_metaList.insert(idx, newMeta);
+    emit metaDataChanged(UpdateMetaRet::OK, old, newMeta);
+}
+
+PhoenixPlayer::PlayListMeta PhoenixPlayer::PlayListMetaMgr::create()
+{
+    PPSettings set;
+    PlayListMeta meta;
+    M3uPlayListFormat f;
+    QString name(tr("playlist"));
+    auto loopName = [&](const QString &name) -> bool {
+        foreach(const PlayListMeta &m, m_metaList) {
+            if (m.getFileName() == name) {
+                return true;
+            }
+        }
+        return false;
+    };
+    do {
+        QString nn = QString("%1-%2").arg(name).arg(m_nameSuffix);
+        if (loopName(nn)) {
+            m_nameSuffix += 1;
+        } else {
+            break;
+        }
+    } while (true);
+    meta.setDir(set.playListDir());
+    meta.setFileName(QString("%1-%2").arg(name).arg(m_nameSuffix));
+    meta.setTimeStamp(QString::number(QDateTime::currentSecsSinceEpoch()));
+    meta.setFileSuffix(f.extension());
+    return meta;
 }
 
 //void PhoenixPlayer::PlayListObjectMgr::refresh()
@@ -93,9 +135,10 @@ void PhoenixPlayer::PlayListObjectMgr::updateMeta(const PlayListMeta &old, const
 //    readDatabase();
 //}
 
-void PhoenixPlayer::PlayListObjectMgr::readDatabase()
+void PhoenixPlayer::PlayListMetaMgr::readDatabase()
 {
-    m_metaMap.clear();
+//    m_metaMap.clear();
+    m_metaList.clear();
     QFile file(QString("%1/%2").arg(m_dbPath).arg(DB_NAME));
     if (!file.exists()) {
         qDebug()<<Q_FUNC_INFO<<"database file not exist, first run this program??";
@@ -123,13 +166,19 @@ void PhoenixPlayer::PlayListObjectMgr::readDatabase()
         meta.setTimeStamp(obj.value(KEY_TIME_STAMP).toString());
         meta.setAnnotation(obj.value(KEY_ANNOTATION).toString());
         meta.setFileSuffix(obj.value(KEY_FILE_SUFFIX).toString());
-        const QString key = QString("%1.%2").arg(meta.getFileName()).arg(meta.getFileSuffix());
-        m_metaMap.insert(key, meta);
+//        const QString key = QString("%1.%2").arg(meta.getFileName()).arg(meta.getFileSuffix());
+//        m_metaMap.insert(key, meta);
+        m_metaList.append(meta);
     }
+    std::stable_sort(m_metaList.begin(), m_metaList.end(),
+                     [](const PlayListMeta &a, const PlayListMeta &b) -> bool {
+        return a.getTimeStamp().toLongLong() < b.getTimeStamp().toLongLong();
+
+    });
     file.close();
 }
 
-void PhoenixPlayer::PlayListObjectMgr::saveToDatabase()
+void PhoenixPlayer::PlayListMetaMgr::saveToDatabase()
 {
     QFile file(QString("%1/%2").arg(m_dbPath).arg(DB_NAME));
     if (file.exists()) {
@@ -143,7 +192,7 @@ void PhoenixPlayer::PlayListObjectMgr::saveToDatabase()
         return;
     }
     QJsonArray array;
-    foreach(const PlayListMeta &meta, m_metaMap.values()) {
+    foreach(const PlayListMeta &meta, m_metaList) {
         QJsonObject obj = QJsonObject::fromVariantMap(meta.toMap());
         array.append(obj);
     }

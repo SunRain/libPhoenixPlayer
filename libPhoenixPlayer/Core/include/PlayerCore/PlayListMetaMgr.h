@@ -1,5 +1,5 @@
-#ifndef PLAYLISTOBJECTMGR_H
-#define PLAYLISTOBJECTMGR_H
+#ifndef PLAYLISTMETAMGR_H
+#define PLAYLISTMETAMGR_H
 
 #include <QObject>
 #include <QList>
@@ -20,19 +20,29 @@ class IMusicLibraryDAO;
 }
 
 
-class LIBPHOENIXPLAYER_EXPORT PlayListObjectMgr : public QObject
+class LIBPHOENIXPLAYER_EXPORT PlayListMetaMgr : public QObject
 {
     Q_OBJECT
 protected:
-    explicit PlayListObjectMgr(QObject *parent = Q_NULLPTR);
-    static PlayListObjectMgr *createInstance();
+    explicit PlayListMetaMgr(QObject *parent = Q_NULLPTR);
+    static PlayListMetaMgr *createInstance();
 
 public:
-    static PlayListObjectMgr *instance();
-    virtual ~PlayListObjectMgr();
+    enum UpdateMetaRet {
+        OK = 0x0,
+        NameConflict
+    };
+    static PlayListMetaMgr *instance();
+    virtual ~PlayListMetaMgr();
 
     QList<PlayListMeta> metaList() const;
 
+    ///
+    /// \brief addMeta
+    /// \param meta
+    /// \return    True if list not contains this meta(same meta name and suffix)
+    /// False if list contains this meta(same meta name and suffix)
+    ///
     bool addMeta(const PlayListMeta &meta);
 
     ///
@@ -43,9 +53,19 @@ public:
     ///
     void tryAdd(const PlayListMeta &meta);
 
+    ///
+    /// \brief deleteMeta
+    /// \param meta
+    ///
     void deleteMeta(const PlayListMeta &meta);
 
     void updateMeta(const PlayListMeta &old,  const PlayListMeta &newMeta);
+
+    ///
+    /// \brief create
+    /// \return
+    ///
+    PlayListMeta create();
 
 //    void refresh();
 
@@ -67,7 +87,7 @@ protected:
 
 signals:
 //    void existPlayListsChanged(const QStringList &existPlayLists);
-    void metaDataChanged(const PlayListMeta &old, const PlayListMeta &newMeta);
+    void metaDataChanged(UpdateMetaRet ret, const PlayListMeta &old, const PlayListMeta &newMeta);
 
     void addedMeta(const PlayListMeta &meta);
 
@@ -80,11 +100,13 @@ private:
 //    PPSettings   *m_settings;
 //    QString     m_playListDir;
 //    QStringList m_existPlayLists;
+    int         m_nameSuffix;
     QString     m_dbPath;
-    QMap<QString, PlayListMeta> m_metaMap;
+//    QMap<QString, PlayListMeta> m_metaMap;
+    QList<PlayListMeta> m_metaList;
 };
 
 
 } //PhoenixPlayer
 
-#endif // PLAYLISTOBJECTMGR_H
+#endif // PLAYLISTMETAMGR_H
