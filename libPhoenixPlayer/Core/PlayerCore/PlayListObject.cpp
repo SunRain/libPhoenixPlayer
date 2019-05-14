@@ -32,7 +32,7 @@ PlayListObject::PlayListObject(const PlayListMeta &meta, QObject *parent)
 
 PlayListObject::~PlayListObject()
 {
-
+    save();
 }
 
 //void PlayListObject::refreshExistPlayLists()

@@ -89,12 +89,19 @@ signals:
 //    void existPlayListsChanged(const QStringList &existPlayLists);
     void metaDataChanged(UpdateMetaRet ret, const PlayListMeta &old, const PlayListMeta &newMeta);
 
-    void addedMeta(const PlayListMeta &meta);
+    void metaAdded(const PlayListMeta &meta);
 
-    void deletedMeta(const PlayListMeta &meta);
+    void metaDeleted(const PlayListMeta &meta);
 
 private:
     void readDatabase();
+    ///
+    /// \brief nameConflict compare name and namesuffix of two PlayListMeta
+    /// \param old
+    /// \param newMeta
+    /// \return true if conflict
+    ///
+    bool nameConflict(const PlayListMeta &old, const PlayListMeta &newMeta);
 
 private:
 //    PPSettings   *m_settings;

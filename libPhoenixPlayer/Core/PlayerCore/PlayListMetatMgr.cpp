@@ -45,6 +45,7 @@ PhoenixPlayer::PlayListMetaMgr *PhoenixPlayer::PlayListMetaMgr::instance()
 
 PhoenixPlayer::PlayListMetaMgr::~PlayListMetaMgr()
 {
+    qDebug()<<Q_FUNC_INFO<<"-------------------------";
     saveToDatabase();
 }
 
@@ -67,32 +68,41 @@ bool PhoenixPlayer::PlayListMetaMgr::addMeta(const PhoenixPlayer::PlayListMeta &
 void PhoenixPlayer::PlayListMetaMgr::tryAdd(const PhoenixPlayer::PlayListMeta &meta)
 {
     if(addMeta(meta)) {
-        emit addedMeta(meta);
+        emit metaAdded(meta);
     }
 }
 
 void PhoenixPlayer::PlayListMetaMgr::deleteMeta(const PhoenixPlayer::PlayListMeta &meta)
 {
-    if (m_metaList.removeOne(meta)) {
-        emit deletedMeta(meta);
+    PlayListMeta mm;
+    foreach(const PlayListMeta &m, m_metaList) {
+        if (meta.getFileName() == m.getFileName() && meta.getFileSuffix() == m.getFileSuffix()) {
+            mm = m;
+            break;
+        }
+    }
+    if (m_metaList.removeOne(mm)) {
+        qDebug()<<Q_FUNC_INFO<<" removed meta "<<mm.getFileName();
+        emit metaDeleted(mm);
     }
 }
 
 void PhoenixPlayer::PlayListMetaMgr::updateMeta(const PlayListMeta &old, const PhoenixPlayer::PlayListMeta &newMeta)
 {
-//    const QString oldKey = QString("%1.%2").arg(old.getFileName()).arg(old.getFileSuffix());
-//    const QString newKey = QString("%1.%2").arg(newMeta.getFileName()).arg(newMeta.getFileSuffix());
-//    if (oldKey != newKey) {
-//        m_metaMap.remove(oldKey);
-//    }
-//    m_metaMap.insert(newKey, newMeta);
-    //    emit metaDataChanged(old, newMeta);
     const int idx = m_metaList.indexOf(old);
     if (idx < 0) {
         qDebug()<<Q_FUNC_INFO<<"can't find meta "<<old.getFileName();
         return;
     }
-    if (m_metaList.contains(newMeta)) {
+    qDebug()<<Q_FUNC_INFO<<" old "<<old.getFileName()<<" new "<<newMeta.getFileName();
+    bool conflicted = false;
+    foreach(const PlayListMeta &meta, m_metaList) {
+        if (nameConflict(meta, newMeta)) {
+            conflicted = true;
+            break;
+        }
+    }
+    if (conflicted) {
         emit metaDataChanged(NameConflict, old, newMeta);
         return;
     }
@@ -178,8 +188,15 @@ void PhoenixPlayer::PlayListMetaMgr::readDatabase()
     file.close();
 }
 
+bool PhoenixPlayer::PlayListMetaMgr::nameConflict(const PhoenixPlayer::PlayListMeta &old, const PhoenixPlayer::PlayListMeta &newMeta)
+{
+    return old.getFileName() == newMeta.getFileName() && old.getFileSuffix() == newMeta.getFileSuffix();
+}
+
 void PhoenixPlayer::PlayListMetaMgr::saveToDatabase()
 {
+    qDebug()<<Q_FUNC_INFO<<"-------------------------";
+
     QFile file(QString("%1/%2").arg(m_dbPath).arg(DB_NAME));
     if (file.exists()) {
         if (!file.remove()) {
