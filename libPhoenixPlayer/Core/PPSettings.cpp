@@ -12,20 +12,20 @@
 
 namespace PhoenixPlayer {
 
-const char *KEY_MUSIC_DIR = "MusicDir";
-const char *KEY_LAST_SONG = "LastPlayedSongHash";
-const char *KEY_PLAY_LIST = "CurrentPlayList";
-const char *KEY_PLUGIN_PLAY_BACKEND = "Plugin/CurrentPlayBackend";
-const char *KEY_PLUGIN_MUSIC_LIBRARY_DAO = "Plugin/CurrentMusicLibraryDAO";
-const char *KEY_PLUGIN_OUTPUT = "Plugin/CurrentOutPut";
-const char *KEY_PLUGIN_DECODERS = "Plugin/Decoders";
-const char *KEY_PLUGIN_METADATA_LOOKUP = "Plugin/MetadataLookup";
-const char *KEY_PLUGIN_TAG_PASER = "Plugin/TagPaser";
-const char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
-const char *KEY_TRACE_LOG = "TraceLog";
-const char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
-const char *KEY_FETCH_METADATA_MOBILE_NETWORK = "fetchMetaDataMobileNetwork";
-const char *KEY_PLAY_LIST_DIR = "PlayListDir";
+const static char *KEY_MUSIC_DIR = "MusicDir";
+const static char *KEY_LAST_SONG = "LastPlayedSongHash";
+const static char *KEY_PLAY_LIST = "CurrentPlayList";
+const static char *KEY_PLUGIN_PLAY_BACKEND = "Plugin/CurrentPlayBackend";
+const static char *KEY_PLUGIN_MUSIC_LIBRARY_DAO = "Plugin/CurrentMusicLibraryDAO";
+const static char *KEY_PLUGIN_OUTPUT = "Plugin/CurrentOutPut";
+const static char *KEY_PLUGIN_DECODERS = "Plugin/Decoders";
+const static char *KEY_PLUGIN_METADATA_LOOKUP = "Plugin/MetadataLookup";
+const static char *KEY_PLUGIN_TAG_PASER = "Plugin/TagPaser";
+const static char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
+const static char *KEY_TRACE_LOG = "TraceLog";
+const static char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
+const static char *KEY_FETCH_METADATA_MOBILE_NETWORK = "fetchMetaDataMobileNetwork";
+const static char *KEY_PLAY_LIST_DIR = "PlayListDir";
 
 PPSettings::PPSettings(QObject *parent) : QObject(parent)
 {
@@ -126,6 +126,11 @@ bool PPSettings::deleteMusicDir(const QString &target)
         list.removeOne (target);
     return setMusicDir (list);
 
+}
+
+const QString PPSettings::defaultMusicDir() const
+{
+    return m_defaultMusicDir;
 }
 
 QStringList PPSettings::musicDirs()

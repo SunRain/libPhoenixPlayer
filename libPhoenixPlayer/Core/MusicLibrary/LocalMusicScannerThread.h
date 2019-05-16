@@ -23,8 +23,9 @@ class IMusicTagParser;
 class LIBPHOENIXPLAYER_EXPORT LocalMusicScannerThread : public QThread
 {
     Q_OBJECT
-public:
-    explicit LocalMusicScannerThread(QObject *parent = 0);  
+    friend class LocalMusicScanner;
+protected:
+    explicit LocalMusicScannerThread(PPSettings *set, PluginLoader *loader, QObject *parent = Q_NULLPTR);
     virtual ~LocalMusicScannerThread();
 
     ///
@@ -43,16 +44,16 @@ protected:
     void scanDir(const QString &path);
 
 private:
-    QStringList m_pathList;
-    bool m_stopLookupFlag;
-    QMimeDatabase m_QMimeDatabase;
-    QMutex m_mutex;
+    QStringList             m_pathList;
+    bool                    m_stopLookupFlag;
+    QMimeDatabase           m_QMimeDatabase;
+    QMutex                  m_mutex;
 
-    PPSettings *m_settings;
-    PluginLoader *m_pluginLoader;
-    IMusicLibraryDAO *m_dao;
-    QList<MusicTagParserHost *> m_tagHostList;
-    QList<IMusicTagParser *> m_tagParserList;
+    PPSettings                      *m_settings;
+    PluginLoader                    *m_pluginLoader;
+    IMusicLibraryDAO                *m_dao;
+    QList<MusicTagParserHost *>     m_tagHostList;
+    QList<IMusicTagParser *>        m_tagParserList;
 };
 } //MusicLibrary
 } //PhoenixPlayer

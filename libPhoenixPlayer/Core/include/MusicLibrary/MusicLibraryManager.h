@@ -22,6 +22,7 @@ namespace MusicLibrary {
 
 class MusicLibraryDAOHost;
 class IMusicLibraryDAO;
+class LocalMusicScanner;
 
 class LIBPHOENIXPLAYER_EXPORT MusicLibraryManager : public BaseObject
 {
@@ -31,6 +32,9 @@ protected:
     explicit MusicLibraryManager(PPSettings *set, PluginLoader *loader, QObject *parent = Q_NULLPTR);
     virtual ~MusicLibraryManager();
 public:
+
+    LocalMusicScanner *localMusicScanner() const;
+
     ///
     /// \brief allTracks 显示所有曲目
     /// \return 空列表如果没有曲目
@@ -42,6 +46,8 @@ public:
     /// \return true if empty
     ///
     Q_INVOKABLE bool empty() const;
+
+    Q_INVOKABLE bool isEmpty() const {return empty();}
 
     ///
     /// \brief artistTracks 显示某个artist下的曲目
@@ -196,12 +202,13 @@ private:
 private:
 //      bool m_isInit;
 //      QPointer<IPlayListDAO> m_playListDAO;
-    PPSettings *m_settings;
-    PluginLoader *m_pluginLoader;
-    MusicLibraryDAOHost *m_daoHost;
-    IMusicLibraryDAO *m_dao;
+    PPSettings                  *m_settings;
+    PluginLoader                *m_pluginLoader;
+    MusicLibraryDAOHost         *m_daoHost;
+    IMusicLibraryDAO            *m_dao;
+    LocalMusicScanner           *m_localMusicScanner;
 //    /*AudioMetaList */AudioMetaList m_trackList;
-    AudioMetaList m_trackList;
+    AudioMetaList               m_trackList;
 //      AsyncDiskLookup *m_asyncDiskLookup;
 //      AsyncTagParserMgrWrapper *m_tagParserWrapper;
 

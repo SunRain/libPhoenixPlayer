@@ -18,63 +18,63 @@
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-LocalMusicScanner::LocalMusicScanner(PPSettings *set, QObject *parent)
-    : QObject(parent)
-    , m_settings(set)
+LocalMusicScanner::LocalMusicScanner(PPSettings *set, PluginLoader *loader, QObject *parent)
+    : QObject(parent),
+      m_settings(set),
+      m_pluginLoader(loader)
 {
     m_scanner = nullptr;
 }
 
-LocalMusicScanner::LocalMusicScanner(QObject *parent)
-    : QObject(parent)
-{
-    m_scanner = nullptr;
-    m_settings = phoenixPlayerLib->settings ();
-}
 
 LocalMusicScanner::~LocalMusicScanner()
 {
-    if (m_scanner && m_scanner->isRunning ()) {
-        m_scanner->stopLookup ();
-        m_scanner->quit ();
+    if (m_scanner && m_scanner->isRunning()) {
+        m_scanner->stopLookup();
+        m_scanner->quit();
         m_scanner->wait (3*60*1000);
-        m_scanner->deleteLater ();
+        m_scanner->deleteLater();
         m_scanner = nullptr;
     }
 }
 
 void LocalMusicScanner::scanLocalMusic()
 {
-    doScann (QString());
+    doScann(QString());
 }
 
 void LocalMusicScanner::scanDir(const QString &dirname)
 {
-    if (dirname.isEmpty ())
+    if (dirname.isEmpty())
         return;
-    if (dirname.startsWith ("file://")) {
+    if (dirname.startsWith("file://")) {
         QString str = dirname.mid (7);
-        doScann (str);
+        doScann(str);
     } else {
-        doScann (dirname);
+        doScann(dirname);
+    }
+}
+
+void LocalMusicScanner::scarnDirs(const QStringList &list)
+{
+    foreach(const QString &dir, list) {
+        scanDir(dir);
     }
 }
 
 void LocalMusicScanner::doScann(const QString &dirname)
 {
     if (!m_scanner) {
-        m_scanner = new LocalMusicScannerThread(0);
-        connect (m_scanner, &QThread::finished,
-                 [&]() {
-//            m_scanner->quit ();
-//            m_scanner->wait (3*60*1000);
-            m_scanner->deleteLater ();
+        m_scanner = new LocalMusicScannerThread(m_settings, m_pluginLoader);
+        connect(m_scanner, &QThread::finished,
+                this, [&]() {
+            m_scanner->deleteLater();
             m_scanner = nullptr;
-            emit searchingFinished ();
+            emit searchingFinished();
         });
     }
-    if (dirname.isEmpty ())
-        m_scanner->addLookupDirs (m_settings->musicDirs ());
+    if (dirname.isEmpty())
+        m_scanner->addLookupDirs(m_settings->musicDirs());
     else
         m_scanner->addLookupDir (dirname);
     m_scanner->start (QThread::HighPriority);

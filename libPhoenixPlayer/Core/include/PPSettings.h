@@ -36,6 +36,7 @@ public:
     Q_INVOKABLE bool setMusicDir(const QStringList &dirList);
     Q_INVOKABLE bool addMusicDir(const QString &dir);
     Q_INVOKABLE bool deleteMusicDir(const QString &target);
+    Q_INVOKABLE const QString defaultMusicDir() const;
     Q_INVOKABLE QStringList musicDirs();
 
 //    Q_INVOKABLE bool setLastPlayedSong(const QString &songHash);

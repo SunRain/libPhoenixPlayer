@@ -17,12 +17,15 @@ class LocalMusicScannerThread;
 class LIBPHOENIXPLAYER_EXPORT LocalMusicScanner : public QObject
 {
     Q_OBJECT
-public:
-    explicit LocalMusicScanner(PPSettings *set, QObject *parent = 0);
-    explicit LocalMusicScanner(QObject *parent = 0);
+    friend class MusicLibraryManager;
+protected:
+    explicit LocalMusicScanner(PPSettings *set, PluginLoader *loader, QObject *parent = Q_NULLPTR);
     virtual ~LocalMusicScanner();
-    Q_INVOKABLE void scanLocalMusic();
-    Q_INVOKABLE void scanDir(const QString &dirname);
+
+public:
+    void scanLocalMusic();
+    void scanDir(const QString &dirname);
+    void scarnDirs(const QStringList &list);
 
 signals:
     void searchingFinished();
@@ -30,8 +33,9 @@ signals:
 private:
     void doScann(const QString &dirname);
 private:
-    PPSettings *m_settings;
-    LocalMusicScannerThread *m_scanner;
+    PPSettings                  *m_settings;
+    PluginLoader                *m_pluginLoader;
+    LocalMusicScannerThread     *m_scanner;
 };
 } //MusicLibrary
 } //PhoenixPlayer

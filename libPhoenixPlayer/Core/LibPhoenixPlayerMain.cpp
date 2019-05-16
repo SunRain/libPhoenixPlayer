@@ -59,7 +59,7 @@ void LibPhoenixPlayer::registerPlugins(const char *url)
     qmlRegisterUncreatableType<Common>(url, 1, 0, "Common", "Common cannot be created");
     qmlRegisterSingletonType<AudioMetaObjectKeyName>(url, 1, 0, "MetaKey", AudioMetaObjectKeyName::qmlSingleton);
 
-    qmlRegisterType<LocalMusicScanner>(url, 1, 0, "LocalMusicScanner");
+//    qmlRegisterType<LocalMusicScanner>(url, 1, 0, "LocalMusicScanner");
 }
 
 PPSettings *LibPhoenixPlayer::settings()

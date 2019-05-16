@@ -8,6 +8,7 @@
 
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
+#include "MusicLibrary/LocalMusicScanner.h"
 #include "PPSettings.h"
 #include "PPUtility.h"
 #include "AudioMetaObject.h"
@@ -19,9 +20,10 @@ namespace PhoenixPlayer {
 namespace MusicLibrary {
 
 MusicLibraryManager::MusicLibraryManager(PPSettings *set, PluginLoader *loader, QObject *parent)
-    : BaseObject(parent)
-    , m_settings(set)
-    , m_pluginLoader(loader)
+    : BaseObject(parent),
+      m_settings(set),
+      m_pluginLoader(loader),
+      m_localMusicScanner(new LocalMusicScanner(m_settings, m_pluginLoader))
 {
 //    m_settings = phoenixPlayerLib->settings ();//Settings::instance ();
 //    m_pluginLoader = phoenixPlayerLib->pluginLoader ();//PluginLoader::instance ();
@@ -103,6 +105,11 @@ MusicLibraryManager::~MusicLibraryManager()
     }
 
     qDebug()<<">>>>>>>> after "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
+}
+
+LocalMusicScanner *MusicLibraryManager::localMusicScanner() const
+{
+    return m_localMusicScanner;
 }
 
 AudioMetaList MusicLibraryManager::allTracks()
