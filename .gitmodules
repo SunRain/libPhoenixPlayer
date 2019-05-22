@@ -6,3 +6,6 @@
 	path = ThirdParty/Taglib/src
 	url = https://github.com/SunRain/taglib.git
 	branch = phoenixplayer
+[submodule "ThirdParty/QCurl"]
+	path = ThirdParty/QCurl
+	url = https://github.com/SunRain/QCurl.git
