@@ -1,7 +1,7 @@
 #ifndef VOLUMECONTROL_H
 #define VOLUMECONTROL_H
 
-#include <Common.h>
+#include <PPCommon.h>
 #include <QObject>
 
 #include "libphoenixplayer_global.h"
@@ -62,7 +62,7 @@ public:
     bool muted() const;
 
 signals:
-    void volumeChanged(int left, int right);
+//    void volumeChanged(int left, int right);
     void volumeChanged(int volume);
     void balanceChanged(int balance);
     void leftVolumeChanged(int volume);

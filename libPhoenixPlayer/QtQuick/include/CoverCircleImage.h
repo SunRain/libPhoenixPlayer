@@ -3,7 +3,7 @@
 
 #include "libphoenixplayer_global.h"
 #include "CircleImage.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 class QUrl;
 namespace PhoenixPlayer {

@@ -7,7 +7,7 @@
 #include <QUrl>
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "../AudioMetaObject_p.h"
 
 typedef QList<PhoenixPlayer::AudioMetaObject> AudioMetaList;
@@ -274,7 +274,7 @@ private:
             path = QString();
             name = QString();
             size = 0;
-            mediaType = (int)Common::MediaTypeLocalFile;
+            mediaType = (int)PPCommon::MediaTypeLocalFile;
             lyricsData = QString();
             lyricsUri = QUrl();
             albumMeta = AlbumMeta();

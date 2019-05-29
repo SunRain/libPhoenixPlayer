@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef PPCOMMON_H
+#define PPCOMMON_H
 #include <QObject>
 #include <QMetaEnum>
 
@@ -8,7 +8,7 @@
 
 namespace PhoenixPlayer {
 
-class LIBPHOENIXPLAYER_EXPORT Common : public BaseObject
+class LIBPHOENIXPLAYER_EXPORT PPCommon : public BaseObject
 {
     Q_OBJECT
     Q_ENUMS(PlayBackendState)
@@ -103,4 +103,4 @@ public:
 //    }
 };
 }
-#endif // COMMON_H
+#endif // PPCOMMON_H

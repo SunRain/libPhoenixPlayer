@@ -5,7 +5,7 @@
 #include <QPointer>
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "MetadataLookup/IMetadataLookup.h"
 #include "SingletonPointer.h"
 #include "AudioMetaObject.h"
@@ -56,10 +56,10 @@ public:
     virtual ~PlayerCore();
     void initiate();
 
-    Common::PlayMode playMode() const;
+    PPCommon::PlayMode playMode() const;
     int playModeInt() const;
 
-    Common::PlayBackendState playBackendState() const;
+    PPCommon::PlayBackendState playBackendState() const;
     int playBackendStateInt() const;
 
 //    PlayListObject *playList() const;
@@ -161,8 +161,8 @@ signals:
 
 //    void autoSkipForwardChanged();
 
-    void playModeChanged(Common::PlayMode mode);
-    void playModeChanged(int mode);
+    void playModeChanged(PPCommon::PlayMode mode);
+    void playModeChangedInt(int mode);
 
     void playBackendStateChanged(int state);
 
@@ -191,8 +191,8 @@ public slots:
     ///
     void skipShuffle();
 
-    void setPlayMode(Common::PlayMode mode);
-    void setPlayMode(int mode);
+    void setPlayMode(PPCommon::PlayMode mode);
+    void setPlayModeInt(int mode);
 
     void setAutoSkipForward(bool autoSkipForward);
 
@@ -229,7 +229,7 @@ private:
     MusicLibrary::IMusicLibraryDAO          *m_dao;
     MediaResource                           *m_resource;
 
-    Common::PlayMode                        m_playMode;
+    PPCommon::PlayMode                        m_playMode;
     quint64                                 m_curTrackDuration;
     quint64                                 m_currentPlayPos;
 

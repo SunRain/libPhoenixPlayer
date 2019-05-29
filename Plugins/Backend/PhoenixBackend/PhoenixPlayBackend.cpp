@@ -10,7 +10,7 @@
 #include "StateChangedEvent.h"
 #include "LibPhoenixPlayerMain.h"
 
-#include "Common.h"
+#include "PPCommon.h"
 #include "PlayerCore/VolumeControl.h"
 
 namespace PhoenixPlayer {
@@ -53,13 +53,13 @@ bool PhoenixPlayBackend::event(QEvent *e)
         qDebug()<<Q_FUNC_INFO<<"Current event is EVENT_STATE_CHANGED, value is "<<st;
 
         if (st == PlayState::Playing)
-            emit stateChanged (Common::PlayBackendPlaying);
+            emit stateChanged (PPCommon::PlayBackendPlaying);
         else if (st == PlayState::Paused)
-            emit stateChanged (Common::PlayBackendPaused);
+            emit stateChanged (PPCommon::PlayBackendPaused);
         else if (st == PlayState::NormalError || st == PlayState::FatalError)
             emit failed ();
         else
-            emit stateChanged (Common::PlayBackendStopped);
+            emit stateChanged (PPCommon::PlayBackendStopped);
     } else if (e->type () == EVENT_NEXT_TRACK_REQUEST
                || e->type () == EVENT_FINISHED) {
         emit finished ();
@@ -69,7 +69,7 @@ bool PhoenixPlayBackend::event(QEvent *e)
     return true;
 }
 
-Common::PlayBackendState PhoenixPlayBackend::playBackendState()
+PPCommon::PlayBackendState PhoenixPlayBackend::playBackendState()
 {
 //    PlayBackendStopped = 0x0,  //播放停止
 //    PlayBackendPlaying,        //播放
@@ -82,11 +82,11 @@ Common::PlayBackendState PhoenixPlayBackend::playBackendState()
 //    NormalError,        //Input source is invalid or unsupported. Player should skip this file
 //    FatalError          //This means unrecorvable error die audio output problems. Player should abort playback.
     if (m_handler->state () == PlayState::Playing) {
-        return Common::PlayBackendPlaying;
+        return PPCommon::PlayBackendPlaying;
     } else if (m_handler->state () == PlayState::Paused) {
-        return Common::PlayBackendPaused;
+        return PPCommon::PlayBackendPaused;
     } else {
-        return Common::PlayBackendStopped;
+        return PPCommon::PlayBackendStopped;
     }
 }
 

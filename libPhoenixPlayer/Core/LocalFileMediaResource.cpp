@@ -40,9 +40,9 @@ bool LocalFileMediaResource::ready() const
     return m_file->isOpen ();
 }
 
-Common::MediaType LocalFileMediaResource::type() const
+PPCommon::MediaType LocalFileMediaResource::type() const
 {
-    return Common::MediaTypeLocalFile;
+    return PPCommon::MediaTypeLocalFile;
 }
 
 

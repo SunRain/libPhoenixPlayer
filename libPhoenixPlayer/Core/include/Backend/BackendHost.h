@@ -2,7 +2,7 @@
 #define BACKENDHOST_H
 
 #include "PluginHost.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer {
 namespace PlayBackend {
@@ -19,8 +19,8 @@ public:
 
     // PluginHost interface
 public:
-    Common::PluginType type() const {
-        return Common::PluginPlayBackend;
+    PPCommon::PluginType type() const {
+        return PPCommon::PluginPlayBackend;
     }
 };
 

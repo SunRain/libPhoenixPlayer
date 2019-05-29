@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "Common.h"
+#include "PPCommon.h"
 //#include "BaseMediaObject.h"
 //#include "MediaResource.h"
 //#include "BaseVisual.h"
@@ -28,7 +28,7 @@ public:
     }
 
     //    Q_INVOKABLE virtual void 	load_equalizer(vector<EQ_Setting>&)=0;
-    virtual Common::PlayBackendState  playBackendState() = 0;
+    virtual PPCommon::PlayBackendState  playBackendState() = 0;
     virtual void initialize() = 0;
     // 返回不同playbackend的BaseVolume以供外部调用
     virtual BaseVolume *baseVolume() = 0;
@@ -64,7 +64,7 @@ signals:
     ///
     void failed();
 
-    void stateChanged(Common::PlayBackendState state);
+    void stateChanged(PPCommon::PlayBackendState state);
     void tick(quint64 sec = 0);
 
     //    void totalTimeChanged(qint64);

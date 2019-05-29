@@ -5,7 +5,7 @@
 #include <QUrl>
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 class QByteArray;
 class QVariant;

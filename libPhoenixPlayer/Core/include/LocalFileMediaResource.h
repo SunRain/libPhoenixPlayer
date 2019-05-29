@@ -4,7 +4,7 @@
 #include "MediaResource.h"
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 class QFile;
 namespace PhoenixPlayer {
@@ -22,7 +22,7 @@ public:
     QIODevice *device();
     bool waiting() const;
     bool ready() const;
-    Common::MediaType type() const;
+    PPCommon::MediaType type() const;
 
 private:
     QFile *m_file;

@@ -11,7 +11,7 @@
 class QString;
 namespace PhoenixPlayer {
 class AudioMetaObject;
-class Common;
+class PPCommon;
 namespace MusicLibrary {
 namespace SQLite3 {
 

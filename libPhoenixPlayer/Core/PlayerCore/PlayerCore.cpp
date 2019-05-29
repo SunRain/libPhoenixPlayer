@@ -5,7 +5,7 @@
 #include <QScopedPointer>
 #include <QUrl>
 
-#include "Common.h"
+#include "PPCommon.h"
 #include "PPSettings.h"
 #include "MusicLibrary/MusicLibraryManager.h"
 #include "Backend/BaseMediaObject.h"
@@ -55,7 +55,7 @@ PlayerCore::PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibraryManage
     if (host)
         m_dao = host->instance<IMusicLibraryDAO>();
 
-    m_playMode = Common::PlayModeOrder;
+    m_playMode = PPCommon::PlayModeOrder;
 //    m_playlistObject = new PlayListObject(m_settings, this);
 //    m_playlistObject = new PlayListObject(m_settings->playListDir(), this);
 //    connect (m_playlistObject, &PlayListObject::currentIndexChanged,
@@ -230,7 +230,7 @@ void PlayerCore::initiate()
 //{
 //    return (int)getPlayMode();
 //}
-Common::PlayMode PlayerCore::playMode() const
+PPCommon::PlayMode PlayerCore::playMode() const
 {
     return m_playMode;
 }
@@ -240,11 +240,11 @@ int PlayerCore::playModeInt() const
     return (int)m_playMode;
 }
 
-Common::PlayBackendState PlayerCore::playBackendState() const
+PPCommon::PlayBackendState PlayerCore::playBackendState() const
 {
 //    return m_playBackendState;
     if (!m_playBackend)
-        return Common::PlayBackendStopped;
+        return PPCommon::PlayBackendStopped;
     return (*m_playBackend)->playBackendState ();
 }
 
@@ -370,20 +370,20 @@ int PlayerCore::forwardIndex() const
     int index = m_playQueue->currentIndex () + 1;
 
     switch (m_playMode) {
-    case Common::PlayModeOrder: {
+    case PPCommon::PlayModeOrder: {
         if (index >= m_playQueue->count ())
             index = -1;
         break;
     }
-    case Common::PlayModeRepeatAll: {
+    case PPCommon::PlayModeRepeatAll: {
         if (index >= m_playQueue->count ())
             index = 0;
         break;
     }
-    case Common::PlayModeRepeatCurrent:
+    case PPCommon::PlayModeRepeatCurrent:
         index--;
         break;
-    case Common::PlayModeShuffle:
+    case PPCommon::PlayModeShuffle:
         index = - 1;//m_playList->randomIndex ();
         break;
     default:
@@ -402,20 +402,20 @@ int PlayerCore::backwardIndex() const
     int index = m_playQueue->currentIndex () -1;
 
     switch (m_playMode) {
-    case Common::PlayModeOrder: {
+    case PPCommon::PlayModeOrder: {
         if (index < 0)
             index = -1;
         break;
     }
-    case Common::PlayModeRepeatAll: {
+    case PPCommon::PlayModeRepeatAll: {
         if (index < 0)
             index = m_playQueue->count () -1;
         break;
     }
-    case Common::PlayModeRepeatCurrent:
+    case PPCommon::PlayModeRepeatCurrent:
         index++;
         break;
-    case Common::PlayModeShuffle:
+    case PPCommon::PlayModeShuffle:
         index = -1;//m_playList->randomIndex ();
         break;
     default:
@@ -440,13 +440,13 @@ void PlayerCore::togglePlayPause()
         return;
 
     switch ((*m_playBackend)->playBackendState ()) {
-    case Common::PlayBackendPlaying:
+    case PPCommon::PlayBackendPlaying:
         (*m_playBackend)->pause ();
         break;
-    case Common::PlayBackendPaused:
+    case PPCommon::PlayBackendPaused:
         (*m_playBackend)->play (m_currentPlayPos);
         break;
-    case Common::PlayBackendStopped: {
+    case PPCommon::PlayBackendStopped: {
         if (m_autoSkipForward) {
             qDebug()<<Q_FUNC_INFO<<"playbackend stopped";
 //            QString playingHash = m_musicLibraryManager->playingSongHash ();
@@ -547,23 +547,23 @@ void PlayerCore::skipShuffle()
 {
     m_playQueue->setCurrentIndex (this->shuffleIndex ());
 }
-void PlayerCore::setPlayMode(Common::PlayMode mode)
+void PlayerCore::setPlayMode(PPCommon::PlayMode mode)
 {
     if (m_playMode != mode) {
         m_playMode = mode;
         emit playModeChanged(mode);
-        emit playModeChanged((int)mode);
+        emit playModeChangedInt((int)mode);
     }
 }
 
-void PlayerCore::setPlayMode(int mode)
+void PlayerCore::setPlayModeInt(int mode)
 {
 //    if ((int)m_playMode != mode) {
 //        Common::PlayMode m = Common::PlayMode(mode);
 //        m_playMode = m;
 //        emit playModeIntChanged(mode);
 //    }
-    setPlayMode(Common::PlayMode(mode));
+    setPlayMode(PPCommon::PlayMode(mode));
 }
 
 void PlayerCore::setAutoSkipForward(bool autoSkipForward)
@@ -626,7 +626,7 @@ void PlayerCore::setPluginLoader()
 
     // 播放状态改变信号
     connect (*m_playBackend, &IPlayBackend::stateChanged,
-             [&](Common::PlayBackendState state) {
+             [&](PPCommon::PlayBackendState state) {
         emit playBackendStateChanged (state);
 //        emit playBackendStateChanged ((int)state);
     });
@@ -675,7 +675,7 @@ void PlayerCore::doPlayByPlayMode()
     }
     qDebug()<<">>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<";
     switch (m_playMode) {
-    case Common::PlayModeOrder: { //顺序播放
+    case PPCommon::PlayModeOrder: { //顺序播放
         qDebug()<<Q_FUNC_INFO<<" PlayModeOrder";
         if (m_playQueue->isEmpty ())
             break;
@@ -685,7 +685,7 @@ void PlayerCore::doPlayByPlayMode()
             this->skipForward ();
         break;
     }
-    case Common::PlayModeRepeatCurrent: { //单曲播放
+    case PPCommon::PlayModeRepeatCurrent: { //单曲播放
         qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatCurrent";
 
         AudioMetaObject data = m_playQueue->currentTrack ();
@@ -705,12 +705,12 @@ void PlayerCore::doPlayByPlayMode()
 //        }
         break;
     }
-    case Common::PlayModeRepeatAll:  { //循环播放
+    case PPCommon::PlayModeRepeatAll:  { //循环播放
         qDebug()<<Q_FUNC_INFO<<" PlayModeRepeatAll";
         this->skipForward ();
         break;
     }
-    case Common::PlayModeShuffle: { //随机播放
+    case PPCommon::PlayModeShuffle: { //随机播放
         qDebug()<<Q_FUNC_INFO<<" PlayModeShuffle";
         this->skipShuffle ();
         break;

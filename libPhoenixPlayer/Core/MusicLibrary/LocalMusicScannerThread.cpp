@@ -30,7 +30,7 @@ LocalMusicScannerThread::LocalMusicScannerThread(PPSettings *set, PluginLoader *
 
     QStringList tagHosts = m_settings->tagPaserLibraries ();
     if (tagHosts.isEmpty ())
-        tagHosts.append (m_pluginLoader->pluginLibraries (Common::PluginMusicTagParser));
+        tagHosts.append (m_pluginLoader->pluginLibraries (PPCommon::PluginMusicTagParser));
 
     foreach (QString s, tagHosts) {
         MusicTagParserHost *host = new MusicTagParserHost(s);

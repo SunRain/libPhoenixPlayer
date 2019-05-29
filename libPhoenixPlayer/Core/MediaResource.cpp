@@ -40,8 +40,8 @@ bool MediaResource::ready() const
     return true;
 }
 
-Common::MediaType MediaResource::type() const {
-    return Common::MediaTypeLocalFile;
+PPCommon::MediaType MediaResource::type() const {
+    return PPCommon::MediaTypeLocalFile;
 }
 
 MediaResource *MediaResource::create(const QString &uri, QObject *parent)

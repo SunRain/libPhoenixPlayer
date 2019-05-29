@@ -6,7 +6,7 @@
 #include <QList>
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "SingletonPointer.h"
 
 class QPluginLoader;
@@ -89,7 +89,7 @@ public:
     /// \param type
     /// \return 某一个插件类型的所有插件文件地址
     ///
-    QStringList pluginLibraries(Common::PluginType type);
+    QStringList pluginLibraries(PPCommon::PluginType type);
 protected:
     void initPluginByPath(const QString &path);
 signals:
@@ -105,7 +105,7 @@ private:
      MusicLibrary::MusicLibraryDAOHost *m_curDAOHost;
 
      QStringList m_pluginPaths;
-     QHash<Common::PluginType, QString> m_libraries;
+     QHash<PPCommon::PluginType, QString> m_libraries;
 
 };
 

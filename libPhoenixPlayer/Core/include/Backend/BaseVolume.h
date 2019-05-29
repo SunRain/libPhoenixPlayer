@@ -12,7 +12,7 @@ class BaseVolume : public QObject
 {
     Q_OBJECT
 public:
-    explicit BaseVolume(QObject *parent = 0);
+    explicit BaseVolume(QObject *parent = Q_NULLPTR);
     virtual ~BaseVolume();
     virtual void setVolume (int left, int right);
     virtual void setVolume (int volume);

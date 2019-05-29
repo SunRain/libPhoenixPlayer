@@ -7,13 +7,13 @@ QT += network core
 #CONFIG += c++11
 
 HEADERS += \
-    $$PWD/include/Common.h \
+    $$PWD/include/PPCommon.h \
     $$PWD/include/PPUtility.h \
     $$PWD/include/PlayerCore/PlayListMeta.h \
     $$PWD/include/PlayerCore/PlayListMetaMgr.h \
     $$PWD/include/PlayerCore/PlayListObject.h \
     $$PWD/include/PluginLoader.h \
-    $$PWD/include/Settings.h \
+    $$PWD/include/PPSettings.h \
     $$PWD/include/SingletonPointer_p.h \
     $$PWD/include/SingletonPointer_sf.h \
     $$PWD/include/SingletonPointer.h \

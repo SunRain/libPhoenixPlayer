@@ -2,7 +2,7 @@
 #define OUTPUTHOST_H
 
 #include "PluginHost.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer {
 namespace OutPut {
@@ -18,8 +18,8 @@ public:
 
     // PluginHost interface
 public:
-    Common::PluginType type() const {
-        return Common::PluginOutPut;
+    PPCommon::PluginType type() const {
+        return PPCommon::PluginOutPut;
     }
 };
 } //OutPut

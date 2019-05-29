@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QIODevice>
 
-#include "Common.h"
+#include "PPCommon.h"
 #include "libphoenixplayer_global.h"
 
 namespace PhoenixPlayer {
@@ -23,7 +23,7 @@ public:
 
     virtual bool waiting() const;
     virtual bool ready() const;
-    virtual Common::MediaType type() const;
+    virtual PPCommon::MediaType type() const;
 
     static MediaResource *create(const QString &uri, QObject *parent = 0);
 

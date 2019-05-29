@@ -12,7 +12,7 @@
 #include "PPSettings.h"
 #include "PPUtility.h"
 #include "AudioMetaObject.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "PluginLoader.h"
 #include "SingletonPointer.h"
 

@@ -2,7 +2,7 @@
 #define DECODERHOST_H
 
 #include "PluginHost.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer {
 namespace Decoder {
@@ -18,8 +18,8 @@ public:
 
     // PluginHost interface
 public:
-    Common::PluginType type() const {
-        return Common::PluginDecoder;
+    PPCommon::PluginType type() const {
+        return PPCommon::PluginDecoder;
     }
 };
 

@@ -6,7 +6,7 @@
 #include <QTextStream>
 #include <QDebug>
 
-#include "Common.h"
+#include "PPCommon.h"
 #include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {
@@ -50,12 +50,12 @@ void RecentPlayedMgr::queryList()
             }
             QFileInfo info(str);
             AudioMetaObject o(info.absolutePath (), info.fileName (), info.size ());
-            o.setMediaType ((int)Common::MediaTypeLocalFile);
+            o.setMediaType ((int)PPCommon::MediaTypeLocalFile);
             //TODO: should fill other SongMetaData properties from music library
             addTrack (o);
         } else {
             AudioMetaObject o(url);
-            o.setMediaType ((int)Common::MediaTypeUrl);
+            o.setMediaType ((int)PPCommon::MediaTypeUrl);
             addTrack (o);
         }
     }

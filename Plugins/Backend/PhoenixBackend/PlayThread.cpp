@@ -17,7 +17,7 @@
 #include "PluginHost.h"
 #include "PluginLoader.h"
 #include "SingletonPointer.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "Buffer.h"
 #include "PPSettings.h"
 #include "LibPhoenixPlayerMain.h"
@@ -67,11 +67,11 @@ PlayThread::PlayThread(StateHandler *handle, BaseVisual *v, QObject *parent)
 
     m_decoderLibs = m_settings->decoderLibraries ();
     if (m_decoderLibs.isEmpty ())
-        m_decoderLibs = m_pluginLoader->pluginLibraries (Common::PluginDecoder);
+        m_decoderLibs = m_pluginLoader->pluginLibraries (PPCommon::PluginDecoder);
 
     qDebug()<<Q_FUNC_INFO<<" m_decoderLibs "<<m_decoderLibs
               <<"m_decoderLibs size "<<m_decoderLibs.size ()
-           <<" all decoderLibs "<<m_pluginLoader->pluginLibraries (Common::PluginDecoder);
+           <<" all decoderLibs "<<m_pluginLoader->pluginLibraries (PPCommon::PluginDecoder);
 
 //    m_output_buf = 0;
 //    m_output_size = 0;

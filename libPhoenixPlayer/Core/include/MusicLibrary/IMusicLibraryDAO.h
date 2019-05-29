@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVariant>
 
-#include "Common.h"
+#include "PPCommon.h"
 #include "AudioMetaObject.h"
 
 namespace PhoenixPlayer {

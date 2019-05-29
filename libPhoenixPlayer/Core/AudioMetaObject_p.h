@@ -7,7 +7,7 @@
 #include <QDate>
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer {
 

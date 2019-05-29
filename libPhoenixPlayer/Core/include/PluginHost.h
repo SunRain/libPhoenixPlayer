@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QPluginLoader>
 
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer {
 
@@ -24,7 +24,7 @@ public:
 
     virtual ~PluginHost();
 
-    virtual Common::PluginType type() const = 0;
+    virtual PPCommon::PluginType type() const = 0;
 
     QString name() const;
     QString version() const;

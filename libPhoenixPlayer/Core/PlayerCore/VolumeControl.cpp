@@ -32,7 +32,7 @@ VolumeControl::VolumeControl(PluginLoader *loader, QObject *parent)
     m_prev_block = false;
     m_muted = false;
 
-    m_timer = new QTimer(0);
+    m_timer = new QTimer;
     m_timer->setSingleShot (false);
 
 //    connect (m_pluginLoader, &PluginLoader::signalPluginChanged,
@@ -145,7 +145,7 @@ void VolumeControl::checkVolume()
     if (m_prevLeft != left || m_prevRight != right) { //volume has been changed
         m_prevLeft = left;
         m_prevRight = right;
-        emit volumeChanged (m_left, m_right);
+//        emit volumeChanged (m_left, m_right);
         emit volumeChanged (volume ());
         emit balanceChanged (balance ());
         emit leftVolumeChanged (m_left);
@@ -153,7 +153,7 @@ void VolumeControl::checkVolume()
         emit mutedChanged (m_muted);
 
     } else if (m_prev_block && !signalsBlocked ()) { //signals have been unblocked
-        emit volumeChanged (m_left, m_right);
+//        emit volumeChanged (m_left, m_right);
         emit volumeChanged (volume ());
         emit balanceChanged (balance ());
         emit leftVolumeChanged (m_left);

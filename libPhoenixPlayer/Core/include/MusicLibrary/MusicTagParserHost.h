@@ -2,7 +2,7 @@
 #define MUSICTAGPARSERHOST_H
 
 #include "PluginHost.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
@@ -18,8 +18,8 @@ public:
 
     // PluginHost interface
 public:
-    Common::PluginType type() const {
-        return Common::PluginMusicTagParser;
+    PPCommon::PluginType type() const {
+        return PPCommon::PluginMusicTagParser;
     }
 };
 } //MusicLibrary

@@ -6,7 +6,7 @@
 
 #include "BaiduLookup.h"
 #include "AudioMetaObject.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "MetadataLookup/BaseNetworkLookup.h"
 
 namespace PhoenixPlayer{

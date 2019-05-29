@@ -235,12 +235,12 @@ bool PlayListObject::open()
             AudioMetaObject o(info.absolutePath (), info.fileName (), info.size ());
 //            qDebug()<<Q_FUNC_INFO<<QString("===== Add file name=[%1],path=[%2],size=[%3],hash=[%4]")
 //                      .arg(name).arg(path).arg(QString::number(size)).arg(o.hash());
-            o.setMediaType ((int)Common::MediaTypeLocalFile);
+            o.setMediaType ((int)PPCommon::MediaTypeLocalFile);
             //TODO: should fill other SongMetaData properties from music library
             addTrack (o);
         } else { //network stream
             AudioMetaObject o(url);
-            o.setMediaType ((int)Common::MediaTypeUrl);
+            o.setMediaType ((int)PPCommon::MediaTypeUrl);
             addTrack (o);
         }
     }

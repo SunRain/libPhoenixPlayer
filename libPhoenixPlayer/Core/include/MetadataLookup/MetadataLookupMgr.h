@@ -6,7 +6,7 @@
 #include <QThread>
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "AudioMetaObject.h"
 #include "MetadataLookup/IMetadataLookup.h"
 

@@ -7,7 +7,7 @@
 #include "AudioMetaObject.h"
 #include "PPSettings.h"
 #include "SingletonPointer.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "LibPhoenixPlayerMain.h"
 
 namespace PhoenixPlayer {
@@ -34,7 +34,7 @@ TagParserPro::~TagParserPro()
 
 bool TagParserPro::parserTag(AudioMetaObject *target)
 {
-    if (!target || target->mediaType () == (int)Common::MediaTypeUrl)
+    if (!target || target->mediaType () == (int)PPCommon::MediaTypeUrl)
         return false;
 
     m_filePath = target->uri ().toLocalFile ();

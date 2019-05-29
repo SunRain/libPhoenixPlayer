@@ -2,7 +2,7 @@
 #define METADATALOOKUPHOST_H
 
 #include "PluginHost.h"
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer{
 namespace MetadataLookup {
@@ -18,8 +18,8 @@ public:
 
     // PluginHost interface
 public:
-    Common::PluginType type() const {
-        return Common::PluginMetadataLookup;
+    PPCommon::PluginType type() const {
+        return PPCommon::PluginMetadataLookup;
     }
 };
 } //MetadataLookup

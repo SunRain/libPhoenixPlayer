@@ -99,7 +99,7 @@ BackendHost *PluginLoader::curBackendHost()
                 m_curBackendHost->deleteLater ();
                 m_curBackendHost = nullptr;
             }
-            QStringList list = m_libraries.values (Common::PluginPlayBackend);
+            QStringList list = m_libraries.values (PPCommon::PluginPlayBackend);
             if (list.isEmpty ()) {
                 m_curBackendHost = nullptr;
             } else {
@@ -126,7 +126,7 @@ OutPutHost *PluginLoader::curOutPutHost()
                 m_curOutPutHost->deleteLater ();
                 m_curOutPutHost = nullptr;
             }
-            QStringList list = m_libraries.values (Common::PluginOutPut);
+            QStringList list = m_libraries.values (PPCommon::PluginOutPut);
             if (list.isEmpty ()) {
                 m_curOutPutHost = nullptr;
             } else {
@@ -153,7 +153,7 @@ MusicLibraryDAOHost *PluginLoader::curDAOHost()
                 m_curDAOHost->deleteLater ();
                 m_curDAOHost = nullptr;
             }
-            QStringList list = m_libraries.values (Common::PluginMusicLibraryDAO);
+            QStringList list = m_libraries.values (PPCommon::PluginMusicLibraryDAO);
             if (list.isEmpty ()) {
                 m_curDAOHost = nullptr;
             } else {
@@ -170,9 +170,9 @@ MusicLibraryDAOHost *PluginLoader::curDAOHost()
     return m_curDAOHost;
 }
 
-QStringList PluginLoader::pluginLibraries(Common::PluginType type)
+QStringList PluginLoader::pluginLibraries(PPCommon::PluginType type)
 {
-    if (type == Common::PluginTypeAll)
+    if (type == PPCommon::PluginTypeAll)
         return m_libraries.values ();
     return m_libraries.values (type);
 }
@@ -487,19 +487,19 @@ void PluginLoader::initPluginByPath(const QString &path)
         if (!obj.isEmpty ()) {
             QString iid = obj.value ("IID").toString ();
             if (iid.startsWith ("PhoenixPlayer.PlayBackend")) {
-                m_libraries.insertMulti (Common::PluginPlayBackend, absFilePath);
+                m_libraries.insertMulti (PPCommon::PluginPlayBackend, absFilePath);
             } else if (iid.startsWith ("PhoenixPlayer.MetadataLookup")) {
-                m_libraries.insertMulti (Common::PluginMetadataLookup, absFilePath);
+                m_libraries.insertMulti (PPCommon::PluginMetadataLookup, absFilePath);
             } else if (iid.startsWith ("PhoenixPlayer.MusicTagParser")) {
-                m_libraries.insertMulti (Common::PluginMusicTagParser, absFilePath);
+                m_libraries.insertMulti (PPCommon::PluginMusicTagParser, absFilePath);
             } else if (iid.startsWith ("PhoenixPlayer.MusicLibraryDAO")) {
-                m_libraries.insertMulti (Common::PluginMusicLibraryDAO, absFilePath);
+                m_libraries.insertMulti (PPCommon::PluginMusicLibraryDAO, absFilePath);
             } else if (iid.startsWith ("PhoenixPlayer.Decoder")) {
-                m_libraries.insertMulti (Common::PluginDecoder, absFilePath);
+                m_libraries.insertMulti (PPCommon::PluginDecoder, absFilePath);
             } else if (iid.startsWith ("PhoenixPlayer.OutPut")) {
-                m_libraries.insertMulti (Common::PluginOutPut, absFilePath);
+                m_libraries.insertMulti (PPCommon::PluginOutPut, absFilePath);
             } else {
-                m_libraries.insertMulti (Common::PluginTypeUndefined, absFilePath);
+                m_libraries.insertMulti (PPCommon::PluginTypeUndefined, absFilePath);
             }
         }
     }
@@ -510,7 +510,7 @@ void PluginLoader::initPluginByPath(const QString &path)
 //              <<obj->name ()<<"] file ["
 //             <<obj->libraryFile ()<<"]";
 //    }
-    foreach (Common::PluginType t, m_libraries.uniqueKeys ()) {
+    foreach (PPCommon::PluginType t, m_libraries.uniqueKeys ()) {
         foreach (QString str, m_libraries.values (t)) {
             qDebug()<<Q_FUNC_INFO<<QString("Found plugin for type [%1], file [%2]").arg (t).arg (str);
         }

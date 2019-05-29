@@ -7,7 +7,7 @@
 #include <QList>
 
 #include "libphoenixplayer_global.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "SingletonPointer.h"
 #include "BaseObject.h"
 #include "AudioMetaObject.h"

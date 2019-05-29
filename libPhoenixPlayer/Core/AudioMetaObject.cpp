@@ -6,7 +6,7 @@
 
 #include "PPUtility.h"
 #include "AudioMetaObject.h"
-#include "Common.h"
+#include "PPCommon.h"
 #include "AudioMetaObjectKeys.h"
 
 namespace PhoenixPlayer {
@@ -33,7 +33,7 @@ AudioMetaObject::AudioMetaObject(const AudioMetaObject &other)
 AudioMetaObject::AudioMetaObject(const QUrl &url)
     : d(new AudioMetaObjectPriv())
 {
-    d.data ()->mediaType = (int)Common::MediaTypeUrl;
+    d.data ()->mediaType = (int)PPCommon::MediaTypeUrl;
     d.data ()->path = url.toString ();
     d.data ()->hash = formatHash (url.toString ());
 }
@@ -165,7 +165,7 @@ void AudioMetaObject::setTrackMeta(const TrackMeta &meta)
 
 QUrl AudioMetaObject::uri() const
 {
-    if (d.data ()->mediaType == (int)Common::MediaTypeLocalFile) {
+    if (d.data ()->mediaType == (int)PPCommon::MediaTypeLocalFile) {
         if (!d.data ()->path.isEmpty () && !d.data ()->name.isEmpty ())
             //TODO file:// or file:/ ? or no file:/ (file://) ?
             //FIXME should fix path like ../path/to/file

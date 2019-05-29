@@ -3,7 +3,7 @@
 
 #include <QAbstractListModel>
 
-#include "Common.h"
+#include "PPCommon.h"
 
 namespace PhoenixPlayer {
 class PluginLoader;
