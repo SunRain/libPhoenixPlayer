@@ -145,7 +145,7 @@ signals:
     ///
     /// \brief trackChanged 当切换歌曲的时候发送此信号
     ///
-    void trackChanged(QVariantMap currentTrack);
+    void trackChanged(const QVariantMap &currentTrack);
     void playTrackFinished();
     void playTrackFailed();
     ///
