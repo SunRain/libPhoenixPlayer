@@ -80,14 +80,18 @@ public slots:
     void reload();
 private:
 //    void doPluginChanged(Common::PluginType type);
+    void changeMuted(bool muted);
+
 private:
     PluginLoader *m_pluginLoader;
     PlayBackend::IPlayBackend *m_playBackend;
     PlayBackend::BaseVolume *m_volume;
     int m_left;
     int m_prevLeft;
+    int m_leftBeforeMuted;
     int m_right;
     int m_prevRight;
+    int m_rightBeforMuted;
     bool m_prev_block;
     bool m_muted;
     QTimer *m_timer;

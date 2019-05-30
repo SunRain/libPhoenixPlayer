@@ -29,6 +29,8 @@ VolumeControl::VolumeControl(PluginLoader *loader, QObject *parent)
     m_right = 100;
     m_prevLeft = 0;
     m_prevRight = 0;
+    m_leftBeforeMuted = 0;
+    m_rightBeforMuted = 0;
     m_prev_block = false;
     m_muted = false;
 
@@ -126,7 +128,8 @@ void VolumeControl::setMuted(bool muted)
 {
     m_muted = muted;
     m_volume->setMuted (muted);
-    checkVolume ();
+//    checkVolume ();
+    changeMuted(muted);
 }
 
 bool VolumeControl::muted() const
@@ -150,7 +153,7 @@ void VolumeControl::checkVolume()
         emit balanceChanged (balance ());
         emit leftVolumeChanged (m_left);
         emit rightVolumeChanged (m_right);
-        emit mutedChanged (m_muted);
+//        emit mutedChanged (m_muted);
 
     } else if (m_prev_block && !signalsBlocked ()) { //signals have been unblocked
 //        emit volumeChanged (m_left, m_right);
@@ -158,7 +161,7 @@ void VolumeControl::checkVolume()
         emit balanceChanged (balance ());
         emit leftVolumeChanged (m_left);
         emit rightVolumeChanged (m_right);
-        emit mutedChanged (m_muted);
+//        emit mutedChanged (m_muted);
     }
     m_prev_block = signalsBlocked ();
 }
@@ -192,6 +195,23 @@ void VolumeControl::reload()
         blockSignals (false);
         QTimer::singleShot (100, this, &VolumeControl::checkVolume);
     }
+}
+
+void VolumeControl::changeMuted(bool muted)
+{
+    if (muted) {
+        m_leftBeforeMuted = m_left;
+        m_rightBeforMuted = m_right;
+        m_left = 0;
+        m_right = 0;
+    } else {
+        m_left = m_leftBeforeMuted;
+        m_right = m_rightBeforMuted;
+    }
+    checkVolume();
+    emit mutedChanged(m_muted);
+
+
 }
 
 //void VolumeControl::doPluginChanged(Common::PluginType type)
