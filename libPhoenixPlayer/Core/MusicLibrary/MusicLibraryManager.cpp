@@ -93,8 +93,25 @@ MusicLibraryManager::~MusicLibraryManager()
 {
     qDebug()<<">>>>>>>> "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
 
-    if (m_dao)
+    if (m_dao) {
+        m_dao->beginTransaction();
+        {
+            auto i = m_playCntMap.constBegin();
+            while (i != m_playCntMap.constEnd()) {
+                m_dao->setPlayedCount(i.key(), i.value());
+                ++i;
+            }
+        }
+        {
+            auto i = m_likeMap.constBegin();
+            while (i != m_likeMap.constEnd()) {
+                m_dao->setLike(i.key(), i.value());
+                ++i;
+            }
+        }
+        m_dao->commitTransaction();
         m_dao = nullptr;
+    }
     if (m_daoHost->isLoaded ()) {
         if (!m_daoHost->unLoad ())
             m_daoHost->forceUnload ();
@@ -358,6 +375,67 @@ AudioMetaGroupList MusicLibraryManager::genreList() const
         list.append (g);
     }
     return list;
+}
+
+void MusicLibraryManager::setLike(const QString &hash, bool like)
+{
+    if (!m_dao) {
+        qWarning()<<Q_FUNC_INFO<<"Can't find database, this data will lost if app exit!!!";
+    }
+    m_likeMap.insert(hash, like);
+}
+
+void MusicLibraryManager::setLike(const AudioMetaObject &obj, bool like)
+{
+    setLike(obj.hash(), like);
+}
+
+bool MusicLibraryManager::isLike(const QString &hash)
+{
+    return m_likeMap.value(hash, false);
+}
+
+bool MusicLibraryManager::isLike(const AudioMetaObject &obj)
+{
+    return isLike(obj.hash());
+}
+
+void MusicLibraryManager::setPlayedCount(const QString &hash, int count)
+{
+    if (!m_dao) {
+        qWarning()<<Q_FUNC_INFO<<"Can't find database, this data will lost if app exit!!!";
+    }
+    m_playCntMap.insert(hash, count);
+}
+
+void MusicLibraryManager::setPlayedCount(const AudioMetaObject &obj, int count)
+{
+    return setPlayedCount(obj.hash(), count);
+}
+
+void MusicLibraryManager::addPlayedCount(const QString &hash)
+{
+    int cnt = playedCount(hash);
+    setPlayedCount(hash, ++cnt);
+}
+
+void MusicLibraryManager::addPlayedCount(const AudioMetaObject &obj)
+{
+    int cnt = playedCount(obj);
+    setPlayedCount(obj, ++cnt);
+}
+
+int MusicLibraryManager::playedCount(const QString &hash) const
+{
+    if (!m_dao) {
+        return false;
+    }
+    return m_dao->playedCount(hash);
+}
+
+int MusicLibraryManager::playedCount(const AudioMetaObject &obj) const
+{
+    return playedCount(obj.hash());
 }
 
 void MusicLibraryManager::initList()

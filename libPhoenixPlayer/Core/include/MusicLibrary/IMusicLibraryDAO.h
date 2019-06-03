@@ -56,6 +56,20 @@ public:
 
     virtual QStringList trackHashList() const = 0;
 
+    virtual bool setLike(const QString &hash, bool like) = 0;
+
+    virtual bool isLike(const QString &hash) const = 0;
+
+    ///
+    /// \brief setPlayedCount set count of a track played
+    /// \param hash
+    /// \param count
+    /// \return
+    ///
+    virtual bool setPlayedCount(const QString &hash, int count) = 0;
+
+    virtual int playedCount(const QString &hash) const = 0;
+
 //    ///
 //    /// \brief queryMusicLibrary 搜索音乐列表中targetColumn中的值,条件为regColumn值=regValue
 //    /// \param targetColumn

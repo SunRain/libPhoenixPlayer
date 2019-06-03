@@ -627,8 +627,8 @@ void PlayerCore::setPluginLoader()
     // 播放状态改变信号
     connect (*m_playBackend, &IPlayBackend::stateChanged,
              [&](PPCommon::PlayBackendState state) {
+        emit playBackendStateChangedInt (state);
         emit playBackendStateChanged (state);
-//        emit playBackendStateChanged ((int)state);
     });
 //    connect(*m_playBackend, &IPlayBackend::stateChanged, this, &PlayerCore::playBackendStateChanged);
 

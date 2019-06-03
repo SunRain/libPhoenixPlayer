@@ -66,6 +66,28 @@ public:
     AudioMetaGroupList albumList() const;
     AudioMetaGroupList genreList() const;
 
+    void setLike(const QString &hash, bool like);
+    void setLike(const AudioMetaObject &obj, bool like);
+
+    bool isLike(const QString &hash);
+    bool isLike(const AudioMetaObject &obj);
+
+    ///
+    /// \brief setPlayedCount set count of a track played
+    /// \param hash
+    /// \param count
+    /// \return
+    ///
+    void setPlayedCount(const QString &hash, int count);
+    void setPlayedCount(const AudioMetaObject &obj, int count);
+    void addPlayedCount(const QString &hash);
+    void addPlayedCount(const AudioMetaObject &obj);
+
+    int playedCount(const QString &hash) const;
+
+    int playedCount(const AudioMetaObject &obj) const;
+
+
 //    ///
 //    /// \brief playingSong 返回当前播放的歌曲hash,
 //    /// 如果当前未播放,则返回数据库中的第一首歌曲,或者播放器上次播放的歌曲
@@ -200,20 +222,14 @@ private:
     void initList();
 //    bool trackInList(AudioMetaObject **data);
 private:
-//      bool m_isInit;
-//      QPointer<IPlayListDAO> m_playListDAO;
     PPSettings                  *m_settings;
     PluginLoader                *m_pluginLoader;
     MusicLibraryDAOHost         *m_daoHost;
     IMusicLibraryDAO            *m_dao;
     LocalMusicScanner           *m_localMusicScanner;
-//    /*AudioMetaList */AudioMetaList m_trackList;
     AudioMetaList               m_trackList;
-//      AsyncDiskLookup *m_asyncDiskLookup;
-//      AsyncTagParserMgrWrapper *m_tagParserWrapper;
-
-//      QString m_currentSongHash;
-//      QString m_currentPlayListHash;
+    QMap<QString, bool>         m_likeMap;
+    QMap<QString, int>          m_playCntMap;
 };
 
 } //MusicLibrary

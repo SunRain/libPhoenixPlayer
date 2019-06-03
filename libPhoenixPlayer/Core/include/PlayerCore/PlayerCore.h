@@ -40,7 +40,7 @@ class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int playMode READ playModeInt WRITE setPlayMode NOTIFY playModeChanged)
-    Q_PROPERTY(int playBackendState READ playBackendStateInt NOTIFY playBackendStateChanged)
+    Q_PROPERTY(int playBackendState READ playBackendStateInt NOTIFY playBackendStateChangedInt)
     Q_PROPERTY(bool autoSkipForward READ autoSkipForward WRITE setAutoSkipForward NOTIFY autoSkipForwardChanged)
 //    Q_PROPERTY(QObject* playList READ playListObject CONSTANT)
     Q_PROPERTY(QVariantMap currentTrack READ currentTrack NOTIFY trackChanged)
@@ -164,7 +164,9 @@ signals:
     void playModeChanged(PPCommon::PlayMode mode);
     void playModeChangedInt(int mode);
 
-    void playBackendStateChanged(int state);
+    void playBackendStateChangedInt(int state);
+
+    void playBackendStateChanged(PPCommon::PlayBackendState state);
 
     void autoSkipForwardChanged(bool skip);
 

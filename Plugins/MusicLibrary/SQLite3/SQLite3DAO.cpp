@@ -20,8 +20,11 @@ namespace PhoenixPlayer {
 namespace MusicLibrary {
 namespace SQLite3 {
 
-#define DATABASE_NAME "PhoenixPlayer_musiclibrary"
-#define LIBRARY_TABLE_TAG "LIBRARY"
+const static char *DATABASE_NAME        = "PhoenixPlayer_musiclibrary";
+const static char *TABLE_LIBRARY_TAG    = "LIBRARY";
+const static char *TABLE_UTILITY_TAG    = "UTILITY";
+const static char *UTILITY_KEY_LIKE     = "LIKE";
+const static char *UTILITY_KEY_CNT      = "CNT";
 
 SQLite3DAO::SQLite3DAO(QObject *parent)
     :IMusicLibraryDAO(parent)
@@ -88,9 +91,14 @@ bool SQLite3DAO::initDataBase()
      * 检测数据表是否存在
      */
     QStringList tables = m_database.tables();
-    if (tables.contains(LIBRARY_TABLE_TAG, Qt::CaseInsensitive)) {
-        qDebug()<<"Found tables now, we will check exist Song Hashes!!!";
+    if (tables.contains(TABLE_LIBRARY_TAG, Qt::CaseInsensitive)) {
+        qDebug()<<"Found library table now, we will check exist Song Hashes!!!";
         calcExistSongs();
+        return true;
+    }
+    if (tables.contains(TABLE_UTILITY_TAG, Qt::CaseInsensitive)) {
+        qDebug()<<"Found utility now, we will check exist data!!!";
+        calcUtilityTable();
         return true;
     }
 
@@ -102,53 +110,50 @@ bool SQLite3DAO::initDataBase()
 //    BLOB	The value is a BLOB of data, stored exactly as it was input.	Mapped to QByteArray
 
     QSqlQuery q;
-    QString str;
-    str = "create table ";
-    str += LIBRARY_TABLE_TAG;
-    str += "(";
-    str += "id integer primary key, ";
+    {
+        QString str;
+        str = "create table ";
+        str += TABLE_LIBRARY_TAG;
+        str += "(";
+        str += "id integer primary key, ";
 
-    QJsonObject obj = AudioMetaObject().toObject ();
-    foreach (QString key, obj.keys ()) {
-        str += QString("%1 TEXT, ").arg (key);
+        QJsonObject obj = AudioMetaObject().toObject ();
+        foreach (QString key, obj.keys ()) {
+            str += QString("%1 TEXT, ").arg (key);
+        }
+        str = str.simplified ();
+        str = str.left (str.length () - 1);
+        str += ")";
+
+
+        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        /*
+         * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
+         */
+        if (!q.exec (str)) {
+            qDebug()<<Q_FUNC_INFO<<QString("Create library tab error [ %1 ]").arg (q.lastError ().text ());
+            m_database.removeDatabase (DATABASE_NAME);
+            return false;
+        }
     }
-//    QStringList list = MetaData::AlbumMeta::staticPropertyList ();
-//    foreach (QString s, list) {
-//        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::AlbumMeta>()).arg (s);
-//    }
-//    list.clear ();
-//    list = MetaData::ArtistMeta::staticPropertyList ();
-//    foreach (QString s, list) {
-//        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::ArtistMeta>()).arg (s);
-//    }
-//    list.clear ();
-//    list = MetaData::CoverMeta::staticPropertyList ();
-//    foreach (QString s, list) {
-//        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::CoverMeta>()).arg (s);
-//    }
-//    list.clear ();
-//    list = MetaData::TrackMeta::staticPropertyList ();
-//    foreach (QString s, list) {
-//        str += QString ("%1_%2 TEXT, ").arg (classToKey<MetaData::TrackMeta>()).arg (s);
-//    }
-//    list.clear ();
-//    list = songMetaDataPropertyList ();
-//    foreach (QString s, list) {
-//        str += QString ("%1_%2 TEXT, ").arg (classToKey<AudioMetaObject>()).arg (s);
-//    }
-    str = str.simplified ();
-    str = str.left (str.length () - 1);
-    str += ")";
 
+    {
+        QString str = QString("create table %1 (id integer primary key, %2 TEXT, %3 INTEGER, %4 INTEGER)")
+                .arg(TABLE_UTILITY_TAG)
+                .arg(AudioMetaObject::keyHash())
+                .arg(UTILITY_KEY_CNT)
+                .arg(UTILITY_KEY_LIKE);
 
-    qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
-    /*
-     * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
-     */
-    if (!q.exec (str)) {
-        qDebug()<<Q_FUNC_INFO<<QString("Create library tab error [ %1 ]").arg (q.lastError ().text ());
-        m_database.removeDatabase (DATABASE_NAME);
-        return false;
+        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        /*
+         * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
+         */
+        if (!q.exec (str)) {
+            qDebug()<<Q_FUNC_INFO<<QString("Create utility tab error [ %1 ]").arg (q.lastError ().text ());
+            m_database.removeDatabase (DATABASE_NAME);
+            return false;
+        }
+
     }
 
 //    str = "create table ";
@@ -202,7 +207,7 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
     value = value.left (value.length () - 1);
 
     QString str = "insert into ";
-    str += LIBRARY_TABLE_TAG;
+    str += TABLE_LIBRARY_TAG;
     str += " (";
     str += column;
     str += ") values (";
@@ -262,7 +267,7 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
     column = column.left (column.length () - 1);
 
     QString str = "update ";
-    str += LIBRARY_TABLE_TAG;
+    str += TABLE_LIBRARY_TAG;
     str += " set ";
     str += column;
     str += QString(" where %1 = \"%2\"")
@@ -325,7 +330,7 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
     }
 
     QString str = QString("delete from %1 where %2 = \"%3\"")
-            .arg (LIBRARY_TABLE_TAG)
+            .arg (TABLE_LIBRARY_TAG)
             .arg (AudioMetaObject::keyHash ())
             .arg (hash);
     QSqlQuery q;
@@ -345,7 +350,7 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
         return AudioMetaObject();
     }
     QString str = QString("select * from %1 where %2 = \"%3\"")
-            .arg (LIBRARY_TABLE_TAG)
+            .arg (TABLE_LIBRARY_TAG)
             .arg (AudioMetaObject::keyHash ())
             .arg (hash);
     QSqlQuery q(str, m_database);
@@ -369,6 +374,84 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
 QStringList SQLite3DAO::trackHashList() const
 {
     return m_existSongHashes;
+}
+
+bool SQLite3DAO::setLike(const QString &hash, bool like)
+{
+    if (m_likeMap.keys().contains(hash)) {
+        QString str = "update ";
+        str += TABLE_UTILITY_TAG;
+        str += " set ";
+        str += QString(" %1 = '%2' ").arg(UTILITY_KEY_LIKE).arg(like);
+        str += QString(" where %1 = '%2'").arg(AudioMetaObject::keyHash()).arg(hash);
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            m_likeMap.insert(hash, like);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    } else {
+        QString str = "insert into ";
+        str += TABLE_UTILITY_TAG;
+        str += QString(" (%1, %2, %3) ")
+                  .arg(AudioMetaObject::keyHash())
+                  .arg(UTILITY_KEY_CNT)
+                  .arg(UTILITY_KEY_LIKE);
+        str += " values ";
+        str += QString("('%1', '%2', '%3' ) ").arg(hash).arg(0).arg(like);
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            m_likeMap.insert(hash, like);
+            m_playedCntMap.insert(hash, 0);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    }
+    return false;
+}
+
+bool SQLite3DAO::isLike(const QString &hash) const
+{
+    return m_likeMap.value(hash, false);
+}
+
+bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
+{
+    if (m_playedCntMap.keys().contains(hash)) {
+        QString str = "update ";
+        str += TABLE_UTILITY_TAG;
+        str += " set ";
+        str += QString(" %1 = '%2' ").arg(UTILITY_KEY_CNT).arg(count);
+        str += QString(" where %1 = '%2'").arg(AudioMetaObject::keyHash()).arg(hash);
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            m_playedCntMap.insert(hash, count);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    } else {
+        QString str = "insert into ";
+        str += TABLE_UTILITY_TAG;
+        str += QString(" (%1, %2, %3) ")
+                  .arg(AudioMetaObject::keyHash())
+                  .arg(UTILITY_KEY_CNT)
+                  .arg(UTILITY_KEY_LIKE);
+        str += " values ";
+        str += QString("('%1', '%2', '%3' ) ").arg(hash).arg(count).arg(false);
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            m_likeMap.insert(hash, false);
+            m_playedCntMap.insert(hash, count);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    }
+    return false;
+}
+
+int SQLite3DAO::playedCount(const QString &hash) const
+{
+    return m_playedCntMap.value(hash, 0);
 }
 
 bool SQLite3DAO::openDataBase()
@@ -469,6 +552,7 @@ bool SQLite3DAO::beginTransaction()
     qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<";
 
     calcExistSongs();
+    calcUtilityTable();
     m_transaction = m_database.transaction ();
     return m_transaction;
 }
@@ -482,7 +566,8 @@ bool SQLite3DAO::commitTransaction()
     qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<";
 
     if (m_database.commit ()) {
-        calcExistSongs ();
+        calcExistSongs();
+        calcUtilityTable();
         return true;
     } else {
         return false;
@@ -867,11 +952,34 @@ void SQLite3DAO::calcExistSongs()
     //TODO do not use hard code
     QString str = QString("select %1 from %2")
             .arg (AudioMetaObject::keyHash ())
-            .arg (LIBRARY_TABLE_TAG);
+            .arg (TABLE_LIBRARY_TAG);
     QSqlQuery q(str, m_database);
     while (q.next ()) {
         m_existSongHashes.append (q.value (AudioMetaObject::keyHash ()).toString ());
     }
+}
+
+void SQLite3DAO::calcUtilityTable()
+{
+    m_likeMap.clear();
+    m_playedCntMap.clear();
+    if (!checkDatabase ())
+        return;
+    //%1_hash hash来自SongMetaData的hard code
+    //TODO do not use hard code
+    QString str = QString("select %1 from %2")
+            .arg (AudioMetaObject::keyHash())
+            .arg (TABLE_UTILITY_TAG);
+    QSqlQuery q(str, m_database);
+    while (q.next ()) {
+        const QString hash = q.value(AudioMetaObject::keyHash()).toString();
+        const int cnt = q.value(UTILITY_KEY_CNT).toInt();
+        const bool like = q.value(UTILITY_KEY_LIKE).toBool();
+        m_playedCntMap.insert(hash, cnt);
+        m_likeMap.insert(hash, like);
+    }
+    qDebug()<<Q_FUNC_INFO<<m_playedCntMap;
+    qDebug()<<Q_FUNC_INFO<<m_likeMap;
 }
 
 //QString SQLite3DAO::fillValues(const QVariant &value,
