@@ -11,6 +11,18 @@
 
 namespace PhoenixPlayer {
 
+
+class LastPlayedMetaPriv : public QSharedData
+{
+public:
+    LastPlayedMetaPriv() {}
+    QString hash = QString();
+    QString albumName = QString();
+    QString artistName = QString();
+    QString genres = QString();
+    qint64 timestamp = 0;
+};
+
 class AlbumMetaPriv : public QSharedData
 {
 public:

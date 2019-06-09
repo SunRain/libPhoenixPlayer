@@ -18,7 +18,7 @@ class PlayListMetaMgr;
 class MediaResource;
 //class AudioMetaObject;
 //class MusicQueue;
-class RecentPlayedMgr;
+class RecentPlayedQueue;
 class MusicQueue;
 
 namespace PlayBackend {
@@ -50,7 +50,7 @@ class LIBPHOENIXPLAYER_EXPORT PlayerCore : public QObject
 
     friend class LibPhoenixPlayer;
 protected:
-    explicit PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibrary::MusicLibraryManager *mgr, QObject *parent = 0);
+    explicit PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibrary::MusicLibraryManager *mgr, QObject *parent = Q_NULLPTR);
 
 public:
     virtual ~PlayerCore();
@@ -63,7 +63,7 @@ public:
     int playBackendStateInt() const;
 
 //    PlayListObject *playList() const;
-    RecentPlayedMgr *recentList() const;
+//    RecentPlayedQueue *recentQueue() const;
     MusicQueue *playQueue() const;
 //    QObject *playListObject() const;
 
@@ -227,7 +227,7 @@ private:
 //    PlayListObject                          *m_playlistObject;
 //    PlayListObjectMgr                       *m_plstObjMgr;
     MusicQueue                              *m_playQueue;
-    RecentPlayedMgr                         *m_recentList;
+//    RecentPlayedQueue                         *m_recentQueue;
     MusicLibrary::IMusicLibraryDAO          *m_dao;
     MediaResource                           *m_resource;
 

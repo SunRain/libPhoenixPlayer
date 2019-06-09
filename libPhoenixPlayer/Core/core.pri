@@ -12,6 +12,7 @@ HEADERS += \
     $$PWD/include/PlayerCore/PlayListMeta.h \
     $$PWD/include/PlayerCore/PlayListMetaMgr.h \
     $$PWD/include/PlayerCore/PlayListObject.h \
+    $$PWD/include/PlayerCore/RecentPlayedQueue.h \
     $$PWD/include/PluginLoader.h \
     $$PWD/include/PPSettings.h \
     $$PWD/include/SingletonPointer_p.h \
@@ -62,7 +63,6 @@ HEADERS += \
     $$PWD/include/AudioMetaObjectKeys.h \
     $$PWD/include/AudioMetaGroupObject.h \
     $$PWD/include/PlayerCore/MusicQueue.h \
-    $$PWD/include/PlayerCore/RecentPlayedMgr.h \
     $$PWD/include/MediaResource.h \
     $$PWD/include/LocalFileMediaResource.h
 
@@ -81,6 +81,7 @@ SOURCES += \
     $$PWD/PlayerCore/PlayerCore.cpp \
     $$PWD/BaseMediaObject.cpp \
     $$PWD/IMusicTagParser.cpp \
+    $$PWD/PlayerCore/RecentPlayedQueue.cpp \
     $$PWD/PluginLoader.cpp \
     $$PWD/PluginHost.cpp \
     $$PWD/AddonMgr.cpp \
@@ -106,7 +107,6 @@ SOURCES += \
     $$PWD/libphoenixplayer_global.cpp \
     $$PWD/AudioMetaGroupObject.cpp \
     $$PWD/PlayerCore/MusicQueue.cpp \
-    $$PWD/PlayerCore/RecentPlayedMgr.cpp \
     $$PWD/MediaResource.cpp \
     $$PWD/LocalFileMediaResource.cpp
 

@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QPointer>
 #include <QMutex>
+#include <QDateTime>
 
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
@@ -34,84 +35,97 @@ MusicLibraryManager::MusicLibraryManager(PPSettings *set, PluginLoader *loader, 
 
     if (m_dao) {
         connect (m_dao, &IMusicLibraryDAO::metaDataInserted,
-                 [&]() {
-//            if (!trackInList (data)) {
-//                SongMetaData *d = new SongMetaData(data);
-//                m_dao->fillAttribute (&d);
-//                m_trackList.append (d);
-//            }
+                 this, [&](const QString &hash) {
             QStringList daoHashList = m_dao->trackHashList ();
             QStringList trackList;
             foreach (const AudioMetaObject &d, m_trackList) {
                 trackList.append (d.hash ());
             }
-            foreach (QString s, daoHashList) {
+            foreach (const QString &s, daoHashList) {
                 if (!trackList.contains (s)) {
-//                    AudioMetaObject *d = m_dao->trackFromHash (s);
-//                    if (d) {
-//                        AudioMetaObject *dd = new AudioMetaObject(d);
-//                        m_trackList.append (dd);
-//                        d->deleteLater ();
-//                    }
-//                    d = nullptr;
                     AudioMetaObject o = m_dao->trackFromHash (s);
                     m_trackList.append (o);
+                    this->insertToAlbumGroupMap(o);
+                    this->insertToGenreGroupMap(o);
+                    this->insertToArtistGroupMap(o);
                 }
             }
         });
         connect (m_dao, &IMusicLibraryDAO::metaDataDeleted,
-                 [&]() {
-//            if (trackInList (data)) {
-//                int i;
-//                for(i=0; i<m_trackList.size (); ++i) {
-//                    if (m_trackList.at (i)->equals (*data))
-//                        break;
-//                }
-//                m_trackList.removeAt (i);
+                 this, [&](const QString &hash) {
+//            QStringList daoList = m_dao->trackHashList ();
+//            QStringList trackList;
+//            foreach (const AudioMetaObject &d, m_trackList) {
+//                trackList.append (d.hash ());
 //            }
-            QStringList daoList = m_dao->trackHashList ();
-            QStringList trackList;
-            foreach (AudioMetaObject d, m_trackList) {
-                trackList.append (d.hash ());
-            }
-            int pos = -1;
-            for (int i=0; i<trackList.size (); ++i) {
-                if (!daoList.contains (trackList.value (i))) {
-                    pos = i;
-                    break;
+//            int pos = -1;
+//            for (int i=0; i<trackList.size (); ++i) {
+//                if (!daoList.contains (trackList.value (i))) {
+//                    pos = i;
+//                    break;
+//                }
+//            }
+//            if (pos > 0) {
+//                m_trackList.removeAt (pos);
+//            }
+            static auto loop = [](const AudioMetaList &list, const QString &hash) -> int {
+                int pos = -1;
+                for (int i=0; i<list.size(); ++i) {
+                    if (list.value(i).hash() == hash) {
+                        pos = i;
+                        break;
+                    }
                 }
+                return pos;
+            };
+            int pos = loop(m_trackList, hash);
+            if (pos > 0) {
+//                m_trackList.removeAt(pos);
+                const AudioMetaObject obj = m_trackList.at(pos);
+                if (m_albumGroupMap.contains(obj.albumMeta().name())) {
+                    AudioMetaGroupObject o = m_albumGroupMap.value(obj.albumMeta().name());
+                    AudioMetaList list = o.list();
+                    int pp = loop(list, hash);
+                    if (pp > 0) {
+                        list.removeAt(pp);
+                        o.setList(list);
+                        m_albumGroupMap.insert(obj.albumMeta().name(), o);
+                    }
+                }
+                //copy
+                if (m_artistGroupMap.contains(obj.artistMeta().name())) {
+                    AudioMetaGroupObject o = m_artistGroupMap.value(obj.artistMeta().name());
+                    AudioMetaList list = o.list();
+                    int pp = loop(list, hash);
+                    if (pp > 0) {
+                        list.removeAt(pp);
+                        o.setList(list);
+                        m_artistGroupMap.insert(obj.artistMeta().name(), o);
+                    }
+                }
+                //copy
+                if (m_genreGroupMap.contains(obj.trackMeta().genre())) {
+                    AudioMetaGroupObject o = m_genreGroupMap.value(obj.trackMeta().genre());
+                    AudioMetaList list = o.list();
+                    int pp = loop(list, hash);
+                    if (pp > 0) {
+                        list.removeAt(pp);
+                        o.setList(list);
+                        m_genreGroupMap.insert(obj.trackMeta().genre(), o);
+                    }
+                }
+                m_trackList.removeAt(pos);
             }
-            if (pos > 0)
-                m_trackList.removeAt (pos);
         });
     }
 
-    initList ();
+    initList();
 }
 
 MusicLibraryManager::~MusicLibraryManager()
 {
     qDebug()<<">>>>>>>> "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
-
-    if (m_dao) {
-        m_dao->beginTransaction();
-        {
-            auto i = m_playCntMap.constBegin();
-            while (i != m_playCntMap.constEnd()) {
-                m_dao->setPlayedCount(i.key(), i.value());
-                ++i;
-            }
-        }
-        {
-            auto i = m_likeMap.constBegin();
-            while (i != m_likeMap.constEnd()) {
-                m_dao->setLike(i.key(), i.value());
-                ++i;
-            }
-        }
-        m_dao->commitTransaction();
-        m_dao = nullptr;
-    }
+    saveToDB();
     if (m_daoHost->isLoaded ()) {
         if (!m_daoHost->unLoad ())
             m_daoHost->forceUnload ();
@@ -131,19 +145,15 @@ LocalMusicScanner *MusicLibraryManager::localMusicScanner() const
 
 AudioMetaList MusicLibraryManager::allTracks()
 {
-//    return m_trackList;
-//    QList<QObject*> list;
-//    foreach (AudioMetaObject *d, m_trackList) {
-//        QObject *obj = qobject_cast<QObject *>(d);
-//        if (obj)
-//            list.append (obj);
-//    }
-//    return list;
-
-//    foreach (AudioMetaObject o, m_trackList) {
-//        qDebug()<<Q_FUNC_INFO<<">>>>>>>>>>>>>>>> data hash "<<o.hash ();
-//    }
     return m_trackList;
+}
+
+AudioMetaObject MusicLibraryManager::trackFromHash(const QString &hash) const
+{
+    if (!m_dao) {
+        return AudioMetaObject();
+    }
+    return m_dao->trackFromHash(hash);
 }
 
 bool MusicLibraryManager::empty() const
@@ -256,125 +266,163 @@ AudioMetaList MusicLibraryManager::folderTracks(const QString &folder, int limit
 
 AudioMetaGroupList MusicLibraryManager::artistList() const
 {
-    if (m_trackList.isEmpty ())
-        return AudioMetaGroupList();
-    AudioMetaGroupList list;
-    QStringList nameList;
-    foreach (AudioMetaObject o, m_trackList) {
-        if (nameList.contains (o.artistMeta ().name ()))
-            continue;
-        nameList.append (o.artistMeta ().name ());
-    }
-    foreach (QString name, nameList) {
-        AudioMetaGroupObject g;
-        g.setName (name);
-        QUrl uri;
-        AudioMetaList ll;
-        foreach (AudioMetaObject o, m_trackList) {
-            if (o.artistMeta ().name () == name) {
-                ll.append (o);
-                if (!uri.isValid ()) {
-                    uri = o.artistMeta ().imgUri ();
-                }
-            }
-        }
-        //fallback
-        if (!uri.isValid () && !ll.isEmpty ()) {
-            foreach (AudioMetaObject o, ll) {
-                uri = o.queryImgUri ();
-                if (uri.isValid ()) {
-                    break;
-                }
-            }
-        }
-        g.setImageUri (uri);
-        g.setList (ll);
-        list.append (g);
-    }
-    return list;
+//    if (m_trackList.isEmpty ())
+//        return AudioMetaGroupList();
+//    AudioMetaGroupList list;
+//    QStringList nameList;
+//    foreach (const AudioMetaObject &o, m_trackList) {
+//        if (nameList.contains (o.artistMeta ().name ()))
+//            continue;
+//        nameList.append (o.artistMeta ().name ());
+//    }
+//    foreach (const QString &name, nameList) {
+//        AudioMetaGroupObject g;
+//        g.setName (name);
+//        QUrl uri;
+//        AudioMetaList ll;
+//        foreach (const AudioMetaObject &o, m_trackList) {
+//            if (o.artistMeta ().name () == name) {
+//                ll.append (o);
+//                if (!uri.isValid ()) {
+//                    uri = o.artistMeta ().imgUri ();
+//                }
+//            }
+//        }
+//        //fallback
+//        if (!uri.isValid () && !ll.isEmpty ()) {
+//            foreach (const AudioMetaObject &o, ll) {
+//                uri = o.queryImgUri ();
+//                if (uri.isValid ()) {
+//                    break;
+//                }
+//            }
+//        }
+//        g.setImageUri (uri);
+//        g.setList (ll);
+//        list.append (g);
+//    }
+//    return list;
+    return m_artistGroupMap.values();
 }
 
 AudioMetaGroupList MusicLibraryManager::albumList() const
 {
-    if (m_trackList.isEmpty ())
-        return AudioMetaGroupList();
-    AudioMetaGroupList list;
-    QStringList nameList;
-    foreach (AudioMetaObject o, m_trackList) {
-        if (nameList.contains (o.albumMeta ().name ()))
-            continue;
-        nameList.append (o.albumMeta ().name ());
-    }
-    foreach (QString name, nameList) {
-        AudioMetaGroupObject g;
-        g.setName (name);
-        QUrl uri;
-        AudioMetaList ll;
-        foreach (AudioMetaObject o, m_trackList) {
-            if (o.albumMeta ().name () == name) {
-                ll.append (o);
-                if (!uri.isValid ()) {
-                    uri = o.albumMeta ().imgUri ();
-                }
-            }
-        }
-        //fallback
-        if (!uri.isValid () && !ll.isEmpty ()) {
-            foreach (AudioMetaObject o, ll) {
-                uri = o.queryImgUri ();
-                if (uri.isValid ()) {
-                    break;
-                }
-            }
-        }
-        g.setImageUri (uri);
-        g.setList (ll);
-        list.append (g);
-    }
-    return list;
+//    if (m_trackList.isEmpty ())
+//        return AudioMetaGroupList();
+//    AudioMetaGroupList list;
+//    QStringList nameList;
+//    foreach (const AudioMetaObject &o, m_trackList) {
+//        if (nameList.contains (o.albumMeta ().name ()))
+//            continue;
+//        nameList.append (o.albumMeta ().name ());
+//    }
+//    foreach (const QString &name, nameList) {
+//        AudioMetaGroupObject g;
+//        g.setName (name);
+////        QUrl uri;
+//        QMap<QUrl, int> uriMap;
+//        AudioMetaList ll;
+//        foreach (const AudioMetaObject &o, m_trackList) {
+//            if (o.albumMeta ().name () == name) {
+//                ll.append (o);
+//                QUrl u = o.albumMeta().imgUri();
+//                if (u.isValid()) {
+//                    if (uriMap.contains(u)) {
+//                        int i = uriMap.value(u);
+//                        uriMap.insert(u, ++i);
+//                    }
+//                }
+//            }
+//        }
+//        //fallback
+//        if (!uri.isValid () && !ll.isEmpty ()) {
+//            foreach (AudioMetaObject o, ll) {
+//                uri = o.queryImgUri ();
+//                if (uri.isValid ()) {
+//                    break;
+//                }
+//            }
+//        }
+//        g.setImageUri (uri);
+//        g.setList (ll);
+//        list.append (g);
+//    }
+//    return list;
+//    QMap<QString, AudioMetaGroupObject> map;
+//    foreach(const AudioMetaObject &o, m_trackList) {
+//        const QString albumName = o.albumMeta().name();
+//        if (map.contains(albumName)) {
+//            AudioMetaGroupObject gb = map.value(albumName);
+//            AudioMetaList l = gb.list();
+//            l.append(o);
+//            gb.setList(l);
+//            const QUrl iu = o.albumMeta().imgUri();
+//            if (iu.isValid()) {
+//                QList<QUrl> imgs = gb.imageUri();
+//                imgs.append(iu);
+//                gb.setImageUri(imgs);
+//            }
+//        } else {
+//            AudioMetaGroupObject gb;
+//            gb.setName(albumName);
+//            AudioMetaList l;
+//            l.append(o);
+//            gb.setList(l);
+//            const QUrl iu = o.albumMeta().imgUri();
+//            if (iu.isValid()) {
+//                QList<QUrl> ll;
+//                ll.append(iu);
+//                gb.setImageUri(ll);
+//            }
+//            map.insert(albumName, gb);
+//        }
+//    }
+//    return map.values();
+    return m_albumGroupMap.values();
 }
 
 AudioMetaGroupList MusicLibraryManager::genreList() const
 {
-    if (m_trackList.isEmpty ())
-        return AudioMetaGroupList();
-    AudioMetaGroupList list;
-    QStringList nameList;
-    foreach (AudioMetaObject o, m_trackList) {
-        if (nameList.contains (o.trackMeta ().genre ()))
-            continue;
-        nameList.append (o.trackMeta ().genre ());
-    }
-    foreach (QString name, nameList) {
-        AudioMetaGroupObject g;
-        g.setName (name);
-        QUrl uri;
-        AudioMetaList ll;
-        foreach (AudioMetaObject o, m_trackList) {
-            if (o.trackMeta ().genre () == name) {
-                ll.append (o);
-                if (!uri.isValid ()) {
-                    uri = o.coverMeta ().middleUri ();
-                    if (!uri.isValid ())
-                        uri = o.coverMeta ().largeUri ();
-                    if (!uri.isValid ())
-                        uri = o.coverMeta ().smallUri ();
-                }
-            }
-        }
-        //fallback
-        if (!uri.isValid () && !ll.isEmpty ()) {
-            foreach (AudioMetaObject o, ll) {
-                uri = o.queryImgUri ();
-                if (uri.isValid ())
-                    break;
-            }
-        }
-        g.setImageUri (uri);
-        g.setList (ll);
-        list.append (g);
-    }
-    return list;
+//    if (m_trackList.isEmpty ())
+//        return AudioMetaGroupList();
+//    AudioMetaGroupList list;
+//    QStringList nameList;
+//    foreach (AudioMetaObject o, m_trackList) {
+//        if (nameList.contains (o.trackMeta ().genre ()))
+//            continue;
+//        nameList.append (o.trackMeta ().genre ());
+//    }
+//    foreach (QString name, nameList) {
+//        AudioMetaGroupObject g;
+//        g.setName (name);
+//        QUrl uri;
+//        AudioMetaList ll;
+//        foreach (AudioMetaObject o, m_trackList) {
+//            if (o.trackMeta ().genre () == name) {
+//                ll.append (o);
+//                if (!uri.isValid ()) {
+//                    uri = o.coverMeta ().middleUri ();
+//                    if (!uri.isValid ())
+//                        uri = o.coverMeta ().largeUri ();
+//                    if (!uri.isValid ())
+//                        uri = o.coverMeta ().smallUri ();
+//                }
+//            }
+//        }
+//        //fallback
+//        if (!uri.isValid () && !ll.isEmpty ()) {
+//            foreach (AudioMetaObject o, ll) {
+//                uri = o.queryImgUri ();
+//                if (uri.isValid ())
+//                    break;
+//            }
+//        }
+//        g.setImageUri (uri);
+//        g.setList (ll);
+//        list.append (g);
+//    }
+//    return list;
+    return m_genreGroupMap.values();
 }
 
 void MusicLibraryManager::setLike(const QString &hash, bool like)
@@ -398,6 +446,33 @@ bool MusicLibraryManager::isLike(const QString &hash)
 bool MusicLibraryManager::isLike(const AudioMetaObject &obj)
 {
     return isLike(obj.hash());
+}
+
+void MusicLibraryManager::addLastPlayedTime(const QString &hash)
+{
+    if (!m_dao) {
+        qWarning()<<Q_FUNC_INFO<<"Can't find database, this data will lost if app exit!!!";
+    }
+    LastPlayedMeta meta = m_lastPlayedMap.value(hash);
+    if (meta.isValid()) {
+        meta.setTimestamp(QDateTime::currentSecsSinceEpoch());
+        m_lastPlayedMap.insert(hash, meta);
+    }
+}
+
+void MusicLibraryManager::addLastPlayedTime(const AudioMetaObject &obj)
+{
+    addLastPlayedTime(obj.hash());
+}
+
+qint64 MusicLibraryManager::getLastPlayedTime(const QString &hash)
+{
+    return m_lastPlayedMap.value(hash).timestamp();
+}
+
+qint64 MusicLibraryManager::getLastPlayedTime(const AudioMetaObject &obj)
+{
+    return getLastPlayedTime(obj.hash());
 }
 
 void MusicLibraryManager::setPlayedCount(const QString &hash, int count)
@@ -438,28 +513,202 @@ int MusicLibraryManager::playedCount(const AudioMetaObject &obj) const
     return playedCount(obj.hash());
 }
 
+LastPlayedMeta MusicLibraryManager::getLastPlayedMeta(const QString &hash) const
+{
+    if (!m_dao) {
+        return LastPlayedMeta();
+    }
+    return m_dao->getLastPlayedMeta(hash);
+}
+
+QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedMeta(int limit, bool orderByDesc) const
+{
+    if (!m_dao) {
+        return QList<LastPlayedMeta>();
+    }
+    return m_dao->getLastPlayedMeta(limit, orderByDesc);
+}
+
+QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByAlbum(int limit, bool orderByDesc) const
+{
+    if (!m_dao) {
+        return QList<LastPlayedMeta>();
+    }
+    return m_dao->getLastPlayedByAlbum(limit, orderByDesc);
+}
+
+QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByArtist(int limit, bool orderByDesc) const
+{
+    if (!m_dao) {
+        return QList<LastPlayedMeta>();
+    }
+    return m_dao->getLastPlayedByArtist(limit, orderByDesc);
+}
+
+QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByGenres(int limit, bool orderByDesc) const
+{
+    if (!m_dao) {
+        return QList<LastPlayedMeta>();
+    }
+    return m_dao->getLastPlayedByGenres(limit, orderByDesc);
+}
+
+QStringList MusicLibraryManager::trackHashListByPlayedCount(bool orderByDesc) const
+{
+    if (!m_dao) {
+        return QStringList();
+    }
+    return m_dao->trackHashListByPlayedCount(orderByDesc);
+}
+
+QStringList MusicLibraryManager::trackHashListByLastPlayedTime(bool orderByDesc) const
+{
+    if (!m_dao) {
+        return QStringList();
+    }
+    return m_dao->trackHashListByLastPlayedTime(orderByDesc);
+}
+
+void MusicLibraryManager::saveToDB()
+{
+    if (m_dao) {
+        m_dao->beginTransaction();
+        {
+            auto i = m_playCntMap.constBegin();
+            while (i != m_playCntMap.constEnd()) {
+                m_dao->setPlayedCount(i.key(), i.value());
+                ++i;
+            }
+        }
+        {
+            auto i = m_likeMap.constBegin();
+            while (i != m_likeMap.constEnd()) {
+                m_dao->setLike(i.key(), i.value());
+                ++i;
+            }
+        }
+        {
+            auto i = m_lastPlayedMap.constBegin();
+            while (i != m_lastPlayedMap.constEnd()) {
+                m_dao->setLastPlayedTime(i.value());
+                ++i;
+            }
+        }
+        m_dao->commitTransaction();
+        m_dao = nullptr;
+    }
+}
+
 void MusicLibraryManager::initList()
 {
-    if (!m_trackList.isEmpty ()) {
-//        qDeleteAll(m_trackList);
-        m_trackList.clear ();
+    if (!m_trackList.isEmpty()) {
+        m_trackList.clear();
     }
     if (!m_dao)
         return;
-    QStringList list = m_dao->trackHashList ();
+    QStringList list = m_dao->trackHashList();
+    foreach (const QString &hash, list) {
+        AudioMetaObject d = m_dao->trackFromHash(hash);
+        if (d.isEmpty()) {
+            continue;
+        }
+        m_trackList.append(d);
+        m_likeMap.insert(hash, m_dao->isLike(hash));
+        m_playCntMap.insert(hash, m_dao->playedCount(hash));
+        m_lastPlayedMap.insert(hash, m_dao->getLastPlayedMeta(hash));
+        insertToAlbumGroupMap(d);
+        insertToArtistGroupMap(d);
+        insertToGenreGroupMap(d);
+    }
+}
 
-//    qDebug()<<Q_FUNC_INFO<<">>>>>>>>>>>>> hash list "<<list;
+void MusicLibraryManager::insertToAlbumGroupMap(const AudioMetaObject &d)
+{
+    const QString albumName = d.albumMeta().name();
+    if (m_albumGroupMap.contains(albumName)) {
+        AudioMetaGroupObject gb = m_albumGroupMap.value(albumName);
+        AudioMetaList l = gb.list();
+        l.append(d);
+        gb.setList(l);
+        const QUrl iu = d.albumMeta().imgUri();
+        if (iu.isValid()) {
+            QList<QUrl> imgs = gb.imageUri();
+            imgs.append(iu);
+            gb.setImageUri(imgs);
+        }
+    } else {
+        AudioMetaGroupObject gb;
+        gb.setName(albumName);
+        AudioMetaList l;
+        l.append(d);
+        gb.setList(l);
+        const QUrl iu = d.albumMeta().imgUri();
+        if (iu.isValid()) {
+            QList<QUrl> ll;
+            ll.append(iu);
+            gb.setImageUri(ll);
+        }
+        m_albumGroupMap.insert(albumName, gb);
+    }
+}
 
-    foreach (QString s, list) {
-//        AudioMetaObject *d = m_dao->trackFromHash (s);
-//        if (d) {
-//            AudioMetaObject *dd = new AudioMetaObject(d);
-//            m_dao->fillAttribute (&dd);
-//            m_trackList.append (dd);
-//        }
-        AudioMetaObject d = m_dao->trackFromHash (s);
-        if (!d.isEmpty ())
-            m_trackList.append (d);
+void MusicLibraryManager::insertToArtistGroupMap(const AudioMetaObject &d)
+{
+    const QString artistName = d.artistMeta().name();
+    if (m_artistGroupMap.contains(artistName)) {
+        AudioMetaGroupObject gb = m_artistGroupMap.value(artistName);
+        AudioMetaList l = gb.list();
+        l.append(d);
+        gb.setList(l);
+        const QUrl iu = d.artistMeta().imgUri();
+        if (iu.isValid()) {
+            QList<QUrl> imgs = gb.imageUri();
+            imgs.append(iu);
+            gb.setImageUri(imgs);
+        }
+    } else {
+        AudioMetaGroupObject gb;
+        gb.setName(artistName);
+        AudioMetaList l;
+        l.append(d);
+        gb.setList(l);
+        const QUrl iu = d.artistMeta().imgUri();
+        if (iu.isValid()) {
+            QList<QUrl> ll;
+            ll.append(iu);
+            gb.setImageUri(ll);
+        }
+        m_artistGroupMap.insert(artistName, gb);
+    }
+}
+
+void MusicLibraryManager::insertToGenreGroupMap(const AudioMetaObject &d)
+{
+    const QString genreName = d.trackMeta().genre();
+    if (m_genreGroupMap.contains(genreName)) {
+        AudioMetaGroupObject gb = m_genreGroupMap.value(genreName);
+        AudioMetaList l = gb.list();
+        l.append(d);
+        gb.setList(l);
+        const QUrl iu = d.queryImgUri();
+        if (iu.isValid()) {
+            QList<QUrl> imgs = gb.imageUri();
+            imgs.append(iu);
+            gb.setImageUri(imgs);
+        }
+    } else {
+        AudioMetaGroupObject gb;
+        gb.setName(genreName);
+        AudioMetaList l;
+        l.append(d);
+        gb.setList(l);
+        const QUrl iu = d.queryImgUri();
+        if (iu.isValid()) {
+            QList<QUrl> ll;
+            ll.append(iu);
+            gb.setImageUri(ll);
+        }
+        m_genreGroupMap.insert(genreName, gb);
     }
 }
 

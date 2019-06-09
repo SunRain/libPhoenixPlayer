@@ -56,6 +56,10 @@ public:
 
     virtual QStringList trackHashList() const = 0;
 
+    virtual QStringList trackHashListByPlayedCount(bool orderByDesc = true) const = 0;
+
+    virtual QStringList trackHashListByLastPlayedTime(bool orderByDesc = true) const = 0;
+
     virtual bool setLike(const QString &hash, bool like) = 0;
 
     virtual bool isLike(const QString &hash) const = 0;
@@ -70,6 +74,37 @@ public:
 
     virtual int playedCount(const QString &hash) const = 0;
 
+    virtual bool setLastPlayedTime(const QString &hash, qint64 secs) = 0;
+
+    virtual bool setLastPlayedTime(const LastPlayedMeta &meta) = 0;
+
+    virtual qint64 getLastPlayedTime(const QString &hash) const = 0;
+
+    virtual LastPlayedMeta getLastPlayedMeta(const QString &hash) const = 0;
+
+    ///
+    /// \brief getLastPlayedMeta
+    /// \param limit limit size
+    /// \param orderByDesc
+    /// TRUE order by timestamp with desc
+    /// FALSE order by timestamp with asc
+    /// \return
+    ///
+    virtual QList<LastPlayedMeta> getLastPlayedMeta(int limit = 20, bool orderByDesc = true) const = 0;
+
+    ///
+    /// \brief getLastPlayedByAlbum
+    /// \param limit the limit of album size
+    /// \param orderByDesc
+    /// TRUE order by timestamp with desc
+    /// FALSE order by timestamp with asc
+    /// \return
+    ///
+    virtual QList<LastPlayedMeta> getLastPlayedByAlbum(int limit = 20, bool orderByDesc = true) const = 0;
+
+    virtual QList<LastPlayedMeta> getLastPlayedByArtist(int limit = 20, bool orderByDesc = true) const = 0;
+
+    virtual QList<LastPlayedMeta> getLastPlayedByGenres(int limit = 20, bool orderByDesc = true) const = 0;
 //    ///
 //    /// \brief queryMusicLibrary 搜索音乐列表中targetColumn中的值,条件为regColumn值=regValue
 //    /// \param targetColumn
@@ -110,8 +145,8 @@ public:
 //    virtual bool insertPlayList(const QString &playListName) = 0;
 
 signals:
-    void metaDataInserted();
-    void metaDataDeleted();
+    void metaDataInserted(const QString &hash);
+    void metaDataDeleted(const QString &hash);
 //    void libraryChanged();
 
 public slots:

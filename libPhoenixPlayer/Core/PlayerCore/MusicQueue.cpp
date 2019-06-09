@@ -46,7 +46,7 @@ void MusicQueue::addAndFocus(const AudioMetaObject &song)
     if (m_limitSize >0 && m_trackList.size () >= m_limitSize)
         m_trackList.removeFirst ();
     m_trackList.append (song);
-    emit queueChanged ();
+    emit queueChanged();
     setCurrentIndex(m_trackList.count() -1);
 }
 
@@ -64,7 +64,8 @@ void MusicQueue::addTrack(const AudioMetaList &list)
     } else {
         l = list;
     }
-    if (m_limitSize >0 && m_trackList.size () + l.size ()>= m_limitSize) {
+    if (m_limitSize > 0 &&
+            (m_trackList.size () + l.size ()) >= m_limitSize) {
         m_trackList = m_trackList.mid (m_trackList.size ()+l.size ()- m_limitSize);
     }
     m_trackList.append (l);

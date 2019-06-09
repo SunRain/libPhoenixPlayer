@@ -41,6 +41,8 @@ public:
     ///
     AudioMetaList allTracks();
 
+    AudioMetaObject trackFromHash(const QString &hash) const;
+
     ///
     /// \brief empty wether current library is empty
     /// \return true if empty
@@ -73,6 +75,18 @@ public:
     bool isLike(const AudioMetaObject &obj);
 
     ///
+    /// \brief addLastPlayedTime add last played time for current time
+    /// \param hash
+    ///
+    void addLastPlayedTime(const QString &hash);
+
+    void addLastPlayedTime(const AudioMetaObject &obj);
+
+    qint64 getLastPlayedTime(const QString &hash);
+
+    qint64 getLastPlayedTime(const AudioMetaObject &obj);
+
+    ///
     /// \brief setPlayedCount set count of a track played
     /// \param hash
     /// \param count
@@ -86,6 +100,40 @@ public:
     int playedCount(const QString &hash) const;
 
     int playedCount(const AudioMetaObject &obj) const;
+
+
+    LastPlayedMeta getLastPlayedMeta(const QString &hash) const;
+
+    ///
+    /// \brief getLastPlayedMeta
+    /// \param limit limit size
+    /// \param orderByDesc
+    /// TRUE order by timestamp with desc
+    /// FALSE order by timestamp with asc
+    /// \return
+    ///
+    QList<LastPlayedMeta> getLastPlayedMeta(int limit = 20, bool orderByDesc = true) const;
+
+    ///
+    /// \brief getLastPlayedByAlbum
+    /// \param limit the limit of album size
+    /// \param orderByDesc
+    /// TRUE order by timestamp with desc
+    /// FALSE order by timestamp with asc
+    /// \return
+    ///
+    QList<LastPlayedMeta> getLastPlayedByAlbum(int limit = 20, bool orderByDesc = true) const;
+
+    QList<LastPlayedMeta> getLastPlayedByArtist(int limit = 20, bool orderByDesc = true) const;
+
+    QList<LastPlayedMeta> getLastPlayedByGenres(int limit = 20, bool orderByDesc = true) const;
+
+    QStringList trackHashListByPlayedCount(bool orderByDesc = true) const;
+
+    QStringList trackHashListByLastPlayedTime(bool orderByDesc = true) const;
+
+
+    void saveToDB();
 
 
 //    ///
@@ -220,16 +268,23 @@ public:
 private:
 //      bool init();
     void initList();
+    void insertToAlbumGroupMap(const AudioMetaObject &obj);
+    void insertToArtistGroupMap(const AudioMetaObject &obj);
+    void insertToGenreGroupMap(const AudioMetaObject &obj);
 //    bool trackInList(AudioMetaObject **data);
 private:
-    PPSettings                  *m_settings;
-    PluginLoader                *m_pluginLoader;
-    MusicLibraryDAOHost         *m_daoHost;
-    IMusicLibraryDAO            *m_dao;
-    LocalMusicScanner           *m_localMusicScanner;
-    AudioMetaList               m_trackList;
-    QMap<QString, bool>         m_likeMap;
-    QMap<QString, int>          m_playCntMap;
+    PPSettings                      *m_settings;
+    PluginLoader                    *m_pluginLoader;
+    MusicLibraryDAOHost             *m_daoHost;
+    IMusicLibraryDAO                *m_dao;
+    LocalMusicScanner               *m_localMusicScanner;
+    AudioMetaList                   m_trackList;
+    QMap<QString, bool>             m_likeMap;
+    QMap<QString, int>              m_playCntMap;
+    QMap<QString, LastPlayedMeta>   m_lastPlayedMap;
+    QMap<QString, AudioMetaGroupObject> m_albumGroupMap;
+    QMap<QString, AudioMetaGroupObject> m_artistGroupMap;
+    QMap<QString, AudioMetaGroupObject> m_genreGroupMap;
 };
 
 } //MusicLibrary

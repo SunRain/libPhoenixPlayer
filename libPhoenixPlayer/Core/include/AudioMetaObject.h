@@ -17,6 +17,57 @@ class QDate;
 class QJsonObject;
 namespace PhoenixPlayer {
 
+class LIBPHOENIXPLAYER_EXPORT LastPlayedMeta
+{
+public:
+    LastPlayedMeta();
+    LastPlayedMeta(const LastPlayedMeta &other);
+    virtual ~LastPlayedMeta();
+
+    inline LastPlayedMeta &operator =(const LastPlayedMeta &other) {
+        if (this != &other)
+            d.operator = (other.d);
+        return *this;
+    }
+
+    bool operator == (const LastPlayedMeta &other);
+
+    inline bool operator != (const LastPlayedMeta &other) {
+        return !operator == (other);
+    }
+
+    QString audioMetaObjHash() const;
+    QString albumName() const;
+    QString artistName() const;
+    QString genres() const;
+    qint64 timestamp() const;
+
+    void setAudioMetaObjHash(const QString &audioMetaObjHash);
+    void setAlbumName(const QString &name);
+    void setArtistName(const QString &name);
+    void setGenres(const QString &genres);
+    void setTimestamp(qint64 time);
+
+    ///
+    /// \brief isValid valid object hash is not empty && (timestamp != 0)
+    /// \return
+    ///
+    bool isValid() const;
+
+    ///
+    /// \brief fromAudioMetaObject
+    /// \param obj with timestamp QDateTime::currentSecsSinceEpoch()
+    /// \return
+    ///
+    static LastPlayedMeta fromAudioMetaObject(const AudioMetaObject &obj);
+
+    static qint64 placeholderTimestamp();
+
+private:
+    QSharedDataPointer<LastPlayedMetaPriv> d;
+};
+
+
 ///
 /// \brief The AlbumMeta class
 ///
@@ -25,7 +76,7 @@ class LIBPHOENIXPLAYER_EXPORT AlbumMeta
 public:
     AlbumMeta();
     AlbumMeta(const AlbumMeta &other);
-    virtual ~AlbumMeta(){}
+    virtual ~AlbumMeta();
 
     inline AlbumMeta &operator =(const AlbumMeta &other) {
         if (this != &other)
@@ -65,7 +116,7 @@ class LIBPHOENIXPLAYER_EXPORT ArtistMeta
 public:
     ArtistMeta();
     ArtistMeta(const ArtistMeta &other);
-    virtual ~ArtistMeta() {}
+    virtual ~ArtistMeta();
     inline ArtistMeta &operator =(const ArtistMeta &other) {
         if (this != &other)
             d.operator = (other.d);
@@ -102,7 +153,7 @@ class LIBPHOENIXPLAYER_EXPORT CoverMeta
 public:
     CoverMeta();
     CoverMeta(const CoverMeta &other);
-    virtual ~CoverMeta() {}
+    virtual ~CoverMeta();
     inline CoverMeta &operator =(const CoverMeta &other) {
         if (this != &other)
             d.operator = (other.d);
@@ -148,7 +199,7 @@ class LIBPHOENIXPLAYER_EXPORT TrackMeta
 public:
     TrackMeta();
     TrackMeta(const TrackMeta &other);
-    virtual ~TrackMeta(){}
+    virtual ~TrackMeta();
 
     inline TrackMeta &operator =(const TrackMeta &other) {
         if (this != &other)

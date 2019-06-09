@@ -1,4 +1,4 @@
-#ifndef SQLITE3DAO_H
+﻿#ifndef SQLITE3DAO_H
 #define SQLITE3DAO_H
 
 #include <QObject>
@@ -15,6 +15,7 @@ class PPCommon;
 namespace MusicLibrary {
 namespace SQLite3 {
 
+class InnerNode;
 class SQLite3DAO : public IMusicLibraryDAO
 {
     Q_OBJECT
@@ -38,6 +39,16 @@ public:
     bool isLike(const QString &hash) const Q_DECL_OVERRIDE;
     bool setPlayedCount(const QString &hash, int count) Q_DECL_OVERRIDE;
     int playedCount(const QString &hash) const Q_DECL_OVERRIDE;
+    bool setLastPlayedTime(const QString &hash, qint64 secs) Q_DECL_OVERRIDE;
+    qint64 getLastPlayedTime(const QString &hash) const Q_DECL_OVERRIDE;
+    bool setLastPlayedTime(const LastPlayedMeta &meta) Q_DECL_OVERRIDE;
+    LastPlayedMeta getLastPlayedMeta(const QString &hash) const Q_DECL_OVERRIDE;
+    QList<LastPlayedMeta> getLastPlayedMeta(int limit, bool orderByDesc) const Q_DECL_OVERRIDE;
+    QList<LastPlayedMeta> getLastPlayedByAlbum(int limit, bool orderByDesc) const Q_DECL_OVERRIDE;
+    QList<LastPlayedMeta> getLastPlayedByArtist(int limit, bool orderByDesc) const Q_DECL_OVERRIDE;
+    QList<LastPlayedMeta> getLastPlayedByGenres(int limit, bool orderByDesc) const Q_DECL_OVERRIDE;
+    QStringList trackHashListByPlayedCount(bool orderByDesc) const Q_DECL_OVERRIDE;
+    QStringList trackHashListByLastPlayedTime(bool orderByDesc) const Q_DECL_OVERRIDE;
 
     // IMusicLibraryDAO interface
 public slots:
@@ -47,13 +58,18 @@ public slots:
 private:
     void calcExistSongs();
     void calcUtilityTable();
+    void calcLastPlayedTable();
     bool checkDatabase();
 private:
-    QSqlDatabase            m_database;
-    QStringList             m_existSongHashes;
-    bool                    m_transaction;
-    QMap<QString, int>      m_playedCntMap;
-    QMap<QString, bool>     m_likeMap;
+    QSqlDatabase                    m_database;
+//    QStringList                     m_existSongHashes;
+    bool                            m_transaction;
+//    QMap<QString, int>              m_playedCntMap;
+//    QMap<QString, InnerNode>        m_playedCntMap;
+//    QMap<QString, bool>             m_likeMap;
+    QMap<QString, InnerNode>        m_utilityMap;
+    QMap<QString, LastPlayedMeta>   m_lastPlayedMap;
+    QMap<QString, AudioMetaObject>  m_objMap;
 };
 
 } //SQLite3

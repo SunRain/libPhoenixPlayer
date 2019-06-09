@@ -305,6 +305,11 @@ AlbumMeta::AlbumMeta(const AlbumMeta &other)
 {
 }
 
+AlbumMeta::~AlbumMeta()
+{
+
+}
+
 bool AlbumMeta::operator ==(const AlbumMeta &other)
 {
     return d.data ()->date == other.d.data ()->date
@@ -420,6 +425,11 @@ ArtistMeta::ArtistMeta(const ArtistMeta &other)
 {
 }
 
+ArtistMeta::~ArtistMeta()
+{
+
+}
+
 bool ArtistMeta::operator ==(const ArtistMeta &other)
 {
     return d.data ()->description == other.d.data ()->description
@@ -520,6 +530,11 @@ CoverMeta::CoverMeta(const CoverMeta &other)
 {
 }
 
+CoverMeta::~CoverMeta()
+{
+
+}
+
 bool CoverMeta::operator ==(const CoverMeta &other)
 {
     return d.data ()->largeUri == other.d.data ()->largeUri
@@ -618,6 +633,11 @@ TrackMeta::TrackMeta()
 
 TrackMeta::TrackMeta(const TrackMeta &other)
     : d(other.d)
+{
+
+}
+
+TrackMeta::~TrackMeta()
 {
 
 }
@@ -800,6 +820,104 @@ TrackMeta TrackMeta::fromJson(const QByteArray &json)
     meta.setUserRating (o.value (KEY_USER_RATING).toString ());
     meta.setYear (o.value (KEY_YEAR).toString ());
     return meta;
+}
+
+LastPlayedMeta::LastPlayedMeta()
+    : d(new LastPlayedMetaPriv())
+{
+
+}
+
+LastPlayedMeta::LastPlayedMeta(const LastPlayedMeta &other)
+    : d(other.d)
+{
+
+}
+
+LastPlayedMeta::~LastPlayedMeta()
+{
+
+}
+
+bool LastPlayedMeta::operator ==(const LastPlayedMeta &other)
+{
+    return other.d.data()->hash == d.data()->hash &&
+            other.d.data()->genres == d.data()->genres &&
+            other.d.data()->albumName == d.data()->albumName &&
+            other.d.data()->artistName == d.data()->artistName &&
+            other.d.data()->timestamp == d.data()->timestamp;
+}
+
+QString LastPlayedMeta::audioMetaObjHash() const
+{
+    return  d.data()->hash;
+}
+
+QString LastPlayedMeta::albumName() const
+{
+    return d.data()->albumName;
+}
+
+QString LastPlayedMeta::artistName() const
+{
+    return d.data()->artistName;
+}
+
+QString LastPlayedMeta::genres() const
+{
+    return d.data()->genres;
+}
+
+qint64 LastPlayedMeta::timestamp() const
+{
+    return d.data()->timestamp;
+}
+
+void LastPlayedMeta::setAudioMetaObjHash(const QString &hash)
+{
+    d.data()->hash = hash;
+}
+
+void LastPlayedMeta::setAlbumName(const QString &name)
+{
+    d.data()->albumName = name;
+}
+
+void LastPlayedMeta::setArtistName(const QString &name)
+{
+    d.data()->artistName = name;
+}
+
+void LastPlayedMeta::setGenres(const QString &genres)
+{
+    d.data()->genres = genres;
+}
+
+void LastPlayedMeta::setTimestamp(qint64 time)
+{
+    d.data()->timestamp = time;
+}
+
+bool LastPlayedMeta::isValid() const
+{
+    return !d.data()->hash.isEmpty() && (d.data()->timestamp != 0);
+}
+
+LastPlayedMeta LastPlayedMeta::fromAudioMetaObject(const AudioMetaObject &obj)
+{
+    LastPlayedMeta meta;
+    meta.setAudioMetaObjHash(obj.hash());
+    meta.setGenres(obj.trackMeta().genre());
+    meta.setAlbumName(obj.albumMeta().name());
+    meta.setArtistName(obj.artistMeta().name());
+    meta.setTimestamp(QDateTime::currentSecsSinceEpoch());
+    return meta;
+}
+
+qint64 LastPlayedMeta::placeholderTimestamp()
+{
+    //TODO lol
+    return 111111;
 }
 
 } //PhoenixPlayer

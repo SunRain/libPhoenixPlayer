@@ -20,7 +20,7 @@ class LIBPHOENIXPLAYER_EXPORT MusicQueue : public QObject
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
     Q_PROPERTY(int count READ count CONSTANT)
 public:
-    explicit MusicQueue(QObject *parent = 0);
+    explicit MusicQueue(QObject *parent = Q_NULLPTR);
     virtual ~MusicQueue();
 
     void addTrack(const AudioMetaObject &song);

@@ -17,7 +17,7 @@
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "PlayerCore/PlayListObject.h"
-#include "PlayerCore/RecentPlayedMgr.h"
+#include "PlayerCore/RecentPlayedQueue.h"
 #include "PlayerCore/PlayListMetaMgr.h"
 #include "SingletonPointer.h"
 #include "Backend/BackendHost.h"
@@ -71,21 +71,21 @@ PlayerCore::PlayerCore(PPSettings *set, PluginLoader *loader, MusicLibraryManage
 
 //    m_plstObjMgr = new PlayListObjectMgr(m_settings, this);
 
-    m_recentList = new RecentPlayedMgr(this);
-    connect (m_recentList, &RecentPlayedMgr::currentIndexChanged,
-             [&](int idx) {
-        AudioMetaObject o = m_recentList->get (idx);
-        playTrack (o);
-    });
+//    m_recentQueue = new RecentPlayedQueue(this);
+//    connect (m_recentQueue, &RecentPlayedQueue::currentIndexChanged,
+//             [&](int idx) {
+//        AudioMetaObject o = m_recentQueue->get (idx);
+//        playTrack (o);
+//    });
 
     m_playQueue = new MusicQueue(this);
     m_playQueue->setSizeLimit(-1);
     m_playQueue->setSkipDuplicates(false);
     connect(m_playQueue, &MusicQueue::currentIndexChanged,
-            [&](int idx) {
+            this, [&](int idx) {
         AudioMetaObject o = m_playQueue->get (idx);
-        m_recentList->addTrack(o);
-        playTrack (o);
+//        m_recentQueue->addTrack(o);
+        playTrack(o);
     });
 
 //    init ();
@@ -96,9 +96,9 @@ PlayerCore::~PlayerCore()
 //    if (m_playlistObject)
 //        m_playlistObject->deleteLater ();
 //    m_playlistObject = nullptr;
-    if (m_recentList)
-        m_recentList->deleteLater ();
-    m_recentList = nullptr;
+//    if (m_recentQueue)
+//        m_recentQueue->deleteLater ();
+//    m_recentQueue = nullptr;
     if (m_playQueue)
         m_playQueue->deleteLater();
     m_playQueue = nullptr;
@@ -263,10 +263,10 @@ int PlayerCore::playBackendStateInt() const
 //    return m_playlistObject;
 //}
 
-RecentPlayedMgr *PlayerCore::recentList() const
-{
-    return m_recentList;
-}
+//RecentPlayedQueue *PlayerCore::recentQueue() const
+//{
+//    return m_recentQueue;
+//}
 
 MusicQueue *PlayerCore::playQueue() const
 {
@@ -341,6 +341,9 @@ void PlayerCore::playTrack(const AudioMetaObject &data)
         qWarning()<<Q_FUNC_INFO<<"AudioMetaData is empty";
         return;
     }
+    m_musicLibraryManager->addLastPlayedTime(data);
+    m_musicLibraryManager->addPlayedCount(data);
+
     m_curTrack = data;
     m_curTrackDuration = data.trackMeta ().duration ();
 //    BaseMediaObject obj;
@@ -356,9 +359,9 @@ void PlayerCore::playTrack(const AudioMetaObject &data)
         (*m_playBackend)->changeMedia (m_resource, 0, true);
         m_currentPlayPos = 0;
         (*m_playBackend)->play ();
-    }
-    else
+    } else {
         qCritical("No playBackend found");
+    }
     emit trackChanged (m_curTrack.toMap());
 }
 

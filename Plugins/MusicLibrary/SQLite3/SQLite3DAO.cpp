@@ -1,4 +1,4 @@
-#include <QSqlDatabase>
+﻿#include <QSqlDatabase>
 #include <QSqlError>
 #include <QStringList>
 #include <QSqlQuery>
@@ -23,8 +23,54 @@ namespace SQLite3 {
 const static char *DATABASE_NAME        = "PhoenixPlayer_musiclibrary";
 const static char *TABLE_LIBRARY_TAG    = "LIBRARY";
 const static char *TABLE_UTILITY_TAG    = "UTILITY";
+const static char *TABLE_LAST_PLAYED    = "LAST_PLAYED";
 const static char *UTILITY_KEY_LIKE     = "LIKE";
 const static char *UTILITY_KEY_CNT      = "CNT";
+const static char *LP_KEY_HASH          = "HASH";
+const static char *LP_KEY_ALBUM_NAME    = "ALBUM_NAME";
+const static char *LP_KEY_ARTIST_NAME   = "ARTIST_NAME";
+const static char *LP_KEY_GENRES        = "GENRES";
+const static char *LP_KEY_TIMESTAMP     = "TIME_STAMP";
+
+bool sortLastPlayedMetaLessThan(const LastPlayedMeta &a, const LastPlayedMeta &b)
+{
+    return a.timestamp() < b.timestamp();
+}
+
+bool sortLastPlayedMetaGreaterThan(const LastPlayedMeta &a, const LastPlayedMeta &b)
+{
+    return a.timestamp() > b.timestamp();
+}
+
+class InnerNode
+{
+public:
+    InnerNode() : d(new Priv()) {}
+    InnerNode(const InnerNode &other) : d(other.d){}
+
+    class Priv : public QSharedData
+    {
+    public:
+        Priv() {}
+        int cnt = 0;
+        bool like = false;
+        QString hash = QString();
+    };
+    QSharedDataPointer<Priv> d;
+    inline InnerNode &operator =(const InnerNode &other) {
+        if (this != &other)
+            d.operator = (other.d);
+        return *this;
+    }
+    inline bool operator == (const InnerNode &other) {
+        return other.d.data()->hash == d.data()->hash &&
+                other.d.data()->cnt == d.data()->cnt &&
+                other.d.data()->like == d.data()->like;
+    }
+    inline bool operator != (const InnerNode &other) {
+        return !operator == (other);
+    }
+};
 
 SQLite3DAO::SQLite3DAO(QObject *parent)
     :IMusicLibraryDAO(parent)
@@ -41,8 +87,8 @@ SQLite3DAO::~SQLite3DAO()
     if (m_database.isOpen ()) {
         m_database.close ();
     }
-    if (!m_existSongHashes.isEmpty ())
-        m_existSongHashes.clear ();
+//    if (!m_existSongHashes.isEmpty ())
+//        m_existSongHashes.clear ();
 
     qDebug()<<"after "<<Q_FUNC_INFO;
 }
@@ -94,14 +140,18 @@ bool SQLite3DAO::initDataBase()
     if (tables.contains(TABLE_LIBRARY_TAG, Qt::CaseInsensitive)) {
         qDebug()<<"Found library table now, we will check exist Song Hashes!!!";
         calcExistSongs();
-        return true;
+//        return true;
     }
     if (tables.contains(TABLE_UTILITY_TAG, Qt::CaseInsensitive)) {
         qDebug()<<"Found utility now, we will check exist data!!!";
         calcUtilityTable();
-        return true;
+//        return true;
     }
-
+    if (tables.contains(TABLE_LAST_PLAYED, Qt::CaseInsensitive)) {
+        qDebug()<<"Found lastplayed now, we will check exist data!!!";
+        calcLastPlayedTable();
+//        return true;
+    }
 //    NULL	NULL value.	NULL
 //    INTEGER	Signed integer, stored in 8, 16, 24, 32, 48, or 64-bits depending on the magnitude of the value.	typedef qint8/16/32/64
 //    REAL	64-bit floating point value.	By default mapping to QString
@@ -153,7 +203,27 @@ bool SQLite3DAO::initDataBase()
             m_database.removeDatabase (DATABASE_NAME);
             return false;
         }
+    }
+    {
+        QString str = QString("create table %1").arg(TABLE_LAST_PLAYED);
+        str += " ( ";
+        str += "id integer primary key, ";
+        str += QString("%1 TEXT, ").arg(LP_KEY_HASH);
+        str += QString("%1 TEXT, ").arg(LP_KEY_ALBUM_NAME);
+        str += QString("%1 TEXT, ").arg(LP_KEY_ARTIST_NAME);
+        str += QString("%1 TEXT, ").arg(LP_KEY_GENRES);
+        str += QString("%1 INTEGER").arg(LP_KEY_TIMESTAMP);
+        str += ")";
 
+        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        /*
+         * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
+         */
+        if (!q.exec (str)) {
+            qDebug()<<Q_FUNC_INFO<<QString("Create utility tab error [ %1 ]").arg (q.lastError ().text ());
+            m_database.removeDatabase (DATABASE_NAME);
+            return false;
+        }
     }
 
 //    str = "create table ";
@@ -189,7 +259,7 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
         return false;
 
     if (skipDuplicates) {
-        if (m_existSongHashes.contains (obj.hash ())) {
+        if (m_objMap.contains(obj.hash())) {
             qDebug()<<Q_FUNC_INFO<<"skipDuplicates "<<obj.uri ();
             return true;
         }
@@ -214,7 +284,6 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
     str += value;
     str += ") ";
 
-//    qDebug()<<Q_FUNC_INFO<<"prepare sql query "<<str;
     QSqlQuery q;
     if (!q.prepare (str)) {
         qDebug()<<Q_FUNC_INFO<<QString("prepare sql query [%1] error [%2]").arg (str).arg (q.lastError ().text ());
@@ -233,9 +302,9 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
             q.bindValue (key, value);
         }
     }
-    if (q.exec (/*str*/)) {
-        m_existSongHashes.append (obj.hash ());
-        emit metaDataInserted ();
+    if (q.exec()) {
+        m_objMap.insert(obj.hash(), obj);
+        emit metaDataInserted(obj.hash());
         return true;
     }
     qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
@@ -274,8 +343,6 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
             .arg (AudioMetaObject::keyHash ())
             .arg (obj.hash ());
 
-//    qDebug()<<Q_FUNC_INFO<<"prepare sql query "<<str;
-
     QSqlQuery q;
     if (!q.prepare (str)) {
         qDebug()<<Q_FUNC_INFO<<QString("prepare sql query [%1] error [%2]").arg (str).arg (q.lastError ().text ());
@@ -288,7 +355,8 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
         q.bindValue (key, value);
     }
 
-    if (q.exec (/*str*/)) {
+    if (q.exec()) {
+        m_objMap.insert(obj.hash(), obj);
         return true;
     }
     qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
@@ -335,8 +403,9 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
             .arg (hash);
     QSqlQuery q;
     if (q.exec (str)) {
-        calcExistSongs ();
-        emit metaDataDeleted ();
+//        calcExistSongs ();
+        m_objMap.remove(hash);
+        emit metaDataDeleted (hash);
         return true;
     }
     qDebug()<<Q_FUNC_INFO<<"deleteMetaData error "<<q.lastError ().text ();
@@ -349,6 +418,10 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
         qDebug()<<Q_FUNC_INFO<<"Invalid hash";
         return AudioMetaObject();
     }
+    if (m_objMap.contains(hash)) {
+        return m_objMap.value(hash);
+    }
+
     QString str = QString("select * from %1 where %2 = \"%3\"")
             .arg (TABLE_LIBRARY_TAG)
             .arg (AudioMetaObject::keyHash ())
@@ -361,24 +434,24 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
 
         AudioMetaObject audio; //a tmp object to get the query keys
         QJsonObject json;
-        foreach (QString key, audio.toObject ().keys ()) {
+        foreach (const QString &key, audio.toObject ().keys ()) {
             json.insert (key, q.value (key).toString ());
         }
         QJsonDocument doc(json);
-        return AudioMetaObject::fromJson (doc.toJson ());
+        return AudioMetaObject::fromJson(doc.toJson());
     }
-    qDebug()<<Q_FUNC_INFO<<"Current hash not found in database";
+    qDebug()<<Q_FUNC_INFO<<"Current hash ["<<hash<<"] not found in database";
     return AudioMetaObject();
 }
 
 QStringList SQLite3DAO::trackHashList() const
 {
-    return m_existSongHashes;
+    return m_objMap.keys();
 }
 
 bool SQLite3DAO::setLike(const QString &hash, bool like)
 {
-    if (m_likeMap.keys().contains(hash)) {
+    if (/*m_likeMap.keys().contains(hash)*/m_utilityMap.contains(hash)) {
         QString str = "update ";
         str += TABLE_UTILITY_TAG;
         str += " set ";
@@ -386,7 +459,10 @@ bool SQLite3DAO::setLike(const QString &hash, bool like)
         str += QString(" where %1 = '%2'").arg(AudioMetaObject::keyHash()).arg(hash);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-            m_likeMap.insert(hash, like);
+//            m_likeMap.insert(hash, like);
+            InnerNode node = m_utilityMap.value(hash);
+            node.d.data()->like = like;
+            m_utilityMap.insert(hash, node);
             return true;
         }
         qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
@@ -401,8 +477,11 @@ bool SQLite3DAO::setLike(const QString &hash, bool like)
         str += QString("('%1', '%2', '%3' ) ").arg(hash).arg(0).arg(like);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-            m_likeMap.insert(hash, like);
-            m_playedCntMap.insert(hash, 0);
+//            m_likeMap.insert(hash, like);
+//            m_playedCntMap.insert(hash, 0);
+            InnerNode node;
+            node.d.data()->like = like;
+            m_utilityMap.insert(hash, node);
             return true;
         }
         qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
@@ -412,12 +491,13 @@ bool SQLite3DAO::setLike(const QString &hash, bool like)
 
 bool SQLite3DAO::isLike(const QString &hash) const
 {
-    return m_likeMap.value(hash, false);
+//    return m_likeMap.value(hash, false);
+    return m_utilityMap.value(hash).d.data()->like;
 }
 
 bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
 {
-    if (m_playedCntMap.keys().contains(hash)) {
+    if (/*m_playedCntMap.keys().contains(hash)*/m_utilityMap.contains(hash)) {
         QString str = "update ";
         str += TABLE_UTILITY_TAG;
         str += " set ";
@@ -425,7 +505,10 @@ bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
         str += QString(" where %1 = '%2'").arg(AudioMetaObject::keyHash()).arg(hash);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-            m_playedCntMap.insert(hash, count);
+//            m_playedCntMap.insert(hash, count);
+            InnerNode node = m_utilityMap.value(hash);
+            node.d.data()->cnt = count;
+            m_utilityMap.insert(hash, node);
             return true;
         }
         qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
@@ -440,8 +523,11 @@ bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
         str += QString("('%1', '%2', '%3' ) ").arg(hash).arg(count).arg(false);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-            m_likeMap.insert(hash, false);
-            m_playedCntMap.insert(hash, count);
+//            m_likeMap.insert(hash, false);
+//            m_playedCntMap.insert(hash, count);
+            InnerNode node;
+            node.d.data()->cnt = count;
+            m_utilityMap.insert(hash, node);
             return true;
         }
         qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
@@ -451,7 +537,230 @@ bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
 
 int SQLite3DAO::playedCount(const QString &hash) const
 {
-    return m_playedCntMap.value(hash, 0);
+//    return m_playedCntMap.value(hash, 0);
+    return m_utilityMap.value(hash).d.data()->cnt;
+}
+
+bool SQLite3DAO::setLastPlayedTime(const QString &hash, qint64 secs)
+{
+    if (m_lastPlayedMap.keys().contains(hash)) {
+        QString str = "update ";
+        str += TABLE_LAST_PLAYED;
+        str += " set ";
+        str += QString(" %1 = '%2' ").arg(LP_KEY_TIMESTAMP).arg(secs);
+        str += QString(" where %1 = '%2'").arg(LP_KEY_HASH).arg(hash);
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            auto obj = m_lastPlayedMap.value(hash);
+            obj.setTimestamp(secs);
+            m_lastPlayedMap.insert(hash, obj);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    } else {
+        AudioMetaObject obj = trackFromHash(hash);
+        if (obj.isEmpty()) {
+            return false;
+        }
+        QString str = "insert into ";
+        str += TABLE_LAST_PLAYED;
+        str += QString(" (%1, %2, %3, %4) ")
+                  .arg(LP_KEY_HASH)
+                  .arg(LP_KEY_ALBUM_NAME)
+                  .arg(LP_KEY_ARTIST_NAME)
+                  .arg(LP_KEY_GENRES)
+                  .arg(LP_KEY_TIMESTAMP);
+        str += " values ";
+        str += QString("('%1', '%2', '%3', '%4' ) ")
+                .arg(hash)
+                .arg(obj.albumMeta().name())
+                .arg(obj.artistMeta().name())
+                .arg(obj.trackMeta().genre())
+                .arg(secs);
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            LastPlayedMeta meta = LastPlayedMeta::fromAudioMetaObject(obj);
+            meta.setTimestamp(secs);
+            m_lastPlayedMap.insert(hash, meta);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    }
+    return false;
+}
+
+qint64 SQLite3DAO::getLastPlayedTime(const QString &hash) const
+{
+    return m_lastPlayedMap.value(hash).timestamp();
+}
+
+bool SQLite3DAO::setLastPlayedTime(const LastPlayedMeta &meta)
+{
+    const QString hash = meta.audioMetaObjHash();
+    if (m_lastPlayedMap.keys().contains(hash)) {
+        QString str = "update ";
+        str += TABLE_LAST_PLAYED;
+        str += " set ";
+        str += QString(" %1 = '%2' ").arg(LP_KEY_TIMESTAMP).arg(meta.timestamp());
+        str += QString(" where %1 = '%2'").arg(LP_KEY_HASH).arg(hash);
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            m_lastPlayedMap.insert(hash, meta);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    } else {
+        QString str = "insert into ";
+        str += TABLE_LAST_PLAYED;
+        str += QString(" (%1, %2, %3, %4) ")
+                  .arg(LP_KEY_HASH)
+                  .arg(LP_KEY_ALBUM_NAME)
+                  .arg(LP_KEY_ARTIST_NAME)
+                  .arg(LP_KEY_GENRES)
+                  .arg(LP_KEY_TIMESTAMP);
+        str += " values ";
+        str += QString("('%1', '%2', '%3', '%4' ) ")
+                .arg(hash)
+                .arg(meta.albumName())
+                .arg(meta.artistName())
+                .arg(meta.genres())
+                .arg(meta.timestamp());
+        QSqlQuery q(str, m_database);
+        if (q.exec()) {
+            m_lastPlayedMap.insert(hash, meta);
+            return true;
+        }
+        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+    }
+    return false;
+}
+
+LastPlayedMeta SQLite3DAO::getLastPlayedMeta(const QString &hash) const
+{
+    return m_lastPlayedMap.value(hash);
+}
+
+QList<LastPlayedMeta> SQLite3DAO::getLastPlayedMeta(int limit, bool orderByDesc) const
+{
+    QList<LastPlayedMeta> list = m_lastPlayedMap.values();
+    if (orderByDesc) {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaGreaterThan);
+    } else {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaLessThan);
+    }
+    if (limit <= list.size()) {
+        return list.mid(0, limit);
+    } else {
+        return list;
+    }
+}
+
+QList<LastPlayedMeta> SQLite3DAO::getLastPlayedByAlbum(int limit, bool orderByDesc) const
+{
+    QList<LastPlayedMeta> list = m_lastPlayedMap.values();
+    if (orderByDesc) {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaGreaterThan);
+    } else {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaLessThan);
+    }
+    QStringList albumList;
+    QList<LastPlayedMeta> ll;
+    foreach(const LastPlayedMeta &meta, list) {
+        if (albumList.size() >= limit) {
+            break;
+        }
+        if (!albumList.contains(meta.albumName())) {
+            albumList.append(meta.albumName());
+        }
+        ll.append(meta);
+    }
+    return ll;
+}
+
+QList<LastPlayedMeta> SQLite3DAO::getLastPlayedByArtist(int limit, bool orderByDesc) const
+{
+    QList<LastPlayedMeta> list = m_lastPlayedMap.values();
+    if (orderByDesc) {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaGreaterThan);
+    } else {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaLessThan);
+    }
+    QStringList artistList;
+    QList<LastPlayedMeta> ll;
+    foreach(const LastPlayedMeta &meta, list) {
+        if (artistList.size() >= limit) {
+            break;
+        }
+        if (!artistList.contains(meta.artistName())) {
+            artistList.append(meta.artistName());
+        }
+        ll.append(meta);
+    }
+    return ll;
+}
+
+QList<LastPlayedMeta> SQLite3DAO::getLastPlayedByGenres(int limit, bool orderByDesc) const
+{
+    QList<LastPlayedMeta> list = m_lastPlayedMap.values();
+    if (orderByDesc) {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaGreaterThan);
+    } else {
+        std::sort(list.begin(), list.end(), sortLastPlayedMetaLessThan);
+    }
+    QStringList genresList;
+    QList<LastPlayedMeta> ll;
+    foreach(const LastPlayedMeta &meta, list) {
+        if (genresList.size() >= limit) {
+            break;
+        }
+        if (!genresList.contains(meta.genres())) {
+            genresList.append(meta.genres());
+        }
+        ll.append(meta);
+    }
+    return ll;
+}
+
+QStringList SQLite3DAO::trackHashListByPlayedCount(bool orderByDesc) const
+{
+    QList<InnerNode> list = m_utilityMap.values();
+    if (orderByDesc) {
+        std::sort(list.begin(), list.end(),
+                  [](const InnerNode &a, const InnerNode &b)->bool {
+            return a.d.data()->cnt > b.d.data()->cnt;
+        });
+    } else {
+        std::sort(list.begin(), list.end(),
+                  [](const InnerNode &a, const InnerNode &b)->bool {
+            return a.d.data()->cnt < b.d.data()->cnt;
+        });
+    }
+    QStringList sl;
+    foreach(const InnerNode &node, list) {
+        sl.append(node.d.data()->hash);
+    }
+    return sl;
+}
+
+QStringList SQLite3DAO::trackHashListByLastPlayedTime(bool orderByDesc) const
+{
+    QList<LastPlayedMeta> list = m_lastPlayedMap.values();
+    if (orderByDesc) {
+        std::sort(list.begin(), list.end(),
+                  [](const LastPlayedMeta &a, const LastPlayedMeta &b)->bool {
+            return a.timestamp() > b.timestamp();
+        });
+    } else {
+        std::sort(list.begin(), list.end(),
+                  [](const LastPlayedMeta &a, const LastPlayedMeta &b)->bool {
+            return a.timestamp() < b.timestamp();
+        });
+    }
+    QStringList sl;
+    foreach(const LastPlayedMeta &node, list) {
+        sl.append(node.audioMetaObjHash());
+    }
+    return sl;
 }
 
 bool SQLite3DAO::openDataBase()
@@ -553,6 +862,7 @@ bool SQLite3DAO::beginTransaction()
 
     calcExistSongs();
     calcUtilityTable();
+    calcLastPlayedTable();
     m_transaction = m_database.transaction ();
     return m_transaction;
 }
@@ -568,6 +878,7 @@ bool SQLite3DAO::commitTransaction()
     if (m_database.commit ()) {
         calcExistSongs();
         calcUtilityTable();
+        calcLastPlayedTable();
         return true;
     } else {
         return false;
@@ -942,44 +1253,71 @@ bool SQLite3DAO::commitTransaction()
 
 void SQLite3DAO::calcExistSongs()
 {
-    /*
-     * 获取当前已经存储的歌曲hash
-     */
-    m_existSongHashes.clear ();
-    if (!checkDatabase ())
-        return;
-    //%1_hash hash来自SongMetaData的hard code
-    //TODO do not use hard code
-    QString str = QString("select %1 from %2")
-            .arg (AudioMetaObject::keyHash ())
-            .arg (TABLE_LIBRARY_TAG);
+    m_objMap.clear();
+
+    QString str = QString("select * from %1").arg (TABLE_LIBRARY_TAG);
+
     QSqlQuery q(str, m_database);
     while (q.next ()) {
-        m_existSongHashes.append (q.value (AudioMetaObject::keyHash ()).toString ());
+        const QString hash = q.value(AudioMetaObject::keyHash()).toString();
+        AudioMetaObject audio;
+        QJsonObject json;
+        foreach (const QString &key, audio.toObject().keys()) {
+            json.insert (key, q.value (key).toString ());
+        }
+        QJsonDocument doc(json);
+        audio = AudioMetaObject::fromJson(doc.toJson());
+        if (audio.hash() != hash) {
+            qWarning()<<Q_FUNC_INFO<<"bibibibibi, why hash not same!!!!!!";
+        }
+        m_objMap.insert(hash, audio);
     }
 }
 
 void SQLite3DAO::calcUtilityTable()
 {
-    m_likeMap.clear();
-    m_playedCntMap.clear();
+//    m_likeMap.clear();
+//    m_playedCntMap.clear();
+    m_utilityMap.clear();
     if (!checkDatabase ())
         return;
-    //%1_hash hash来自SongMetaData的hard code
-    //TODO do not use hard code
-    QString str = QString("select %1 from %2")
-            .arg (AudioMetaObject::keyHash())
-            .arg (TABLE_UTILITY_TAG);
+    QString str = QString("select * from %1").arg(TABLE_UTILITY_TAG);
     QSqlQuery q(str, m_database);
     while (q.next ()) {
-        const QString hash = q.value(AudioMetaObject::keyHash()).toString();
-        const int cnt = q.value(UTILITY_KEY_CNT).toInt();
-        const bool like = q.value(UTILITY_KEY_LIKE).toBool();
-        m_playedCntMap.insert(hash, cnt);
-        m_likeMap.insert(hash, like);
+//        const QString hash = q.value(AudioMetaObject::keyHash()).toString();
+//        const int cnt = q.value(UTILITY_KEY_CNT).toInt();
+//        const bool like = q.value(UTILITY_KEY_LIKE).toBool();
+//        m_playedCntMap.insert(hash, cnt);
+//        m_likeMap.insert(hash, like);
+        InnerNode node;
+        node.d.data()->hash = q.value(AudioMetaObject::keyHash()).toString();;
+        node.d.data()->cnt = q.value(UTILITY_KEY_CNT).toInt();
+        node.d.data()->like = q.value(UTILITY_KEY_LIKE).toBool();
+        m_utilityMap.insert(node.d.data()->hash, node);
     }
-    qDebug()<<Q_FUNC_INFO<<m_playedCntMap;
-    qDebug()<<Q_FUNC_INFO<<m_likeMap;
+//    qDebug()<<Q_FUNC_INFO<<m_playedCntMap;
+//    qDebug()<<Q_FUNC_INFO<<m_likeMap;
+}
+
+void SQLite3DAO::calcLastPlayedTable()
+{
+    m_lastPlayedMap.clear();
+    QString str = QString("select * from %1").arg(TABLE_LAST_PLAYED);
+    QSqlQuery q(str, m_database);
+    while (q.next ()) {
+        const QString hash = q.value(LP_KEY_HASH).toString();
+        const QString abn = q.value(LP_KEY_ALBUM_NAME).toString();
+        const QString arn = q.value(LP_KEY_ARTIST_NAME).toString();
+        const QString genres = q.value(LP_KEY_GENRES).toString();
+        const qint64 ts = q.value(LP_KEY_GENRES).toLongLong();
+        LastPlayedMeta meta;
+        meta.setAudioMetaObjHash(hash);
+        meta.setGenres(genres);
+        meta.setAlbumName(abn);
+        meta.setArtistName(arn);
+        meta.setTimestamp(ts);
+        m_lastPlayedMap.insert(hash, meta);
+    }
 }
 
 //QString SQLite3DAO::fillValues(const QVariant &value,

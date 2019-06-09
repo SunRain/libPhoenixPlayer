@@ -11,30 +11,30 @@
 
 namespace PhoenixPlayer {
 // keys for AudioMetaObject
-const static QString KEY_NAME ("NAME");
-const static QString KEY_URI ("URI");
-const static QString KEY_DESCRIPTION ("DESCRIPTION");
-const static QString KEY_DATE ("DATE");
-const static QString KEY_SMALL_IMG ("SMALL_URI");
-const static QString KEY_MIDDLE_IMG ("MIDDLE_URI");
-const static QString KEY_LARGE_IMG ("LARGE_URI");
-const static QString KEY_BIT_RATE ("BIT_RATE");
-const static QString KEY_DURATION ("DURATION");
-const static QString KEY_TITLE ("TITLE");
-const static QString KEY_YEAR ("YEAR");
-const static QString KEY_GENRE ("GENRE");
-const static QString KEY_SAMPLE_RATE ("SAMPLE_RATE");
-const static QString KEY_USER_RATING ("USER_RATING");
-const static QString KEY_HASH ("HASH");
-const static QString KEY_PATH ("PATH");
-const static QString KEY_SIZE ("SIZE");
-const static QString KEY_MEDIA_TYPE ("MEDIA_TYPE");
-const static QString KEY_LYRICS_DATA ("LYRICS_DATA");
-const static QString KEY_LYRICS_URI ("LYRICS_URI");
-const static QString KEY_ALBUM_META ("ALBUM_META");
-const static QString KEY_ARTIST_META ("ARTIST_META");
-const static QString KEY_COVER_META ("COVER_META");
-const static QString KEY_TRACK_META ("TRACK_META");
+const static char *KEY_NAME             = "NAME";
+const static char *KEY_URI              = "URI";
+const static char *KEY_DESCRIPTION      = "DESCRIPTION";
+const static char *KEY_DATE             = "DATE";
+const static char *KEY_SMALL_IMG        = "SMALL_URI";
+const static char *KEY_MIDDLE_IMG       = "MIDDLE_URI";
+const static char *KEY_LARGE_IMG        = "LARGE_URI";
+const static char *KEY_BIT_RATE         = "BIT_RATE";
+const static char *KEY_DURATION         = "DURATION";
+const static char *KEY_TITLE            = "TITLE";
+const static char *KEY_YEAR             = "YEAR";
+const static char *KEY_GENRE            = "GENRE";
+const static char *KEY_SAMPLE_RATE      = "SAMPLE_RATE";
+const static char *KEY_USER_RATING      = "USER_RATING";
+const static char *KEY_HASH             = "HASH";
+const static char *KEY_PATH             = "PATH";
+const static char *KEY_SIZE             = "SIZE";
+const static char *KEY_MEDIA_TYPE       = "MEDIA_TYPE";
+const static char *KEY_LYRICS_DATA      = "LYRICS_DATA";
+const static char *KEY_LYRICS_URI       = "LYRICS_URI";
+const static char *KEY_ALBUM_META       = "ALBUM_META";
+const static char *KEY_ARTIST_META      = "ARTIST_META";
+const static char *KEY_COVER_META       = "COVER_META";
+const static char *KEY_TRACK_META       = "TRACK_META";
 
 class LIBPHOENIXPLAYER_EXPORT AudioMetaObjectKeyName : public QObject
 {
