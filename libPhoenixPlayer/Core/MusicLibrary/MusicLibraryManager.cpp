@@ -185,7 +185,7 @@ AudioMetaList MusicLibraryManager::albumTracks(const QString &albumName, int lim
         return AudioMetaList();
     AudioMetaList list;
     int i = 0;
-    foreach (AudioMetaObject d, m_trackList) {
+    foreach (const auto &d, m_trackList) {
         if (d.albumMeta ().name () == albumName) {
             list.append (d);
         }
@@ -202,7 +202,7 @@ AudioMetaList MusicLibraryManager::genreTracks(const QString &genreName, int lim
         return AudioMetaList();
     AudioMetaList list;
     int i = 0;
-    foreach (AudioMetaObject d, m_trackList) {
+    foreach (const auto &d, m_trackList) {
         if (d.trackMeta ().genre () == genreName) {
             list.append (d);
         }
@@ -219,7 +219,7 @@ AudioMetaList MusicLibraryManager::mediaTypeTracks(const QString &mediaType, int
         return AudioMetaList();
     AudioMetaList list;
     int i = 0;
-    foreach (AudioMetaObject d, m_trackList) {
+    foreach (const auto &d, m_trackList) {
         if (d.mediaType () == mediaType.toInt ()) {
             list.append (d);
         }
@@ -236,7 +236,7 @@ AudioMetaList MusicLibraryManager::userRatingTracks(const QString &rating, int l
         return AudioMetaList();
     AudioMetaList list;
     int i = 0;
-    foreach (AudioMetaObject d, m_trackList) {
+    foreach (const auto &d, m_trackList) {
         if (d.trackMeta ().userRating () == rating) {
             list.append (d);
         }
@@ -253,7 +253,7 @@ AudioMetaList MusicLibraryManager::folderTracks(const QString &folder, int limit
         return AudioMetaList();
     AudioMetaList list;
     int i = 0;
-    foreach (AudioMetaObject d, m_trackList) {
+    foreach (const auto &d, m_trackList) {
         if (d.path () == folder) {
             list.append (d);
         }

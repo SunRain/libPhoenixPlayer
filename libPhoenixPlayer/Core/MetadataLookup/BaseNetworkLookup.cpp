@@ -1,21 +1,21 @@
+#include "MetadataLookup/BaseNetworkLookup.h"
 
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
 #include <QUrl>
 #include <QDebug>
 #include <QTimer>
-
 #include <QByteArray>
 
-#include "MetadataLookup/BaseNetworkLookup.h"
+#include "QCNetworkAccessManager.h"
+#include "QCNetworkSyncReply.h"
 
 namespace PhoenixPlayer {
 namespace MetadataLookup {
 
+using namespace QCurl;
+
 BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
 {
-    m_network = new QNetworkAccessManager(this);
+    m_network = new QCNetworkAccessManager(this);
     m_reply = nullptr;
     m_interval = 10000;
     m_failEmitted = false;
@@ -73,43 +73,74 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
 
     if (m_reply) {
         m_reply->abort ();
-        qDebug()<<"====== mReply is running "<<m_reply->isRunning ();
         m_requestAborted = true;
     }
     m_failEmitted = false;
-
-    switch (m_requestType) {
-    case RequestType::RequestGet: {
-        qDebug()<<"Get "<< url.toString ();
-        QNetworkRequest request(url);
-        m_reply = m_network->get (request);
-        break;
+    if (!cookieFile().isEmpty()) {
+        m_network->setCookieFilePath(cookieFile());
     }
-    case RequestType::RequestPut: {
-        QByteArray qba(url.query (QUrl::FullyEncoded).toLocal8Bit ());
-        QNetworkRequest request(url);
-        request.setHeader(QNetworkRequest::ContentTypeHeader,
-                          "application/x-www-form-urlencoded");
-        request.setHeader(QNetworkRequest::ContentLengthHeader,
-                          QByteArray::number(qba.length()));
+    QByteArray replyData;
+    QCNetworkRequest request(url);
+    request.setRawHeader("User-Agent",
+                         "Mozilla/5.0 (Windows;U;Windows NT 5.1;zh-CN;rv:1.9.2.9) Gecko/20100101 Firefox/43.0");
+    request.setRawHeader("Accept",
+                         "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+
+    if (m_requestType == RequestType::RequestGet) {
+        qDebug()<<"Get "<< url.toString ();
+        m_reply = m_network->create(request);
+    } else {
+        QByteArray qba(url.query(QUrl::FullyEncoded).toUtf8());
+        request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.setRawHeader("Content-Length", QByteArray::number(qba.length()));
         qDebug("post data [%s] to [%s]",
                qba.constData(),
-               url.toString().toLocal8Bit().constData());
-        m_reply = m_network->post (request, qba);
-        break;
-    }
-    default:
-        break;
-    }
-    if (watchTimeout) {
-        m_requestAborted = false;
-        m_timer->start (m_interval);
+               url.toString().toUtf8().constData());
+        m_reply = m_network->create(request);
+        m_reply->setPostData(qba);
     }
 
-    if (m_reply) {
-        connect (m_reply, &QNetworkReply::finished,
-                 this, &BaseNetworkLookup::readReplyData);
+    m_reply->setWriteFunction([&](char *buffer, size_t size) ->size_t {
+        replyData.append(buffer, static_cast<int>(size));
+        return size;
+    });
+    m_reply->setCustomHeaderFunction([&](char *buffer, size_t size)->size_t {
+        if (!replyData.isEmpty()) {
+            const QByteArray header(buffer, static_cast<int>(size));
+            const int pos = replyData.indexOf(header);
+            if (pos >= 0) {
+                replyData.remove(pos, static_cast<int>(size));
+            }
+        }
+        return size;
+    });
+
+    if (watchTimeout) {
+        m_requestAborted = false;
+        m_timer->start(m_interval);
     }
+
+    m_reply->perform();
+
+    if (m_timer->isActive()) {
+        m_timer->stop();
+    }
+
+    url = m_reply->request().url();
+    const NetworkError error = m_reply->error();
+    const QString errorStr = m_reply->errorString();
+    m_reply->deleteLater();
+    m_reply = Q_NULLPTR;
+    if (error != NetworkNoError) {
+        if (!m_failEmitted) {
+            m_failEmitted = true;
+            emit failed(url, errorStr);
+        }
+        return false;
+    }
+    qDebug()<<Q_FUNC_INFO<<"=== succeed with result "<<replyData;
+
+    emit succeed(url, replyData);
     return true;
 }
 
@@ -118,42 +149,6 @@ void BaseNetworkLookup::doTimeout()
     m_requestAborted = true;
     if (m_reply)
         m_reply->abort ();
-}
-
-void BaseNetworkLookup::readReplyData()
-{
-    if (m_timer->isActive ())
-        m_timer->stop ();
-
-    QUrl url = m_reply->request ().url ();
-    if (m_requestAborted) {
-        m_reply->deleteLater ();
-        m_reply = nullptr;
-        if (!m_failEmitted) {
-            m_failEmitted = true;
-            emit failed (url, QString("Aborted du to time out"));
-        }
-        return;
-    }
-    QNetworkReply::NetworkError error = m_reply->error ();
-    if (error != QNetworkReply::NetworkError::NoError) {
-        QString errorStr = m_reply->errorString ();
-        m_reply->deleteLater ();
-        m_reply = nullptr;
-        if (!m_failEmitted) {
-            m_failEmitted = true;
-            emit failed (url, errorStr);
-        }
-        return;
-    }
-
-    QByteArray qba = m_reply->readAll ();
-    m_reply->deleteLater ();
-    m_reply = nullptr;
-
-    qDebug()<<Q_FUNC_INFO<<"===  BaseNetworkLookup  succeed with result "<<qba;
-
-    emit succeed (url, qba);
 }
 } //Lyrics
 } //PhoenixPlayer

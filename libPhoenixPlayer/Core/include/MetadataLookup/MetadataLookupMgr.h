@@ -25,7 +25,7 @@ class LIBPHOENIXPLAYER_EXPORT MetadataLookupMgr : public QThread
 {
     Q_OBJECT
 public:
-    explicit MetadataLookupMgr(QObject *parent = 0);
+    explicit MetadataLookupMgr(QObject *parent = Q_NULLPTR);
     virtual ~MetadataLookupMgr();
     void lookup(const AudioMetaObject &data, IMetadataLookup::LookupType type);
 
@@ -34,8 +34,6 @@ protected:
         AudioMetaObject data;
         IMetadataLookup::LookupType type;
         bool operator == (const WorkNode &other) const {
-//            return ((*(this->data))->hash () == (*(other.data))->hash ()
-//                    && (this->type == other.type));
             return data.hash () == other.data.hash ()
                     && type == other.type;
         }
@@ -72,33 +70,21 @@ private:
 //    void doLookup();
     void emitFinish();
 private:
-    PluginLoader *m_pluginLoader;
-//    IMetadataLookup *m_currentLookup;
-    PPSettings *m_settings;
-    PPUtility *m_util;
+    PluginLoader        *m_pluginLoader;
+    PPSettings          *m_settings;
+    PPUtility           *m_util;
 
-    QList<WorkNode> m_workQueue;
-    WorkNode m_currentWork;
+    QList<WorkNode>     m_workQueue;
+    WorkNode            m_currentWork;
 
-//    QList<IMetadataLookup *> m_lookupList;
-    QList<HostNode> m_hostList;
-//    QList<HostNode>::const_iterator m_currentHost;
-    HostNode m_currentHost;
-//    int m_currentHostIndex;
-//    IMetadataLookup **m_currentLookup;
+    QList<HostNode>     m_hostList;
+    HostNode            m_currentHost;
 
-    QMutex m_mutex;
-    QMutex m_lookupMutex;
-    bool m_finish;
-    bool m_doInternalLoop;
-    bool m_useNextHost;
-//    QTimer *m_destructorTimer;
-//    QMutex m_workQueueLock;
-//    QMutex m_startLookupLock;
-//    QMutex m_destructorLock;
-//    int m_currentLookupIndex;
-//    bool m_lookupStarted;
-//    bool m_destructorState;
+    QMutex      m_mutex;
+    QMutex      m_lookupMutex;
+    bool        m_finish;
+//    bool        m_doInternalLoop;
+    bool        m_useNextHost;
 };
 
 } //MetadataLookup

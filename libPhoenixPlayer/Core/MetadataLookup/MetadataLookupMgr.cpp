@@ -25,7 +25,7 @@ MetadataLookupMgr::MetadataLookupMgr(QObject *parent)
     m_settings = phoenixPlayerLib->settings ();
     m_util = PPUtility::instance ();
     m_finish = true;
-    m_doInternalLoop = true;
+//    m_doInternalLoop = true;
     m_useNextHost = true;
     initPluginObject ();
 }
@@ -106,7 +106,7 @@ void MetadataLookupMgr::run()
             }
             if (!m_useNextHost)
                 break;
-            m_doInternalLoop = true;
+//            m_doInternalLoop = true;
             m_useNextHost = true;
             m_currentHost = m_hostList.at (i);
 //            在外部设置LookupFlag，防止当在nextLookupPlugin里面没有任何一个插件支持当前的flag的时候，在发送失败信号的时候无法得到LookupFlag
@@ -124,25 +124,25 @@ void MetadataLookupMgr::run()
                 qDebug()<<Q_FUNC_INFO<<QString("Use lookup plugin [%1] for lookup type [%2], with track [%3]")
                           .arg ((*m_currentHost.lookup)->metaObject ()->className ())
                           .arg (m_currentWork.type)
-                          .arg (/*(*m_currentWork.data)->path ()*/m_currentWork.data.path ()
+                          .arg (m_currentWork.data.path ()
                                 +"/"
-                                +/*(*m_currentWork.data)->name ()*/m_currentWork.data.name ());
+                                +m_currentWork.data.name ());
                 (*m_currentHost.lookup)->lookup (m_currentWork.data);
             } else {
                 continue;
             }
-            //使用一个内部的QEventLoop来等待lookup成功活在失败
-            QScopedPointer<QTimer> timer(new QTimer(this));
-            QEventLoop eventLoop;
-            connect (timer.data (), &QTimer::timeout,[&] {
-                if (!m_doInternalLoop) {
-                    timer.data ()->stop ();
-                    eventLoop.quit ();
-                }
-            });
-            timer.data ()->setSingleShot (false);
-            timer.data ()->start (30);
-            eventLoop.exec ();
+//            //使用一个内部的QEventLoop来等待lookup成功活在失败
+//            QScopedPointer<QTimer> timer(new QTimer(this));
+//            QEventLoop eventLoop;
+//            connect (timer.data (), &QTimer::timeout,[&] {
+//                if (!m_doInternalLoop) {
+//                    timer.data ()->stop ();
+//                    eventLoop.quit ();
+//                }
+//            });
+//            timer.data ()->setSingleShot (false);
+//            timer.data ()->start (30);
+//            eventLoop.exec ();
 //            emit lookupSucceed (m_currentWork.data, (*m_currentHost.lookup)->currentLookupFlag ());
         }
     }
@@ -245,14 +245,14 @@ void MetadataLookupMgr::doLookupSucceed(const QByteArray &result)
         emit lookupSucceed (m_currentWork.data, (*m_currentHost.lookup)->currentLookupFlag ());
     }
     m_useNextHost = false;
-    m_doInternalLoop = false;
+//    m_doInternalLoop = false;
 }
 
 void MetadataLookupMgr::doLookupFailed()
 {
     qDebug()<<Q_FUNC_INFO;
     m_useNextHost = true;
-    m_doInternalLoop = false;
+//    m_doInternalLoop = false;
 }
 
 //void MetadataLookupMgr::destructor()
@@ -339,7 +339,7 @@ void MetadataLookupMgr::initPluginObject()
     }
 
     QStringList libs = m_settings->metadataLookupLibraries ();
-    foreach (QString s, libs) {
+    foreach (const QString &s, libs) {
         MetadataLookupHost *host = new MetadataLookupHost(s, this);
         if (host->isValid ()) {
             IMetadataLookup *lookup = host->instance<IMetadataLookup>();
@@ -362,7 +362,7 @@ void MetadataLookupMgr::initPluginObject()
     if (!m_hostList.isEmpty ()) {
 //        m_currentHost = m_hostList.first ();
 //        m_currentHostIndex = 0;
-        foreach (HostNode node, m_hostList) {
+        foreach (const HostNode &node, m_hostList) {
             bool ret = QObject::connect (*(node.lookup), &IMetadataLookup::lookupFailed,
                                          this, &MetadataLookupMgr::doLookupFailed,
                                          Qt::UniqueConnection);
