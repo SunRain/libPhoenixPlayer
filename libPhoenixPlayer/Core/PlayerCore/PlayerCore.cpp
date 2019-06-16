@@ -278,7 +278,7 @@ MusicQueue *PlayerCore::playQueue() const
 //    return qobject_cast<QObject*>(playList ());
 //}
 
-AudioMetaObject PlayerCore::curTrackMetadata()
+AudioMetaObject PlayerCore::curTrackMetaObject()
 {
     return m_curTrack;
 }

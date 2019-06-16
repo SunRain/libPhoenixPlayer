@@ -67,7 +67,7 @@ public:
     MusicQueue *playQueue() const;
 //    QObject *playListObject() const;
 
-    AudioMetaObject curTrackMetadata();
+    AudioMetaObject curTrackMetaObject();
     QVariantMap currentTrack() const;
 
     ///
