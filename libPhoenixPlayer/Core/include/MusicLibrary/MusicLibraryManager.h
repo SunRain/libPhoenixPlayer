@@ -49,7 +49,11 @@ public:
     ///
     Q_INVOKABLE bool empty() const;
 
-    Q_INVOKABLE bool isEmpty() const {return empty();}
+    Q_INVOKABLE inline bool isEmpty() const {return empty();}
+
+    void deleteObject(const AudioMetaObject &obj, bool deleteFromLocalDisk = false);
+
+    void deleteObject(const QString &hash, bool deleteFromLocalDisk = false);
 
     ///
     /// \brief artistTracks 显示某个artist下的曲目
@@ -259,7 +263,12 @@ public:
 
 ////protected:
 ////    explicit MusicLibraryManager(QObject *parent = 0);
-//signals:
+signals:
+    ///
+    /// \brief libraryListSizeChanged
+    /// emited when audio meta object removed from library or added to library
+    void libraryListSizeChanged();
+
 //    void playingSongChanged();
 //    void playListChanged();
 //    void playListCreated();

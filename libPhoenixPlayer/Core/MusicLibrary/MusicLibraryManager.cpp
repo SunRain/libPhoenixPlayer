@@ -50,24 +50,10 @@ MusicLibraryManager::MusicLibraryManager(PPSettings *set, PluginLoader *loader, 
                     this->insertToArtistGroupMap(o);
                 }
             }
+            emit this->libraryListSizeChanged();
         });
         connect (m_dao, &IMusicLibraryDAO::metaDataDeleted,
                  this, [&](const QString &hash) {
-//            QStringList daoList = m_dao->trackHashList ();
-//            QStringList trackList;
-//            foreach (const AudioMetaObject &d, m_trackList) {
-//                trackList.append (d.hash ());
-//            }
-//            int pos = -1;
-//            for (int i=0; i<trackList.size (); ++i) {
-//                if (!daoList.contains (trackList.value (i))) {
-//                    pos = i;
-//                    break;
-//                }
-//            }
-//            if (pos > 0) {
-//                m_trackList.removeAt (pos);
-//            }
             static auto loop = [](const AudioMetaList &list, const QString &hash) -> int {
                 int pos = -1;
                 for (int i=0; i<list.size(); ++i) {
@@ -116,6 +102,7 @@ MusicLibraryManager::MusicLibraryManager(PPSettings *set, PluginLoader *loader, 
                 }
                 m_trackList.removeAt(pos);
             }
+            emit this->libraryListSizeChanged();
         });
     }
 
@@ -159,6 +146,30 @@ AudioMetaObject MusicLibraryManager::trackFromHash(const QString &hash) const
 bool MusicLibraryManager::empty() const
 {
     return m_trackList.isEmpty ();
+}
+
+void MusicLibraryManager::deleteObject(const AudioMetaObject &obj, bool deleteFromLocalDisk)
+{
+    if (!m_dao) {
+        return;
+    }
+    if (m_dao->deleteMetaData(obj) && deleteFromLocalDisk) {
+        QString file = QString("%1/%2").arg(obj.path()).arg(obj.name());
+        if (QFile::exists(file)) {
+            if (!QFile::remove(file)) {
+                qWarning()<<Q_FUNC_INFO<<"remove failure file ["<<file<<"]";
+            }
+        }
+    }
+}
+
+void MusicLibraryManager::deleteObject(const QString &hash, bool deleteFromLocalDisk)
+{
+    AudioMetaObject obj = trackFromHash(hash);
+    if (obj.isEmpty()) {
+        return;
+    }
+    deleteObject(obj, deleteFromLocalDisk);
 }
 
 AudioMetaList MusicLibraryManager::artistTracks(const QString &artistName, int limitNum)

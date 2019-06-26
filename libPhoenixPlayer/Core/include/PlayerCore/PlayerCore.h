@@ -93,6 +93,11 @@ public:
     /// \param url
     ///
     Q_INVOKABLE void playFromNetwork(const QUrl &url);
+
+    ///
+    /// \brief playTrack without adding to playqueue
+    /// \param data
+    ///
     void playTrack(const AudioMetaObject &data);
 
     //播放队列相关操作
