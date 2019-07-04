@@ -190,7 +190,7 @@ bool SQLite3DAO::initDataBase()
     {
         QString str = QString("create table %1 (id integer primary key, %2 TEXT, %3 INTEGER, %4 INTEGER)")
                 .arg(TABLE_UTILITY_TAG)
-                .arg(AudioMetaObject::keyHash())
+                .arg(AudioMetaObject::Object_Internal_Key_Name_Hash())
                 .arg(UTILITY_KEY_CNT)
                 .arg(UTILITY_KEY_LIKE);
 
@@ -340,7 +340,7 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
     str += " set ";
     str += column;
     str += QString(" where %1 = \"%2\"")
-            .arg (AudioMetaObject::keyHash ())
+            .arg (AudioMetaObject::Object_Internal_Key_Name_Hash ())
             .arg (obj.hash ());
 
     QSqlQuery q;
@@ -399,7 +399,7 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
 
     QString str = QString("delete from %1 where %2 = \"%3\"")
             .arg (TABLE_LIBRARY_TAG)
-            .arg (AudioMetaObject::keyHash ())
+            .arg (AudioMetaObject::Object_Internal_Key_Name_Hash ())
             .arg (hash);
     QSqlQuery q;
     if (q.exec (str)) {
@@ -424,11 +424,11 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
 
     QString str = QString("select * from %1 where %2 = \"%3\"")
             .arg (TABLE_LIBRARY_TAG)
-            .arg (AudioMetaObject::keyHash ())
+            .arg (AudioMetaObject::Object_Internal_Key_Name_Hash ())
             .arg (hash);
     QSqlQuery q(str, m_database);
     while (q.next ()) {
-        QString str = q.value (AudioMetaObject::keyHash ()).toString ();
+        QString str = q.value (AudioMetaObject::Object_Internal_Key_Name_Hash ()).toString ();
         if (str != hash)
             continue;
 
@@ -456,7 +456,7 @@ bool SQLite3DAO::setLike(const QString &hash, bool like)
         str += TABLE_UTILITY_TAG;
         str += " set ";
         str += QString(" %1 = '%2' ").arg(UTILITY_KEY_LIKE).arg(like);
-        str += QString(" where %1 = '%2'").arg(AudioMetaObject::keyHash()).arg(hash);
+        str += QString(" where %1 = '%2'").arg(AudioMetaObject::Object_Internal_Key_Name_Hash()).arg(hash);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
 //            m_likeMap.insert(hash, like);
@@ -470,7 +470,7 @@ bool SQLite3DAO::setLike(const QString &hash, bool like)
         QString str = "insert into ";
         str += TABLE_UTILITY_TAG;
         str += QString(" (%1, %2, %3) ")
-                  .arg(AudioMetaObject::keyHash())
+                  .arg(AudioMetaObject::Object_Internal_Key_Name_Hash())
                   .arg(UTILITY_KEY_CNT)
                   .arg(UTILITY_KEY_LIKE);
         str += " values ";
@@ -502,7 +502,7 @@ bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
         str += TABLE_UTILITY_TAG;
         str += " set ";
         str += QString(" %1 = '%2' ").arg(UTILITY_KEY_CNT).arg(count);
-        str += QString(" where %1 = '%2'").arg(AudioMetaObject::keyHash()).arg(hash);
+        str += QString(" where %1 = '%2'").arg(AudioMetaObject::Object_Internal_Key_Name_Hash()).arg(hash);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
 //            m_playedCntMap.insert(hash, count);
@@ -516,7 +516,7 @@ bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
         QString str = "insert into ";
         str += TABLE_UTILITY_TAG;
         str += QString(" (%1, %2, %3) ")
-                  .arg(AudioMetaObject::keyHash())
+                  .arg(AudioMetaObject::Object_Internal_Key_Name_Hash())
                   .arg(UTILITY_KEY_CNT)
                   .arg(UTILITY_KEY_LIKE);
         str += " values ";
@@ -1259,7 +1259,7 @@ void SQLite3DAO::calcExistSongs()
 
     QSqlQuery q(str, m_database);
     while (q.next ()) {
-        const QString hash = q.value(AudioMetaObject::keyHash()).toString();
+        const QString hash = q.value(AudioMetaObject::Object_Internal_Key_Name_Hash()).toString();
         AudioMetaObject audio;
         QJsonObject json;
         foreach (const QString &key, audio.toObject().keys()) {
@@ -1290,7 +1290,7 @@ void SQLite3DAO::calcUtilityTable()
 //        m_playedCntMap.insert(hash, cnt);
 //        m_likeMap.insert(hash, like);
         InnerNode node;
-        node.d.data()->hash = q.value(AudioMetaObject::keyHash()).toString();;
+        node.d.data()->hash = q.value(AudioMetaObject::Object_Internal_Key_Name_Hash()).toString();;
         node.d.data()->cnt = q.value(UTILITY_KEY_CNT).toInt();
         node.d.data()->like = q.value(UTILITY_KEY_LIKE).toBool();
         m_utilityMap.insert(node.d.data()->hash, node);

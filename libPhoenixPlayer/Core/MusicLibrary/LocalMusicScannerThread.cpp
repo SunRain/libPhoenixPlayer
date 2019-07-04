@@ -28,11 +28,11 @@ LocalMusicScannerThread::LocalMusicScannerThread(PPSettings *set, PluginLoader *
     if (dh)
         m_dao = dh->instance<IMusicLibraryDAO>();
 
-    QStringList tagHosts = m_settings->tagPaserLibraries ();
+    QStringList tagHosts = m_settings->tagParserLibraries ();
     if (tagHosts.isEmpty ())
         tagHosts.append (m_pluginLoader->pluginLibraries (PPCommon::PluginMusicTagParser));
 
-    foreach (QString s, tagHosts) {
+    foreach (const QString &s, tagHosts) {
         MusicTagParserHost *host = new MusicTagParserHost(s);
         if (!host->isValid ()) {
             host->deleteLater ();
@@ -80,7 +80,7 @@ void LocalMusicScannerThread::addLookupDir(const QString &dirName, bool lookupIm
     if (!m_pathList.contains (dirName))
         m_pathList.append (dirName);
     m_mutex.unlock ();
-    if (lookupImmediately) {
+    if (lookupImmediately && !this->isRunning()) {
         this->start ();
     }
 }
@@ -91,7 +91,7 @@ void LocalMusicScannerThread::addLookupDirs(const QStringList &dirList, bool loo
     m_pathList.append (dirList);
     m_pathList.removeDuplicates ();
     m_mutex.unlock ();
-    if (lookupImmediately) {
+    if (lookupImmediately && !this->isRunning()) {
         this->start ();
     }
 }
@@ -157,15 +157,10 @@ void LocalMusicScannerThread::scanDir(const QString &path)
             //所以直接检测mimetype 生成的字符串
 //            if (type.inherits ("audio/mpeg")) {
             if (type.name ().contains ("audio") || type.name ().contains ("Audio")) {
-//                AudioMetaObject *data = new AudioMetaObject(path, info.fileName (), info.size (), 0);
                 AudioMetaObject data(path, info.fileName (), info.size ());
-//                foreach (MusicTagParserHost *host, m_tagHostList) {
                 foreach (IMusicTagParser *parser, m_tagParserList) {
                     if (m_stopLookupFlag)
                         break;
-//                    IMusicTagParser *parser = host->instance<IMusicTagParser>();
-//                    if (!parser)
-//                        continue;
                     if (parser->parserTag (&data)) {
                         break;
                     }

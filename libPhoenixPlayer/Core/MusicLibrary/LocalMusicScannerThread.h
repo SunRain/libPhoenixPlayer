@@ -45,6 +45,7 @@ protected:
 
 private:
     QStringList             m_pathList;
+    QStringList             m_fileList;
     bool                    m_stopLookupFlag;
     QMimeDatabase           m_QMimeDatabase;
     QMutex                  m_mutex;

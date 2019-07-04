@@ -13,7 +13,9 @@ class AudioMetaObject;
 namespace MusicLibrary {
 
 class IMusicLibraryDAO;
+class FileListScanner;
 class LocalMusicScannerThread;
+class AudioParser;
 class LIBPHOENIXPLAYER_EXPORT LocalMusicScanner : public QObject
 {
     Q_OBJECT
@@ -28,14 +30,18 @@ public:
     void scarnDirs(const QStringList &list);
 
 signals:
+    void searchingDir(const QString &dirName);
+    void parsingFile(const QString &file);
     void searchingFinished();
 
 private:
     void doScann(const QString &dirname);
 private:
-    PPSettings                  *m_settings;
-    PluginLoader                *m_pluginLoader;
-    LocalMusicScannerThread     *m_scanner;
+    PPSettings                  *m_settings         = Q_NULLPTR;
+    PluginLoader                *m_pluginLoader     = Q_NULLPTR;
+//    LocalMusicScannerThread     *m_scanner          = Q_NULLPTR;
+    FileListScanner             *m_fileListScanner  = Q_NULLPTR;
+    AudioParser                 *m_audioParser      = Q_NULLPTR;
 };
 } //MusicLibrary
 } //PhoenixPlayer

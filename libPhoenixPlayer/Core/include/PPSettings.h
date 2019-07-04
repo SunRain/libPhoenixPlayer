@@ -99,9 +99,13 @@ public:
     void disableMetadataLookup(const QString &libraryFile);
     QStringList metadataLookupLibraries() const;
 
-    void enableTagPaser(const QString &libraryFile);
-    void disableTagPaser(const QString &libraryFile);
-    QStringList tagPaserLibraries() const;
+    void enableTagParser(const QString &libraryFile);
+    void disableTagParser(const QString &libraryFile);
+    QStringList tagParserLibraries() const;
+
+    void enableSpectrumGenerator(const QString &lib);
+    void disableSpectrumGenerator(const QString &lib);
+    QStringList spectrumGeneratorLibraries() const;
 
 signals:
     void autoFetchMetaDataChanged();

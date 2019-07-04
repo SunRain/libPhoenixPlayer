@@ -20,7 +20,8 @@ const static char *KEY_PLUGIN_MUSIC_LIBRARY_DAO = "Plugin/CurrentMusicLibraryDAO
 const static char *KEY_PLUGIN_OUTPUT = "Plugin/CurrentOutPut";
 const static char *KEY_PLUGIN_DECODERS = "Plugin/Decoders";
 const static char *KEY_PLUGIN_METADATA_LOOKUP = "Plugin/MetadataLookup";
-const static char *KEY_PLUGIN_TAG_PASER = "Plugin/TagPaser";
+const static char *KEY_PLUGIN_TAG_PARSER = "Plugin/TagPaser";
+const static char *KEY_PLUGIN_SPECTTUM_PARSER = "Plugin/SpectrumGenerator";
 const static char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
 const static char *KEY_TRACE_LOG = "TraceLog";
 const static char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
@@ -29,8 +30,7 @@ const static char *KEY_PLAY_LIST_DIR = "PlayListDir";
 
 PPSettings::PPSettings(QObject *parent) : QObject(parent)
 {
-    m_settings = new QSettings(qApp->organizationName(), qApp->applicationName(),
-                              parent);
+    m_settings = new QSettings(qApp->organizationName(), qApp->applicationName(), parent);
 
 
     QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
@@ -363,33 +363,62 @@ QStringList PPSettings::metadataLookupLibraries() const
         return v.split ("||");
 }
 
-void PPSettings::enableTagPaser(const QString &libraryFile)
+void PPSettings::enableTagParser(const QString &libraryFile)
 {
-    QStringList list = tagPaserLibraries ();
+    QStringList list = tagParserLibraries ();
     if (!list.contains (libraryFile)) {
         list.append (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_TAG_PASER, list.join ("||"));
+        m_settings->setValue (KEY_PLUGIN_TAG_PARSER, list.join ("||"));
         m_settings->sync ();
     }
 }
 
-void PPSettings::disableTagPaser(const QString &libraryFile)
+void PPSettings::disableTagParser(const QString &libraryFile)
 {
-    QStringList list = tagPaserLibraries ();
+    QStringList list = tagParserLibraries ();
     if (list.contains (libraryFile)) {
         list.removeOne (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_TAG_PASER, list.join ("||"));
+        m_settings->setValue (KEY_PLUGIN_TAG_PARSER, list.join ("||"));
         m_settings->sync ();
     }
 }
 
-QStringList PPSettings::tagPaserLibraries() const
+QStringList PPSettings::tagParserLibraries() const
 {
-    QString v = m_settings->value (KEY_PLUGIN_TAG_PASER, QString()).toString ();
+    QString v = m_settings->value (KEY_PLUGIN_TAG_PARSER, QString()).toString ();
     if (v.isEmpty ())
         return QStringList();
     else
         return v.split ("||");
+}
+
+void PPSettings::enableSpectrumGenerator(const QString &lib)
+{
+    QStringList list = spectrumGeneratorLibraries();
+    if (!list.contains(lib)) {
+        list.append(lib);
+        m_settings->setValue(KEY_PLUGIN_SPECTTUM_PARSER, list.join("||"));
+        m_settings->sync();
+    }
+}
+
+void PPSettings::disableSpectrumGenerator(const QString &lib)
+{
+    QStringList list = spectrumGeneratorLibraries();
+    if (list.contains(lib)) {
+        list.removeOne(lib);
+        m_settings->setValue(KEY_PLUGIN_SPECTTUM_PARSER, list.join("||"));
+        m_settings->sync();
+    }
+}
+
+QStringList PPSettings::spectrumGeneratorLibraries() const
+{
+    QString str = m_settings->value(KEY_PLUGIN_SPECTTUM_PARSER, QString()).toString();
+    if (str.isEmpty()) {
+        return QStringList();
+    }
+    return str.split("||");
 }
 
 void PPSettings::setPlayListDir(QString arg)

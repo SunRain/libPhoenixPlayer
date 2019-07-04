@@ -87,11 +87,12 @@ public:
         PluginTypeAll = 0x100,
         //为保证后续兼容,TypePlayBackend必须为第二个项
         PluginPlayBackend,              //播放后端
-        PluginMusicLibraryDAO,              //音乐库存储后端
+        PluginMusicLibraryDAO,          //音乐库存储后端
         PluginMusicTagParser,           //音乐Tag解析
         PluginMetadataLookup,           //metadata查询
         PluginDecoder,                  //解码插件
         PluginOutPut,                   //输出插件
+        PluginSpectrumGenerator,        //
         PluginTypeUndefined             //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
     };
 

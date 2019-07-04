@@ -250,8 +250,10 @@ class LIBPHOENIXPLAYER_EXPORT AudioMetaObject
 public:
     AudioMetaObject();
     AudioMetaObject(const QString &path, const QString &name, quint64 size);
+    AudioMetaObject(const QString &file);
     AudioMetaObject(const AudioMetaObject &other);
     AudioMetaObject(const QUrl &url);
+
     virtual ~AudioMetaObject();
 
     inline AudioMetaObject &operator =(const AudioMetaObject &other) {
@@ -266,11 +268,13 @@ public:
     }
 
     ///
-    /// \brief keyHash the primary key for audio meta data, each audio meta data had a unique hash
+    /// \brief Object_Internal_Key_Name_Hash
+    /// the primary key for audio meta data, each audio meta data had a unique hash
     /// this should be used for database searching
+    /// the key name returned is same as "KEY_HASH" and KeyHash() in file AudioMetaObjectKeys.h
     /// \return
     ///
-    static QString keyHash();
+    static QString Object_Internal_Key_Name_Hash();
 
     static QString formatHash(const QString &value);
     static QString formatHash(const QString &path, const QString &name, quint64 size);
@@ -309,7 +313,9 @@ public:
     ///
     QUrl queryImgUri() const;
 
-    bool isEmpty() const;
+    Q_DECL_DEPRECATED bool isEmpty() const;
+    bool isHashEmpty() const;
+
     QJsonObject toObject() const;
     QByteArray toJson() const;
     QVariantMap toMap() const;

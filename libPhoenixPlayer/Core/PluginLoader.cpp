@@ -174,7 +174,7 @@ QStringList PluginLoader::pluginLibraries(PPCommon::PluginType type)
 {
     if (type == PPCommon::PluginTypeAll)
         return m_libraries.values ();
-    return m_libraries.values (type);
+    return m_libraries.values(type);
 }
 
 //#if defined(SAILFISH_OS) || defined(UBUNTU_TOUCH)
@@ -480,7 +480,7 @@ void PluginLoader::initPluginByPath(const QString &path)
     qDebug()<<Q_FUNC_INFO<<QString("Search plugin in dir [%1]").arg (path);
 
     QDir dir(path);
-    foreach (QString fileName, dir.entryList(QDir::Files)) {
+    foreach (const QString &fileName, dir.entryList(QDir::Files)) {
         QString absFilePath = dir.absoluteFilePath(fileName);
         QPluginLoader loader(absFilePath, this);
         QJsonObject obj = loader.metaData ();
@@ -498,6 +498,8 @@ void PluginLoader::initPluginByPath(const QString &path)
                 m_libraries.insertMulti (PPCommon::PluginDecoder, absFilePath);
             } else if (iid.startsWith ("PhoenixPlayer.OutPut")) {
                 m_libraries.insertMulti (PPCommon::PluginOutPut, absFilePath);
+            } else if (iid.startsWith("PhoenixPlayer.SpectrumGenerator")) {
+                m_libraries.insertMulti(PPCommon::PluginSpectrumGenerator, absFilePath);
             } else {
                 m_libraries.insertMulti (PPCommon::PluginTypeUndefined, absFilePath);
             }
@@ -511,7 +513,7 @@ void PluginLoader::initPluginByPath(const QString &path)
 //             <<obj->libraryFile ()<<"]";
 //    }
     foreach (PPCommon::PluginType t, m_libraries.uniqueKeys ()) {
-        foreach (QString str, m_libraries.values (t)) {
+        foreach (const QString &str, m_libraries.values (t)) {
             qDebug()<<Q_FUNC_INFO<<QString("Found plugin for type [%1], file [%2]").arg (t).arg (str);
         }
     }

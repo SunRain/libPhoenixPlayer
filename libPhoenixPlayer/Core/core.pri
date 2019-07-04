@@ -7,6 +7,8 @@ QT += network core
 #CONFIG += c++11
 
 HEADERS += \
+    $$PWD/include/MusicLibrary/ISpectrumGenerator.h \
+    $$PWD/include/MusicLibrary/SpectrumGeneratorHost.h \
     $$PWD/include/PPCommon.h \
     $$PWD/include/PPUtility.h \
     $$PWD/include/PlayerCore/PlayListMeta.h \

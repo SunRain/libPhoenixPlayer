@@ -25,6 +25,19 @@ AudioMetaObject::AudioMetaObject(const QString &path, const QString &name, quint
     d.data ()->hash = AudioMetaObject::formatHash(path, name, size);
 }
 
+AudioMetaObject::AudioMetaObject(const QString &file)
+    : d(new AudioMetaObjectPriv())
+{
+    if (!QFile::exists(file)) {
+        return;
+    }
+    QFileInfo info(file);
+    d.data()->path = info.absolutePath();
+    d.data()->name = info.fileName();
+    d.data()->size = info.size();
+    d.data()->hash = AudioMetaObject::formatHash(d.data()->path, d.data()->name, d.data()->size);
+}
+
 AudioMetaObject::AudioMetaObject(const AudioMetaObject &other)
     : d(other.d)
 {
@@ -58,7 +71,7 @@ bool AudioMetaObject::operator ==(const AudioMetaObject &other)
             && d.data ()->trackMeta == other.d.data ()->trackMeta;
 }
 
-QString AudioMetaObject::keyHash()
+QString AudioMetaObject::Object_Internal_Key_Name_Hash()
 {
     return KEY_HASH;
 }
@@ -197,6 +210,11 @@ QUrl AudioMetaObject::queryImgUri() const
 bool AudioMetaObject::isEmpty() const
 {
     return d.data ()->hash.isEmpty ();
+}
+
+bool AudioMetaObject::isHashEmpty() const
+{
+    return d.data()->hash.isEmpty();
 }
 
 QJsonObject AudioMetaObject::toObject() const
