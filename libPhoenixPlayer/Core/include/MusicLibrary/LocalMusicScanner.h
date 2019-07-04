@@ -31,7 +31,7 @@ public:
 
 signals:
     void searchingDir(const QString &dirName);
-    void parsingFile(const QString &file);
+    void parsingFile(const QString &file, int remainingSize);
     void searchingFinished();
 
 private:
@@ -39,7 +39,6 @@ private:
 private:
     PPSettings                  *m_settings         = Q_NULLPTR;
     PluginLoader                *m_pluginLoader     = Q_NULLPTR;
-//    LocalMusicScannerThread     *m_scanner          = Q_NULLPTR;
     FileListScanner             *m_fileListScanner  = Q_NULLPTR;
     AudioParser                 *m_audioParser      = Q_NULLPTR;
 };

@@ -40,7 +40,7 @@ public:
 
     void addDir(const QString &dir)
     {
-        if (dir.isEmpty()) {
+        if (dir.isEmpty() || m_stop) {
             return;
         }
         m_locker.lock();
@@ -56,13 +56,20 @@ public:
             this->start(QThread::HighPriority);
         }
     }
-
+    void stop()
+    {
+        m_stop = true;
+    }
     // QThread interface
 protected:
     void run() Q_DECL_OVERRIDE
     {
+        m_stop = false;
         QStringList fileList;
         while (true) {
+            if (m_stop) {
+                break;
+            }
             QMutexLocker ml(&m_locker);
             if (m_dirList.isEmpty()) {
                 break;
@@ -107,6 +114,7 @@ signals:
     void findFiles(const QStringList &fileList);
 
 private:
+    bool            m_stop = false;
     QStringList     m_dirList;
     QMutex          m_locker;
     QMimeDatabase   m_QMimeDatabase;
@@ -121,8 +129,13 @@ class AudioParser : public QThread
     Q_OBJECT
 public:
     explicit AudioParser(PPSettings *set, PluginLoader *loader, QObject *parent = Q_NULLPTR)
-        : QThread(parent), m_settings(set), m_pluginLoader(loader)
+        : QThread(parent), m_stop(false), m_settings(set), m_pluginLoader(loader)
     {
+        MusicLibraryDAOHost *dh = m_pluginLoader->curDAOHost();
+        if (dh) {
+            m_dao = dh->instance<IMusicLibraryDAO>();
+        }
+
         QStringList tagHosts = m_settings->tagParserLibraries();
         if (tagHosts.isEmpty())
             tagHosts.append(m_pluginLoader->pluginLibraries(PPCommon::PluginMusicTagParser));
@@ -174,19 +187,30 @@ public:
     }
     void addFiles(const QStringList &list)
     {
-        if (list.isEmpty()) {
+        if (list.isEmpty() || m_stop) {
             return;
         }
         m_mutex.lock();
         m_fileList.append(list);
         m_mutex.unlock();
     }
+    void stop()
+    {
+        m_stop = true;
+    }
 
     // QThread interface
 protected:
     void run() Q_DECL_OVERRIDE
     {
+        m_stop = false;
+        if (m_dao) {
+            m_dao->beginTransaction();
+        }
         while (true) {
+            if (m_stop) {
+                break;
+            }
             QMutexLocker ml(&m_mutex);
             if (m_fileList.isEmpty()) {
                 break;
@@ -205,32 +229,45 @@ protected:
                     break;
                 }
             }
-            emit parsed(obj);
-
+            if (m_dao) {
+                m_dao->insertMetaData(obj);
+            }
             foreach (auto parser, m_specParserList) {
                 auto list = parser->generate(obj);
                 if (!list.isEmpty()) {
-                    emit spectrumGenerated(list);
+                    QString f = QString("%1/%2.spek")
+                                    .arg(m_settings->musicImageCachePath())
+                                    .arg(obj.name());
+                    QFile qf(f);
+                    if (!qf.open(QIODevice::WriteOnly)) {
+                        qWarning()<<Q_FUNC_INFO<<"Open to write spectrum data error: "<<qf.errorString();
+                        break;
+                    }
+                    QDataStream out(&qf);
+                    out<<list;
+                    qf.flush();
+                    qf.close();
                     break;
                 }
             }
+        }
+        if (m_dao) {
+            m_dao->commitTransaction();
         }
         emit parsingFinished();
     }
 
 signals:
     void parsingFile(const QString &file, int remainingSize);
-    void parsed(const AudioMetaObject &obj);
-    void spectrumGenerated(const QList<QList<qreal>> &list);
     void parsingFinished();
 
-
 private:
+    bool                            m_stop;
     QMutex                          m_mutex;
     QStringList                     m_fileList;
     PPSettings                      *m_settings;
     PluginLoader                    *m_pluginLoader;
-//    IMusicLibraryDAO                *m_dao;
+    IMusicLibraryDAO                *m_dao;
     QList<MusicTagParserHost *>     m_tagHostList;
     QList<SpectrumGeneratorHost *>  m_specHostList;
     QList<IMusicTagParser *>        m_tagParserList;
@@ -255,19 +292,29 @@ LocalMusicScanner::LocalMusicScanner(PPSettings *set, PluginLoader *loader, QObj
                     m_audioParser->start(QThread::HighPriority);
                 }
             });
-
+    connect(m_audioParser, &AudioParser::parsingFile,
+            this, &LocalMusicScanner::parsingFile, Qt::QueuedConnection);
+    connect(m_audioParser, &AudioParser::parsingFinished,
+            this, &LocalMusicScanner::searchingFinished, Qt::QueuedConnection);
 }
 
 
 LocalMusicScanner::~LocalMusicScanner()
 {
-//    if (m_scanner && m_scanner->isRunning()) {
-//        m_scanner->stopLookup();
-//        m_scanner->quit();
-//        m_scanner->wait (3*60*1000);
-//        m_scanner->deleteLater();
-//        m_scanner = nullptr;
-//    }
+    if (m_fileListScanner->isRunning()) {
+        m_fileListScanner->stop();
+        m_fileListScanner->quit();
+        m_fileListScanner->wait(3*60*1000);
+        m_fileListScanner->deleteLater();
+        m_fileListScanner = nullptr;
+    }
+    if (m_audioParser->isRunning()) {
+        m_audioParser->stop();
+        m_audioParser->quit();
+        m_audioParser->wait(3*60*1000);
+        m_audioParser->deleteLater();
+        m_audioParser = nullptr;
+    }
 }
 
 void LocalMusicScanner::scanLocalMusic()
@@ -296,22 +343,9 @@ void LocalMusicScanner::scarnDirs(const QStringList &list)
 
 void LocalMusicScanner::doScann(const QString &dirname)
 {
-    if (!m_scanner) {
-        m_scanner = new LocalMusicScannerThread(m_settings, m_pluginLoader);
-        connect(m_scanner, &QThread::finished,
-                this, [&]() {
-            m_scanner->deleteLater();
-            m_scanner = nullptr;
-            emit searchingFinished();
-        });
-    }
-    if (dirname.isEmpty()) {
-        m_scanner->addLookupDirs(m_settings->musicDirs());
-    } else {
-        m_scanner->addLookupDir(dirname);
-    }
-    if (!m_scanner->isRunning()) {
-        m_scanner->start(QThread::HighPriority);
+    m_fileListScanner->addDir(dirname);
+    if (!m_fileListScanner->isRunning()) {
+        m_fileListScanner->start(QThread::HighPriority);
     }
 }
 
