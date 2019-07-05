@@ -22,6 +22,7 @@
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "MusicLibrary/SpectrumGeneratorHost.h"
 #include "MusicLibrary/ISpectrumGenerator.h"
+#include "MusicLibrary/MusicLibraryManager.h"
 
 #include "LocalMusicScannerThread.h"
 
@@ -235,14 +236,16 @@ protected:
             foreach (auto parser, m_specParserList) {
                 auto list = parser->generate(obj);
                 if (!list.isEmpty()) {
-                    QString f = QString("%1/%2.spek")
-                                    .arg(m_settings->musicImageCachePath())
-                                    .arg(obj.name());
+                    QString f = MusicLibraryManager::getSpectrumFile(obj);
+                    if (f.isEmpty()) {
+                        break;
+                    }
                     QFile qf(f);
                     if (!qf.open(QIODevice::WriteOnly)) {
                         qWarning()<<Q_FUNC_INFO<<"Open to write spectrum data error: "<<qf.errorString();
                         break;
                     }
+                    qDebug()<<Q_FUNC_INFO<<"Write spectrum data to "<<f;
                     QDataStream out(&qf);
                     out<<list;
                     qf.flush();

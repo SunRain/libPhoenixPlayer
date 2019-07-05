@@ -1,0 +1,6 @@
+{
+      "name" : "SpectrumGenerator-FFmpeg",
+      "version" : "0.0.1",
+      "dependencies" : [],
+      "description" : "Spectrum Parser by FFmpeg"
+} 

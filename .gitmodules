@@ -9,3 +9,6 @@
 [submodule "ThirdParty/QCurl"]
 	path = ThirdParty/QCurl
 	url = https://github.com/SunRain/QCurl.git
+[submodule "Plugins/MusicLibrary/SpectrumGeneratorFFmpeg/qt-spek"]
+	path = Plugins/MusicLibrary/SpectrumGeneratorFFmpeg/qt-spek
+	url = https://github.com/SunRain/qt-spek.git
