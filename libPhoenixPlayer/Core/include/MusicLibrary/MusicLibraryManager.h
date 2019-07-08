@@ -139,19 +139,19 @@ public:
 
     void saveToDB();
 
-    ///
-    /// \brief getSpectrumFile
-    /// \param obj
-    /// \return full path of spectrum data file. Empty if AudioMetaObject is empty
-    ///
-    static QString getSpectrumFile(const AudioMetaObject &obj);
+//    ///
+//    /// \brief getSpectrumFile
+//    /// \param obj
+//    /// \return full path of spectrum data file. Empty if AudioMetaObject is empty
+//    ///
+//    static QString getSpectrumFile(const AudioMetaObject &obj);
 
     ///
     /// \brief loadSpectrumData
     /// \param obj
     /// \return  empty if no spectrum data file found
 ///
-    static QList<QList<qreal> > loadSpectrumData(const AudioMetaObject &obj);
+    QList<QList<qreal> > loadSpectrumData(const AudioMetaObject &obj);
 
 
 //    ///

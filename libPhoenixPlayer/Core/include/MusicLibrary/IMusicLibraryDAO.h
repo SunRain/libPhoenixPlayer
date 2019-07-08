@@ -105,6 +105,10 @@ public:
     virtual QList<LastPlayedMeta> getLastPlayedByArtist(int limit = 20, bool orderByDesc = true) const = 0;
 
     virtual QList<LastPlayedMeta> getLastPlayedByGenres(int limit = 20, bool orderByDesc = true) const = 0;
+
+    virtual void insertSpectrumData(const AudioMetaObject &obj, const QList<QList<qreal>> &list) = 0;
+
+    virtual QList<QList<qreal>> getSpectrumData(const AudioMetaObject &obj) const = 0;
 //    ///
 //    /// \brief queryMusicLibrary 搜索音乐列表中targetColumn中的值,条件为regColumn值=regValue
 //    /// \param targetColumn

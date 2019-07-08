@@ -9,6 +9,8 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QJsonDocument>
+#include <QDataStream>
+#include <QByteArray>
 
 #include <QDebug>
 
@@ -24,6 +26,7 @@ const static char *DATABASE_NAME        = "PhoenixPlayer_musiclibrary";
 const static char *TABLE_LIBRARY_TAG    = "LIBRARY";
 const static char *TABLE_UTILITY_TAG    = "UTILITY";
 const static char *TABLE_LAST_PLAYED    = "LAST_PLAYED";
+const static char *TABLE_SPECTRUM       = "SPECTRUM";
 const static char *UTILITY_KEY_LIKE     = "LIKE";
 const static char *UTILITY_KEY_CNT      = "CNT";
 const static char *LP_KEY_HASH          = "HASH";
@@ -31,6 +34,8 @@ const static char *LP_KEY_ALBUM_NAME    = "ALBUM_NAME";
 const static char *LP_KEY_ARTIST_NAME   = "ARTIST_NAME";
 const static char *LP_KEY_GENRES        = "GENRES";
 const static char *LP_KEY_TIMESTAMP     = "TIME_STAMP";
+const static char *SP_KEY_HASH          = "HASH";
+const static char *SP_KEY_DATA          = "SPEK_DATA";
 
 bool sortLastPlayedMetaLessThan(const LastPlayedMeta &a, const LastPlayedMeta &b)
 {
@@ -87,9 +92,6 @@ SQLite3DAO::~SQLite3DAO()
     if (m_database.isOpen ()) {
         m_database.close ();
     }
-//    if (!m_existSongHashes.isEmpty ())
-//        m_existSongHashes.clear ();
-
     qDebug()<<"after "<<Q_FUNC_INFO;
 }
 
@@ -112,26 +114,33 @@ bool SQLite3DAO::initDataBase()
 
     if (!m_database.isValid ()) {
         qDebug()<<"Database is not valid";
-        m_database = QSqlDatabase::database ();
-        qDebug()<<"Try to add database form connection  'MusicLibrary', error is "<<m_database.lastError ().text ();
+        m_database = QSqlDatabase::database();
+        qDebug()<<"Try to add database form connection  'MusicLibrary', ret is "<<m_database.lastError().text();
     }
 
-    if (!m_database.isValid ()) {
+    if (!m_database.isValid()) {
         qDebug()<<"Add database from connection 'MusicLibrary' failed";
         m_database = QSqlDatabase::addDatabase("QSQLITE");
         m_database.setDatabaseName(dbFile);
-        qDebug()<<"Try to add a new connection MusicLibrary, error is "<<m_database.lastError ().text ();
+        qDebug()<<"Try to add a new connection MusicLibrary, ret is "<<m_database.lastError().text();
     }
 
-    if (!m_database.isValid ()) {
-        qDebug()<<"OOPS, We can't connetc to sqlite database "<<m_database.lastError ().text ();
+    if (!m_database.isValid()) {
+        qDebug()<<"OOPS, We can't connetc to sqlite database "<<m_database.lastError().text();
         m_database.removeDatabase (dbFile);
     }
     if (!m_database.open()) {
-        qDebug()<<"Can't open mDatabase "<<m_database.lastError ().text ();
-        m_database.removeDatabase (dbFile);
+        qDebug()<<"Can't open mDatabase "<<m_database.lastError().text();
+        m_database.removeDatabase(dbFile);
         return false;
     }
+
+    //    NULL	NULL value.	NULL
+    //    INTEGER	Signed integer, stored in 8, 16, 24, 32, 48, or 64-bits depending on the magnitude of the value.	typedef qint8/16/32/64
+    //    REAL	64-bit floating point value.	By default mapping to QString
+    //    TEXT	Character string (UTF-8, UTF-16BE or UTF-16-LE).	Mapped to QString
+    //    CLOB	Character large string object	Mapped to QString
+    //    BLOB	The value is a BLOB of data, stored exactly as it was input.	Mapped to QByteArray
 
     /*
      * 检测数据表是否存在
@@ -140,27 +149,8 @@ bool SQLite3DAO::initDataBase()
     if (tables.contains(TABLE_LIBRARY_TAG, Qt::CaseInsensitive)) {
         qDebug()<<"Found library table now, we will check exist Song Hashes!!!";
         calcExistSongs();
-//        return true;
-    }
-    if (tables.contains(TABLE_UTILITY_TAG, Qt::CaseInsensitive)) {
-        qDebug()<<"Found utility now, we will check exist data!!!";
-        calcUtilityTable();
-//        return true;
-    }
-    if (tables.contains(TABLE_LAST_PLAYED, Qt::CaseInsensitive)) {
-        qDebug()<<"Found lastplayed now, we will check exist data!!!";
-        calcLastPlayedTable();
-//        return true;
-    }
-//    NULL	NULL value.	NULL
-//    INTEGER	Signed integer, stored in 8, 16, 24, 32, 48, or 64-bits depending on the magnitude of the value.	typedef qint8/16/32/64
-//    REAL	64-bit floating point value.	By default mapping to QString
-//    TEXT	Character string (UTF-8, UTF-16BE or UTF-16-LE).	Mapped to QString
-//    CLOB	Character large string object	Mapped to QString
-//    BLOB	The value is a BLOB of data, stored exactly as it was input.	Mapped to QByteArray
-
-    QSqlQuery q;
-    {
+    } else {
+        QSqlQuery q;
         QString str;
         str = "create table ";
         str += TABLE_LIBRARY_TAG;
@@ -186,8 +176,11 @@ bool SQLite3DAO::initDataBase()
             return false;
         }
     }
-
-    {
+    if (tables.contains(TABLE_UTILITY_TAG, Qt::CaseInsensitive)) {
+        qDebug()<<"Found utility now, we will check exist data!!!";
+        calcUtilityTable();
+    } else {
+        QSqlQuery q;
         QString str = QString("create table %1 (id integer primary key, %2 TEXT, %3 INTEGER, %4 INTEGER)")
                 .arg(TABLE_UTILITY_TAG)
                 .arg(AudioMetaObject::Object_Internal_Key_Name_Hash())
@@ -204,7 +197,11 @@ bool SQLite3DAO::initDataBase()
             return false;
         }
     }
-    {
+    if (tables.contains(TABLE_LAST_PLAYED, Qt::CaseInsensitive)) {
+        qDebug()<<"Found lastplayed now, we will check exist data!!!";
+        calcLastPlayedTable();
+    } else {
+        QSqlQuery q;
         QString str = QString("create table %1").arg(TABLE_LAST_PLAYED);
         str += " ( ";
         str += "id integer primary key, ";
@@ -225,26 +222,22 @@ bool SQLite3DAO::initDataBase()
             return false;
         }
     }
-
-//    str = "create table ";
-//    str += PLAYLIST_TABLE_TAG;
-//    str += "(";
-//    str += "id integer primary key,";
-//    for (int i = (int)(Common::PlayListElement::PlayListFirstFlag) + 1;
-//         i < (int)(Common::PlayListElement::PlayListLastFlag) -1;
-//         ++i) {
-//        str += QString ("%1 TEXT,").arg (m_common.enumToStr ("PlayListElement", i));
-//    }
-//    str += QString("%1 TEXT )")
-//            .arg (m_common.enumToStr ("PlayListElement",
-//                                     (int)Common::PlayListElement::PlayListLastFlag -1));
-
-//    if (!q.exec (str)) {
-//        qDebug() << "Create playlist tab error "
-//                 << " [ " << q.lastError ().text () << " ] ";
-//        m_database.removeDatabase (DATABASE_NAME);
-//        return false;
-//    }
+    if (!tables.contains(TABLE_SPECTRUM, Qt::CaseInsensitive)) {
+        QSqlQuery q;
+        QString str = QString("create table %1 (id integer primary key, %2 TEXT, %3 BLOB)")
+                .arg(TABLE_SPECTRUM)
+                .arg(SP_KEY_HASH)
+                .arg(SP_KEY_DATA);
+        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        /*
+         * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
+         */
+        if (!q.exec (str)) {
+            qDebug()<<Q_FUNC_INFO<<QString("Create spectrum tab error [ %1 ]").arg(q.lastError().text());
+            m_database.removeDatabase(DATABASE_NAME);
+            return false;
+        }
+    }
     return true;
 }
 
@@ -761,6 +754,84 @@ QStringList SQLite3DAO::trackHashListByLastPlayedTime(bool orderByDesc) const
         sl.append(node.audioMetaObjHash());
     }
     return sl;
+}
+
+void SQLite3DAO::insertSpectrumData(const AudioMetaObject &obj, const QList<QList<qreal> > &list)
+{
+    if (obj.isHashEmpty()) {
+        qWarning()<<Q_FUNC_INFO<<"Ignore insert empty hash object";
+        return;
+    }
+    if (!checkDatabase()) {
+        qWarning()<<Q_FUNC_INFO<<"Database not open !!";
+    }
+    const QString hash = obj.hash();
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << list;
+
+    bool isExists = false;
+    {
+        const QString str = QString("select * from %1 where %2 = '%3'")
+                .arg(TABLE_SPECTRUM).arg(SP_KEY_HASH).arg(obj.hash());
+        QSqlQuery q(str, m_database);
+        while (q.next()) {
+            isExists = true;
+            break;
+        }
+    }
+    if (isExists) { //update
+        const QString str = QString("update %1 set %2 = ':vaData' where %3 = '%4")
+                .arg(TABLE_SPECTRUM)
+                .arg(SP_KEY_DATA)
+                .arg(SP_KEY_HASH)
+                .arg(obj.hash());
+        QSqlQuery q(m_database);
+        if (!q.prepare(str)) {
+            qDebug()<<Q_FUNC_INFO<<" prepare sql "<<str<<" error "<<q.lastError().text();
+        }
+        q.bindValue(":vaData", ba);
+        if (!q.exec()) {
+            qDebug()<<Q_FUNC_INFO<<" run sql "<<str<<" error "<<q.lastError().text();
+        }
+    } else {
+        const QString str = QString("insert into %1 (%2, %3) values (:va1, :va2)")
+                .arg(TABLE_SPECTRUM)
+                .arg(SP_KEY_HASH)
+                .arg(SP_KEY_DATA);
+
+        QSqlQuery q;
+        q.prepare(str);
+        q.bindValue(":va1", obj.hash());
+        q.bindValue(":va2", ba);
+        if (!q.exec()) {
+            qDebug()<<Q_FUNC_INFO<<" run sql "<<str<<" error "<<q.lastError().text();
+        }
+    }
+}
+
+QList<QList<qreal> > SQLite3DAO::getSpectrumData(const AudioMetaObject &obj) const
+{
+    if (obj.isHashEmpty()) {
+        return QList<QList<qreal> >();
+    }
+    const QString str = QString("select %1 from %2 where %3 = '%4'")
+            .arg(SP_KEY_DATA)
+            .arg(TABLE_SPECTRUM)
+            .arg(SP_KEY_HASH)
+            .arg(obj.hash());
+    QSqlQuery q(str, m_database);
+    if (!q.exec()) {
+        qDebug()<<Q_FUNC_INFO<<" run sql "<<str<<" error "<<q.lastError().text();
+    }
+    while (q.next()) {
+        QByteArray ba = q.value(SP_KEY_DATA).toByteArray();
+        QDataStream ds(&ba, QIODevice::ReadOnly);
+        QList<QList<qreal> > list;
+        ds >> list;
+        return list;
+    }
+    return QList<QList<qreal> >();
 }
 
 bool SQLite3DAO::openDataBase()

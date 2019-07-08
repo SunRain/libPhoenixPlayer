@@ -208,6 +208,7 @@ protected:
         if (m_dao) {
             m_dao->beginTransaction();
         }
+        AudioMetaList ll;
         while (true) {
             if (m_stop) {
                 break;
@@ -225,6 +226,7 @@ protected:
             emit parsingFile(file, size);
 
             AudioMetaObject obj(file);
+            ll.append(obj);
             foreach (auto *parser, m_tagParserList) {
                 if (parser->parserTag(&obj)) {
                     break;
@@ -236,20 +238,7 @@ protected:
             foreach (auto parser, m_specParserList) {
                 auto list = parser->generate(obj);
                 if (!list.isEmpty()) {
-                    QString f = MusicLibraryManager::getSpectrumFile(obj);
-                    if (f.isEmpty()) {
-                        break;
-                    }
-                    QFile qf(f);
-                    if (!qf.open(QIODevice::WriteOnly)) {
-                        qWarning()<<Q_FUNC_INFO<<"Open to write spectrum data error: "<<qf.errorString();
-                        break;
-                    }
-                    qDebug()<<Q_FUNC_INFO<<"Write spectrum data to "<<f;
-                    QDataStream out(&qf);
-                    out<<list;
-                    qf.flush();
-                    qf.close();
+                    m_dao->insertSpectrumData(obj, list);
                     break;
                 }
             }

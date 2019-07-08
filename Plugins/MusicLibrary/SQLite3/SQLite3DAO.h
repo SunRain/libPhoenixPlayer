@@ -49,6 +49,8 @@ public:
     QList<LastPlayedMeta> getLastPlayedByGenres(int limit, bool orderByDesc) const Q_DECL_OVERRIDE;
     QStringList trackHashListByPlayedCount(bool orderByDesc) const Q_DECL_OVERRIDE;
     QStringList trackHashListByLastPlayedTime(bool orderByDesc) const Q_DECL_OVERRIDE;
+    void insertSpectrumData(const AudioMetaObject &obj, const QList<QList<qreal> > &list) Q_DECL_OVERRIDE;
+    QList<QList<qreal> > getSpectrumData(const AudioMetaObject &obj) const Q_DECL_OVERRIDE;
 
     // IMusicLibraryDAO interface
 public slots:

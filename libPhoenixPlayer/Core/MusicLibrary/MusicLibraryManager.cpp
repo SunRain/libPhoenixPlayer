@@ -611,33 +611,21 @@ void MusicLibraryManager::saveToDB()
     }
 }
 
-QString MusicLibraryManager::getSpectrumFile(const AudioMetaObject &obj)
-{
-    if (obj.isHashEmpty()) {
-        return QString();
-    }
-    const QString path = phoenixPlayerLib->settings()->musicImageCachePath();
-    return QString("%1/%2.spek").arg(path).arg(obj.name());
-}
+//QString MusicLibraryManager::getSpectrumFile(const AudioMetaObject &obj)
+//{
+//    if (obj.isHashEmpty()) {
+//        return QString();
+//    }
+//    const QString path = phoenixPlayerLib->settings()->musicImageCachePath();
+//    return QString("%1/%2.spek").arg(path).arg(obj.name());
+//}
 
 QList<QList<qreal> > MusicLibraryManager::loadSpectrumData(const AudioMetaObject &obj)
 {
-    QList<QList<qreal>> list;
-    if (obj.isHashEmpty()) {
-        return list;
+    if (obj.isHashEmpty() || !m_dao) {
+        return QList<QList<qreal>>();
     }
-    const QString file = MusicLibraryManager::getSpectrumFile(obj);
-    QFile qf(file);
-    if (file.isEmpty() || !qf.exists(file)) {
-        return list;
-    }
-    if (!qf.open(QIODevice::ReadOnly)) {
-        return list;
-    }
-    QDataStream in(&qf);
-    in>>list;
-    qf.close();
-    return list;
+    return m_dao->getSpectrumData(obj);
 }
 
 void MusicLibraryManager::initList()
