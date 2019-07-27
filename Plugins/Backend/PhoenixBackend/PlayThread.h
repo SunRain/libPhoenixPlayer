@@ -26,7 +26,7 @@ class BaseVisual;
 namespace PhoenixBackend {
 class Recycler;
 class StateHandler;
-class OutputThread;
+class OutputThread_old;
 class RingBuffer;
 class PlayThread : public QThread
 {
@@ -46,7 +46,7 @@ public:
     void changeMedia(MediaResource *res = 0, quint64 startSec = 0);
 
     // QThread interface
-    OutputThread *output() const;
+    OutputThread_old *output() const;
 //    void setOutput(OutputThread *output);
 
 protected:
@@ -68,7 +68,7 @@ private:
     PPSettings *m_settings;
     RingBuffer *m_ring;
     BaseVisual *m_visual;
-    OutputThread *m_outputThread;
+    OutputThread_old *m_outputThread;
     Decoder::IDecoder *m_decoder;
     Decoder::DecoderHost *m_decoderHost;
 //    QTimer *m_finishSignalDelaytimer;

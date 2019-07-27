@@ -30,7 +30,7 @@ QIODevice *LocalFileMediaResource::device()
     return m_file;
 }
 
-bool LocalFileMediaResource::waiting() const
+bool LocalFileMediaResource::pending() const
 {
     return false;
 }

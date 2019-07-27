@@ -17,7 +17,7 @@ class StateHandler : public QObject
     Q_OBJECT
 //    DECLARE_SINGLETON_POINTER(StateHandler)
 public:
-    explicit StateHandler(QObject *parent = 0);
+    explicit StateHandler(QObject *parent = Q_NULLPTR);
     virtual ~StateHandler();
 //    static StateHandler *instance();
 
@@ -35,13 +35,18 @@ public:
      * Sends information about song length
      * @param length song length in milliseconds
      */
-    void dispatch(qint64 length);
+    Q_DECL_DEPRECATED void dispatch(qint64 length);
+
+    void dispatchTrackTimeMS(qint64 ms);
 
     ///
     /// \brief dispatch Sends playback state.
     /// \param state
     ///
     void dispatch(PlayState state);
+
+
+    void dispatchSeekTime(qint64 timeMS);
 
     ///
     /// \brief sendFinished Sends playback finished event.

@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QCoreApplication>
 
-#include "StateChangedEvent.h"
+#include "InternalEvent.h"
 
 namespace PhoenixPlayer {
 namespace PlayBackend {
@@ -100,6 +100,13 @@ void StateHandler::dispatch(qint64 length)
     m_mutex.unlock();
 }
 
+void StateHandler::dispatchTrackTimeMS(qint64 ms)
+{
+    m_mutex.lock();
+    m_length = ms;
+    m_mutex.unlock();
+}
+
 void StateHandler::dispatch(PlayState state)
 {
     m_mutex.lock ();
@@ -133,6 +140,11 @@ void StateHandler::dispatch(PlayState state)
         qApp->postEvent (parent (), new StateChangedEvent(m_state, prevState));
     }
     m_mutex.unlock ();
+}
+
+void StateHandler::dispatchSeekTime(qint64 timeMS)
+{
+    qApp->postEvent(parent(), new SeekEvent(timeMS));
 }
 
 void StateHandler::sendFinished()

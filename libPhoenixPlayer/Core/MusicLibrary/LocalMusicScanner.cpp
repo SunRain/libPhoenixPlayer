@@ -283,13 +283,13 @@ LocalMusicScanner::LocalMusicScanner(PPSettings *set, PluginLoader *loader, QObj
                 if (!m_audioParser->isRunning()) {
                     m_audioParser->start(QThread::HighPriority);
                 }
+                emit newFileListAdded(list);
             });
     connect(m_audioParser, &AudioParser::parsingFile,
             this, &LocalMusicScanner::parsingFile, Qt::QueuedConnection);
     connect(m_audioParser, &AudioParser::parsingFinished,
             this, &LocalMusicScanner::searchingFinished, Qt::QueuedConnection);
 }
-
 
 LocalMusicScanner::~LocalMusicScanner()
 {

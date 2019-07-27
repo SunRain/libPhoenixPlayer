@@ -31,7 +31,7 @@ QIODevice *MediaResource::device() {
     return nullptr;
 }
 
-bool MediaResource::waiting() const {
+bool MediaResource::pending() const {
     return false;
 }
 

@@ -24,7 +24,8 @@ public:
     static SoftVolume *instance();
 
     virtual ~SoftVolume();
-    void changeVolume(Buffer *buffer, int chan, AudioParameters::AudioFormat format);
+
+    void changeVolume(Buffer *buffer, int channels);
 };
 
 } //namespace PlayBackend

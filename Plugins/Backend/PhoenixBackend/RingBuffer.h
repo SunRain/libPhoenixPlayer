@@ -105,18 +105,18 @@ protected:
             qWarning()<<Q_FUNC_INFO<<"No dest buffer found";
             return false;
         }
-        if (!src || !src->data || src->nbytes == 0) {
+        if (!src || !src->data || src->samples == 0) {
             qWarning()<<Q_FUNC_INFO<<"fill zero to dest buffer";
             memset (dest->data, 0, dest->size);
-            dest->nbytes = dest->size;
+            dest->samples = dest->size;
             return true;
         }
         if (dest->size != src->size) {
             qCritical()<<Q_FUNC_INFO<<"Buffer size not equal";
             return false;
         }
-        memmove (dest->data, src->data, src->nbytes);
-        dest->nbytes = src->nbytes;
+        memmove (dest->data, src->data, src->samples);
+        dest->samples = src->samples;
         return true;
     }
 

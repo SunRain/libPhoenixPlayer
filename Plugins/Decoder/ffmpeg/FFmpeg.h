@@ -88,7 +88,7 @@ private:
 public:
     bool initialize(MediaResource *res);
     quint64 durationInSeconds();
-    void setPosition(qreal sec);
+    void setPositionMS(qreal sec);
     int bitrate();
     qint64 runDecode(char *data, qint64 maxSize);
     PhoenixPlayer::AudioParameters audioParameters() const;

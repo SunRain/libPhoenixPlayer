@@ -4,10 +4,10 @@
 #include <QCoreApplication>
 
 #include "StateHandler.h"
-#include "StateChangedEvent.h"
+#include "InternalEvent.h"
 #include "PlayThread.h"
-#include "OutputThread.h"
-#include "StateChangedEvent.h"
+#include "OutputThread_old.h"
+#include "InternalEvent.h"
 #include "LibPhoenixPlayerMain.h"
 
 #include "PPCommon.h"

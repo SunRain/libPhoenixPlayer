@@ -32,6 +32,7 @@ public:
 signals:
     void searchingDir(const QString &dirName);
     void parsingFile(const QString &file, int remainingSize);
+    void newFileListAdded(const QStringList &list);
     void searchingFinished();
 
 private:

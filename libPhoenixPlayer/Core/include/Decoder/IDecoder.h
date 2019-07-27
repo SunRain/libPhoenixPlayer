@@ -20,22 +20,19 @@ class LIBPHOENIXPLAYER_EXPORT IDecoder : public QObject
 {
     Q_OBJECT
 public:
-    IDecoder(QObject *parent = 0);
+    IDecoder(QObject *parent = Q_NULLPTR);
     virtual ~IDecoder();
 
-//    void setResource(MediaResource *src);
-//    void setInputSource(QIODevice *input = 0);
-//    QIODevice *inputSource();
-//    QIODevice *inputSource();
-
-//    QString getUri() const;
-//    void setFileUri(const QString &uri);
-//    QString fileUri() const;
-
     virtual bool initialize(MediaResource *res) = 0;
+
+    ///
+    /// \brief durationInSeconds
+    /// \return duration in seconds, <=0 if not find duration
+    ///
     virtual quint64 durationInSeconds() = 0;
-    virtual void setPosition(qreal sec = 0) = 0;
-//    virtual qreal getPosition() = 0;
+
+    virtual void setPositionMS(qreal millisecond = 0) = 0;
+
     /*!
      * Returns current bitrate (in kbps).
      * Subclass should reimplement this function.
@@ -47,28 +44,13 @@ public:
      * Returns the number of bytes read, or -1 if an error occurred.
      * Subclass should reimplement this function.
      */
-    virtual qint64 runDecode(char *data, qint64 maxSize) = 0;
-//    virtual void setController(PlayController *controller = 0);
-//    PlayController *getController();
-//    virtual bool open(const QUrl &url);
+    virtual qint64 runDecode(unsigned char *data, qint64 maxSize) = 0;
 
-//    virtual AudioParameters *getAdudioParameters(const QUrl &url) = 0;
-
-//    virtual bool reader() = 0;
-
+    ///
+    /// \brief audioParameters
+    /// \return detected audio parameters
+    ///
     virtual PhoenixPlayer::AudioParameters audioParameters() const = 0;
-
-protected:
-//    Buffer *bufferOut;
-//    void  setAudioParameters(const AudioParameters &p);
-//    void configure(quint32 srate = 44100, int chan = 2, AudioParameters::AudioFormat f = AudioParameters::PCM_S16LE);
-private:
-//    PlayController *mController;
-//    QIODevice *m_input;
-//    AudioParameters *m_audioParameters;
-//    AudioParameters m_audioParameters;
-//    MediaResource *m_res;
-//    QString m_uri;
 };
 } //Decoder
 } //PhoenixPlayer

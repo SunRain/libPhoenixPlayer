@@ -11,7 +11,6 @@
 
 namespace PhoenixPlayer {
 
-//#define BUFFER_PERIOD 512
 
 /*! @brief Audio buffer class.
  * @author Brad Hughes <bhughes@trolltech.com>
@@ -19,15 +18,18 @@ namespace PhoenixPlayer {
 class Buffer
 {
 public:
+
+    const static uint BUFFER_PERIOD = 512;
+
     /*!
      * Constructs an empty buffer object.
      * @param sz Size in bytes;
      */
-    Buffer(ulong sz)
+    Buffer(size_t sz)
     {
-        data = new uchar[sz];
-        nbytes = 0;
-//        rate = 0;
+        data = new float[sz];
+        samples = 0;
+        rate = 0;
         size = sz;
     }
     /*!
@@ -37,17 +39,17 @@ public:
     {
         delete[] data;
         data = nullptr;
-        nbytes = 0;
-//        rate = 0;
+        samples = 0;
+        rate = 0;
         size = 0;
     }
 
-    uchar *data;      /*!< Audio data */
-    ulong nbytes;     /*!< Audio data size */
+    float *data;      /*!< Audio data */
+//    ulong nbytes;     /*!< Audio data size */
+    size_t samples;                      /*!< Audio data size in samples. */
 //    unsigned long rate;       /*!< Buffer bitrate */
-    ulong size;       /*!< Buffer size */
-
-    const static uint BUFFER_PERIOD = 512 * 2;
+    size_t size;       /*!< Buffer size */
+    unsigned int rate;                   /*!< Buffer bitrate. */
 };
 } //PhoenixPlayer
 #endif // BUFFER_H

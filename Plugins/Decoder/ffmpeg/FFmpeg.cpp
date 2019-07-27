@@ -29,7 +29,7 @@ using namespace PhoenixPlayer;
 
 FFmpeg::FFmpeg(QObject *parent)
     : IDecoder(parent)
-    , m_audioFormat(AudioParameters::PCM_UNKNOWM)
+    , m_audioFormat(AudioParameters::PCM_UNKNOWN)
 //    , m_parameter(AudioParameters())
     , container(nullptr)
     , ctx(nullptr)
@@ -192,7 +192,7 @@ quint64 FFmpeg::durationInSeconds()
     return duration_in_seconds;
 }
 
-void FFmpeg::setPosition(qreal sec)
+void FFmpeg::setPositionMS(qreal sec)
 {
     qDebug()<<Q_FUNC_INFO<<"set to pos "<<sec;
     int64_t timestamp = int64_t(sec)*AV_TIME_BASE/1000;

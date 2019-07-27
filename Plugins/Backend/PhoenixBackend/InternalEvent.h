@@ -7,11 +7,11 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
 
-#define EVENT_STATE_CHANGED (QEvent::Type(QEvent::User)) /*!< @internal */
-#define EVENT_NEXT_TRACK_REQUEST (QEvent::Type(QEvent::User + 1)) /*!< @internal */
-#define EVENT_FINISHED (QEvent::Type(QEvent::User + 2)) /*!< @internal */
-//#define EVENT_METADATA_CHANGED (QEvent::Type(QEvent::User + 3)) /*!< @internal */
-//#define EVENT_STREAM_INFO_CHANGED (QEvent::Type(QEvent::User + 4)) /*!< @internal */
+#define EVENT_STATE_CHANGED         (QEvent::Type(QEvent::User))
+#define EVENT_NEXT_TRACK_REQUEST    (QEvent::Type(QEvent::User + 1))
+#define EVENT_FINISHED              (QEvent::Type(QEvent::User + 2))
+#define EVENT_SEEK_REQUEST          (QEvent::Type(QEvent::User + 3))
+
 
 class StateChangedEvent : public QEvent
 {
@@ -25,6 +25,20 @@ private:
     PlayState m_prevState;
 
 };
+
+class SeekEvent : public QEvent
+{
+public:
+    explicit SeekEvent(qint64 tm)
+        : QEvent(EVENT_SEEK_REQUEST),
+        seekTimeMS(tm)
+    {
+
+    }
+    ~SeekEvent();
+    qint64 seekTimeMS = 0;
+};
+
 
 } //PhoenixBackend
 } //PlayBackend

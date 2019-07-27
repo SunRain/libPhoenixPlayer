@@ -5,110 +5,106 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-#include "PhoenixBackend_global.h"
 #include "AudioParameters.h"
 
-class QAudioOutput;
-class QIODevice;
-
 namespace PhoenixPlayer {
-//class PluginLoader;
-//class PluginHost;
-class EqualizerMgr;
+    class EqualizerMgr;
+    class PluginLoader;
+    class PluginHost;
+    class PPSettings;
 
-namespace OutPut {
-class IOutPut;
-class OutPutHost;
-}
+    namespace OutPut {
+        class IOutPut;
+        class OutPutHost;
+    }
 
-namespace PlayBackend {
-//class BaseVolume;
-class BaseVisual;
+    namespace PlayBackend {
+        class BaseVisual;
 
-namespace PhoenixBackend {
+        namespace PhoenixBackend {
+            class StateHandler;
+            class BufferQueue;
+            class AudioConverter;
+            class ChannelConverter;
+            class AudioEffect;
 
-class RingBuffer;
-class StateHandler;
 class OutputThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit OutputThread(RingBuffer *ring, StateHandler *handle, BaseVisual *v = 0, QObject *parent = 0);
-    virtual ~OutputThread();
+    explicit OutputThread(StateHandler *handler,
+                          BufferQueue *queue,
+//                          QList<AudioEffect*> *list,
+                          QObject *parent = Q_NULLPTR);
 
-    bool initialize(const PhoenixPlayer::AudioParameters &para);
+    virtual ~OutputThread() Q_DECL_OVERRIDE;
+
+    bool initialization(quint32 sampleRate, const QList<AudioParameters::ChannelPosition> &list);
 
     bool isPaused();
 
     void togglePlayPause();
 
     void reset();
-    /*!
-     * Requests playback to stop.
-     */
+
     void stop();
-    /*!
-     * Mutes/Restores volume
-     * @param mute state of volume (\b true - mute, \b false - restore)
-     */
+
     void setMuted(bool muted);
-    /*!
-     * Requests playback to finish.
-     */
+
     void finish();
-    /*!
-     * Requests a seek to the time \b pos indicated, specified in milliseconds.
-     * If \b reset is \b true, this function also clears internal output buffers for faster seeking;
-     * otherwise does nothing with buffers.
-     */
-    void seek(qint64 pos, bool reset = false);
+
+    // QObject interface
+public:
+    bool event(QEvent *event) Q_DECL_OVERRIDE;
 
     // QThread interface
 protected:
-    void run();
+    void run() Q_DECL_OVERRIDE;
 
 private:
     void updateEQ();
     void status();
-private:
-//    QAudioOutput *m_output;
-    OutPut::OutPutHost *m_outputHost;
-    OutPut::IOutPut *m_output;
-#if 0
-    QIODevice *m_device;
-#endif
-    EqualizerMgr *m_eq;
-//    StateHandler *m_handler;
-//    AudioParameters *m_audioParameters;
-    BaseVisual *m_visual;
-    RingBuffer *m_ring;
-    StateHandler *m_handler;
 
-    PhoenixPlayer::AudioParameters m_audioParameters;
+private:
+    StateHandler                *m_handler              = Q_NULLPTR;
+    BufferQueue                 *m_bufferQueue          = Q_NULLPTR;
+    AudioConverter              *m_format_converter     = Q_NULLPTR;
+    ChannelConverter            *m_channel_converter    = Q_NULLPTR;
+//    QList<AudioEffect *>        *m_effectList         = Q_NULLPTR;
+
+    EqualizerMgr                *m_eq = Q_NULLPTR;
+    bool m_useEq = false;
+
+
+    OutPut::OutPutHost          *m_outputHost   = Q_NULLPTR;
+    OutPut::IOutPut             *m_output       = Q_NULLPTR;
+
+    unsigned char               *m_output_buf = Q_NULLPTR;
+    size_t                      m_output_size = 0;
+
+    qint64 m_bytesPerMillisecond    = -1;
+    qint64 m_totalWritten           = -1;
+    qint64 m_currentMilliseconds    = -1;
+
+    AudioParameters         m_in_params;
+
+    quint32                 m_sampleRate = 0;
+    QList<AudioParameters::ChannelPosition> m_channels;
+    AudioParameters::AudioFormat            m_format = AudioParameters::PCM_UNKNOWN;
+
+    bool m_paused = false;
+    bool m_user_stop = false;
+    bool m_muted = false;
+    bool m_finish = false;
 
     QMutex m_mutex;
-    QWaitCondition m_wait;
+    QWaitCondition m_pauseWait;
 
-    unsigned char *m_visBuffer;
 
-    bool m_userStop;
-    bool m_pause;
-    bool m_prev_pause;
-    bool m_finish;
-    bool m_useEq;
-    bool m_muted;
-    bool m_skip;
-
-//    int m_kbps;
-
-//    quint32 m_frequency;
-    qint64 m_bytesPerMillisecond;
-    qint64 m_totalWritten;
-    qint64 m_currentMilliseconds;
-    qint64 m_visBufferSize;
 };
 
 } //PhoenixBackend
 } //PlayBackend
 } //PhoenixPlayer
+
 #endif // OUTPUTTHREAD_H

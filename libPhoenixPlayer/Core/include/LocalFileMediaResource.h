@@ -20,7 +20,7 @@ public:
 public:
     bool initialize();
     QIODevice *device();
-    bool waiting() const;
+    bool pending() const;
     bool ready() const;
     PPCommon::MediaType type() const;
 

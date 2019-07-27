@@ -23,7 +23,7 @@
 #include "LibPhoenixPlayerMain.h"
 #include "MediaResource.h"
 
-#include "OutputThread.h"
+#include "OutputThread_old.h"
 #include "StateHandler.h"
 #include "RingBuffer.h"
 //#include "Recycler.h"
@@ -388,7 +388,7 @@ void PlayThread::run()
 
         if (m_seekTime >= 0) {
             m_ring->clear ();
-            m_decoder->setPosition (m_seekTime);
+            m_decoder->setPositionMS (m_seekTime);
             m_seekTime = -1;
         }
 
@@ -415,7 +415,7 @@ void PlayThread::run()
 //            m_handler->sendFinished();
             break;
         }
-        buffer.nbytes = ret;
+        buffer.samples = ret;
         m_mutex.unlock();
 
         if (done || m_finish) {
@@ -675,7 +675,7 @@ void PlayThread::createOutput()
 {
 //    OutputThread *m_ouputThread = new OutputThread(0, m_visual);
     if (!m_outputThread)
-        m_outputThread = new OutputThread(m_ring, m_handler, m_visual);
+        m_outputThread = new OutputThread_old(m_ring, m_handler, m_visual);
 
     m_outputThread->reset ();
     m_outputThread->setMuted (m_muted);
@@ -723,7 +723,7 @@ void PlayThread::createOutput()
 //    m_output_buf = new unsigned char[m_output_size];
 //    return m_outputThread;
 }
-OutputThread *PlayThread::output() const
+OutputThread_old *PlayThread::output() const
 {
     return m_outputThread;
 }

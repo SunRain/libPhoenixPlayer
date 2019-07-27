@@ -1,4 +1,4 @@
-#include "StateChangedEvent.h"
+#include "InternalEvent.h"
 
 namespace PhoenixPlayer {
 namespace PlayBackend {
@@ -23,6 +23,11 @@ PlayState StateChangedEvent::currentState() const
 PlayState StateChangedEvent::previousState() const
 {
     return m_prevState;
+}
+
+SeekEvent::~SeekEvent()
+{
+
 }
 
 } //PhoenixBackend

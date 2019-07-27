@@ -12,8 +12,10 @@ namespace PhoenixPlayer {
 class LIBPHOENIXPLAYER_EXPORT MediaResource : public QObject
 {
     Q_OBJECT
+protected:
+    explicit MediaResource(const QString &getUri, QObject *parent = Q_NULLPTR);
+
 public:
-    explicit MediaResource(const QString &getUri, QObject *parent = 0);
     virtual ~MediaResource();
 
     virtual bool initialize();
@@ -21,11 +23,11 @@ public:
 
     virtual QIODevice *device();
 
-    virtual bool waiting() const;
+    virtual bool pending() const;
     virtual bool ready() const;
     virtual PPCommon::MediaType type() const;
 
-    static MediaResource *create(const QString &uri, QObject *parent = 0);
+    static MediaResource *create(const QString &uri, QObject *parent = Q_NULLPTR);
 
 private:
     QString m_uri;

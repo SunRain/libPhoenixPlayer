@@ -2,42 +2,36 @@
 #define IOUTPUT_H
 
 #include <QObject>
-//#include "AudioParameters.h"
+#include "AudioParameters.h"
 
 namespace PhoenixPlayer {
+    class Buffer;
 
-//class PlayController;
-class Buffer;
-class AudioParameters;
-
-namespace OutPut {
+    namespace OutPut {
 
 class IOutPut : public QObject
 {
     Q_OBJECT
 public:
-    explicit IOutPut(QObject *parent = 0);
+    explicit IOutPut(QObject *parent = Q_NULLPTR);
     virtual ~IOutPut();
-//    void setWork(bool isWork = false);
-//    bool isWork();
-//    virtual void setController(PlayController *controller = 0);
-//    PlayController *getController();
 
-//    /*
-//     * 根据不同插件返回 BUFFER_PERIOD倍数
-//     */
-//    virtual qint32 getBufferSize() = 0;
-
-//    virtual void initialize(Buffer *in = 0) = 0;
-    virtual bool initialize(const AudioParameters &p) = 0;
+    ///
+    /// \brief initialize
+    /// Subclass should reimplement this function.
+    /// \param sampleRate
+    /// \param channels
+    /// \param f
+    /// \return
+    ///
+    virtual bool initialize(quint32 sampleRate,
+                            const QList<AudioParameters::ChannelPosition> &channels,
+                            AudioParameters::AudioFormat f);
     /*
      * Returns output interface latency in milliseconds.
      */
     virtual qint64 latency() = 0;
-//    virtual int writeAudio(Buffer *buffer = 0) = 0;
-//    virtual void rewind() = 0;
-//    virtual void resume() = 0;
-//    virtual void pause() = 0;
+
     /*
      * Writes up to maxSize bytes from  data to the output interface device.
      * Returns the number of bytes written, or -1 if an error occurred.
@@ -63,7 +57,19 @@ public:
      */
     virtual void resume() {}
 
-    virtual AudioParameters audioParameters() const = 0;
+    ///
+    /// \brief audioParameters
+    /// \return selected audio parameters
+    ///
+    virtual AudioParameters audioParameters() const;
+
+    quint32 sampleRate() const;
+
+    QList<AudioParameters::ChannelPosition> channels() const;
+
+    AudioParameters::AudioFormat format() const;
+
+    int sampleSize() const;
 
 protected:
 //    Buffer *bufferIn;
@@ -75,12 +81,11 @@ protected:
       */
 //     void configure(const PhoenixPlayer::AudioParameters &p);
 private:
-//    PlayController *mController;
-//    bool mWork;
-//     AudioParameters *mAudioParameters;
-//     PhoenixPlayer::AudioParameters m_param;
-//     quint32 mSrate;
-//     int mChan;
+    int                                     m_sampleSize    = 0;
+    quint32                                 m_sampleRate    = 0;
+    AudioParameters::AudioFormat            m_format        = AudioParameters::PCM_UNKNOWN;
+    QList<AudioParameters::ChannelPosition> m_channels;
+
 };
 } //Decoder
 } //PhoenixPlayer

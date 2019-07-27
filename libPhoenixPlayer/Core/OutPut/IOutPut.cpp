@@ -14,77 +14,46 @@ namespace OutPut {
 IOutPut::IOutPut(QObject *parent)
     : QObject(parent)
 {
-//    mController == nullptr;
-//    mWork = true;
-//    mAudioParameters = new AudioParameters(0,0, AudioParameters::PCM_UNKNOWM);
-//    mAudioParameters = nullptr;
+
 }
 
 IOutPut::~IOutPut()
 {
-//    //    mController = nullptr;
-//    if (mAudioParameters) {
-//        mAudioParameters->deleteLater ();
-//        mAudioParameters = nullptr;
-//    }
 }
 
-//AudioParameters IOutPut::audioParameters() const
-//{
-//    return m_param;
-//}
+bool IOutPut::initialize(quint32 sampleRate, const QList<AudioParameters::ChannelPosition> &channels, AudioParameters::AudioFormat f)
+{
+    m_sampleRate = sampleRate;
+    m_channels = channels;
+    m_format = f;
+    m_sampleSize = AudioParameters::sampleSize(f);
+    return true;
+}
 
-//void IOutPut::configure(const AudioParameters &p)
-//{
-////    if (mAudioParameters) {
-////        mAudioParameters->deleteLater ();
-////        mAudioParameters = nullptr;
-////    }
-////    mAudioParameters = new AudioParameters(p, chan, f, this);
-//    m_param = p;
-//}
+AudioParameters IOutPut::audioParameters() const
+{
+    return AudioParameters(m_sampleRate, m_channels, m_format);
+}
 
-//void IOutPut::setWork(bool isWork)
-//{
-//    mWork = isWork;
-//}
+quint32 IOutPut::sampleRate() const
+{
+    return m_sampleRate;
+}
 
-//bool IOutPut::isWork()
-//{
-//    return mWork;
-//}
+QList<AudioParameters::ChannelPosition> IOutPut::channels() const
+{
+    return m_channels;
+}
 
-//void IOutPut::setController(PlayController *controller)
-//{
-//    mController = controller;
-//}
+AudioParameters::AudioFormat IOutPut::format() const
+{
+    return m_format;
+}
 
-//PlayController *IOutPut::getController()
-//{
-//    return mController;
-//}
-
-//void IOutPut::initialize(Buffer *in)
-//{
-//    qDebug()<<Q_FUNC_INFO;
-//    if (!in || !mController) {
-//        qCritical()<<"No input buffer found or no PlayController pointer!!";
-//        return;
-//    }
-//    bufferIn = in;
-
-//    if (!mWork)
-//        mWork = !mWork;
-
-//    while (isWork ()) {
-//        if (!isWork ())
-//            break;
-
-//    }
-
-//}
-
-
+int IOutPut::sampleSize() const
+{
+    return m_sampleSize;
+}
 
 
 } //Decoder
