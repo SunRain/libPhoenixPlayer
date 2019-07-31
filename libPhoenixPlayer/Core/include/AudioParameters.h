@@ -107,7 +107,18 @@ private:
     void generateMap(int channels);
 
 private:
-    QSharedDataPointer<AudioParametersPriv> d;
+    QSharedDataPointer<PhoenixPlayer::AudioParametersPriv> d;
+};
+
+class AudioParametersPriv : public QSharedData
+{
+public:
+    AudioParametersPriv() {}
+    quint32 sampleRate = 48000;
+    AudioParameters::AudioFormat format = AudioParameters::PCM_UNKNOWN;
+    int sampleSize = 2;
+    int validBitsPerSample = 16;
+    QList<AudioParameters::ChannelPosition> channelList;
 };
 
 } //PhoenixPlayer

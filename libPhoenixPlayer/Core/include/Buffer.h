@@ -31,6 +31,7 @@ public:
         samples = 0;
         rate = 0;
         size = sz;
+        lastBuffer = false;
     }
     /*!
      * Destructor.
@@ -44,12 +45,11 @@ public:
         size = 0;
     }
 
-    float *data;      /*!< Audio data */
-//    ulong nbytes;     /*!< Audio data size */
-    size_t samples;                      /*!< Audio data size in samples. */
-//    unsigned long rate;       /*!< Buffer bitrate */
-    size_t size;       /*!< Buffer size */
-    unsigned int rate;                   /*!< Buffer bitrate. */
+    float *data;        // Audio data
+    size_t samples;     // Audio data size in samples.
+    size_t size;        // Buffer size
+    unsigned int rate;  //Buffer bitrate
+    bool lastBuffer;    // flag to indicate decode finished or terminated
 };
 } //PhoenixPlayer
 #endif // BUFFER_H

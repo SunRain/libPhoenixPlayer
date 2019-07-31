@@ -1,11 +1,6 @@
 #include "OutPut/IOutPut.h"
 
-
 #include <QDebug>
-
-//#include "Buffer.h"
-//#include "Player/PlayeController.h"
-//#include "AudioParameters.h"
 
 namespace PhoenixPlayer {
 

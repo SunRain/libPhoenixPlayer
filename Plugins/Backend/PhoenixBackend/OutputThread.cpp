@@ -195,9 +195,11 @@ void OutputThread::run()
     uchar *tmp = Q_NULLPTR;
     size_t output_at = 0;
 
-    bool outputTerminate = false;
+    bool outputFinish = false;
 
     while (true) {
+
+        if (m_finish || outputFinish) break;
 
         QMutexLocker locker(&m_mutex);
 
@@ -250,24 +252,31 @@ void OutputThread::run()
         {
             qint64 pos = 0;
             do {
+                if (m_user_stop) {
+                    outputFinish = true;
+                    break;
+                }
                 qint64 len = m_output->writeAudio(tmp + pos, output_at - pos);
                 if (len >= 0) {
                     m_totalWritten += len;
                     pos += len;
+                    if (pos == output_at) {
+                        break;
+                    }
                 } else {
-                    outputTerminate = true;
+                    outputFinish = true;
                     break;
                 }
             } while (true);
-            if (outputTerminate) break;
         }
-
-
+        if (b->lastBuffer) {
+            m_finish = true;
+        }
     }
-
-
-
-
+    if (m_finish) {
+        m_output->drain();
+    }
+    m_handler->dispatch(PlayState::Stopped);
 }
 
 void OutputThread::updateEQ()

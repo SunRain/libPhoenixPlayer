@@ -294,7 +294,7 @@ void DecodeThread::run()
                 locker.relock();
             } while (true);
 
-            if (m_user_stop) break;
+            if (m_user_stop || decodeTerminate) break;
 
             m_bufferQueue->mutex()->lock();
             if (m_bufferQueue->size() == m_bufferQueue->maxAvailableCnt()) {
@@ -309,6 +309,7 @@ void DecodeThread::run()
             Buffer *b = new Buffer(m_audioParameters.channels().count() * Buffer::BUFFER_PERIOD);
             b->samples = samples;
             b->rate = m_bitrate;
+            b->lastBuffer = (decodeFinish || decodeTerminate);
 
             qDebug()<<Q_FUNC_INFO<<" samples "<<samples<<" buffer size "<<b->size;
 
@@ -320,7 +321,13 @@ void DecodeThread::run()
             m_bufferQueue->mutex()->unlock();
         }
     }
-
+    if (decodeFinish || decodeTerminate) {
+        m_bufferQueue->mutex()->lock();
+        if (!m_bufferQueue->isEmpty()) {
+            m_bufferQueue->last()->lastBuffer = true;
+        }
+        m_bufferQueue->mutex()->unlock();
+    }
 }
 
 void DecodeThread::reset()
