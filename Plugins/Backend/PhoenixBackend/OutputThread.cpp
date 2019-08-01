@@ -1,5 +1,8 @@
 #include "OutputThread.h"
 
+#include <QCoreApplication>
+#include <QDebug>
+
 #include "OutPut/IOutPut.h"
 #include "OutPut/OutPutHost.h"
 
@@ -57,6 +60,8 @@ OutputThread::~OutputThread()
 
 bool OutputThread::initialization(quint32 sampleRate, const QList<PhoenixPlayer::AudioParameters::ChannelPosition> &list)
 {
+    this->stop();
+
     m_in_params = AudioParameters(sampleRate, list, AudioParameters::PCM_FLOAT);
 
     if (!m_output && m_outputHost) {
@@ -155,12 +160,27 @@ void OutputThread::reset()
 
 void OutputThread::stop()
 {
-    QMutexLocker locker(&m_mutex);
+    m_mutex.lock();
     if (m_paused) {
-        m_pauseWait.wakeAll();
         m_paused = !m_paused;
     }
     m_user_stop = true;
+    m_mutex.unlock();
+
+    m_pauseWait.wakeAll();
+    m_bufferQueue->waitIn()->wakeAll();
+
+    int loopOut = 3;
+    do {
+        qDebug()<<Q_FUNC_INFO<<"======= thread is runnging, loopout "<<loopOut;
+        loopOut--;
+        qApp->processEvents();
+    } while(this->isRunning() && loopOut > 0);
+
+    if (this->isRunning()) {
+        qDebug()<<Q_FUNC_INFO<<"======== thread still running";
+    }
+    this->reset();
 }
 
 void OutputThread::setMuted(bool muted)
@@ -170,10 +190,10 @@ void OutputThread::setMuted(bool muted)
     m_mutex.unlock();
 }
 
-void OutputThread::finish()
-{
-    m_finish = true;
-}
+//void OutputThread::finish()
+//{
+//    m_finish = true;
+//}
 
 bool OutputThread::event(QEvent *event)
 {

@@ -723,7 +723,7 @@ void PlayThread::createOutput()
 //    m_output_buf = new unsigned char[m_output_size];
 //    return m_outputThread;
 }
-OutputThread_old *PlayThread::output() const
+OutputThread *PlayThread::output() const
 {
     return m_outputThread;
 }

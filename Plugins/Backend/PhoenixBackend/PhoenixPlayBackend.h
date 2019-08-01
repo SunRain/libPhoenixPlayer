@@ -16,28 +16,27 @@ class PhoenixPlayBackend : public IPlayBackend
     Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayBackend.PhoenixPlayBackend" FILE "PhoenixBackend.json")
     Q_INTERFACES(PhoenixPlayer::PlayBackend::IPlayBackend)
 public:
-    explicit PhoenixPlayBackend(QObject *parent = 0);
+    explicit PhoenixPlayBackend(QObject *parent = Q_NULLPTR);
     virtual ~PhoenixPlayBackend();
 
     // QObject interface
 public:
-    bool event(QEvent *e);
+    bool event(QEvent *event) Q_DECL_OVERRIDE;
 
     // IPlayBackend interface
 public:
-    PPCommon::PlayBackendState playBackendState();
-    void initialize();
-    BaseVolume *baseVolume();
-    bool useExternalDecoder();
-    bool useExternalOutPut();
+    PPCommon::PlayBackendState playBackendState() Q_DECL_OVERRIDE;
+    void initialize() Q_DECL_OVERRIDE;
+    BaseVolume *baseVolume() Q_DECL_OVERRIDE;
+    bool useExternalDecoder() Q_DECL_OVERRIDE;
+    bool useExternalOutPut() Q_DECL_OVERRIDE;
 
 public slots:
-    void play(quint64 startSec = 0);
-    void stop();
-    void pause();
-//    void setVolume(int vol);
-    void setPosition(quint64 sec = 0);
-    void changeMedia(MediaResource *res, quint64 startSec = 0, bool startPlay = false);
+    void play(quint64 startSec) Q_DECL_OVERRIDE;
+    void stop() Q_DECL_OVERRIDE;
+    void pause() Q_DECL_OVERRIDE;
+    void setPosition(quint64 sec) Q_DECL_OVERRIDE;
+    void changeMedia(MediaResource *res, quint64 startSec, bool startPlay) Q_DECL_OVERRIDE;
 
 signals:
 //    void volumeChanged(int vol = 0);

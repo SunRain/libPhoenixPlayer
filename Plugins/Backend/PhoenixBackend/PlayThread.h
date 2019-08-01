@@ -46,7 +46,7 @@ public:
     void changeMedia(MediaResource *res = 0, quint64 startSec = 0);
 
     // QThread interface
-    OutputThread_old *output() const;
+    OutputThread *output() const;
 //    void setOutput(OutputThread *output);
 
 protected:

@@ -19,7 +19,7 @@ class BaseVolume;
 class LIBPHOENIXPLAYER_EXPORT IPlayBackend : public QObject {
     Q_OBJECT
 public:
-    explicit IPlayBackend(QObject *parent = 0): QObject(parent) {
+    explicit IPlayBackend(QObject *parent = Q_NULLPTR): QObject(parent) {
 //        m_visual = nullptr;
     }
     virtual ~IPlayBackend() {
@@ -43,11 +43,11 @@ public:
 //    void setVisual(BaseVisual *v) {
 //        m_visual = v;
 //    }
-protected:
-    virtual BaseVisual *getVisual() {
-//        return m_visual;
-        return nullptr;
-    }
+//protected:
+//    virtual BaseVisual *getVisual() {
+////        return m_visual;
+//        return nullptr;
+//    }
 
 signals:
 //    void positionChanged(quint64 posMs = 0);

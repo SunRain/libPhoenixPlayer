@@ -45,13 +45,11 @@ public:
 
     void togglePlayPause();
 
-    void reset();
-
     void stop();
 
     void setMuted(bool muted);
 
-    void finish();
+//    void finish();
 
     // QObject interface
 public:
@@ -62,6 +60,7 @@ protected:
     void run() Q_DECL_OVERRIDE;
 
 private:
+    void reset();
     void updateEQ();
     void status();
 
