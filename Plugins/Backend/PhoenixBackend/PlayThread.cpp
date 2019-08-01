@@ -23,7 +23,7 @@
 #include "LibPhoenixPlayerMain.h"
 #include "MediaResource.h"
 
-#include "OutputThread_old.h"
+#include "OutputThread.h"
 #include "StateHandler.h"
 #include "RingBuffer.h"
 //#include "Recycler.h"

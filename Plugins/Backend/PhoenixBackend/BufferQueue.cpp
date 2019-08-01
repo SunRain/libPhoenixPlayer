@@ -12,7 +12,12 @@ BufferQueue::BufferQueue()
 
 BufferQueue::~BufferQueue()
 {
-    qDeleteAll(this);
+    auto it = this->begin();
+    while (it != this->end()) {
+        delete *it;
+        ++it;
+    }
+    QQueue::clear();
 }
 
 void BufferQueue::initialization(quint32 sampleRate, int channels)
@@ -31,6 +36,10 @@ void BufferQueue::initialization(quint32 sampleRate, int channels)
 
 void BufferQueue::clear()
 {
-    qDeleteAll(this);
+    auto it = this->begin();
+    while (it != this->end()) {
+        delete *it;
+        ++it;
+    }
     QQueue::clear();
 }

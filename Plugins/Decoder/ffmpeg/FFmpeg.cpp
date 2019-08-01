@@ -19,6 +19,20 @@ namespace FFmpegDecoder {
 
 using namespace PhoenixPlayer;
 
+#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,24,102)) //ffmpeg-3.0
+    #define FREE_AV_PACKET(pkt) av_packet_unref(pkt)
+#else
+    #define FREE_AV_PACKET(pkt) av_free_packet(pkt)
+#endif
+
+
+#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,34,0)) //libav-10: 55.34.1; ffmpeg-2.1:  55.39.100
+    #define FREE_AV_FRAME(frame)   av_frame_free(&frame)
+#else
+    #define FREE_AV_FRAME(frame)   av_free(frame)
+#endif
+
+
 FFmpeg::FFmpeg(QObject *parent)
     : IDecoder(parent)
     , m_audioFormat(AudioParameters::PCM_UNKNOWN)
@@ -26,7 +40,7 @@ FFmpeg::FFmpeg(QObject *parent)
     , ic(nullptr)
     , c(nullptr)
     , m_decoded_frame(nullptr)
-    , audio_st(nullptr)
+//    , audio_st(nullptr)
     , m_resource(nullptr)
     , current_in_seconds(0)
     , duration_in_seconds(0)
@@ -88,7 +102,7 @@ bool FFmpeg::initialize(MediaResource *res)
 
     ic->flags |= AVFMT_FLAG_GENPTS;
 
-    av_read_play (ic);
+    av_read_play(ic);
 
     //find audio stream id;
     audioIndex = av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
@@ -137,7 +151,7 @@ bool FFmpeg::initialize(MediaResource *res)
 
     if (avcodec_open2(c, codec, nullptr) < 0) {
         qWarning()<<Q_FUNC_INFO<<"Codec cannot be opened";
-        close ();
+        close();
         return false;
     }
 
@@ -184,6 +198,8 @@ bool FFmpeg::initialize(MediaResource *res)
                   .arg (ic->bit_rate).arg (c->bit_rate);
     }
 
+    m_parameter = AudioParameters(c->sample_rate, m_channels, m_audioFormat);
+
     qDebug()<<">>>>>>>>>>> "<<Q_FUNC_INFO<<" opend <<<<<<<<<";
 
     return true;
@@ -209,11 +225,7 @@ void FFmpeg::setPositionMS(qreal millisecond)
 
     av_seek_frame(ic, -1, timestamp, AVSEEK_FLAG_BACKWARD);
     avcodec_flush_buffers(c);
-#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,24,102)) //ffmpeg-3.0
-    av_packet_unref(&m_pkt);
-#else
-    av_free_packet(&m_pkt);
-#endif
+    FREE_AV_PACKET(&m_pkt);
     m_temp_pkt.size = 0;
 }
 
@@ -224,8 +236,6 @@ int FFmpeg::bitrate()
 
 qint64 FFmpeg::runDecode(unsigned char *data, qint64 maxSize)
 {
-//    qDebug()<<" >>>> "<<Q_FUNC_INFO<<" <<<<";
-
     m_skipBytes = 0;
 
     if (!m_output_at) {
@@ -237,35 +247,25 @@ qint64 FFmpeg::runDecode(unsigned char *data, qint64 maxSize)
         return 0;
     }
     qint64 len = qMin(m_output_at, maxSize);
-//    qDebug()<<"try to copy buffer size "<<len;
 
-    if (av_sample_fmt_is_planar (c->sample_fmt) && m_parameter.channels () > 1) {
-//        qDebug()<<" try to decode planar frame ";
-        int bps = av_get_bytes_per_sample (c->sample_fmt);
-//        qDebug()<<" bps "<<bps;
-        for (int i=0; i<(len>>1); i+=bps) {
-            memcpy (data+2*i, m_decoded_frame->extended_data[0]+i, bps);
-            memcpy (data+2*i+bps, m_decoded_frame->extended_data[1]+i, bps);
+    if (av_sample_fmt_is_planar(c->sample_fmt) && m_channels > 1) {
+        int bps = av_get_bytes_per_sample(c->sample_fmt);
+        for (int i = 0; i < len/bps; ++i) {
+            memcpy(data + i * bps,
+                   m_decoded_frame->extended_data[i % m_channels] + i/m_channels * bps,
+                   bps);
         }
         m_output_at -= len;
-//        qDebug()<<" in planar frame, now out put at "<<m_output_at;
-        memmove (m_decoded_frame->extended_data[0], m_decoded_frame->extended_data[0]+len/2, m_output_at/2);
-        memmove (m_decoded_frame->extended_data[1], m_decoded_frame->extended_data[1]+len/2, m_output_at/2);
+        for (int i = 0; i < m_channels; ++i) {
+            memmove(m_decoded_frame->extended_data[i],
+                    m_decoded_frame->extended_data[i] + len/m_channels,
+                    m_output_at/m_channels);
+        }
     } else {
-        memcpy (data, m_decoded_frame->extended_data[0], len);
+        memcpy(data, m_decoded_frame->extended_data[0], len);
         m_output_at -= len;
-//        qDebug()<<" no planar frame, now out put at "<<m_output_at;
-        memmove (m_decoded_frame->extended_data[0], m_decoded_frame->extended_data[0]+len, m_output_at);
+        memmove(m_decoded_frame->extended_data[0], m_decoded_frame->extended_data[0] + len, m_output_at);
     }
-    if (c->sample_fmt == AV_SAMPLE_FMT_FLTP || c->sample_fmt == AV_SAMPLE_FMT_FLT) {
-        qDebug()<<" convert float to signed 32 bit LE ";
-        for (int i=0; i<(len>>2); ++i) {
-            int32_t *out = (int32_t*)data;
-            float *in = (float*)data;
-            out[i] = qBound(-1.0f, in[i], +1.0f) * (double) 0x7fffffff;
-        }
-    }
-//    qDebug()<<" >>>> "<<Q_FUNC_INFO<<" finish <<<<";
     return len;
 }
 
@@ -287,33 +287,39 @@ void FFmpeg::reset()
     m_temp_pkt.data = Q_NULLPTR;
 }
 
-bool FFmpeg::close()
+void FFmpeg::close()
 {
-    if (c)
-        avcodec_close(c);
-    c = nullptr;
+#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,48,0)) //ffmpeg-3.1:  57.48.101
+    if (c) {
+        avcodec_free_context(&c);
+    }
+    c = Q_NULLPTR;
+#endif
 
     if (ic) {
         avformat_close_input(&ic);
-        avformat_free_context(ic);
+        if (ic) {
+            avformat_free_context(ic);
+        }
     }
-    ic = nullptr;
+    ic = Q_NULLPTR;
+
+    if (m_pkt.data) {
+        FREE_AV_PACKET(&m_pkt);
+    }
 
     if (m_decoded_frame) {
-        av_frame_free(&m_decoded_frame);
+        FREE_AV_FRAME(m_decoded_frame);
     }
-    m_decoded_frame = nullptr;
-
-    return true;
+    m_decoded_frame = Q_NULLPTR;
 }
 
 void FFmpeg::fillBuffer()
 {
     //    qDebug()<<" >>>>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<< ";
 
-    while(!m_output_at || m_skipBytes > 0)
-    {
-        if(!m_temp_pkt.size) {
+    while (!m_output_at || m_skipBytes > 0) {
+        if (!m_temp_pkt.size) {
             if (av_read_frame(ic, &m_pkt) < 0) {
                 m_temp_pkt.size = 0;
                 m_temp_pkt.data = nullptr;
@@ -324,11 +330,7 @@ void FFmpeg::fillBuffer()
             if(m_pkt.stream_index != audioIndex) {
                 m_temp_pkt.size = 0;
                 if(m_pkt.data) {
-#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,24,102)) //ffmpeg-3.0
-                    av_packet_unref(&m_pkt);
-#else
-                    av_free_packet(&m_pkt);
-#endif
+                    FREE_AV_PACKET(&m_pkt);
                     continue;
                 }
                 return;
@@ -343,18 +345,18 @@ void FFmpeg::fillBuffer()
             m_seekTime = 0;
         }
 
-        if(m_skipBytes > 0 && c->codec_id == AV_CODEC_ID_APE) {
+        if (m_skipBytes > 0 && c->codec_id == AV_CODEC_ID_APE) {
             while (m_skipBytes > 0) {
                 m_output_at = tryDecode();
-                if(m_output_at < 0) {
+                if (m_output_at < 0) {
                     break;
                 }
                 m_skipBytes -= m_output_at;
             }
 
-            if(m_skipBytes < 0) {
+            if (m_skipBytes < 0) {
                 qint64 size = m_output_at;
-                m_output_at = - m_skipBytes;
+                m_output_at = -m_skipBytes;
                 m_output_at = m_output_at - (m_output_at % 4);
 
                 if(av_sample_fmt_is_planar(c->sample_fmt) && m_channels > 1) {
@@ -372,32 +374,24 @@ void FFmpeg::fillBuffer()
             m_output_at = tryDecode();
         }
 
-        if(m_output_at < 0) {
+        if (m_output_at < 0) {
             m_output_at = 0;
             m_temp_pkt.size = 0;
 
             if(c->codec_id == AV_CODEC_ID_SHORTEN || c->codec_id == AV_CODEC_ID_TWINVQ) {
                 if(m_pkt.data) {
-#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,24,102)) //ffmpeg-3.0
-                    av_packet_unref(&m_pkt);
-#else
-                    av_free_packet(&m_pkt);
-#endif
+                    FREE_AV_PACKET(&m_pkt);
                 }
                 m_pkt.data = nullptr;
                 m_temp_pkt.size = 0;
                 break;
             }
             continue;
-        } else if(m_output_at == 0 && !m_pkt.data) {
+        } else if (m_output_at == 0 && !m_pkt.data) {
             return;
-        } else if(m_output_at == 0) {
+        } else if (m_output_at == 0) {
             if(m_pkt.data) {
-#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,24,102)) //ffmpeg-3.0
-                av_packet_unref(&m_pkt);
-#else
-                av_free_packet(&m_pkt);
-#endif
+                FREE_AV_PACKET(&m_pkt);
             }
             m_pkt.data = nullptr;
             m_temp_pkt.size = 0;
@@ -455,21 +449,17 @@ qint64 FFmpeg::tryDecode()
             out_size = 0;
         }
 
-        if(c->bit_rate) {
+        if (c->bit_rate) {
             m_bitrate = c->bit_rate/1000;
         }
-        if(l < 0) {
+        if (l < 0) {
             return l;
         }
         m_temp_pkt.data += l;
         m_temp_pkt.size -= l;
     }
     if (!m_temp_pkt.size && m_pkt.data) {
-#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,24,102)) //ffmpeg-3.0
-        av_packet_unref(&m_pkt);
-#else
-        av_free_packet(&m_pkt);
-#endif
+        FREE_AV_PACKET((&m_pkt));
     }
     return out_size;
 }

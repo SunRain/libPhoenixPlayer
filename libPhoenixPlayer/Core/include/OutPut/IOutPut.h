@@ -18,7 +18,7 @@ public:
 
     ///
     /// \brief initialize
-    /// Subclass should reimplement this function.
+    /// call this when reimplement this function.
     /// \param sampleRate
     /// \param channels
     /// \param f
@@ -61,7 +61,7 @@ public:
     /// \brief audioParameters
     /// \return selected audio parameters
     ///
-    virtual AudioParameters audioParameters() const;
+    AudioParameters audioParameters() const;
 
     quint32 sampleRate() const;
 
@@ -71,15 +71,6 @@ public:
 
     int sampleSize() const;
 
-protected:
-//    Buffer *bufferIn;
-     /*
-      * Use this function inside initialize() reimplementation to tell about accepted audio parameters.
-      * @param freq Sample rate.
-      * @param chan Number of channels.
-      * @param format Audio format.
-      */
-//     void configure(const PhoenixPlayer::AudioParameters &p);
 private:
     int                                     m_sampleSize    = 0;
     quint32                                 m_sampleRate    = 0;

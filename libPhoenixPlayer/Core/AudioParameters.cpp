@@ -5,17 +5,6 @@
 
 namespace PhoenixPlayer {
 
-//class AudioParametersPriv : public QSharedData
-//{
-//public:
-//    AudioParametersPriv() {}
-//    quint32 sampleRate = 48000;
-//    AudioParameters::AudioFormat format = AudioParameters::PCM_UNKNOWN;
-//    int sampleSize = 2;
-//    int validBitsPerSample = 16;
-//    QList<AudioParameters::ChannelPosition> channelList;
-//};
-
 static AudioParameters::ChannelPosition S_INTERNAL_MAP[9] = {
     AudioParameters::ChannelPosition::CHAN_FRONT_LEFT,
     AudioParameters::ChannelPosition::CHAN_FRONT_RIGHT,

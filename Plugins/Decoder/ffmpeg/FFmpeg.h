@@ -43,7 +43,7 @@ public:
 
 private:
     void reset();
-    bool close();
+    void close();
     void fillBuffer();
     qint64 tryDecode();
     AVInputFormat *dumpSourceFormat(const QString &file);
