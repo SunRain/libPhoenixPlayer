@@ -19,17 +19,18 @@
 #include "StateHandler.h"
 #include "AudioConverter.h"
 #include "ChannelConverter.h"
+#include "AudioEffect.h"
 
 using namespace PhoenixPlayer::Decoder;
 using namespace PhoenixPlayer::PlayBackend::PhoenixBackend;
 
 const static int TRANSPORT_TIMEOUT = 5000; //ms
 
-DecodeThread::DecodeThread(StateHandler *handle, BufferQueue *queue, AudioConverter *converter, QList<AudioEffect *> *list, QObject *parent)
+DecodeThread::DecodeThread(StateHandler *handle, BufferQueue *queue, QList<AudioEffect *> *list, QObject *parent)
     : QThread (parent),
     m_handler(handle),
     m_bufferQueue(queue),
-    m_converter(converter),
+//    m_converter(converter),
     m_effectList(list)
 {
     m_bufferQueue = new BufferQueue();
@@ -41,25 +42,39 @@ DecodeThread::DecodeThread(StateHandler *handle, BufferQueue *queue, AudioConver
         m_decoderLibs = m_pluginLoader->pluginLibraries(PPCommon::PluginDecoder);
     }
     qDebug()<<Q_FUNC_INFO<<" m_decoderLibs "<<m_decoderLibs
-             <<" all decoderLibs "<<m_pluginLoader->pluginLibraries(PPCommon::PluginDecoder);
+           <<" all decoderLibs "<<m_pluginLoader->pluginLibraries(PPCommon::PluginDecoder);
 }
 
-void DecodeThread::changeMedia(PhoenixPlayer::MediaResource *res, quint64 startSec)
+DecodeThread::~DecodeThread()
 {
+    stopDecoding();
+    if (m_output_buf) {
+        delete [] m_output_buf;
+    }
+    m_output_buf = Q_NULLPTR;
+    if (m_audioConverter) {
+        delete m_audioConverter;
+    }
+    m_audioConverter = Q_NULLPTR;
+}
+
+bool DecodeThread::changeMedia(PhoenixPlayer::MediaResource *res, quint64 startSec)
+{
+    this->stopDecoding();
+    this->reset();
+
     if (m_output_buf) {
         delete [] m_output_buf;
         m_output_buf = Q_NULLPTR;
     }
     if (!res) {
-        return;
+        return false;
     }
     if (m_resource) {
         m_resource->deleteLater();
         m_resource = Q_NULLPTR;
     }
     m_resource = res;
-
-    this->stopDecoding();
 
     if (m_decoder) {
         //TODO 判断当前decoder是否支持解析当前的media
@@ -85,13 +100,13 @@ void DecodeThread::changeMedia(PhoenixPlayer::MediaResource *res, quint64 startS
 
     if (!m_decoder) {
         qCritical()<<Q_FUNC_INFO<<"No decoder found!!";
-        return;
+        return false;
     }
 
     //TODO post state to backend
     if (!res->initialize()) {
         qWarning()<<Q_FUNC_INFO<<"initialize error !";
-        return;
+        return false;
     }
 
     //TODO 判断媒体类型，也许可以添加一个单独的方法？
@@ -127,7 +142,7 @@ void DecodeThread::changeMedia(PhoenixPlayer::MediaResource *res, quint64 startS
     if (!m_decoder->initialize(res)) {
         qWarning()<<Q_FUNC_INFO<<"invalid file format";
         //TODO: 使用pluginloader切换到另外一个支持当前格式的decoder
-        return;
+        return false;
     }
     m_audioParameters = m_decoder->audioParameters();
 
@@ -145,22 +160,31 @@ void DecodeThread::changeMedia(PhoenixPlayer::MediaResource *res, quint64 startS
     m_sample_size = m_audioParameters.sampleSize();
     m_output_buf = new unsigned char[m_outputSize];
 
-    m_converter->setFormat(m_audioParameters.format());
+    if (!m_audioConverter) {
+        m_audioConverter = new AudioConverter();
+    }
+    m_audioConverter->setFormat(m_audioParameters.format());
     // force set format
     m_audioParameters = AudioParameters(m_audioParameters.sampleRate(),
                                         m_audioParameters.channels(),
                                         AudioParameters::PCM_FLOAT);
+
+    if (m_channelConverter) {
+        delete m_channelConverter;
+    }
+    m_channelConverter = Q_NULLPTR;
     if (m_audioParameters.channels() != m_audioParameters.remapedChannels()) {
-        m_effectList->append(new ChannelConverter(m_audioParameters.remapedChannels()));
-        m_effectList->last()->initialization(m_audioParameters.sampleRate(),
+        m_channelConverter = new ChannelConverter(m_audioParameters.remapedChannels());
+        m_channelConverter->initialization(m_audioParameters.sampleRate(),
                                              m_audioParameters.channels());
-        m_audioParameters = m_effectList->last()->generateAudioParameters();
+        m_audioParameters = m_channelConverter->generateAudioParameters();
     }
     if (this->isRunning()) {
         qDebug()<<Q_FUNC_INFO<<"thread is still running, terminate!!!!";
         this->terminate();
         this->wait();
     }
+    return true;
 }
 
 void DecodeThread::stopDecoding()
@@ -193,12 +217,9 @@ void DecodeThread::stopDecoding()
 
     m_bufferQueue->waitOut()->wakeAll();
     //FIXME should wake waitIn?
-
-    this->reset();
-
 }
 
-void DecodeThread::seek(qint64 millisecond)
+void DecodeThread::seekMS(qint64 millisecond)
 {
     qDebug()<<Q_FUNC_INFO<<"=== seek to "<<millisecond;
 
@@ -207,6 +228,11 @@ void DecodeThread::seek(qint64 millisecond)
 
     m_bufferQueue->clear();
     m_seekTimeMS = millisecond;
+}
+
+PhoenixPlayer::AudioParameters DecodeThread::audioParameters() const
+{
+    return m_audioParameters;
 }
 
 bool DecodeThread::event(QEvent *event)
@@ -275,11 +301,11 @@ void DecodeThread::run()
                 if (len > 0) {
                     pos += len;
                     if (pos == m_outputSize) {
-                        decodeFinish = true;
+//                        decodeFinish = true;
                         break;
                     }
                 } else if (len == 0) {
-                    decodeFinish = true;
+//                    decodeFinish = true;
                     break;
                 } else {
                     decodeTerminate = true;
@@ -313,7 +339,14 @@ void DecodeThread::run()
 
             qDebug()<<Q_FUNC_INFO<<" samples "<<samples<<" buffer size "<<b->size;
 
-            m_converter->toFloat(m_output_buf, b->data, samples);
+            m_audioConverter->toFloat(m_output_buf, b->data, samples);
+
+            foreach (auto e, *m_effectList) {
+                e->apply(b);
+            }
+            if (m_channelConverter) {
+                m_channelConverter->apply(b);
+            }
 
             m_bufferQueue->mutex()->lock();
             m_bufferQueue->enqueue(b);

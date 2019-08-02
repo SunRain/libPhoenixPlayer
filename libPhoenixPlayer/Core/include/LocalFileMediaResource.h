@@ -13,16 +13,16 @@ class LocalFileMediaResource : public MediaResource
 {
     Q_OBJECT
 public:
-    explicit LocalFileMediaResource(const QString &getUri, QObject *parent = 0);
-    virtual ~LocalFileMediaResource();
+    explicit LocalFileMediaResource(const QString &getUri, QObject *parent = Q_NULLPTR);
+    virtual ~LocalFileMediaResource() override;
 
     // MediaResource interface
 public:
-    bool initialize();
-    QIODevice *device();
-    bool pending() const;
-    bool ready() const;
-    PPCommon::MediaType type() const;
+    bool initialize() Q_DECL_OVERRIDE;
+    QIODevice *device() Q_DECL_OVERRIDE;
+    bool pending() const Q_DECL_OVERRIDE;
+    bool ready() const Q_DECL_OVERRIDE;
+    PPCommon::MediaType type() const Q_DECL_OVERRIDE;
 
 private:
     QFile *m_file;

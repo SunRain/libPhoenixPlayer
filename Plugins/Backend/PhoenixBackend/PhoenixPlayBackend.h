@@ -3,13 +3,20 @@
 
 #include "Backend/IPlayBackend.h"
 
-namespace PhoenixPlayer {
-class VolumeControl;
-namespace PlayBackend {
-namespace PhoenixBackend {
+#include "BufferQueue.h"
 
-class PlayThread;
-class StateHandler;
+namespace PhoenixPlayer {
+    class VolumeControl;
+
+    namespace PlayBackend {
+
+        namespace PhoenixBackend {
+            class PlayThread;
+            class StateHandler;
+            class DecodeThread;
+            class OutputThread;
+            class AudioEffect;
+
 class PhoenixPlayBackend : public IPlayBackend
 {
     Q_OBJECT
@@ -17,7 +24,7 @@ class PhoenixPlayBackend : public IPlayBackend
     Q_INTERFACES(PhoenixPlayer::PlayBackend::IPlayBackend)
 public:
     explicit PhoenixPlayBackend(QObject *parent = Q_NULLPTR);
-    virtual ~PhoenixPlayBackend();
+    virtual ~PhoenixPlayBackend() override;
 
     // QObject interface
 public:
@@ -32,7 +39,7 @@ public:
     bool useExternalOutPut() Q_DECL_OVERRIDE;
 
 public slots:
-    void play(quint64 startSec) Q_DECL_OVERRIDE;
+    void play(quint64 startSec = 0) Q_DECL_OVERRIDE;
     void stop() Q_DECL_OVERRIDE;
     void pause() Q_DECL_OVERRIDE;
     void setPosition(quint64 sec) Q_DECL_OVERRIDE;
@@ -56,15 +63,21 @@ signals:
 public slots:
 
 private:
-    PlayThread *m_engine;
-    StateHandler *m_handler;
-    VolumeControl *m_volumeControl;
+//    PlayThread *m_engine;
+    StateHandler    *m_handler          = Q_NULLPTR;
+    VolumeControl   *m_volumeControl    = Q_NULLPTR;
+    DecodeThread    *m_decodeThread     = Q_NULLPTR;
+    OutputThread    *m_outputThread     = Q_NULLPTR;
+
+    BufferQueue     m_bufferQueue;
+
+    QList<AudioEffect*> m_EffectList;
 
     QString m_url;
 
     int m_nextState;
 //    quint64 m_preSec;
-    bool m_muted;
+    bool m_muted        = false;
 };
 
 } //PhoenixBackend

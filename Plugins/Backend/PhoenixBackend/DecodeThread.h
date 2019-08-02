@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QMutex>
+#include <QList>
 
 #include "AudioParameters.h"
 
@@ -27,6 +28,7 @@ namespace PhoenixPlayer {
             class BufferQueue;
             class AudioConverter;
             class AudioEffect;
+            class ChannelConverter;
 
 class DecodeThread : public QThread
 {
@@ -34,16 +36,19 @@ class DecodeThread : public QThread
 public:
     DecodeThread(StateHandler *handle,
                  BufferQueue *queue,
-                 AudioConverter *converter,
+//                 AudioConverter *converter,
                  QList<AudioEffect*> *list,
                  QObject *parent = Q_NULLPTR);
+
     virtual ~DecodeThread() Q_DECL_OVERRIDE;
 
-    void changeMedia(MediaResource *res = Q_NULLPTR, quint64 startSec = 0);
+    bool changeMedia(MediaResource *res = Q_NULLPTR, quint64 startSec = 0);
 
     void stopDecoding();
 
-    void seek(qint64 millisecond = 0);
+    void seekMS(qint64 millisecond = 0);
+
+    AudioParameters audioParameters() const;
 
     // QObject interface
 public:
@@ -57,10 +62,11 @@ private:
     void reset();
 
 private:
-    StateHandler                *m_handler      = Q_NULLPTR;
-    BufferQueue                 *m_bufferQueue  = Q_NULLPTR;
-    AudioConverter              *m_converter    = Q_NULLPTR;
-    QList<AudioEffect *>        *m_effectList   = Q_NULLPTR;
+    StateHandler                *m_handler          = Q_NULLPTR;
+    BufferQueue                 *m_bufferQueue      = Q_NULLPTR;
+    AudioConverter              *m_audioConverter   = Q_NULLPTR;
+    ChannelConverter            *m_channelConverter = Q_NULLPTR;
+    QList<AudioEffect *>        *m_effectList       = Q_NULLPTR;
 
     PPSettings                  *m_settings     = Q_NULLPTR;
     PluginLoader                *m_pluginLoader = Q_NULLPTR;

@@ -1,18 +1,18 @@
-#include "Player/PhoenixPlayer.h"
+//#include "Player/PhoenixPlayer.h"
 
-namespace PhoenixPlayer {
+//namespace PhoenixPlayer {
 
-PhoenixPlayer::PhoenixPlayer(QObject *parent)
-    : QObject(parent)
-{
+//PhoenixPlayer::PhoenixPlayer(QObject *parent)
+//    : QObject(parent)
+//{
 
-}
+//}
 
-PhoenixPlayer::~PhoenixPlayer()
-{
+//PhoenixPlayer::~PhoenixPlayer()
+//{
 
-}
+//}
 
 
 
-} //namespace PhoenixPlayer
+//} //namespace PhoenixPlayer

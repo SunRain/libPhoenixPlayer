@@ -1,17 +1,17 @@
-#ifndef PHOENIXPLAYER_H
-#define PHOENIXPLAYER_H
+//#ifndef PHOENIXPLAYER_H
+//#define PHOENIXPLAYER_H
 
-#include <QObject>
+//#include <QObject>
 
-namespace PhoenixPlayer {
+//namespace PhoenixPlayer {
 
-class PhoenixPlayer : public QObject
-{
-    Q_OBJECT
-public:
-    explicit PhoenixPlayer(QObject *parent = 0);
-    virtual ~PhoenixPlayer();
-};
+//class PhoenixPlayer : public QObject
+//{
+//    Q_OBJECT
+//public:
+//    explicit PhoenixPlayer(QObject *parent = 0);
+//    virtual ~PhoenixPlayer();
+//};
 
-} //PhoenixPlayer
-#endif // PHOENIXPLAYER_H
+//} //PhoenixPlayer
+//#endif // PHOENIXPLAYER_H

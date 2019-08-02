@@ -4,7 +4,9 @@
 #include <QString>
 #include <QObject>
 #include <QDebug>
+#ifdef WITH_QML_LIB
 #include <QtQml>
+#endif
 //#include <QQuickWindow>
 
 #include "libphoenixplayer_global.h"
@@ -71,11 +73,13 @@ public:
     }
     virtual ~AudioMetaObjectKeyName() {}
 
+#ifdef WITH_QML_LIB
     static QObject *qmlSingleton(QQmlEngine *engine, QJSEngine *scriptEngine) {
         Q_UNUSED(engine)
         Q_UNUSED(scriptEngine)
         return new AudioMetaObjectKeyName();
     }
+#endif
 
     QString KeyName() const
     {

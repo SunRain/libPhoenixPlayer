@@ -155,6 +155,12 @@ bool FFmpeg::initialize(MediaResource *res)
         return false;
     }
 
+#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,34,0)) //libav-10: 55.34.1; ffmpeg-2.1:  55.39.100
+    m_decoded_frame = av_frame_alloc();
+#else
+    m_decoded_frame = avcodec_alloc_frame();
+#endif
+
     //dump values
     av_dump_format (ic, 0, Q_NULLPTR, 0);
 

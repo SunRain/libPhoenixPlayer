@@ -1,3 +1,7 @@
+#include "AudioMetaObject.h"
+
+#include <QFile>
+#include <QFileInfo>
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -5,7 +9,6 @@
 #include <QCryptographicHash>
 
 #include "PPUtility.h"
-#include "AudioMetaObject.h"
 #include "PPCommon.h"
 #include "AudioMetaObjectKeys.h"
 

@@ -22,16 +22,72 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+include("../../../../../libPhoenixPlayer/Core/CoreHeaders.pri")
+#include("../../../../../ThirdParty/QCurl/src/qcurl.pri")
+
 CONFIG += c++11
+CONFIG -= WITH_QML_LIB
+DEFINES -= WITH_QML_LIB
+QMAKE_CXXFLAGS = -fpermissive
+
+INCLUDEPATH += $$PWD/../..
+DEPENDPATH += $$PWD/../..
 
 SOURCES += \
+        ../../AudioConverter.cpp \
+        ../../AudioEffect.cpp \
+        ../../BufferQueue.cpp \
+        ../../ChannelConverter.cpp \
+        ../../DecodeThread.cpp \
+        ../../InternalEvent.cpp \
+        ../../OutputThread.cpp \
+        ../../PhoenixPlayBackend.cpp \
+        ../../PlayThread.cpp \
+        ../../StateHandler.cpp \
+        ../../equ/iir.c \
+        ../../equ/iir_cfs.c \
+        ../../equ/iir_fpu.c \
         main.cpp \
         MainWindow.cpp
 
 HEADERS += \
+        ../../AudioConverter.h \
+        ../../AudioEffect.h \
+        ../../BufferQueue.h \
+        ../../ChannelConverter.h \
+        ../../DecodeThread.h \
+        ../../InternalEvent.h \
+        ../../OutputThread.h \
+        ../../OutputThread_old.h \
+        ../../PhoenixBackend_global.h \
+        ../../PhoenixPlayBackend.h \
+        ../../PhoenixPlayer.h \
+        ../../PlayThread.h \
+        ../../RingBuffer.h \
+        ../../StateHandler.h \
+        ../../equ/iir.h \
+        ../../equ/iir_cfs.h \
+        ../../equ/iir_fpu.h \
         MainWindow.h
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+isEmpty (LIB_DIR){
+    LIB_DIR = /opt/PhoenixPlayer
+}
+
+QMAKE_LIBDIR += \
+    $${OUT_PWD} \
+    $${LIB_DIR}/lib \
+
+QMAKE_RPATHDIR += \
+    $${OUT_PWD} \
+    $${LIB_DIR}/lib \
+
+LIBS += -lPhoenixPlayer
+
+DISTFILES += \
+    ../../PhoenixBackend.json \
+    ../../PhoenixBackend.pri \
+    ../../README.md
+
+SUBDIRS += \
+    ../../PhoenixBackend.pro
