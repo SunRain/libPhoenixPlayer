@@ -48,3 +48,4 @@ Makefile*
 tmp/*
 ThirdParty/Taglib/build
 ThirdParty/Taglib/target
+*/build-*
