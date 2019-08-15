@@ -91,6 +91,7 @@ private:
     int m_bitrate = 0;
     unsigned char *m_output_buf = Q_NULLPTR;
     quint64 m_outputSize = 0;
+    quint64 m_output_at = 0;
 };
 
 

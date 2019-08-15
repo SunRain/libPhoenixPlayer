@@ -72,8 +72,8 @@ public:
     void clear();
 
 private:
-    size_t  m_blockSamples;
-    int    m_bufferCnt;
+    size_t  m_blockSamples  = 0;
+    int     m_bufferCnt     = 0;
 
     QMutex          m_mutex;
     QWaitCondition  m_waitIn;

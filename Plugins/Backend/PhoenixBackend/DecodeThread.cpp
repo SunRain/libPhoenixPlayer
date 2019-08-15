@@ -33,7 +33,6 @@ DecodeThread::DecodeThread(StateHandler *handle, BufferQueue *queue, QList<Audio
 //    m_converter(converter),
     m_effectList(list)
 {
-    m_bufferQueue = new BufferQueue();
     m_pluginLoader = phoenixPlayerLib->pluginLoader();
     m_settings = phoenixPlayerLib->settings();
 
@@ -171,13 +170,16 @@ bool DecodeThread::changeMedia(PhoenixPlayer::MediaResource *res, quint64 startS
 
     if (m_channelConverter) {
         delete m_channelConverter;
+        m_channelConverter = Q_NULLPTR;
     }
-    m_channelConverter = Q_NULLPTR;
     if (m_audioParameters.channels() != m_audioParameters.remapedChannels()) {
+        qDebug()<<Q_FUNC_INFO<<"Use channel converter!!";
         m_channelConverter = new ChannelConverter(m_audioParameters.remapedChannels());
         m_channelConverter->initialization(m_audioParameters.sampleRate(),
                                              m_audioParameters.channels());
         m_audioParameters = m_channelConverter->generateAudioParameters();
+    } else {
+        qDebug()<<Q_FUNC_INFO<<"Not use channel converter!!";
     }
     if (this->isRunning()) {
         qDebug()<<Q_FUNC_INFO<<"thread is still running, terminate!!!!";
@@ -294,6 +296,7 @@ void DecodeThread::run()
 
         // read from decoder and add to buffer queue
         {
+#if 0
             quint64 pos = 0;
             //loop to read data to tmp buffer
             do {
@@ -319,7 +322,6 @@ void DecodeThread::run()
                 }
                 locker.relock();
             } while (true);
-
             if (m_user_stop || decodeTerminate) break;
 
             m_bufferQueue->mutex()->lock();
@@ -352,6 +354,75 @@ void DecodeThread::run()
             m_bufferQueue->enqueue(b);
             m_bufferQueue->waitIn()->wakeAll();
             m_bufferQueue->mutex()->unlock();
+#endif
+            qint64 len = m_decoder->runDecode(m_output_buf + m_output_at, m_outputSize - m_output_at);
+            if (len > 0) {
+                m_output_at += len;
+
+                bool seek = false;
+                while (m_output_at > m_blockSize) {
+                    locker.unlock();
+                    if (m_user_stop) {
+                        decodeTerminate = true;
+                        locker.relock();
+                        break;
+                    }
+                    if (m_seekTimeMS > 0) {
+                        m_output_at = 0;
+                        seek = true;
+                        break;
+                    }
+                    locker.relock();
+
+                    m_bufferQueue->mutex()->lock();
+
+//                    qDebug()<<Q_FUNC_INFO<<" queue size "<<m_bufferQueue->size()
+//                             <<" maxAvailableCnt "<<m_bufferQueue->maxAvailableCnt();
+                    if (m_bufferQueue->size() == m_bufferQueue->maxAvailableCnt()) {
+                        qDebug()<<Q_FUNC_INFO<<"Size in max size, wait to out";
+                        m_bufferQueue->waitOut()->wait(m_bufferQueue->mutex());
+                    }
+                    m_bufferQueue->mutex()->unlock();
+
+//                    qDebug()<<Q_FUNC_INFO<<" not full, continue to append to queue";
+
+                    size_t sz = m_output_at < m_blockSize ? m_output_at : m_blockSize;
+                    size_t samples = sz / m_sample_size;
+
+                    Buffer *b = new Buffer(m_audioParameters.channels().count() * Buffer::BUFFER_PERIOD);
+                    b->samples = samples;
+                    b->rate = m_bitrate;
+                    b->lastBuffer = (decodeFinish || decodeTerminate);
+
+//                    qDebug()<<Q_FUNC_INFO<<" samples "<<samples<<" buffer size "<<b->size;
+
+                    m_audioConverter->toFloat(m_output_buf, b->data, samples);
+
+                    foreach (auto e, *m_effectList) {
+                        e->apply(b);
+                    }
+                    if (m_channelConverter) {
+                        qDebug()<<Q_FUNC_INFO<<"use channelConverter";
+                        m_channelConverter->apply(b);
+                    }
+
+                    m_bufferQueue->mutex()->lock();
+                    m_bufferQueue->enqueue(b);
+                    m_bufferQueue->waitIn()->wakeAll();
+                    m_bufferQueue->mutex()->unlock();
+
+                    m_output_at -= sz;
+                }
+                if (seek) {
+                    continue;
+                }
+
+            } else if (len == 0) { //decoder finish
+
+            } else { //decoder error
+
+            }
+
         }
     }
     if (decodeFinish || decodeTerminate) {
@@ -370,4 +441,5 @@ void DecodeThread::reset()
     m_blockSize = 0;
     m_sample_size = 0;
     m_bitrate = 0;
+    m_output_at = 0;
 }

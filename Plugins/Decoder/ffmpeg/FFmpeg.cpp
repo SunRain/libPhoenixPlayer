@@ -48,7 +48,7 @@ FFmpeg::FFmpeg(QObject *parent)
     , audioIndex(-1)
     , m_bitrate(0)
 {
-    avformat_network_init ();
+    avformat_network_init();
     av_register_all();
 
     av_init_packet(&m_pkt);
@@ -303,10 +303,7 @@ void FFmpeg::close()
 #endif
 
     if (ic) {
-        avformat_close_input(&ic);
-        if (ic) {
-            avformat_free_context(ic);
-        }
+        avformat_free_context(ic);
     }
     ic = Q_NULLPTR;
 

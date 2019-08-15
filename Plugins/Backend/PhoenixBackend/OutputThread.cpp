@@ -73,7 +73,7 @@ bool OutputThread::initialization(quint32 sampleRate, const QList<PhoenixPlayer:
         return false;
     }
 
-    if (!m_output->initialize(sampleRate, list, AudioParameters::PCM_FLOAT)) {
+    if (!m_output->initialize(sampleRate, list, /*AudioParameters::PCM_FLOAT*/AudioParameters::PCM_S16LE)) {
         qCritical()<<Q_FUNC_INFO<<"Can't init output";
         if (m_outputHost) {
             if (!m_outputHost->unLoad())
@@ -231,17 +231,24 @@ void OutputThread::run()
 
         m_bufferQueue->mutex()->lock();
         if (m_bufferQueue->isEmpty()) {
+            qDebug()<<Q_FUNC_INFO<<"queue is empty wait ";
             m_bufferQueue->waitIn()->wait(m_bufferQueue->mutex());
         }
         m_bufferQueue->mutex()->unlock();
+
+//        qDebug()<<Q_FUNC_INFO<<"continue output";
 
         if (m_user_stop) break;
 
         status();
 
+        m_bufferQueue->mutex()->lock();
         Buffer *b = m_bufferQueue->dequeue();
+        m_bufferQueue->waitOut()->wakeAll();
+        m_bufferQueue->mutex()->unlock();
 
         if (m_useEq) {
+            qDebug()<<Q_FUNC_INFO<<"Use EQ";
             iir(b->data, b->samples, m_channels.count());
         }
 
@@ -251,17 +258,20 @@ void OutputThread::run()
             memset(b->data, 0, b->size * sizeof(float));
         }
         if (m_channel_converter) {
+            qDebug()<<Q_FUNC_INFO<<"Use channel converter";
             m_channel_converter->apply(b);
         }
 
         //increase buffer size if needed
-        if(b->samples > m_output_size) {
+        if (b->samples > m_output_size) {
+            qDebug()<<Q_FUNC_INFO<<"Increase buffer size";
             delete [] m_output_buf;
             m_output_size = b->samples;
             m_output_buf = new unsigned char[m_output_size * AudioParameters::sampleSize(m_format)];
         }
 
-        if(m_format_converter) {
+        if (m_format_converter) {
+//            qDebug()<<Q_FUNC_INFO<<"Use format converter";
             m_format_converter->fromFloat(b->data, m_output_buf, b->samples);
             tmp = m_output_buf;
         } else {
@@ -280,7 +290,7 @@ void OutputThread::run()
                 if (len >= 0) {
                     m_totalWritten += len;
                     pos += len;
-                    if (pos == output_at) {
+                    if (pos >= output_at) {
                         break;
                     }
                 } else {
@@ -333,5 +343,5 @@ void OutputThread::status()
         m_currentMilliseconds = ct;
         m_handler->dispatchElapsed(m_currentMilliseconds);
     }
-    qDebug()<<Q_FUNC_INFO<<">>>>>>> m_currentMilliseconds "<<m_currentMilliseconds;
+//    qDebug()<<Q_FUNC_INFO<<">>>>>>> m_currentMilliseconds "<<m_currentMilliseconds;
 }

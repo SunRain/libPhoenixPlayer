@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     PhoenixPlayBackend *bk = new PhoenixPlayBackend(this);
     bk->initialize();
 
-    MediaResource *res = MediaResource::create("/home/wangguojian/音乐/music/wmdg.mp3", this);
+    MediaResource *res = MediaResource::create("/home/wangguojian/音乐/faraway.mp3", this);
 
     bk->changeMedia(res, 0, false);
 

@@ -27,10 +27,12 @@ void ChannelConverter::apply(PhoenixPlayer::Buffer *buffer)
         return;
     }
 
+    qDebug()<<Q_FUNC_INFO<<"Do ChannelConverter.";
+
     int inChannels = m_inList.count();
     int outChannels = m_outList.count();
 
-    if(buffer->samples > m_tmpSize) {
+    if (buffer->samples > m_tmpSize) {
         delete [] m_tmpBuf;
         m_tmpBuf = new float[buffer->samples];
         m_tmpSize = buffer->samples;
@@ -38,7 +40,7 @@ void ChannelConverter::apply(PhoenixPlayer::Buffer *buffer)
     memcpy(m_tmpBuf, buffer->data, buffer->samples * sizeof(float));
 
     size_t samples = buffer->samples * outChannels / inChannels;
-    if(samples > buffer->size) {
+    if (samples > buffer->size) {
         delete [] buffer->data;
         buffer->data = new float[samples];
         buffer->size = samples;
@@ -47,7 +49,7 @@ void ChannelConverter::apply(PhoenixPlayer::Buffer *buffer)
     float *in = m_tmpBuf;
     float *out = buffer->data;
 
-    for(unsigned long i = 0; i < buffer->samples / inChannels; ++i) {
+    for (unsigned long i = 0; i < buffer->samples / inChannels; ++i) {
         for(int j = 0; j < outChannels; ++j) {
             out[j] = m_reorderArray[j] < 0 ? 0 : in[m_reorderArray[j]];
         }
@@ -60,7 +62,8 @@ void ChannelConverter::apply(PhoenixPlayer::Buffer *buffer)
 
 void ChannelConverter::initialization(quint32 sampleRate, const QList<PhoenixPlayer::AudioParameters::ChannelPosition> &in)
 {
-    AudioEffect::initialization(sampleRate, in);
+    AudioEffect::initialization(sampleRate, m_outList);
+
     m_disabled = (in == m_outList) || (in.count() == 1 && m_outList.count() == 1);
     if (m_disabled) {
         return;
