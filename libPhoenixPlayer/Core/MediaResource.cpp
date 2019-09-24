@@ -44,15 +44,15 @@ PPCommon::MediaType MediaResource::type() const {
     return PPCommon::MediaTypeLocalFile;
 }
 
-MediaResource *MediaResource::create(const QString &uri, QObject *parent)
+MediaResource *MediaResource::create(const QString &uri)
 {
     QString str = uri;
     if (str.startsWith ("file://"))
         str = str.mid (7); //remove file://
     if (str.contains ("://")) { //local file path doesn't contain "://"
-        return new LocalFileMediaResource(str, parent);
+        return new LocalFileMediaResource(str);
     }
-    return new MediaResource(str, parent);
+    return new MediaResource(str);
 }
 
 

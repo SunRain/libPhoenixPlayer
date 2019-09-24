@@ -1,334 +1,444 @@
+/***************************************************************************
+ *   Copyright (C) 2012-2019 by Ilya Kotov                                 *
+ *   forkotov02@ya.ru                                                      *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
+ ***************************************************************************/
+
 #include "OutputThread.h"
 
+#include <QtDebug>
+#include <string.h>
 #include <QCoreApplication>
-#include <QDebug>
-
-#include "OutPut/IOutPut.h"
-#include "OutPut/OutPutHost.h"
-
-#include "AudioParameters.h"
-#include "Buffer.h"
-#include "RingBuffer.h"
 
 #include "EqualizerMgr.h"
-#include "LibPhoenixPlayerMain.h"
 
-#include "Backend/BaseVolume.h"
-#include "Backend/SoftVolume.h"
-#include "Backend/BaseVisual.h"
-
-#include "PluginLoader.h"
-#include "PhoenixBackend_global.h"
-
-#include "StateHandler.h"
 #include "AudioConverter.h"
 #include "ChannelConverter.h"
-#include "BufferQueue.h"
+#include "Buffer.h"
+#include "StateHandler.h"
+#include "SoftVolume.h"
+#include "Recycler.h"
+
+#include "IOutPut.h"
+#include "QtMultimediaOutput.h"
 
 extern "C" {
 #include "equ/iir.h"
 }
 
-using namespace PhoenixPlayer::OutPut;
-using namespace PhoenixPlayer::PlayBackend::PhoenixBackend;
+namespace PhoenixPlayer {
+namespace PlayBackend {
+namespace PhoenixBackend {
 
-
-OutputThread::OutputThread(StateHandler *handler,
-                           BufferQueue *queue,
-//                           QList<AudioEffect *> *list,
-                           QObject *parent)
-    : QThread (parent),
-    m_handler(handler),
-    m_bufferQueue(queue)
-//    m_effectList(list)
+OutputThread::OutputThread(StateHandler *handle, Recycler *recycler, QObject* parent)
+    : QThread(parent),
+    m_handler(handle),
+    m_recycler(recycler)
 {
-    m_outputHost = phoenixPlayerLib->pluginLoader()->curOutPutHost();
-    if (m_outputHost) {
-        if (m_outputHost->isValid()) {
-            m_output = m_outputHost->instance<IOutPut>();
-        }
-    }
-
+    m_frequency = 0;
+    m_channels = 0;
+    m_output = Q_NULLPTR;
+    m_format = AudioParameters::AudioFormat::PCM_UNKNOWN;
+    m_totalWritten = 0;
+    m_currentMilliseconds = -1;
+    m_bytesPerMillisecond = 0;
+    m_user_stop = false;
+    m_finish = false;
+    m_kbps = 0;
+    m_skip = false;
+    m_pause = false;
+    m_prev_pause = false;
+    m_useEq = false;
+    m_muted = false;
+    m_format_converter = Q_NULLPTR;
+    m_channel_converter = Q_NULLPTR;
+    m_output_buf = Q_NULLPTR;
+    m_output_size = 0;
     m_eq = EqualizerMgr::instance();
-    connect (m_eq, &EqualizerMgr::changed, this, &OutputThread::updateEQ);
 }
 
 OutputThread::~OutputThread()
 {
+    stop();
+    reset();
 
+    if (m_output) {
+        delete m_output;
+        m_output = Q_NULLPTR;
+    }
+    if (m_format_converter) {
+        delete m_format_converter;
+        m_format_converter = Q_NULLPTR;
+    }
+    if (m_channel_converter) {
+        delete m_channel_converter;
+        m_channel_converter = Q_NULLPTR;
+    }
+    if (m_output_buf) {
+        delete[] m_output_buf;
+        m_output_buf = Q_NULLPTR;
+    }
 }
 
-bool OutputThread::initialization(quint32 sampleRate, const QList<PhoenixPlayer::AudioParameters::ChannelPosition> &list)
+bool OutputThread::initialization(quint32 freq, ChannelMap map)
 {
-    this->stop();
+    reset();
 
-    m_in_params = AudioParameters(sampleRate, list, AudioParameters::PCM_FLOAT);
-
-    if (!m_output && m_outputHost) {
-        if (m_outputHost->isValid())
-            m_output = m_outputHost->instance<IOutPut>();
-    }
+    m_in_params = AudioParameters(freq, map, AudioParameters::PCM_FLOAT);
     if (!m_output) {
-        qCritical()<<Q_FUNC_INFO<<"Can't find output!!";
-        return false;
+        m_output = new OutPut::QtMultimediaOutput::QtMultimediaOutput(this);
     }
 
-    if (!m_output->initialize(sampleRate, list, /*AudioParameters::PCM_FLOAT*/AudioParameters::PCM_S16LE)) {
-        qCritical()<<Q_FUNC_INFO<<"Can't init output";
-        if (m_outputHost) {
-            if (!m_outputHost->unLoad())
-                m_outputHost->forceUnload();
-        }
+    if (!m_output->initialize(freq, map, /*m_settings->outputFormat()*/AudioParameters::PCM_S16LE)) {
+        qWarning()<<Q_FUNC_INFO<<"OutputWriter: unable to initialize output";
+        delete m_output;
         m_output = nullptr;
         return false;
     }
-    this->m_sampleRate = m_output->sampleRate();
-    this->m_channels = m_output->channels();
-    this->m_format = m_output->format();
+    m_frequency = m_output->sampleRate();
+    m_chan_map = m_output->channelMap();
+    m_channels = m_chan_map.count();
+    m_format = m_output->format();
 
-    qDebug()<<Q_FUNC_INFO<<" ["<<m_in_params.parametersInfo()
-             <<"] ==> ["<<m_output->audioParameters().parametersInfo()<<"]";
+    qDebug()<<Q_FUNC_INFO<<QString("OutputWriter: [QtMultimediaOutput] %1 ==> %2")
+                                   .arg(m_in_params.parametersInfo())
+                                   .arg(m_output->audioParameters().parametersInfo());
 
-    if(m_format_converter) {
-        delete m_format_converter;
-        m_format_converter = nullptr;
+
+    if (!prepareConverters()) {
+        qWarning()<<Q_FUNC_INFO<<"OutputWriter: unable to convert audio";
+        delete m_output;
+        m_output = nullptr;
+        return false;
     }
-    if(m_channel_converter) {
+
+    if (m_output_buf) {
+        delete[] m_output_buf;
+    }
+    m_output_size = QMMP_BLOCK_FRAMES * m_channels * 4;
+    m_output_buf = new unsigned char[m_output_size * m_output->sampleSize()];
+
+    m_bytesPerMillisecond = m_frequency * m_channels * AudioParameters::sampleSize(m_format) / 1000;
+    m_recycler->configure(m_in_params.sampleRate(), m_in_params.channels()); //calculate output buffer size
+    updateEqSettings();
+    clean_history();
+    return true;
+}
+
+void OutputThread::togglePlayPause()
+{
+    qDebug()<<Q_FUNC_INFO<<" ----- ";
+
+    m_pause = !m_pause;
+    PlayState state = m_pause ? PlayState::Paused: PlayState::Playing;
+    dispatch(state);
+
+    m_recycler->mutex()->lock();
+    m_recycler->cond()->wakeAll();
+    m_recycler->mutex()->unlock();
+}
+
+bool OutputThread::isPaused() const
+{
+    return m_pause;
+}
+
+void OutputThread::stop()
+{
+    qDebug()<<Q_FUNC_INFO<<"===";
+
+    m_user_stop = true;
+
+    m_recycler->cond()->wakeAll();
+
+    int loopOut = 3;
+    do {
+        qDebug()<<Q_FUNC_INFO<<"thread is runnging, loop remain "<<loopOut;
+        loopOut--;
+        qApp->processEvents();
+    } while(this->isRunning() && loopOut > 0);
+
+    if (this->isRunning()) {
+        qDebug()<<Q_FUNC_INFO<<"wait thread";
+        this->wait();
+    }
+    reset();
+}
+
+void OutputThread::setMuted(bool muted)
+{
+    m_muted = muted;
+}
+
+void OutputThread::finish()
+{
+    m_finish = true;
+}
+
+void OutputThread::seek(qint64 pos, bool reset)
+{
+    m_mutex.lock();
+    m_totalWritten = pos * m_bytesPerMillisecond;
+    m_currentMilliseconds = -1;
+    m_skip = isRunning() && reset;
+    m_mutex.unlock();
+}
+
+AudioParameters OutputThread::audioParameters() const
+{
+    return AudioParameters(m_frequency, m_chan_map, AudioParameters::PCM_FLOAT);
+}
+
+int OutputThread::sampleSize() const
+{
+    return AudioParameters::sampleSize(m_format);
+}
+
+void OutputThread::dispatchVisual (Buffer *buffer)
+{
+    if (!buffer)
+        return;
+
+    //TODO
+//    Visual::addAudio(buffer->data, buffer->samples, m_channels,
+//                     m_totalWritten / m_bytesPerMillisecond, m_output->latency());
+}
+
+bool OutputThread::prepareConverters()
+{
+    if (m_format_converter) {
+        delete m_format_converter;
+        m_format_converter = Q_NULLPTR;
+    }
+    if (m_channel_converter) {
         delete m_channel_converter;
-        m_channel_converter = nullptr;
+        m_channel_converter = Q_NULLPTR;
+    }
+
+    if (m_channels != m_output->channels()) {
+        qWarning()<<Q_FUNC_INFO<<"OutputWriter: unsupported channel number";
+        return false;
     }
 
     if (m_in_params.format() != m_format) {
         m_format_converter = new AudioConverter();
         m_format_converter->setFormat(m_format);
     }
-    if (m_in_params.channels() != m_channels) {
-        m_channel_converter = new ChannelConverter(m_channels);
-        m_channel_converter->initialization(m_in_params.sampleRate(), m_in_params.channels());
 
+    if (m_in_params.channelMap() != m_chan_map) {
+        m_channel_converter = new ChannelConverter(m_chan_map);
+        m_channel_converter->initialization(m_in_params.sampleRate(), m_in_params.channelMap());
     }
-
-    if(m_output_buf) {
-        delete [] m_output_buf;
-        m_output_buf = Q_NULLPTR;
-
-    }
-    m_output_size = Buffer::BUFFER_PERIOD * m_channels.size() * 4;
-    m_output_buf = new unsigned char[m_output_size * m_output->sampleSize()];
-
-    m_bytesPerMillisecond = m_sampleRate
-                            * m_channels.size()
-                            * AudioParameters::sampleSize(m_format) / 1000;
-
-    updateEQ();
-    clean_history();
     return true;
-}
-
-bool OutputThread::isPaused()
-{
-    return m_paused;
-}
-
-void OutputThread::togglePlayPause()
-{
-    m_mutex.lock();
-    m_paused = !m_paused;
-    m_mutex.unlock();
-
-    PlayState state = m_paused ? PlayState::Paused : PlayState::Playing;
-    m_handler->dispatch(state);
-    if (!m_paused) {
-        m_pauseWait.wakeAll();
-    }
 }
 
 void OutputThread::reset()
 {
+    m_frequency = 0;
+    m_channels = 0;
+    m_format = AudioParameters::AudioFormat::PCM_UNKNOWN;
     m_totalWritten = 0;
-    m_currentMilliseconds = 0;
+    m_currentMilliseconds = -1;
     m_bytesPerMillisecond = 0;
     m_user_stop = false;
     m_finish = false;
-    //    m_kbps = 0;
-//    m_skip = false;
-    m_paused = false;
+    m_kbps = 0;
+    m_skip = false;
+    m_pause = false;
+    m_prev_pause = false;
     m_muted = false;
-//    m_prev_pause = false;
-    //    m_useEq = false;
 }
 
-void OutputThread::stop()
-{
-    m_mutex.lock();
-    if (m_paused) {
-        m_paused = !m_paused;
-    }
-    m_user_stop = true;
-    m_mutex.unlock();
-
-    m_pauseWait.wakeAll();
-    m_bufferQueue->waitIn()->wakeAll();
-
-    int loopOut = 3;
-    do {
-        qDebug()<<Q_FUNC_INFO<<"======= thread is runnging, loopout "<<loopOut;
-        loopOut--;
-        qApp->processEvents();
-    } while(this->isRunning() && loopOut > 0);
-
-    if (this->isRunning()) {
-        qDebug()<<Q_FUNC_INFO<<"======== thread still running";
-    }
-    this->reset();
-}
-
-void OutputThread::setMuted(bool muted)
-{
-    m_mutex.lock();
-    m_muted = muted;
-    m_mutex.unlock();
-}
-
-//void OutputThread::finish()
+//void OutputWriter::startVisualization()
 //{
-//    m_finish = true;
+//    foreach (Visual *visual, *Visual::visuals())
+//    {
+//        QMetaObject::invokeMethod(visual, "start", Qt::QueuedConnection);
+//    }
 //}
 
-bool OutputThread::event(QEvent *event)
+//void OutputWriter::stopVisualization()
+//{
+//    Visual::clearBuffer();
+//    foreach (Visual *visual, *Visual::visuals())
+//    {
+//        QMetaObject::invokeMethod(visual, "stop", Qt::QueuedConnection);
+//    }
+//}
+
+//void OutputWriter::dispatch(qint64 elapsed)
+//{
+//    if (m_handler)
+//        m_handler->dispatchElapsed(elapsed);
+//}
+
+void OutputThread::dispatch(const PlayState &state)
 {
-    return QThread::event(event);
+    if (m_handler)
+        m_handler->dispatch(state);
+}
+
+void OutputThread::dispatch(const AudioParameters &p)
+{
+//    if (m_handler)
+//        m_handler->dispatch(p);
+//TODO
 }
 
 void OutputThread::run()
 {
-    m_mutex.lock();
+    m_mutex.lock ();
     if (!m_bytesPerMillisecond) {
-        qWarning()<<Q_FUNC_INFO<<"Invalid m_bytesPerMillisecond";
-        m_mutex.unlock();
+        qWarning()<<Q_FUNC_INFO<<"OutputWriter: invalid audio parameters";
+        m_mutex.unlock ();
         return;
     }
-    m_mutex.unlock();
+    m_mutex.unlock ();
 
-    m_handler->dispatch(PlayState::Playing);
-
-    uchar *tmp = Q_NULLPTR;
+    bool done = false;
+    Buffer *b = nullptr;
+    quint64 l;
+    qint64 m = 0;
     size_t output_at = 0;
+    unsigned char *tmp = nullptr;
 
-    bool outputFinish = false;
+    dispatch(PlayState::Playing);
+    dispatch(m_output->audioParameters());
+//    startVisualization();
 
-    while (true) {
-
-        if (m_finish || outputFinish) break;
-
-        QMutexLocker locker(&m_mutex);
-
-        if (m_paused) {
-            m_pauseWait.wait(locker.mutex());
+    while (!done) {
+        m_mutex.lock ();
+        if (m_pause != m_prev_pause) {
+            if (m_pause) {
+//                Visual::clearBuffer();
+                m_output->suspend();
+                m_mutex.unlock();
+                m_prev_pause = m_pause;
+                continue;
+            } else {
+                m_output->resume();
+            }
+            m_prev_pause = m_pause;
         }
+        m_recycler->mutex()->lock ();
+        done = m_user_stop || (m_finish && m_recycler->empty());
 
-        if (m_user_stop) break;
-
-        m_bufferQueue->mutex()->lock();
-        if (m_bufferQueue->isEmpty()) {
-            qDebug()<<Q_FUNC_INFO<<"queue is empty wait ";
-            m_bufferQueue->waitIn()->wait(m_bufferQueue->mutex());
+        while (!done && (m_recycler->empty() || m_pause)) {
+            m_recycler->cond()->wakeOne();
+            m_mutex.unlock();
+            m_recycler->cond()->wait(m_recycler->mutex());
+            m_mutex.lock ();
+            done = m_user_stop || m_finish;
         }
-        m_bufferQueue->mutex()->unlock();
-
-//        qDebug()<<Q_FUNC_INFO<<"continue output";
-
-        if (m_user_stop) break;
 
         status();
 
-        m_bufferQueue->mutex()->lock();
-        Buffer *b = m_bufferQueue->dequeue();
-        m_bufferQueue->waitOut()->wakeAll();
-        m_bufferQueue->mutex()->unlock();
-
-        if (m_useEq) {
-            qDebug()<<Q_FUNC_INFO<<"Use EQ";
-            iir(b->data, b->samples, m_channels.count());
+        if (!b) {
+            if((b = m_recycler->next())) {
+                if (b->rate) {
+                    m_kbps = b->rate;
+                }
+//                if(b->trackInfo)
+//                    m_output->setTrackInfo(*b->trackInfo);
+            }
         }
 
-        SoftVolume::instance()->changeVolume(b, m_channels.count());
+        m_recycler->cond()->wakeOne();
+        m_recycler->mutex()->unlock();
+        m_mutex.unlock();
+        if (b) {
+            m_mutex.lock();
+            if (m_useEq) {
+                iir(b->data, b->samples, m_channels);
+            }
+            m_mutex.unlock();
 
-        if (m_muted) {
-            memset(b->data, 0, b->size * sizeof(float));
-        }
-        if (m_channel_converter) {
-            qDebug()<<Q_FUNC_INFO<<"Use channel converter";
-            m_channel_converter->apply(b);
-        }
+            dispatchVisual(b);
 
-        //increase buffer size if needed
-        if (b->samples > m_output_size) {
-            qDebug()<<Q_FUNC_INFO<<"Increase buffer size";
-            delete [] m_output_buf;
-            m_output_size = b->samples;
-            m_output_buf = new unsigned char[m_output_size * AudioParameters::sampleSize(m_format)];
-        }
+            SoftVolume::instance()->changeVolume(b, m_channels);
 
-        if (m_format_converter) {
-//            qDebug()<<Q_FUNC_INFO<<"Use format converter";
-            m_format_converter->fromFloat(b->data, m_output_buf, b->samples);
-            tmp = m_output_buf;
-        } else {
-            tmp = (unsigned char*)b->data;
-        }
+            if (m_muted) {
+                memset(b->data, 0, b->size * sizeof(float));
+            }
+            if (m_channel_converter) {
+                m_channel_converter->apply(b);
+            }
+            l = 0;
+            m = 0;
 
-        output_at = b->samples * m_output->sampleSize();
-        {
-            qint64 pos = 0;
-            do {
-                if (m_user_stop) {
-                    outputFinish = true;
+            //increase buffer size if needed
+            if (b->samples > m_output_size) {
+                delete [] m_output_buf;
+                m_output_size = b->samples;
+                m_output_buf = new unsigned char[m_output_size * sampleSize()];
+            }
+
+            if (m_format_converter) {
+                m_format_converter->fromFloat(b->data, m_output_buf, b->samples);
+                tmp = m_output_buf;
+            } else {
+                tmp = (unsigned char*)b->data;
+            }
+            output_at = b->samples * m_output->sampleSize();
+
+            while (l < output_at && !m_pause && !m_prev_pause) {
+                m_mutex.lock();
+                if(m_skip)
+                {
+                    m_skip = false;
+//                    Visual::clearBuffer();
+                    m_output->reset();
+                    m_mutex.unlock();
                     break;
                 }
-                qint64 len = m_output->writeAudio(tmp + pos, output_at - pos);
-                if (len >= 0) {
-                    m_totalWritten += len;
-                    pos += len;
-                    if (pos >= output_at) {
-                        break;
-                    }
+                m_mutex.unlock();
+                m = m_output->writeAudio(tmp + l, output_at - l);
+                if (m >= 0) {
+                    m_totalWritten += m;
+                    l+= m;
                 } else {
-                    outputFinish = true;
                     break;
                 }
-            } while (true);
+            }
+            if(m < 0) {
+                break;
+            }
         }
-        if (b->lastBuffer) {
-            m_finish = true;
-        }
-    }
-    if (m_finish) {
-        m_output->drain();
-    }
-    m_handler->dispatch(PlayState::Stopped);
-}
-
-void OutputThread::updateEQ()
-{
-    if (m_eq->enabled()) {
-        double preamp = m_eq->preamp();
-        int bands = m_eq->bands();
-
-        init_iir(m_sampleRate, bands);
-
-        set_preamp(0, 1.0 + 0.0932471 *preamp + 0.00279033 * preamp * preamp);
-        set_preamp(1, 1.0 + 0.0932471 *preamp + 0.00279033 * preamp * preamp);
-
-        for (int i=0; i<bands; ++i) {
-            double value = m_eq->value (i);
-            set_gain(i, 0, 0.03*value + 0.000999999*value*value);
-            set_gain(i, 1, 0.03*value + 0.000999999*value*value);
-        }
+        m_mutex.lock();
+        //force buffer change
+        m_recycler->mutex()->lock ();
+        m_recycler->done();
+        m_recycler->mutex()->unlock();
+        b = nullptr;
+        m_mutex.unlock();
     }
     m_mutex.lock();
-    m_useEq = m_eq->enabled();
+    //write remaining data
+    if(m_finish) {
+        m_output->drain();
+        qDebug()<<Q_FUNC_INFO<<"OutputWriter: total written" << m_totalWritten;
+    }
+    qDebug()<<Q_FUNC_INFO<<"Send finished";
+    m_handler->sendFinished();
+    dispatch(PlayState::Stopped);
+//    stopVisualization();
     m_mutex.unlock();
+
+    qDebug()<<">>>>>>>>>>>>>> FINISH "<<Q_FUNC_INFO<<" FINISH <<<<<<<<<<<<<<<<<<";
 }
 
 void OutputThread::status()
@@ -343,5 +453,30 @@ void OutputThread::status()
         m_currentMilliseconds = ct;
         m_handler->dispatchElapsed(m_currentMilliseconds);
     }
-//    qDebug()<<Q_FUNC_INFO<<">>>>>>> m_currentMilliseconds "<<m_currentMilliseconds;
 }
+
+void OutputThread::updateEqSettings()
+{
+    m_mutex.lock();
+    if (m_eq->enabled()) {
+        double preamp = m_eq->preamp();
+        int bands = m_eq->bands();
+
+        init_iir(m_frequency, bands);
+
+        set_preamp(0, 1.0 + 0.0932471 *preamp + 0.00279033 * preamp * preamp);
+        set_preamp(1, 1.0 + 0.0932471 *preamp + 0.00279033 * preamp * preamp);
+
+        for (int i=0; i<bands; ++i) {
+            double value = m_eq->value (i);
+            set_gain(i, 0, 0.03*value + 0.000999999*value*value);
+            set_gain(i, 1, 0.03*value + 0.000999999*value*value);
+        }
+    }
+    m_useEq = m_eq->enabled();
+    m_mutex.unlock();
+}
+
+} //PhoenixBackend
+} //PlayBackend
+} //PhoenixPlayer

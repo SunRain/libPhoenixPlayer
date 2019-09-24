@@ -1,105 +1,155 @@
+/***************************************************************************
+ *   Copyright (C) 2012-2019 by Ilya Kotov                                 *
+ *   forkotov02@ya.ru                                                      *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
+ ***************************************************************************/
+
 #ifndef OUTPUTTHREAD_H
 #define OUTPUTTHREAD_H
 
 #include <QThread>
 #include <QMutex>
-#include <QWaitCondition>
+#include <atomic>
 
 #include "AudioParameters.h"
+#include "ChannelMap.h"
+
+#include "PhoenixBackend_global.h"
 
 namespace PhoenixPlayer {
-    class EqualizerMgr;
     class PluginLoader;
     class PluginHost;
     class PPSettings;
-
-    namespace OutPut {
-        class IOutPut;
-        class OutPutHost;
-    }
+    class MediaResource;
+    class EqualizerMgr;
 
     namespace PlayBackend {
-        class BaseVisual;
+    class BaseMediaObject;
+    class BaseVisual;
 
         namespace PhoenixBackend {
             class StateHandler;
-            class BufferQueue;
+            class OutputThread;
+            class ReplayGain;
             class AudioConverter;
+            class Dithering;
+            class Buffer;
             class ChannelConverter;
-            class AudioEffect;
+            class Recycler;
 
+            namespace OutPut {
+                class IOutPut;
+            }
+
+/** @internal
+    @brief Output thread.
+    @author Ilya Kotov <forkotov02@ya.ru>
+*/
 class OutputThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit OutputThread(StateHandler *handler,
-                          BufferQueue *queue,
-//                          QList<AudioEffect*> *list,
-                          QObject *parent = Q_NULLPTR);
+    explicit OutputThread(StateHandler *handle, Recycler *recycler, QObject *parent = Q_NULLPTR);
 
-    virtual ~OutputThread() Q_DECL_OVERRIDE;
-
-    bool initialization(quint32 sampleRate, const QList<AudioParameters::ChannelPosition> &list);
-
-    bool isPaused();
+    virtual ~OutputThread() override;
+    /*!
+     * Prepares object for usage and setups required audio parameters.
+     * @param freq Sample rate.
+     * @param map Map of channels.
+     * @return initialization result (\b true - success, \b false - failure)
+     */
+    bool initialization(quint32 freq, ChannelMap map);
 
     void togglePlayPause();
 
+    bool isPaused() const;
+
+    /*!
+     * Requests playback to stop.
+     */
     void stop();
-
+    /*!
+     * Mutes/Restores volume
+     * @param mute state of volume (\b true - mute, \b false - restore)
+     */
     void setMuted(bool muted);
+    /*!
+     * Requests playback to finish.
+     */
+    void finish();
+    /*!
+     * Requests a seek to the time \b pos indicated, specified in milliseconds.
+     * If \b reset is \b true, this function also clears internal output buffers for faster seeking;
+     * otherwise does nothing with buffers.
+     */
+    void seek(qint64 pos, bool reset = false);
 
-//    void finish();
-
-    // QObject interface
-public:
-    bool event(QEvent *event) Q_DECL_OVERRIDE;
-
-    // QThread interface
-protected:
-    void run() Q_DECL_OVERRIDE;
+    /*!
+     * Returns selected audio parameters.
+     */
+    AudioParameters audioParameters() const;
+    /*!
+     * Returns sample size in bytes.
+     */
+    int sampleSize() const;
+    void updateEqSettings();
 
 private:
-    void reset();
-    void updateEQ();
+    void run() override; //thread run function
     void status();
+    void dispatch(const PlayState &state);
+    void dispatch(const AudioParameters &p);
+    void dispatchVisual(Buffer *buffer);
+    bool prepareConverters();
+//    void startVisualization();
+//    void stopVisualization();
+    void reset();
 
 private:
-    StateHandler                *m_handler              = Q_NULLPTR;
-    BufferQueue                 *m_bufferQueue          = Q_NULLPTR;
-    AudioConverter              *m_format_converter     = Q_NULLPTR;
-    ChannelConverter            *m_channel_converter    = Q_NULLPTR;
-//    QList<AudioEffect *>        *m_effectList         = Q_NULLPTR;
+    StateHandler        *m_handler              = Q_NULLPTR;
+    OutPut::IOutPut     *m_output               = Q_NULLPTR;
+    AudioConverter      *m_format_converter     = Q_NULLPTR;
+    ChannelConverter    *m_channel_converter    = Q_NULLPTR;
+    Recycler            *m_recycler             = Q_NULLPTR;
+    EqualizerMgr        *m_eq                   = Q_NULLPTR;
+    unsigned char       *m_output_buf           = Q_NULLPTR;
 
-    EqualizerMgr                *m_eq = Q_NULLPTR;
-    bool m_useEq = false;
+    bool                        m_skip;
+    bool                        m_prev_pause;
+    bool                        m_useEq;
+    std::atomic_bool            m_user_stop;
+    std::atomic_bool            m_pause;
+    std::atomic_bool            m_finish;
+    std::atomic_bool            m_muted;
 
+    int                         m_channels;
+    int                         m_kbps;
+    quint32                     m_frequency;
+    qint64                      m_bytesPerMillisecond;
+    qint64                      m_totalWritten;
+    qint64                      m_currentMilliseconds;
+    size_t                      m_output_size; //samples
 
-    OutPut::OutPutHost          *m_outputHost   = Q_NULLPTR;
-    OutPut::IOutPut             *m_output       = Q_NULLPTR;
+    QMutex                      m_mutex;
 
-    unsigned char               *m_output_buf = Q_NULLPTR;
-    size_t                      m_output_size = 0;
+    ChannelMap                  m_chan_map;
 
-    qint64 m_bytesPerMillisecond    = -1;
-    qint64 m_totalWritten           = -1;
-    qint64 m_currentMilliseconds    = -1;
-
-    AudioParameters         m_in_params;
-
-    quint32                 m_sampleRate = 0;
-    QList<AudioParameters::ChannelPosition> m_channels;
-    AudioParameters::AudioFormat            m_format = AudioParameters::PCM_UNKNOWN;
-
-    bool m_paused = false;
-    bool m_user_stop = false;
-    bool m_muted = false;
-    bool m_finish = false;
-
-    QMutex m_mutex;
-    QWaitCondition m_pauseWait;
-
-
+    AudioParameters                 m_in_params;
+    AudioParameters::AudioFormat    m_format;
 };
 
 } //PhoenixBackend

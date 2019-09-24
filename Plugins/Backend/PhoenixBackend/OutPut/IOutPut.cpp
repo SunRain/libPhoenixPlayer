@@ -1,10 +1,14 @@
-#include "OutPut/IOutPut.h"
+#include "IOutPut.h"
 
 #include <QDebug>
 
 namespace PhoenixPlayer {
 
-namespace OutPut {
+    namespace PlayBackend {
+
+        namespace PhoenixBackend {
+
+            namespace OutPut {
 
 IOutPut::IOutPut(QObject *parent)
     : QObject(parent)
@@ -41,6 +45,11 @@ const ChannelMap IOutPut::channelMap() const
     return m_chan_map;
 }
 
+int IOutPut::channels() const
+{
+    return m_chan_map.count();
+}
+
 //QList<AudioParameters::ChannelPosition> IOutPut::channels() const
 //{
 ////    return m_channels;
@@ -58,5 +67,7 @@ int IOutPut::sampleSize() const
 }
 
 
-} //Decoder
+} //OutPut
+} //PhoenixBackend
+} //PlayBackend
 } //PhoenixPlayer

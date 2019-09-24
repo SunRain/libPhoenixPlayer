@@ -5,16 +5,21 @@
 
 #include "StateHandler.h"
 #include "InternalEvent.h"
-#include "PlayThread.h"
-#include "OutputThread_old.h"
+#include "DecodeThread.h"
+//#include "OutputThread_old.h"
 #include "InternalEvent.h"
 #include "LibPhoenixPlayerMain.h"
+#include "MediaResource.h"
 
 #include "PPCommon.h"
+#include "SoftVolume.h"
 #include "PlayerCore/VolumeControl.h"
-
 #include "DecodeThread.h"
 #include "OutputThread.h"
+#include "Recycler.h"
+
+//#include "DecodeThread.h"
+//#include "OutputThread.h"
 
 namespace PhoenixPlayer {
 namespace PlayBackend {
@@ -23,11 +28,36 @@ namespace PhoenixBackend {
 PhoenixPlayBackend::PhoenixPlayBackend(QObject *parent)
     : IPlayBackend(parent)
 {
-//    m_handler = new StateHandler(this);
+
 }
 
 PhoenixPlayBackend::~PhoenixPlayBackend()
 {
+    if (m_playThread) {
+        m_playThread->stop();
+        m_playThread->wait();
+
+        m_playThread->deleteLater();
+        m_playThread = Q_NULLPTR;
+    }
+
+    if (m_outputThread) {
+        m_outputThread->stop();
+        m_outputThread->wait();
+
+        m_outputThread->deleteLater();
+        m_outputThread = Q_NULLPTR;
+    }
+
+    if (m_recycler) {
+        delete m_recycler;
+        m_recycler = Q_NULLPTR;
+    }
+
+    if (m_handler) {
+        m_handler->deleteLater();
+        m_handler = Q_NULLPTR;
+    }
 }
 
 bool PhoenixPlayBackend::event(QEvent *e)
@@ -35,9 +65,7 @@ bool PhoenixPlayBackend::event(QEvent *e)
     if (e->type() == EVENT_STATE_CHANGED) {
         PlayState st = ((StateChangedEvent *)e)->currentState();
 
-//        QStringList states;
-//        states << "Playing" << "Paused" << "Stopped" << "Buffering" << "NormalError" << "FatalError";
-        qDebug()<<Q_FUNC_INFO<<"Current event is EVENT_STATE_CHANGED, value is "<<st;
+        qDebug()<<Q_FUNC_INFO<<"Current event is EVENT_STATE_CHANGED, value is "<<playStateToName(st);
 
         switch (st) {
         case Playing:
@@ -55,7 +83,12 @@ bool PhoenixPlayBackend::event(QEvent *e)
         }
     } else if (e->type () == EVENT_NEXT_TRACK_REQUEST
                || e->type () == EVENT_FINISHED) {
-        emit finished ();
+        emit finished();
+    } else if (e->type() == EVENT_DECODE_FINISHED) {
+        m_outputThread->finish();
+        m_recycler->cond()->wakeAll();
+    } else if (e->type() == EVENT_REQUEST_STOP_OUTPUT) {
+        m_outputThread->stop();
     } else {
         return QObject::event(e);
     }
@@ -89,58 +122,55 @@ void PhoenixPlayBackend::initialize()
         m_handler = new StateHandler(this);
         connect (m_handler, &StateHandler::elapsedChanged,
                 [&](qint64 time) {
+                    qDebug()<<Q_FUNC_INFO<<"Tick "<<time;
                     emit tick(time/1000);
+                    emit tickInMS(time);
+                    emit tickInSec(time/1000);
                 });
 
         connect (m_handler, &StateHandler::bitrateChanged,
                 [&](int bitrate) {
                     //TODO bitrateChanged
+                    qDebug()<<Q_FUNC_INFO<<"bitrate "<<bitrate;
                 });
 
         connect (m_handler, &StateHandler::frequencyChanged,
                 [&](quint32 frequency) {
                     //TODO frequencyChanged
+                    qDebug()<<Q_FUNC_INFO<<"frequency "<<frequency;
                 });
 
         connect (m_handler, &StateHandler::sampleSizeChanged,
                 [&](int size) {
                     //TODO sampleSizeChanged
+                    qDebug()<<Q_FUNC_INFO<<"sampleSizeChanged "<<size;
                 });
 
         connect (m_handler, &StateHandler::channelsChanged,
                 [&](int channels) {
                     //TODO channelsChanged
+                    qDebug()<<Q_FUNC_INFO<<"channelsChanged "<<channels;
                 });
 
         connect (m_handler, &StateHandler::bufferingProgress,
                 [&](int progress) {
                     //TODO bufferingProgress
+                    qDebug()<<Q_FUNC_INFO<<"bufferingProgress "<<progress;
                 });
     }
 
-
-//    connect(m_handler, &StateHandler::finished,
-//            [&](){
-//        emit finished ();
-//    });
-
-//    connect(m_handler, &StateHandler::stateChanged,
-//            [&](PlayState st){
-//        if (st == PlayState::Playing)
-//            emit stateChanged (Common::PlayBackendPlaying);
-//        else if (st == PlayState::Paused)
-//            emit stateChanged (Common::PlayBackendPaused);
-//        else if (st == PlayState::NormalError || st == PlayState::FatalError)
-//            emit failed ();
-//        else
-//            emit stateChanged (Common::PlayBackendStopped);
-//    });
-    if (!m_decodeThread) {
-        m_decodeThread = new DecodeThread(m_handler, &m_bufferQueue, &m_EffectList, this);
+    if (!m_recycler) {
+        m_recycler = new Recycler();
     }
+
+    if (!m_playThread) {
+        m_playThread = new DecodeThread(m_handler, m_recycler, this);
+    }
+
     if (!m_outputThread) {
-        m_outputThread = new OutputThread(m_handler, &m_bufferQueue, this);
+        m_outputThread = new OutputThread(m_handler, m_recycler, this);
     }
+    m_outputThread->setMuted(m_muted);
 
     if (!m_volumeControl) {
         m_volumeControl = phoenixPlayerLib->volumeCtrl();
@@ -155,57 +185,54 @@ void PhoenixPlayBackend::initialize()
 
 BaseVolume *PhoenixPlayBackend::baseVolume()
 {
-    return nullptr;
+    if (!m_volume) {
+        m_volume = SoftVolume::instance();
+    }
+    return m_volume;
 }
 
 bool PhoenixPlayBackend::useExternalDecoder()
 {
-    return true;
+    return false;
 }
 
 bool PhoenixPlayBackend::useExternalOutPut()
 {
-    return true;
+    return false;
+}
+
+qint64 PhoenixPlayBackend::durationInMS()
+{
+    if (!m_handler) {
+        return  -1;
+    }
+    return m_handler->durationInMS();
 }
 
 void PhoenixPlayBackend::play(quint64 startSec)
 {
     qDebug()<<Q_FUNC_INFO<<"play with startSec "<<startSec;
-//    if (m_engine) {
-//        if (!m_engine->isRunning ()) {
-//            m_engine->play ();
-//        } else {
-//            if (m_engine->output () && m_engine->output ()->isPaused ()) {
-//                m_engine->togglePlayPause ();
-//            }
-//        }
-//        this->setPosition (startSec);
-//    }
-    m_decodeThread->seekMS(startSec * 1000);
-    if (!m_decodeThread->isRunning()) {
-        m_decodeThread->start();
+    m_playThread->seek(startSec * 1000);
+    m_outputThread->seek(startSec * 1000, true);
+
+    if (!m_playThread->isRunning()) {
+        m_playThread->play();
     }
     if (!m_outputThread->isRunning()) {
         m_outputThread->start();
+    }
+    if (m_outputThread->isRunning() && m_outputThread->isPaused()) {
+        m_outputThread->togglePlayPause();
     }
 }
 
 void PhoenixPlayBackend::stop()
 {
-    qDebug()<<"############### "<<Q_FUNC_INFO;
-    m_url.clear ();
-//    if (m_engine) {
-//        m_engine->stop ();
-//        m_engine->quit();
-//        bool b = m_engine->wait();
-//        qDebug()<<Q_FUNC_INFO<<" wait m_engine thread ret "<<b;
-//    }
-    if (m_decodeThread->isRunning()) {
-        m_decodeThread->stopDecoding();
-    }
-    if (m_outputThread->isRunning()) {
-        m_outputThread->stop();
-    }
+    qDebug()<<Q_FUNC_INFO<<"############### ";
+
+    m_playThread->stop();
+    m_outputThread->stop();
+
     m_volumeControl->reload ();
 
     if (m_handler->state () == PlayState::NormalError
@@ -217,8 +244,6 @@ void PhoenixPlayBackend::stop()
 
 void PhoenixPlayBackend::pause()
 {
-//    if (m_engine /*&& !m_engine->output ()->isPaused ()*/)
-//        m_engine->togglePlayPause ();
     if (!m_outputThread->isPaused()) {
         m_outputThread->togglePlayPause();
     }
@@ -227,37 +252,40 @@ void PhoenixPlayBackend::pause()
 void PhoenixPlayBackend::setPosition(quint64 sec)
 {
     qDebug()<<Q_FUNC_INFO<<" setPosition "<<sec;
-//    if (m_engine)
-//        m_engine->seek (sec * 1000);
-    m_decodeThread->seekMS(sec * 1000);
+    m_playThread->seek(sec * 1000);
+    m_outputThread->seek(sec * 1000);
 }
 
 void PhoenixPlayBackend::changeMedia(MediaResource *res, quint64 startSec, bool startPlay)
 {
-//    stop ();
-//    //TODO use QtMultimedia to play network stream;
-//    m_engine->changeMedia (res, startSec); //don't start play, start later
+    this->stop();
 
-//    qDebug()<<Q_FUNC_INFO<<"change m_engine Media finish";
-
-//    if (m_handler->state () == PlayState::Stopped)
-//        m_handler->dispatch (PlayState::Buffering);
-
-//    m_engine->setMuted (m_muted);
-
-//    if (startPlay)
-//        m_engine->play ();
-    if (!m_decodeThread->changeMedia(res, startSec)) {
-        m_handler->dispatch(PlayState::FatalError);
+    if (!res) {
+        qWarning()<<Q_FUNC_INFO<<"No media resource";
         return;
     }
-    const AudioParameters ap = m_decodeThread->audioParameters();
-    if (!m_outputThread->initialization(ap.sampleRate(), ap.channels())) {
-        m_handler->dispatch(PlayState::FatalError);
+    if (m_resource) {
+        m_resource->deleteLater();
+        m_resource = Q_NULLPTR;
+    }
+    //TODO post state to backend
+    if (!res->initialize()) {
+        res->deleteLater();
+        qWarning()<<Q_FUNC_INFO<<"initialize resource error !";
         return;
     }
-    m_bufferQueue.initialization(ap.sampleRate(), ap.channels().size());
+    m_resource = res;
+    m_resource->setParent(this);
 
+    if (!m_playThread->initialization(res, startSec)) {
+        qWarning()<<Q_FUNC_INFO<<"initialize decode thread error";
+        return;
+    }
+    if (!m_outputThread->initialization(m_playThread->audioParameters().sampleRate(),
+                                    m_playThread->audioParameters().channelMap())) {
+        qWarning()<<Q_FUNC_INFO<<"initialize output thread error";
+        return;
+    }
     m_outputThread->setMuted(m_muted);
 
     if (startPlay) {

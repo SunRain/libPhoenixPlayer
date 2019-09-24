@@ -54,7 +54,7 @@ public:
     ///
 //    MusicLibrary::IMusicLibraryDAO *getCurrentLibraryDAO();
 
-    OutPut::OutPutHost *curOutPutHost();
+//    OutPut::OutPutHost *curOutPutHost();
 
     ///
     /// \brief getCurrentMusicTagParser
@@ -101,7 +101,7 @@ signals:
 private:
      PPSettings *m_settings;
      PlayBackend::BackendHost *m_curBackendHost;
-     OutPut::OutPutHost *m_curOutPutHost;
+//     OutPut::OutPutHost *m_curOutPutHost;
      MusicLibrary::MusicLibraryDAOHost *m_curDAOHost;
 
      QStringList m_pluginPaths;

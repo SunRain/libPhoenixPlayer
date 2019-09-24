@@ -14,10 +14,16 @@ extern "C"{
 #include "AudioMetaGroupObject.h"
 
 namespace PhoenixPlayer {
-namespace Decoder {
-namespace FFmpegDecoder {
 
-using namespace PhoenixPlayer;
+    namespace PlayBackend {
+
+        namespace PhoenixBackend {
+
+            namespace Decoder {
+
+                namespace FFmpegDecoder {
+
+//using namespace PhoenixPlayer;
 
 #if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57,24,102)) //ffmpeg-3.0
     #define FREE_AV_PACKET(pkt) av_packet_unref(pkt)
@@ -35,7 +41,7 @@ using namespace PhoenixPlayer;
 
 FFmpeg::FFmpeg(QObject *parent)
     : IDecoder(parent)
-    , m_audioFormat(AudioParameters::PCM_UNKNOWN)
+    , m_audioFormat(AudioParameters::PCM_S16LE)
 //    , m_parameter(AudioParameters())
     , ic(Q_NULLPTR)
     , c(Q_NULLPTR)
@@ -225,7 +231,7 @@ bool FFmpeg::initialize(MediaResource *res)
     return true;
 }
 
-quint64 FFmpeg::durationInSeconds()
+qint64 FFmpeg::durationInSeconds()
 {
     return duration_in_seconds;
 }
@@ -254,7 +260,7 @@ int FFmpeg::bitrate()
     return m_bitrate;
 }
 
-qint64 FFmpeg::runDecode(unsigned char *data, qint64 maxSize)
+qint64 FFmpeg::read(unsigned char *data, qint64 maxSize)
 {
     m_skipBytes = 0;
 
@@ -967,7 +973,9 @@ AVInputFormat *FFmpeg::dumpSourceFormat(const QString &file)
 
 
 
-
 } //FFmpegDecoder
 } //Decoder
+} //PhoenixBackend
+} //PlayBackend
 } //PhoenixPlayer
+

@@ -4,12 +4,19 @@
 // warranty, or liability of any kind.
 //
 
-#ifndef BUFFER_H
-#define BUFFER_H
+#ifndef   __buffer_h
+#define   __buffer_h
 
-#include <QtGlobal>
+#include <QSharedPointer>
+#include <stddef.h>
+
+#define QMMP_BLOCK_FRAMES 512
 
 namespace PhoenixPlayer {
+
+namespace PlayBackend {
+
+namespace PhoenixBackend {
 
 
 /*! @brief Audio buffer class.
@@ -18,12 +25,9 @@ namespace PhoenixPlayer {
 class Buffer
 {
 public:
-
-    const static uint BUFFER_PERIOD = 512;
-
     /*!
      * Constructs an empty buffer object.
-     * @param sz Size in bytes;
+     * @param sz Size in samples;
      */
     Buffer(size_t sz)
     {
@@ -31,7 +35,6 @@ public:
         samples = 0;
         rate = 0;
         size = sz;
-        lastBuffer = false;
     }
     /*!
      * Destructor.
@@ -45,11 +48,15 @@ public:
         size = 0;
     }
 
-    float *data;        // Audio data
-    size_t samples;     // Audio data size in samples.
-    size_t size;        // Buffer size
-    unsigned int rate;  //Buffer bitrate
-    bool lastBuffer;    // flag to indicate decode finished or terminated
+    float *data;                         /*!< Audio data. */
+    size_t samples;                      /*!< Audio data size in samples. */
+    size_t size;                         /*!< Buffer size in samples. */
+    unsigned int rate;                   /*!< Buffer bitrate. */
+//    QSharedPointer<TrackInfo> trackInfo; /*!< Attached track information. */
 };
+
 } //PhoenixPlayer
-#endif // BUFFER_H
+} //PlayBackend
+} //PhoenixPlayer
+
+#endif // __buffer_h

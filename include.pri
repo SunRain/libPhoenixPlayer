@@ -5,10 +5,10 @@ INCLUDEPATH += $$PWD/libPhoenixPlayer/Core/include
 DEPENDPATH += $$PWD/libPhoenixPlayer/Core/include
 
 HEADERS += \
-    $$PWD/libPhoenixPlayer/Core/include/Common.h \
-    $$PWD/libPhoenixPlayer/Core/include/Settings.h \
+#    $$PWD/libPhoenixPlayer/Core/include/Common.h \
+#    $$PWD/libPhoenixPlayer/Core/include/Settings.h \
     $$PWD/libPhoenixPlayer/Core/include/AudioMetaObject.h \
-    $$PWD/libPhoenixPlayer/Core/include/Utility.h \
+#    $$PWD/libPhoenixPlayer/Core/include/Utility.h \
     $$PWD/libPhoenixPlayer/Core/include/Backend/BaseMediaObject.h \
     $$PWD/libPhoenixPlayer/Core/include/Backend/IPlayBackend.h \
     $$PWD/libPhoenixPlayer/Core/include/MusicLibrary/IMusicTagParser.h \
@@ -25,17 +25,17 @@ HEADERS += \
     $$PWD/libPhoenixPlayer/Core/include/AddonMgr.h \
     $$PWD/libPhoenixPlayer/Core/include/MetadataLookup/MetadataLookupMgr.h \
     $$PWD/libPhoenixPlayer/Core/include/MetadataLookup/MetadataLookupMgrWrapper.h \
-    $$PWD/libPhoenixPlayer/Core/include/Buffer.h \
-    $$PWD/libPhoenixPlayer/Core/include/AudioParameters.h \
-    $$PWD/libPhoenixPlayer/Core/include/Decoder/IDecoder.h \
-    $$PWD/libPhoenixPlayer/Core/include/OutPut/IOutPut.h \
-    $$PWD/libPhoenixPlayer/Core/include/Backend/SoftVolume.h \
+#    $$PWD/libPhoenixPlayer/Core/include/Buffer.h \
+#    $$PWD/libPhoenixPlayer/Core/include/AudioParameters.h \
+#    $$PWD/libPhoenixPlayer/Core/include/Decoder/IDecoder.h \
+#    $$PWD/libPhoenixPlayer/Core/include/OutPut/IOutPut.h \
+#    $$PWD/libPhoenixPlayer/Core/include/Backend/SoftVolume.h \
     $$PWD/libPhoenixPlayer/Core/include/Backend/BaseVolume.h \
-    $$PWD/libPhoenixPlayer/Core/include/OutPut/OutPutHost.h \
-    $$PWD/libPhoenixPlayer/Core/include/Decoder/DecoderHost.h \
+#    $$PWD/libPhoenixPlayer/Core/include/OutPut/OutPutHost.h \
+#    $$PWD/libPhoenixPlayer/Core/include/Decoder/DecoderHost.h \
     $$PWD/libPhoenixPlayer/Core/include/MusicLibrary/LocalMusicScanner.h \
     $$PWD/libPhoenixPlayer/Core/include/PlayerCore/VolumeControl.h \
-    $$PWD/libPhoenixPlayer/Core/include/PlayerCore/PlayListMgr.h \
+#    $$PWD/libPhoenixPlayer/Core/include/PlayerCore/PlayListMgr.h \
     $$PWD/libPhoenixPlayer/Core/include/PlayerCore/PlayerCore.h \
     $$PWD/libPhoenixPlayer/Core/include/Backend/BackendHost.h \
     $$PWD/libPhoenixPlayer/Core/include/MetadataLookup/MetadataLookupHost.h \

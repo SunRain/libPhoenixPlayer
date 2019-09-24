@@ -34,40 +34,10 @@ INCLUDEPATH += $$PWD/../..
 DEPENDPATH += $$PWD/../..
 
 SOURCES += \
-        ../../AudioConverter.cpp \
-        ../../AudioEffect.cpp \
-        ../../BufferQueue.cpp \
-        ../../ChannelConverter.cpp \
-        ../../DecodeThread.cpp \
-        ../../InternalEvent.cpp \
-        ../../OutputThread.cpp \
-        ../../PhoenixPlayBackend.cpp \
-        ../../PlayThread.cpp \
-        ../../StateHandler.cpp \
-        ../../equ/iir.c \
-        ../../equ/iir_cfs.c \
-        ../../equ/iir_fpu.c \
         main.cpp \
         MainWindow.cpp
 
 HEADERS += \
-        ../../AudioConverter.h \
-        ../../AudioEffect.h \
-        ../../BufferQueue.h \
-        ../../ChannelConverter.h \
-        ../../DecodeThread.h \
-        ../../InternalEvent.h \
-        ../../OutputThread.h \
-        ../../OutputThread_old.h \
-        ../../PhoenixBackend_global.h \
-        ../../PhoenixPlayBackend.h \
-        ../../PhoenixPlayer.h \
-        ../../PlayThread.h \
-        ../../RingBuffer.h \
-        ../../StateHandler.h \
-        ../../equ/iir.h \
-        ../../equ/iir_cfs.h \
-        ../../equ/iir_fpu.h \
         MainWindow.h
 
 isEmpty (LIB_DIR){
@@ -84,10 +54,8 @@ QMAKE_RPATHDIR += \
 
 LIBS += -lPhoenixPlayer
 
+include(../../PhoenixBackend.pri)
+
 DISTFILES += \
-    ../../PhoenixBackend.json \
-    ../../PhoenixBackend.pri \
     ../../README.md
 
-SUBDIRS += \
-    ../../PhoenixBackend.pro

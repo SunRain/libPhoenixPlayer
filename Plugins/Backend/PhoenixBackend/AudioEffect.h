@@ -6,11 +6,9 @@
 #include "AudioParameters.h"
 
 namespace PhoenixPlayer {
-    class Buffer;
-
     namespace PlayBackend {
-
         namespace PhoenixBackend {
+            class Buffer;
 
 class AudioEffect
 {
@@ -20,7 +18,8 @@ public:
 
     virtual void apply(Buffer *buffer) = 0;
 
-    virtual void initialization(quint32 sampleRate, const QList<AudioParameters::ChannelPosition> &list);
+//    virtual void initialization(quint32 sampleRate, const QList<AudioParameters::ChannelPosition> &list);
+    virtual void initialization(quint32 sampleRate, const ChannelMap &map);
 
     ///
     /// \brief generateAudioParameters
@@ -30,7 +29,8 @@ public:
 
 private:
     quint32                                 m_sampleRate = 0;
-    QList<AudioParameters::ChannelPosition> m_list;
+//    QList<AudioParameters::ChannelPosition> m_list;
+    ChannelMap m_chan_map;
 
 };
 

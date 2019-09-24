@@ -1,52 +1,54 @@
 #ifndef DECODETHREAD_H
 #define DECODETHREAD_H
 
-#include <QObject>
-#include <QThread>
 #include <QMutex>
-#include <QList>
+#include <QThread>
 
 #include "AudioParameters.h"
 
+class QTimer;
 namespace PhoenixPlayer {
     class PluginLoader;
     class PluginHost;
     class PPSettings;
     class MediaResource;
 
-    namespace Decoder {
-        class IDecoder;
-        class DecoderHost;
-    }
-
     namespace PlayBackend {
         class BaseMediaObject;
         class BaseVisual;
 
         namespace PhoenixBackend {
+            class Recycler;
             class StateHandler;
-            class BufferQueue;
+            class OutputThread;
+            class ReplayGain;
             class AudioConverter;
-            class AudioEffect;
+            class Dithering;
+            class OutputThread;
             class ChannelConverter;
+            class AudioEffect;
+            class Recycler;
+
+            namespace Decoder {
+                class IDecoder;
+            }
 
 class DecodeThread : public QThread
 {
     Q_OBJECT
 public:
-    DecodeThread(StateHandler *handle,
-                 BufferQueue *queue,
-//                 AudioConverter *converter,
-                 QList<AudioEffect*> *list,
-                 QObject *parent = Q_NULLPTR);
+    explicit DecodeThread(StateHandler *handle, Recycler *recycler, QObject *parent = Q_NULLPTR);
+    virtual ~DecodeThread() override;
 
-    virtual ~DecodeThread() Q_DECL_OVERRIDE;
+    bool initialization(MediaResource *res, qint64 startTimeMS = 0);
 
-    bool changeMedia(MediaResource *res = Q_NULLPTR, quint64 startSec = 0);
+    void play();
+    void seek(qint64 millisecond = 0);
+    void stop();
+//    void togglePlayPause();
+//    void setMuted(bool muted);
 
-    void stopDecoding();
-
-    void seekMS(qint64 millisecond = 0);
+//    bool changeMedia(MediaResource *res = Q_NULLPTR, qint64 startSec = 0);
 
     AudioParameters audioParameters() const;
 
@@ -58,43 +60,49 @@ public:
 protected:
     void run() Q_DECL_OVERRIDE;
 
+
 private:
+    void flush(bool final = false);
     void reset();
+    void prepareEffects(Decoder::IDecoder *d);
+    qint64 produceSound(unsigned char *data, qint64 size, quint32 brate);
+
+//    OutputWriter *createOutput();
+
+    inline QMutex *mutex()
+    {
+        return &m_mutex;
+    }
 
 private:
-    StateHandler                *m_handler          = Q_NULLPTR;
-    BufferQueue                 *m_bufferQueue      = Q_NULLPTR;
-    AudioConverter              *m_audioConverter   = Q_NULLPTR;
-    ChannelConverter            *m_channelConverter = Q_NULLPTR;
-    QList<AudioEffect *>        *m_effectList       = Q_NULLPTR;
+    StateHandler                            *m_handler          = Q_NULLPTR;
+    Recycler                                *m_recycler         = Q_NULLPTR;
+    ReplayGain                              *m_replayGain       = Q_NULLPTR;
+    AudioConverter                          *m_converter        = Q_NULLPTR;
+    Dithering                               *m_dithering        = Q_NULLPTR;
+    ChannelConverter                        *m_channelConverter = Q_NULLPTR;
 
-    PPSettings                  *m_settings     = Q_NULLPTR;
-    PluginLoader                *m_pluginLoader = Q_NULLPTR;
-    MediaResource               *m_resource     = Q_NULLPTR;
+    unsigned char                           *m_output_buf       = Q_NULLPTR;
 
-    Decoder::IDecoder           *m_decoder      = Q_NULLPTR;
-    Decoder::DecoderHost        *m_decoderHost  = Q_NULLPTR;
+    Decoder::IDecoder                       *m_decoder          = Q_NULLPTR;
 
-    QStringList m_decoderLibs;
+    MediaResource                           *m_resource         = Q_NULLPTR;
 
-    PhoenixPlayer::AudioParameters m_audioParameters;
+    QList<AudioEffect*> m_effects;
 
-    QMutex  m_mutex;
+    QMutex              m_mutex;
+    AudioParameters     m_ap;
 
-    qint64 m_seekTimeMS = -1; //seek time in milliseconds;
-    bool m_user_stop = false;
-//    bool m_finish = false;
-//    bool m_done = false;
-
-    uint m_blockSize = 0;
-    uint m_sample_size = 0;
-    int m_bitrate = 0;
-    unsigned char *m_output_buf = Q_NULLPTR;
-    quint64 m_outputSize = 0;
-    quint64 m_output_at = 0;
+    std::atomic_bool    m_done;
+    std::atomic_bool    m_finish;
+    std::atomic_bool    m_user_stop;
+    int                 m_bitrate;
+    uint                m_bks;
+    uint                m_sample_size;
+    qint64              m_seekTimeMS;
+    quint64             m_output_at;
+    quint64             m_output_size;
 };
-
-
 
 } //PhoenixBackend
 } //PlayBackend

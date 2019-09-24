@@ -8,7 +8,7 @@ HEADERS += \
     $$PWD/include/Backend/BackendHost.h \
     $$PWD/include/Backend/BaseVisual.h \
     $$PWD/include/BaseObject.h \
-    $$PWD/include/Decoder/DecoderHost.h \
+#    $$PWD/include/Decoder/DecoderHost.h \
     $$PWD/include/EqualizerMgr.h \
     $$PWD/include/LibPhoenixPlayerMain.h \
     $$PWD/include/LocalFileMediaResource.h \
@@ -45,10 +45,10 @@ HEADERS += \
     $$PWD/include/AddonMgr.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgr.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgrWrapper.h \
-    $$PWD/include/Buffer.h \
-    $$PWD/include/AudioParameters.h \
-    $$PWD/include/Decoder/IDecoder.h \
-    $$PWD/include/OutPut/IOutPut.h \
-    $$PWD//include/Backend/SoftVolume.h \
+#    $$PWD/include/Buffer.h \
+#    $$PWD/include/AudioParameters.h \
+#    $$PWD/include/Decoder/IDecoder.h \
+#    $$PWD/include/OutPut/IOutPut.h \
+#    $$PWD//include/Backend/SoftVolume.h \
     $$PWD//include/Backend/BaseVolume.h \
     $$PWD/include/libphoenixplayer_global.h

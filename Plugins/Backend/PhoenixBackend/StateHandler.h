@@ -11,33 +11,23 @@ namespace PhoenixPlayer {
 namespace PlayBackend {
 namespace PhoenixBackend {
 
-//class StateChangedEvent;
 class StateHandler : public QObject
 {
     Q_OBJECT
-//    DECLARE_SINGLETON_POINTER(StateHandler)
 public:
     explicit StateHandler(QObject *parent = Q_NULLPTR);
     virtual ~StateHandler();
-//    static StateHandler *instance();
 
-    /*!
-     * Sends information about playback progress.
-     * @param elapsed Current time (in milliseconds).
-     * @param bitrate Current bitrate (in kbps).
-     * @param frequency Current samplerate (in Hz).
-     * @param precision Sample size (in bits).
-     * @param channels Number of channels.
-     */
-//    void dispatch(qint64 elapsed, int bitrate, quint32 frequency, int precision, int channels);
-    void dispatchElapsed(qint64 currentMilliseconds);
+     void dispatchElapsed(qint64 currentMilliseconds);
     /*!
      * Sends information about song length
      * @param length song length in milliseconds
      */
     Q_DECL_DEPRECATED void dispatch(qint64 length);
 
-    void dispatchTrackTimeMS(qint64 ms);
+    void dispatchDurationInMS(qint64 ms);
+
+    qint64 durationInMS();
 
     ///
     /// \brief dispatch Sends playback state.
@@ -52,6 +42,10 @@ public:
     /// \brief sendFinished Sends playback finished event.
     ///
     void sendFinished();
+
+    void decodeFinished();
+
+    void requestStopOutput();
 
     ///
     /// \brief state Returns the current state.
@@ -71,8 +65,6 @@ signals:
      */
     void elapsedChanged(qint64 time);
 
-//    void stateChanged(PlayState state);
-//    void finished();
     /*!
      * Emitted when bitrate has changed.
      * @param bitrate New bitrate (in kbps)
@@ -98,8 +90,6 @@ signals:
      * The argument \b progress indicates the current percentage of buffering completed.
      */
     void bufferingProgress(int progress);
-//private:
-//    explicit StateHandler(QObject *parent = 0);
 
 private:
     qint64 m_elapsed;
@@ -109,6 +99,7 @@ private:
     int m_bitrate, m_precision, m_channels;
     QMutex m_mutex;
     PlayState m_state;
+    QList<PlayState> m_clearStates;
 
 };
 

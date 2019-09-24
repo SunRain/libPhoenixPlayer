@@ -1,21 +1,27 @@
 #ifndef QTMULTIMEDIAOUTPUT_H
 #define QTMULTIMEDIAOUTPUT_H
 
-#include "OutPut/IOutPut.h"
+#include "IOutPut.h"
 #include <QScopedPointer>
 
 class QIODevice;
 class QAudioOutput;
 namespace PhoenixPlayer {
-namespace OutPut {
-namespace QtMultimediaOutput {
+
+    namespace PlayBackend {
+
+        namespace PhoenixBackend {
+
+            namespace OutPut {
+
+                namespace QtMultimediaOutput {
 
 class OutputControl;
 class QtMultimediaOutput : public IOutPut
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PhoenixPlayer.OutPut.QtMultimediaOutput" FILE "QtAudio.json")
-    Q_INTERFACES(PhoenixPlayer::OutPut::IOutPut)
+//    Q_PLUGIN_METADATA(IID "PhoenixPlayer.OutPut.QtMultimediaOutput" FILE "QtAudio.json")
+//    Q_INTERFACES(PhoenixPlayer::OutPut::IOutPut)
 public:
     explicit QtMultimediaOutput(QObject *parent = nullptr);
     virtual ~QtMultimediaOutput() override;
@@ -59,6 +65,8 @@ private:
 
 } //QtMultimediaOutput
 } //OutPut
+} //PhoenixBackend
+} //PlayBackend
 } //PhoenixPlayer
 
 #endif // QTMULTIMEDIAOUTPUT_H

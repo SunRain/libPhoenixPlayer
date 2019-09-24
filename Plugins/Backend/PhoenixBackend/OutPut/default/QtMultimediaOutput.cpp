@@ -11,8 +11,14 @@
 #include "AudioParameters.h"
 
 namespace PhoenixPlayer {
-namespace OutPut {
-namespace QtMultimediaOutput {
+
+    namespace PlayBackend {
+
+        namespace PhoenixBackend {
+
+            namespace OutPut {
+
+                namespace QtMultimediaOutput {
 
 QtMultimediaOutput::QtMultimediaOutput(QObject *parent)
     : IOutPut (parent),
@@ -164,6 +170,9 @@ void OutputControl::resume()
 
 
 
+
 } //QtMultimediaOutput
 } //OutPut
+} //PhoenixBackend
+} //PlayBackend
 } //PhoenixPlayer

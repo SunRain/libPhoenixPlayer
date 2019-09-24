@@ -1,10 +1,12 @@
 #include "SoftVolume.h"
 
-#include "BaseVolume.h"
+#include "Backend/BaseVolume.h"
+
 #include "Buffer.h"
 
 namespace PhoenixPlayer{
-namespace PlayBackend {
+    namespace PlayBackend {
+        namespace PhoenixBackend {
 
 SoftVolume::SoftVolume(QObject *parent)
     : BaseVolume(parent)
@@ -45,5 +47,6 @@ void SoftVolume::changeVolume(Buffer *buffer, int channels)
     }
 }
 
-} //namespace PlayBackend
-} //namespace PhoenixPlayer
+} //PhoenixPlayer
+} //PlayBackend
+} //PhoenixPlayer

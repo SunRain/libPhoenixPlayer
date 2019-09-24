@@ -350,10 +350,11 @@ void PlayerCore::playTrack(const AudioMetaObject &data)
 //    obj.setFilePath (data.path ());
 //    obj.setFileName (data.name ());
 //    obj.setMediaType ((Common::MediaType)data.mediaType ());
-    if (m_resource)
+    if (m_resource) {
         m_resource->deleteLater ();
-    m_resource = nullptr;
-    m_resource = MediaResource::create (data.uri ().toString (), 0);
+        m_resource = nullptr;
+    }
+    m_resource = MediaResource::create(data.uri().toString());
     qDebug()<<Q_FUNC_INFO<<"change file to "<<data.uri ();
     if (*m_playBackend) {
         (*m_playBackend)->changeMedia (m_resource, 0, true);
@@ -485,9 +486,9 @@ void PlayerCore::togglePlayPause()
 //            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
 //            (*m_playBackend)->changeMedia (&obj, 0, true);
             if (m_resource)
-                m_resource->deleteLater ();
-            m_resource = MediaResource::create (data.uri ().toString (), this);
-            (*m_playBackend)->changeMedia (m_resource, 0, true);
+                m_resource->deleteLater();
+            m_resource = MediaResource::create(data.uri().toString());
+            (*m_playBackend)->changeMedia(m_resource, 0, true);
         }
         break;
     }
@@ -701,7 +702,7 @@ void PlayerCore::doPlayByPlayMode()
 //            obj.setMediaType ((Common::MediaType)/*data->mediaType ()*/data.mediaType ());
         if (m_resource)
             m_resource->deleteLater ();
-        m_resource = MediaResource::create (data.uri ().toString (), this);
+        m_resource = MediaResource::create(data.uri().toString());
         (*m_playBackend)->changeMedia (m_resource, 0, true);
         m_currentPlayPos = 0;
         (*m_playBackend)->play ();

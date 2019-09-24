@@ -6,10 +6,16 @@
 
 #include "libphoenixplayer_global.h"
 
+#include "ChannelMap.h"
+
 namespace PhoenixPlayer {
 
+    namespace PlayBackend {
+
+        namespace PhoenixBackend {
+
 class AudioParametersPriv;
-class LIBPHOENIXPLAYER_EXPORT AudioParameters
+class AudioParameters
 {
 public:
     //Audio formats
@@ -31,20 +37,6 @@ public:
         PCM_FLOAT,   /*!< Float 32 bit Native Endian, range: -1.0 to 1.0 */
         PCM_UNKNOWN         //Unknown format
     };
-    //Audio channels enum.
-    enum ChannelPosition
-    {
-        CHAN_NULL         = 0x00,   /*!< No channel */
-        CHAN_FRONT_LEFT   = 0x01,   /*!< Front left channel */
-        CHAN_FRONT_RIGHT  = 0x02,   /*!< Front right channel */
-        CHAN_REAR_LEFT    = 0x04,   /*!< Rear left channel */
-        CHAN_REAR_RIGHT   = 0x08,   /*!< Rear right channel */
-        CHAN_FRONT_CENTER = 0x10,   /*!< Front center channel */
-        CHAN_REAR_CENTER  = 0x20,   /*!< Rear center channel */
-        CHAN_SIDE_LEFT    = 0x40,   /*!< Side left channel */
-        CHAN_SIDE_RIGHT   = 0x80,   /*!< Side right channel */
-        CHAN_LFE          = 0x100,  /*!< Low-frequency effects channel */
-    };
 
     //Byte order of samples.
     enum ByteOrder
@@ -53,11 +45,20 @@ public:
         BigEndian         /*!< Samples are in big-endian byte order */
     };
 public:
-    AudioParameters(quint32 sampleRate = 48000, int channels = 2, AudioFormat f= AudioParameters::PCM_UNKNOWN);
-    AudioParameters(quint32 sampleRate, const QList<ChannelPosition> &channels, AudioFormat f);
+//    AudioParameters(quint32 sampleRate = 48000, int channels = 2, AudioFormat f= AudioParameters::PCM_UNKNOWN);
+
+//    AudioParameters(quint32 sampleRate, const QList<ChannelPosition> &channels, AudioFormat f);
+
+    AudioParameters();
+
+    AudioParameters(quint32 sampleRate, const ChannelMap &map, AudioFormat f);
+
     AudioParameters(const AudioParameters &other);
+
     AudioParameters &operator =(const AudioParameters &other);
+
     bool operator == (const AudioParameters &other);
+
     bool operator != (const AudioParameters &other) {
         return !operator == (other);
     }
@@ -68,13 +69,19 @@ public:
     /// \brief channels Channels from class construction
     /// \return
     ///
-    const QList<ChannelPosition> channels() const;
+//    const QList<ChannelPosition> channels() const;
+
+    int channels() const;
+
+
+    const ChannelMap channelMap() const;
+
 
     ///
     /// \brief remapedChannels add CHAN_NULL to channels from construction to make channel list size of 9
     /// \return
     ///
-    const QList<ChannelPosition> remapedChannels() const;
+//    const QList<ChannelPosition> remapedChannels() const;
 
     AudioFormat format() const;
 
@@ -104,22 +111,25 @@ public:
     void printInfo();
     QString parametersInfo() const;
 private:
-    void generateMap(int channels);
+//    void generateMap(int channels);
 
 private:
-    QSharedDataPointer<PhoenixPlayer::AudioParametersPriv> d;
+    QSharedDataPointer<AudioParametersPriv> d;
 };
 
 class AudioParametersPriv : public QSharedData
 {
 public:
     AudioParametersPriv() {}
-    quint32 sampleRate = 48000;
-    AudioParameters::AudioFormat format = AudioParameters::PCM_UNKNOWN;
+    quint32 sampleRate = 0;
+    AudioParameters::AudioFormat format = AudioParameters::PCM_S16LE;
     int sampleSize = 2;
     int validBitsPerSample = 16;
-    QList<AudioParameters::ChannelPosition> channelList;
+    ChannelMap channelMap;
 };
 
 } //PhoenixPlayer
+} //PlayBackend
+} //PhoenixPlayer
+
 #endif // AUDIOPARAMETERS_H

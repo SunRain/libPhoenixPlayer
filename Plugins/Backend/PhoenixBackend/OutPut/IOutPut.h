@@ -2,12 +2,15 @@
 #define IOUTPUT_H
 
 #include <QObject>
-//#include "AudioParameters.h"
+#include "AudioParameters.h"
 
 namespace PhoenixPlayer {
-    class Buffer;
 
-    namespace OutPut {
+    namespace PlayBackend {
+
+        namespace PhoenixBackend {
+
+            namespace OutPut {
 
 class IOutPut : public QObject
 {
@@ -25,7 +28,6 @@ public:
     /// \return
     ///
     virtual bool initialize(quint32 sampleRate,
-//                            const QList<AudioParameters::ChannelPosition> &channels,
                             const ChannelMap &map,
                             AudioParameters::AudioFormat f);
     /*
@@ -66,9 +68,9 @@ public:
 
     quint32 sampleRate() const;
 
-//    QList<AudioParameters::ChannelPosition> channels() const;
-
     const ChannelMap channelMap() const;
+
+    int channels() const;
 
     AudioParameters::AudioFormat format() const;
 
@@ -78,11 +80,15 @@ private:
     int                                     m_sampleSize    = 0;
     quint32                                 m_sampleRate    = 0;
     AudioParameters::AudioFormat            m_format        = AudioParameters::PCM_UNKNOWN;
-//    QList<AudioParameters::ChannelPosition> m_channels;
     ChannelMap m_chan_map;
 
 };
-} //Decoder
+} //OutPut
+} //PhoenixBackend
+} //PlayBackend
 } //PhoenixPlayer
-Q_DECLARE_INTERFACE(PhoenixPlayer::OutPut::IOutPut, "PhoenixPlayer.OutPut.BaseOutPutInterface/1.0")
+
+Q_DECLARE_INTERFACE(PhoenixPlayer::PlayBackend::PhoenixBackend::OutPut::IOutPut,
+                    "PhoenixPlayer.PhoenixBackend.OutPut.BaseOutPutInterface/1.0")
+
 #endif // IOUTPUT_H

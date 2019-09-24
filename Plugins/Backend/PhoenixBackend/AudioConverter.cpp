@@ -5,7 +5,9 @@
 #include <QtGlobal>
 #include <QtEndian>
 
-using namespace PhoenixPlayer::PlayBackend::PhoenixBackend;
+namespace PhoenixPlayer {
+namespace PlayBackend {
+namespace PhoenixBackend {
 
 #define INT_TO_FLOAT(TYPE,SWAP,in,out,samples,offset,max) \
 { \
@@ -35,7 +37,7 @@ AudioConverter::~AudioConverter()
 
 }
 
-void AudioConverter::setFormat(PhoenixPlayer::AudioParameters::AudioFormat f)
+void AudioConverter::setFormat(AudioParameters::AudioFormat f)
 {
     m_format = f;
 }
@@ -141,3 +143,7 @@ void AudioConverter::fromFloat(const float *in, const unsigned char *out, size_t
         memcpy((void*)out, (void*)in, samples * sizeof(float));
     }
 }
+
+} //PhoenixBackend
+} //PlayBackend
+} //PhoenixPlayer

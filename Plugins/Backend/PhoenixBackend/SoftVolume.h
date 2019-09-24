@@ -2,16 +2,16 @@
 #define SOFTVOLUME_H
 
 #include "libphoenixplayer_global.h"
-#include "BaseVolume.h"
+#include "Backend/BaseVolume.h"
 
-#include "AudioParameters.h"
+//#include "AudioParameters.h"
 #include "SingletonPointer.h"
 
 namespace PhoenixPlayer{
-class Buffer;
+    namespace PlayBackend {
+        namespace PhoenixBackend {
 
-namespace PlayBackend {
-class BaseVolume;
+        class Buffer;
 
 class LIBPHOENIXPLAYER_EXPORT SoftVolume : public BaseVolume
 {
@@ -28,7 +28,8 @@ public:
     void changeVolume(Buffer *buffer, int channels);
 };
 
-} //namespace PlayBackend
-} //namespace PhoenixPlayer
+} //PhoenixPlayer
+} //PlayBackend
+} //PhoenixPlayer
 
 #endif // SOFTVOLUME_H

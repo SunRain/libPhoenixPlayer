@@ -4,10 +4,7 @@
 #include "AudioParameters.h"
 
 namespace PhoenixPlayer {
-    class Buffer;
-
     namespace PlayBackend {
-
         namespace PhoenixBackend {
 
 class AudioConverter

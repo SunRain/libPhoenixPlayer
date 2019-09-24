@@ -3,9 +3,8 @@
 
 #include <QObject>
 
-//#include "AudioParameters.h"
 namespace PhoenixPlayer{
-class Buffer;
+
 namespace PlayBackend {
 
 class BaseVolume : public QObject

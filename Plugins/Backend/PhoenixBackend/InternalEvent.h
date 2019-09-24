@@ -11,7 +11,8 @@ namespace PhoenixBackend {
 #define EVENT_NEXT_TRACK_REQUEST    (QEvent::Type(QEvent::User + 1))
 #define EVENT_FINISHED              (QEvent::Type(QEvent::User + 2))
 #define EVENT_SEEK_REQUEST          (QEvent::Type(QEvent::User + 3))
-
+#define EVENT_DECODE_FINISHED       (QEvent::Type(QEvent::User + 4))
+#define EVENT_REQUEST_STOP_OUTPUT   (QEvent::Type(QEvent::User + 5))
 
 class StateChangedEvent : public QEvent
 {

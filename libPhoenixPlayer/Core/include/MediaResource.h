@@ -27,7 +27,7 @@ public:
     virtual bool ready() const;
     virtual PPCommon::MediaType type() const;
 
-    static MediaResource *create(const QString &uri, QObject *parent = Q_NULLPTR);
+    static MediaResource *create(const QString &uri);
 
 private:
     QString m_uri;

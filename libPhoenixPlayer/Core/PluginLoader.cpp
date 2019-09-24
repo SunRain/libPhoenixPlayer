@@ -14,17 +14,17 @@
 #include "MusicLibrary/IMusicTagParser.h"
 #include "MusicLibrary/MusicLibraryDAOHost.h"
 #include "PluginHost.h"
-#include "Decoder/IDecoder.h"
-#include "OutPut/IOutPut.h"
-#include "OutPut/OutPutHost.h"
+//#include "Decoder/IDecoder.h"
+//#include "OutPut/IOutPut.h"
+//#include "OutPut/OutPutHost.h"
 #include "PPSettings.h"
 
 namespace PhoenixPlayer {
 using namespace MetadataLookup;
 using namespace PlayBackend;
 using namespace MusicLibrary;
-using namespace Decoder;
-using namespace OutPut;
+//using namespace Decoder;
+//using namespace OutPut;
 
 #define RETURN_PLUGIN_OBJECT(Class, Type) \
     Class *p = nullptr; \
@@ -55,7 +55,7 @@ PluginLoader::PluginLoader(PPSettings *set, QObject *parent)
 //    m_settings = phoenixPlayerLib->settings ();
     m_curBackendHost = nullptr;
     m_curDAOHost = nullptr;
-    m_curOutPutHost = nullptr;
+//    m_curOutPutHost = nullptr;
     //TODO: 根据系统来设置插件的默认路径
     QString path = QString("%1/plugins").arg(QCoreApplication::applicationDirPath());
     initPluginByPath (path);
@@ -76,12 +76,12 @@ PluginLoader::~PluginLoader()
         m_curDAOHost->deleteLater ();
         m_curDAOHost = nullptr;
     }
-    if (m_curOutPutHost && m_curOutPutHost) {
-        if (!m_curOutPutHost->unLoad ())
-            m_curOutPutHost->forceUnload ();
-        m_curOutPutHost->deleteLater ();
-        m_curOutPutHost = nullptr;
-    }
+//    if (m_curOutPutHost && m_curOutPutHost) {
+//        if (!m_curOutPutHost->unLoad ())
+//            m_curOutPutHost->forceUnload ();
+//        m_curOutPutHost->deleteLater ();
+//        m_curOutPutHost = nullptr;
+//    }
 }
 
 void PluginLoader::addPluginPath(const QString &path)
@@ -116,32 +116,32 @@ BackendHost *PluginLoader::curBackendHost()
     return m_curBackendHost;
 }
 
-OutPutHost *PluginLoader::curOutPutHost()
-{
-    if (!m_curOutPutHost) {
-        QString lib = m_settings->curOutPut ();
-        m_curOutPutHost = new OutPutHost(lib, this);
-        if (!m_curOutPutHost->isValid ()) {
-            if (m_curOutPutHost) {
-                m_curOutPutHost->deleteLater ();
-                m_curOutPutHost = nullptr;
-            }
-            QStringList list = m_libraries.values (PPCommon::PluginOutPut);
-            if (list.isEmpty ()) {
-                m_curOutPutHost = nullptr;
-            } else {
-                foreach (QString str, list) {
-                    m_curOutPutHost = new OutPutHost(str, this);
-                    if (m_curOutPutHost->isValid ())
-                        break;
-                    m_curOutPutHost->deleteLater ();
-                    m_curOutPutHost = nullptr;
-                }
-            }
-        }
-    }
-    return m_curOutPutHost;
-}
+//OutPutHost *PluginLoader::curOutPutHost()
+//{
+//    if (!m_curOutPutHost) {
+//        QString lib = m_settings->curOutPut ();
+//        m_curOutPutHost = new OutPutHost(lib, this);
+//        if (!m_curOutPutHost->isValid ()) {
+//            if (m_curOutPutHost) {
+//                m_curOutPutHost->deleteLater ();
+//                m_curOutPutHost = nullptr;
+//            }
+//            QStringList list = m_libraries.values (PPCommon::PluginOutPut);
+//            if (list.isEmpty ()) {
+//                m_curOutPutHost = nullptr;
+//            } else {
+//                foreach (QString str, list) {
+//                    m_curOutPutHost = new OutPutHost(str, this);
+//                    if (m_curOutPutHost->isValid ())
+//                        break;
+//                    m_curOutPutHost->deleteLater ();
+//                    m_curOutPutHost = nullptr;
+//                }
+//            }
+//        }
+//    }
+//    return m_curOutPutHost;
+//}
 
 MusicLibraryDAOHost *PluginLoader::curDAOHost()
 {

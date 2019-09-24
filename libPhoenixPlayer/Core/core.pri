@@ -38,13 +38,13 @@ HEADERS += \
     $$PWD/include/MusicLibrary/LocalMusicScanner.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgr.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgrWrapper.h \
-    $$PWD/include/Decoder/IDecoder.h \
-    $$PWD/include/Buffer.h \
-    $$PWD/include/AudioParameters.h \
-    $$PWD/include/OutPut/IOutPut.h \
+#    $$PWD/include/Decoder/IDecoder.h \
+#    $$PWD/include/Buffer.h \
+#    $$PWD/include/AudioParameters.h \
+#    $$PWD/include/OutPut/IOutPut.h \
     $$PWD/include/Backend/BaseVolume.h \
     $$PWD/include/PlayerCore/VolumeControl.h \
-    $$PWD/include/Backend/SoftVolume.h \
+#    $$PWD/include/Backend/SoftVolume.h \
     $$PWD/include/BaseObject.h \
     $$PWD/include/Backend/BaseVisual.h \
     $$PWD/include/EqualizerMgr.h \
@@ -52,13 +52,14 @@ HEADERS += \
     $$PWD/PlayerCore/M3uPlayListFormat.h \
 #    $$PWD/include/PlayerCore/PlayQueueMgr.h \
     $$PWD/include/Backend/BackendHost.h \
-    $$PWD/include/Decoder/DecoderHost.h \
+#    $$PWD/include/Decoder/DecoderHost.h \
     $$PWD/include/MetadataLookup/MetadataLookupHost.h \
     $$PWD/include/MusicLibrary/MusicLibraryDAOHost.h \
     $$PWD/include/MusicLibrary/MusicTagParserHost.h \
-    $$PWD/include/OutPut/OutPutHost.h \
+#    $$PWD/include/OutPut/OutPutHost.h \
     $$PWD/MusicLibrary/LocalMusicScannerThread.h \
     $$PWD/include/AudioMetaObject.h \
+#    $$PWD/include/channelmap.h \
     $$PWD/include/libphoenixplayer_global.h \
     $$PWD/AudioMetaObject_p.h \
     $$PWD/include/LibPhoenixPlayerMain.h \
@@ -92,12 +93,13 @@ SOURCES += \
     $$PWD/MusicLibrary/LocalMusicScanner.cpp \
     $$PWD/MetadataLookup/MetadataLookupMgr.cpp \
     $$PWD/MetadataLookup/MetadataLookupMgrWrapper.cpp \
-    $$PWD/Decoder/IDecoder.cpp \
-    $$PWD/AudioParameters.cpp \
-    $$PWD/OutPut/IOutPut.cpp \
+#    $$PWD/Decoder/IDecoder.cpp \
+#    $$PWD/AudioParameters.cpp \
+#    $$PWD/OutPut/IOutPut.cpp \
+#    $$PWD/channelmap.cpp \
     $$PWD/include/Backend/BaseVolume.cpp \
     $$PWD/PlayerCore/VolumeControl.cpp \
-    $$PWD/include/Backend/SoftVolume.cpp \
+#    $$PWD/include/Backend/SoftVolume.cpp \
     $$PWD/EqualizerMgr.cpp \
     $$PWD/PlayerCore/PlayListFormat.cpp \
     $$PWD/PlayerCore/M3uPlayListFormat.cpp \

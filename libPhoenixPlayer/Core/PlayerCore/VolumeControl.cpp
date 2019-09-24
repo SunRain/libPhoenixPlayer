@@ -8,7 +8,6 @@
 
 #include "Backend/BaseVolume.h"
 #include "Backend/IPlayBackend.h"
-#include "Backend/SoftVolume.h"
 #include "Backend/BackendHost.h"
 
 namespace PhoenixPlayer {
@@ -189,11 +188,12 @@ void VolumeControl::reload()
     if (m_volume) {
         m_timer->start (150);
     } else {
-        m_volume = qobject_cast<BaseVolume *>(SoftVolume::instance ());
-        blockSignals (true);
-        checkVolume ();
-        blockSignals (false);
-        QTimer::singleShot (100, this, &VolumeControl::checkVolume);
+//        m_volume = qobject_cast<BaseVolume *>(SoftVolume::instance ());
+//        blockSignals (true);
+//        checkVolume ();
+//        blockSignals (false);
+//        QTimer::singleShot (100, this, &VolumeControl::checkVolume);
+        qWarning()<<Q_FUNC_INFO<<"No Volume found!!!!";
     }
 }
 
