@@ -93,6 +93,7 @@ public:
         PluginDecoder,                  //解码插件
         PluginOutPut,                   //输出插件
         PluginSpectrumGenerator,        //
+        PluginDataProvider,
         PluginTypeUndefined             //最后一个标记,为保证兼容,所有后续添加的枚举必须在此项之前
     };
 

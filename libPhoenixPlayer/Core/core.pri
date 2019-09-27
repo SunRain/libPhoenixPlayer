@@ -7,6 +7,7 @@ QT += network core
 #CONFIG += c++11
 
 HEADERS += \
+    $$PWD/include/DataProvider/IDataProvider.h \
     $$PWD/include/MusicLibrary/ISpectrumGenerator.h \
     $$PWD/include/MusicLibrary/SpectrumGeneratorHost.h \
     $$PWD/include/PPCommon.h \
@@ -70,6 +71,7 @@ HEADERS += \
     $$PWD/include/LocalFileMediaResource.h
 
 SOURCES += \
+    $$PWD/DataProvider/IDataProvider.cpp \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
     $$PWD/MetadataLookup/IMetadataLookup.cpp \
     $$PWD/MetadataLookup/LyricsParser.cpp \
