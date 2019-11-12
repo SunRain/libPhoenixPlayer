@@ -1,283 +1,27 @@
 #include "MusicLibrary/LocalMusicScanner.h"
 
 #include <QDebug>
-#include <QCoreApplication>
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
-#include <QList>
 
-#include "AsyncDiskLookup.h"
-#include "AsyncTagParserMgrWrapper.h"
-#include "PluginLoader.h"
-#include "PPSettings.h"
-#include "PPUtility.h"
-#include "AudioMetaObject.h"
-#include "SingletonPointer.h"
-#include "AudioMetaObject.h"
-#include "LibPhoenixPlayerMain.h"
-#include "MusicLibrary/MusicTagParserHost.h"
-#include "MusicLibrary/IMusicTagParser.h"
+#include "private/SingletonObjectFactory.h"
+#include "private/LocalMusicScannerInternal.h"
+#include "private/PluginMgrInternal.h"
+
 #include "MusicLibrary/IMusicLibraryDAO.h"
-#include "MusicLibrary/MusicLibraryDAOHost.h"
-#include "MusicLibrary/SpectrumGeneratorHost.h"
-#include "MusicLibrary/ISpectrumGenerator.h"
-#include "MusicLibrary/MusicLibraryManager.h"
-
-#include "LocalMusicScannerThread.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
 
-/*
- *
- */
-class FileListScanner : public QThread
+LocalMusicScanner::LocalMusicScanner(QObject *parent)
+    : QObject(parent)
 {
-    Q_OBJECT
-public:
-    explicit FileListScanner(QObject *parent = Q_NULLPTR) : QThread(parent) {}
-    virtual ~FileListScanner() override {}
+    m_internal = SingletonObjectFactory::instance()->localMusicScannerInternal();
+    m_fileListScanner = m_internal->fileListScanner();
+    m_audioParser = m_internal->audioParser();
 
-    void addDir(const QString &dir)
-    {
-        if (dir.isEmpty() || m_stop) {
-            return;
-        }
-        m_locker.lock();
-        if (!m_dirList.contains(dir)) {
-            QString d = dir;
-            if (d.endsWith("/")) {
-                d = d.mid(0, d.length()-1);
-            }
-            m_dirList.append(d);
-        }
-        m_locker.unlock();
-        if (!this->isRunning()) {
-            this->start(QThread::HighPriority);
-        }
-    }
-    void stop()
-    {
-        m_stop = true;
-    }
-    // QThread interface
-protected:
-    void run() Q_DECL_OVERRIDE
-    {
-        m_stop = false;
-        QStringList fileList;
-        while (true) {
-            if (m_stop) {
-                break;
-            }
-            QMutexLocker ml(&m_locker);
-            if (m_dirList.isEmpty()) {
-                break;
-            }
-            const QString path = m_dirList.takeFirst();
-            ml.unlock();
-
-            emit scanDir(path);
-
-            QDir dir(path);
-            if (!dir.exists()) {
-                qDebug()<<Q_FUNC_INFO<<"dir "<<path<<" not exists";
-                continue;
-            }
-            QString canonicalPath = dir.canonicalPath();
-            qDebug()<<Q_FUNC_INFO<<" path ["<<path<<"] canonicalPath "<<canonicalPath;
-            if (canonicalPath.isEmpty()) {
-                continue;
-            }
-            dir.setPath(canonicalPath);
-            dir.setFilter(QDir::Dirs | QDir::Files | /*QDir::NoSymLinks |*/ QDir::NoDotAndDotDot);
-            QFileInfoList list = dir.entryInfoList ();
-
-            foreach(const auto &info, list) {
-                if (info.isDir()) {
-                    this->addDir(info.absoluteFilePath());
-                    continue;
-                }
-                QMimeType type = m_QMimeDatabase.mimeTypeForFile(info);
-                //TODO 虽然建议使用inherits方法来检测,但是此处我们需要所有音频文件,
-                //所以直接检测mimetype 生成的字符串
-                //            if (type.inherits ("audio/mpeg")) {
-                if (type.name().toLower().contains("audio")) {
-                    fileList.append(QString("%1/%2").arg(path).arg(info.fileName()));
-                }
-            }
-        }
-        emit findFiles(fileList);
-    }
-signals:
-    void scanDir(const QString &dir);
-    void findFiles(const QStringList &fileList);
-
-private:
-    bool            m_stop = false;
-    QStringList     m_dirList;
-    QMutex          m_locker;
-    QMimeDatabase   m_QMimeDatabase;
-};
-
-/***************************************************
- *
- ***************************************************/
-
-class AudioParser : public QThread
-{
-    Q_OBJECT
-public:
-    explicit AudioParser(PPSettings *set, PluginLoader *loader, QObject *parent = Q_NULLPTR)
-        : QThread(parent), m_stop(false), m_settings(set), m_pluginLoader(loader)
-    {
-        MusicLibraryDAOHost *dh = m_pluginLoader->curDAOHost();
-        if (dh) {
-            m_dao = dh->instance<IMusicLibraryDAO>();
-        }
-
-        QStringList tagHosts = m_settings->tagParserLibraries();
-        if (tagHosts.isEmpty())
-            tagHosts.append(m_pluginLoader->pluginLibraries(PPCommon::PluginMusicTagParser));
-
-        foreach(const auto &s, tagHosts) {
-            MusicTagParserHost *host = new MusicTagParserHost(s);
-            if (!host->isValid()) {
-                host->deleteLater();
-                host = nullptr;
-                continue;
-            }
-            IMusicTagParser *parser = host->instance<IMusicTagParser>();
-            if (!parser)
-                continue;
-            m_tagHostList.append (host);
-            m_tagParserList.append (parser);
-        }
-        qDebug()<<Q_FUNC_INFO<<" m_tagParserList size "<<m_tagHostList.size ();
-
-        QStringList specHosts = m_settings->spectrumGeneratorLibraries();
-        if (specHosts.isEmpty()) {
-            specHosts.append(m_pluginLoader->pluginLibraries(PPCommon::PluginSpectrumGenerator));
-        }
-        foreach(const auto &s, specHosts) {
-            SpectrumGeneratorHost *host = new SpectrumGeneratorHost(s);
-            if (!host->isValid()) {
-                host->deleteLater();
-                host = nullptr;
-                continue;
-            }
-            ISpectrumGenerator *parser = host->instance<ISpectrumGenerator>();
-            if (!parser)
-                continue;
-            m_specHostList.append(host);
-            m_specParserList.append(parser);
-        }
-        qDebug()<<Q_FUNC_INFO<<" m_specHostList size "<<m_tagHostList.size ();
-    }
-    virtual ~AudioParser() override
-    {
-        foreach(auto h, m_tagHostList) {
-            if (!h->unLoad ())
-                h->forceUnload ();
-        }
-        if (!m_tagHostList.isEmpty()) {
-            qDeleteAll(m_tagHostList);
-            m_tagHostList.clear();
-        }
-    }
-    void addFiles(const QStringList &list)
-    {
-        if (list.isEmpty() || m_stop) {
-            return;
-        }
-        m_mutex.lock();
-        m_fileList.append(list);
-        m_mutex.unlock();
-    }
-    void stop()
-    {
-        m_stop = true;
-    }
-
-    // QThread interface
-protected:
-    void run() Q_DECL_OVERRIDE
-    {
-        m_stop = false;
-        if (m_dao) {
-            m_dao->beginTransaction();
-        }
-        AudioMetaList ll;
-        while (true) {
-            if (m_stop) {
-                break;
-            }
-            QMutexLocker ml(&m_mutex);
-            if (m_fileList.isEmpty()) {
-                break;
-            }
-            const QString file = m_fileList.takeFirst();
-            const int size = m_fileList.size();
-            ml.unlock();
-            if (!QFile::exists(file)) {
-                continue;
-            }
-            emit parsingFile(file, size);
-
-            AudioMetaObject obj(file);
-            ll.append(obj);
-            foreach (auto *parser, m_tagParserList) {
-                if (parser->parserTag(&obj)) {
-                    break;
-                }
-            }
-            if (m_dao) {
-                m_dao->insertMetaData(obj);
-            }
-            foreach (auto parser, m_specParserList) {
-                auto list = parser->generate(obj);
-                if (!list.isEmpty()) {
-                    m_dao->insertSpectrumData(obj, list);
-                    break;
-                }
-            }
-        }
-        if (m_dao) {
-            m_dao->commitTransaction();
-        }
-        emit parsingFinished();
-    }
-
-signals:
-    void parsingFile(const QString &file, int remainingSize);
-    void parsingFinished();
-
-private:
-    bool                            m_stop;
-    QMutex                          m_mutex;
-    QStringList                     m_fileList;
-    PPSettings                      *m_settings;
-    PluginLoader                    *m_pluginLoader;
-    IMusicLibraryDAO                *m_dao;
-    QList<MusicTagParserHost *>     m_tagHostList;
-    QList<SpectrumGeneratorHost *>  m_specHostList;
-    QList<IMusicTagParser *>        m_tagParserList;
-    QList<ISpectrumGenerator *>     m_specParserList;
-};
-
-LocalMusicScanner::LocalMusicScanner(PPSettings *set, PluginLoader *loader, QObject *parent)
-    : QObject(parent),
-      m_settings(set),
-      m_pluginLoader(loader)
-{
-//    m_scanner = nullptr;
-    m_fileListScanner = new FileListScanner(this);
-    m_audioParser = new AudioParser(m_settings, m_pluginLoader, this);
-
-    connect(m_fileListScanner, &FileListScanner::scanDir,
+    connect(m_fileListScanner.data(), &FileListScanner::scanDir,
             this, &LocalMusicScanner::searchingDir, Qt::QueuedConnection);
-    connect(m_fileListScanner, &FileListScanner::findFiles,
+
+    connect(m_fileListScanner.data(), &FileListScanner::findFiles,
             this, [&](const QStringList &list) {
                 m_audioParser->addFiles(list);
                 if (!m_audioParser->isRunning()) {
@@ -285,28 +29,24 @@ LocalMusicScanner::LocalMusicScanner(PPSettings *set, PluginLoader *loader, QObj
                 }
                 emit newFileListAdded(list);
             });
-    connect(m_audioParser, &AudioParser::parsingFile,
+
+    connect(m_audioParser.data(), &AudioParser::parsingFile,
             this, &LocalMusicScanner::parsingFile, Qt::QueuedConnection);
-    connect(m_audioParser, &AudioParser::parsingFinished,
-            this, &LocalMusicScanner::searchingFinished, Qt::QueuedConnection);
+
+    connect(m_audioParser.data(), &AudioParser::parsed,
+            this, [&](const AudioMetaObject &obj) {
+                m_audioList.append(obj);
+        }, Qt::QueuedConnection);
+
+    connect(m_audioParser.data(), &AudioParser::parsingFinished,
+            this, &LocalMusicScanner::insert, Qt::QueuedConnection);
+
 }
 
 LocalMusicScanner::~LocalMusicScanner()
 {
-    if (m_fileListScanner->isRunning()) {
-        m_fileListScanner->stop();
-        m_fileListScanner->quit();
-        m_fileListScanner->wait(3*60*1000);
-        m_fileListScanner->deleteLater();
-        m_fileListScanner = nullptr;
-    }
-    if (m_audioParser->isRunning()) {
-        m_audioParser->stop();
-        m_audioParser->quit();
-        m_audioParser->wait(3*60*1000);
-        m_audioParser->deleteLater();
-        m_audioParser = nullptr;
-    }
+    m_fileListScanner->disconnect(this);
+    m_audioParser->disconnect(this);
 }
 
 void LocalMusicScanner::scanLocalMusic()
@@ -341,8 +81,24 @@ void LocalMusicScanner::doScann(const QString &dirname)
     }
 }
 
+void LocalMusicScanner::insert()
+{
+    QSharedPointer<PluginMgrInternal> mgr = SingletonObjectFactory::instance()->pluginMgrInternal();
+    PluginMetaData md = mgr->usedMusicLibraryDAO();
+    if (PluginMetaData::isValid(md)) {
+        IMusicLibraryDAO *dao = qobject_cast<IMusicLibraryDAO*>(PluginMgr::instance(md));
+        if (dao) {
+            dao->beginTransaction();
+            foreach (const auto &it, m_audioList) {
+                dao->insertMetaData(it);
+            }
+            dao->commitTransaction();
+            PluginMgr::unload(md);
+//            emit searchingFinished();
+        }
+    }
+     emit searchingFinished();
+}
+
 } //MusicLibrary
 } //PhoenixPlayer
-
-
-#include "LocalMusicScanner.moc"

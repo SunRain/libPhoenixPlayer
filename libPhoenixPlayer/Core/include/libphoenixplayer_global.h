@@ -1,7 +1,7 @@
 #ifndef LIBPHOENIXPLAYER_GLOBAL_H
 #define LIBPHOENIXPLAYER_GLOBAL_H
 
-#include <qglobal.h>
+#include <QtGlobal>
 
 #if defined(LIBPHOENIXPLAYER_LIBRARY)
 #  undef LIBPHOENIXPLAYER_EXPORT
@@ -13,7 +13,7 @@
 
 namespace PhoenixPlayer {
 class AudioMetaObject;
-void LibPhoenixPlayer_Init();
+//void LibPhoenixPlayer_Init();
 }
 typedef QList<PhoenixPlayer::AudioMetaObject> AudioMetaList;
 

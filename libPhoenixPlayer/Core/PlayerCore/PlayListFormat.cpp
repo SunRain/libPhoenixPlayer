@@ -1,4 +1,4 @@
-#include "PlayListFormat.h"
+#include "PlayerCore/PlayListFormat.h"
 
 #include <QStringList>
 

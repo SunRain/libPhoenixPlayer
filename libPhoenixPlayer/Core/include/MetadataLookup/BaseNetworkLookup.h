@@ -14,10 +14,10 @@ class QTimer;
 namespace PhoenixPlayer {
 namespace MetadataLookup {
 
-///
-/// \brief The BaseNetworkLookup class
-/// Sync network lookup
-///
+/*!
+ * \brief The BaseNetworkLookup class
+ *  Sync network lookup
+ */
 class BaseNetworkLookup : public QObject
 {
     Q_OBJECT
@@ -33,19 +33,19 @@ public:
     void setUrl(const QString &url);
     void setRequestType(RequestType type);
 
-    ///
-    /// \brief setInterval msec to interrupt the request
-    /// \param msec  default 10000
-    ///
+    /*!
+     * \brief setInterval msec to interrupt the request
+     * \param msec default 10000
+     */
     void setInterval(int msec);
 
     bool startLookup(bool watchTimeout = true);
 
 protected:
-    ///
-    /// \brief cookieFile
-    /// \return valid file path to save cookie data. Empty string will not use cookie
-    ///
+    /*!
+     * \brief cookieFile
+     * \return Valid file path to save cookie data. Empty string will not use cookie
+     */
     virtual QString cookieFile() const
     {
         return QString();
@@ -56,7 +56,7 @@ signals:
     void failed(const QUrl &requestedUrl, const QString &error);
 
 private:
-    void doTimeout();
+    void doAbort();
 
 private:
     QCurl::QCNetworkAccessManager           *m_network;

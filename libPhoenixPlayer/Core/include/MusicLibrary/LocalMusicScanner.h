@@ -2,29 +2,28 @@
 #define LOCALMUSICSCANNER_H
 
 #include <QObject>
+#include <QSharedPointer>
 
 #include "libphoenixplayer_global.h"
 
 namespace PhoenixPlayer {
+    class LocalMusicScannerInternal;
+    class FileListScanner;
+    class AudioParser;
 
-class PPSettings;
-class PluginLoader;
-class AudioMetaObject;
-namespace MusicLibrary {
+    namespace MusicLibrary {
 
-class IMusicLibraryDAO;
-class FileListScanner;
-class LocalMusicScannerThread;
-class AudioParser;
+/*!
+ * \brief The LocalMusicScanner class
+ * Internal Singleton class
+ */
 class LIBPHOENIXPLAYER_EXPORT LocalMusicScanner : public QObject
 {
     Q_OBJECT
-    friend class MusicLibraryManager;
-protected:
-    explicit LocalMusicScanner(PPSettings *set, PluginLoader *loader, QObject *parent = Q_NULLPTR);
+public:
+    explicit LocalMusicScanner(QObject *parent = Q_NULLPTR);
     virtual ~LocalMusicScanner();
 
-public:
     void scanLocalMusic();
     void scanDir(const QString &dirname);
     void scarnDirs(const QStringList &list);
@@ -37,11 +36,15 @@ signals:
 
 private:
     void doScann(const QString &dirname);
+
+    void insert();
+
 private:
-    PPSettings                  *m_settings         = Q_NULLPTR;
-    PluginLoader                *m_pluginLoader     = Q_NULLPTR;
-    FileListScanner             *m_fileListScanner  = Q_NULLPTR;
-    AudioParser                 *m_audioParser      = Q_NULLPTR;
+    QSharedPointer<LocalMusicScannerInternal>   m_internal;
+    QSharedPointer<FileListScanner>             m_fileListScanner;
+    QSharedPointer<AudioParser>                 m_audioParser;
+
+    AudioMetaList                               m_audioList;
 };
 } //MusicLibrary
 } //PhoenixPlayer

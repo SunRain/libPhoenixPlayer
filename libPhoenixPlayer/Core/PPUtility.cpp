@@ -15,7 +15,6 @@
 
 #include "PluginLoader.h"
 #include "PluginHost.h"
-#include "MetadataLookup/IMetadataLookup.h"
 #include "SingletonPointer.h"
 
 namespace PhoenixPlayer {

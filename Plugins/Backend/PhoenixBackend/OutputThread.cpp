@@ -68,7 +68,7 @@ OutputThread::OutputThread(StateHandler *handle, Recycler *recycler, QObject* pa
     m_channel_converter = Q_NULLPTR;
     m_output_buf = Q_NULLPTR;
     m_output_size = 0;
-    m_eq = EqualizerMgr::instance();
+    m_eq = new EqualizerMgr(this);
 }
 
 OutputThread::~OutputThread()

@@ -3,8 +3,9 @@
 
 #include <QObject>
 
-#include "PPCommon.h"
 #include "libphoenixplayer_global.h"
+#include "PPCommon.h"
+#include "BasePlugin.h"
 
 namespace PhoenixPlayer{
     class MediaResource;
@@ -12,12 +13,18 @@ namespace PhoenixPlayer{
     namespace PlayBackend {
         class BaseVolume;
 
-class LIBPHOENIXPLAYER_EXPORT IPlayBackend : public QObject {
+class LIBPHOENIXPLAYER_EXPORT IPlayBackend : public BasePlugin
+{
     Q_OBJECT
 public:
-    explicit IPlayBackend(QObject *parent = Q_NULLPTR): QObject(parent) {
+    explicit IPlayBackend(QObject *parent = Q_NULLPTR)
+        : BasePlugin(parent)
+    {
+
     }
-    virtual ~IPlayBackend() {
+    virtual ~IPlayBackend() override
+    {
+
     }
 
     virtual PPCommon::PlayBackendState  playBackendState() = 0;
@@ -27,13 +34,15 @@ public:
     // 返回不同playbackend的BaseVolume以供外部调用
     virtual BaseVolume *baseVolume() = 0;
 
-    virtual bool useExternalDecoder() {
-        return false;
-    }
+//    virtual bool useExternalDecoder()
+//    {
+//        return false;
+//    }
 
-    virtual bool useExternalOutPut() {
-        return false;
-    }
+//    virtual bool useExternalOutPut()
+//    {
+//        return false;
+//    }
 
 
     ///
@@ -42,6 +51,25 @@ public:
     ///
     virtual qint64 durationInMS() {
         return -1;
+    }
+
+    // BasePlugin interface
+public:
+    virtual PluginProperty property() const Q_DECL_OVERRIDE
+    {
+        return PluginProperty();
+    }
+    virtual PluginType type() const Q_DECL_OVERRIDE
+    {
+        return BasePlugin::PluginPlayBackend;
+    }
+    virtual QWidget *settingsUI() const Q_DECL_OVERRIDE
+    {
+        return Q_NULLPTR;
+    }
+    virtual QWidget *aboutUI() const Q_DECL_OVERRIDE
+    {
+        return Q_NULLPTR;
     }
 
 signals:
@@ -74,10 +102,8 @@ public slots:
     virtual void changeMedia(MediaResource *res,
                              quint64 startSec = 0,
                              bool startPlay = false) = 0;
-
 };
 } //namespace PlayBackend
 } //namespace PhoenixPlayer
-Q_DECLARE_INTERFACE(PhoenixPlayer::PlayBackend::IPlayBackend, "PhoenixPlayer.PlayBackend.BasePlayBackendInterface/1.0")
 
 #endif // IPLAYBACKEND_H

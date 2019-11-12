@@ -21,6 +21,10 @@ namespace PhoenixPlayer {
 //    }
 
     namespace PlayBackend {
+    class IPlayBackend;
+    }
+
+    namespace PlayBackend {
         namespace PhoenixBackend {
             class PhoenixPlayBackend;
             class StateHandler;
@@ -52,7 +56,8 @@ private:
     QSlider *m_volume = Q_NULLPTR;
 
 
-    PhoenixPlayer::PlayBackend::PhoenixBackend::PhoenixPlayBackend *m_playBackend = Q_NULLPTR;
+//    PhoenixPlayer::PlayBackend::PhoenixBackend::PhoenixPlayBackend *m_playBackend = Q_NULLPTR;
+    PhoenixPlayer::PlayBackend::IPlayBackend  *m_playBackend = Q_NULLPTR;
 
     PhoenixPlayer::PlayBackend::PhoenixBackend::AudioConverter              *m_audioConverter   = Q_NULLPTR;
     PhoenixPlayer::PlayBackend::PhoenixBackend::ChannelConverter            *m_channelConverter = Q_NULLPTR;

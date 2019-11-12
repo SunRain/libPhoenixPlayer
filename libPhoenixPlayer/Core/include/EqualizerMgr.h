@@ -2,57 +2,70 @@
 #define EQUALIZERMGR_H
 
 #include <QObject>
-#include <QHash>
+#include <QSharedPointer>
+#include <QtGlobal>
 
 #include "libphoenixplayer_global.h"
-#include "SingletonPointer.h"
 
 namespace PhoenixPlayer {
 
-class PPSettings;
+class EqualizerMgrInternal;
+/*!
+ * \brief The EqualizerMgr class
+ * Internal Singleton class
+ */
 class EqualizerMgr : public QObject
 {
     Q_OBJECT
-private:
-    explicit EqualizerMgr(QObject *parent = Q_NULLPTR);
-    static EqualizerMgr *createInstance();
 public:
-    static EqualizerMgr *instance();
+    explicit EqualizerMgr(QObject *parent = Q_NULLPTR);
 
     virtual ~EqualizerMgr();
+
+    /*!
+     * \brief setGlobalEnabled
+     * Since EqualizerMgr is an internal Singleton class,
+     * any changes to it will also change all instances of it.
+     * This is an overloads function to setEnabled, every time call this will call interanl instance function,
+     * use setEnabled will be more efficiently.
+     * \param enable
+     */
+    static void setGlobalEnabled(bool enable);
+    static bool globalEnabled();
 
     void setEnabled(bool enable);
     bool enabled() const;
 
-    ///
-    /// \brief setPreamp Sets equalizer preamp
-    /// \param preamp
-    ///
+    /*!
+     * \brief setPreamp Sets equalizer preamp
+     * \param preamp
+     */
     void setPreamp(double preamp);
-    double preamp();
+    double preamp() const;
 
-    ///
-    /// \brief setValue Sets the equalizer channel value.
-    /// \param band  Number of equalizer band.
-    /// \param value Channel gain (-20.0..20.0 dB)
-    ///
+    /*!
+     * \brief setValue Sets the equalizer channel value.
+     * \param band Number of equalizer band.
+     * \param value Channel gain (-20.0..20.0 dB)
+     */
     void setValue(int band, double value);
-    double value(int band);
+    double value(int band) const;
 
     int bands() const;
 
 signals:
     void changed();
+
 public slots:
     void reload();
+
+    /*!
+     * \brief sync call sync to save data and emit changed() signal if preamp or band changes.
+     */
     void sync();
+
 private:
-    void save();
-private:
-    PPSettings *m_settings;
-    bool m_enabled;
-    double m_preamp;
-    QHash<int, double> m_values;
+    QSharedPointer<EqualizerMgrInternal> m_internal;
 
 };
 } //PhoenixPlayer

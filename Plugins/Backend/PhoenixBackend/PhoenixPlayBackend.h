@@ -20,7 +20,7 @@ class PhoenixPlayBackend : public IPlayBackend
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "PhoenixPlayer.PlayBackend.PhoenixPlayBackend" FILE "PhoenixBackend.json")
-    Q_INTERFACES(PhoenixPlayer::PlayBackend::IPlayBackend)
+    Q_INTERFACES(PhoenixPlayer::BasePlugin)
 public:
     explicit PhoenixPlayBackend(QObject *parent = Q_NULLPTR);
     virtual ~PhoenixPlayBackend() override;
@@ -29,13 +29,17 @@ public:
 public:
     bool event(QEvent *event) Q_DECL_OVERRIDE;
 
+    // BasePlugin interface
+public:
+    PluginProperty property() const Q_DECL_OVERRIDE;
+
     // IPlayBackend interface
 public:
     PPCommon::PlayBackendState playBackendState() Q_DECL_OVERRIDE;
     void initialize() Q_DECL_OVERRIDE;
     BaseVolume *baseVolume() Q_DECL_OVERRIDE;
-    bool useExternalDecoder() Q_DECL_OVERRIDE;
-    bool useExternalOutPut() Q_DECL_OVERRIDE;
+//    bool useExternalDecoder() Q_DECL_OVERRIDE;
+//    bool useExternalOutPut() Q_DECL_OVERRIDE;
     qint64 durationInMS() Q_DECL_OVERRIDE;
 
 public slots:
@@ -44,8 +48,6 @@ public slots:
     void pause() Q_DECL_OVERRIDE;
     void setPosition(quint64 sec) Q_DECL_OVERRIDE;
     void changeMedia(MediaResource *res, quint64 startSec, bool startPlay) Q_DECL_OVERRIDE;
-
-
 
 private:
     BaseVolume      *m_volume           = Q_NULLPTR;

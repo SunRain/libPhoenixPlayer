@@ -1,113 +1,113 @@
-#ifndef PLUGINLOADER_H
-#define PLUGINLOADER_H
+//#ifndef PLUGINLOADER_H
+//#define PLUGINLOADER_H
 
-#include <QObject>
-#include <QHash>
-#include <QList>
+//#include <QObject>
+//#include <QHash>
+//#include <QList>
 
-#include "libphoenixplayer_global.h"
-#include "PPCommon.h"
-#include "SingletonPointer.h"
+//#include "libphoenixplayer_global.h"
+//#include "PPCommon.h"
+//#include "SingletonPointer.h"
 
-class QPluginLoader;
-namespace PhoenixPlayer {
+//class QPluginLoader;
+//namespace PhoenixPlayer {
 
-namespace PlayBackend {
-class BackendHost;
-}
+//namespace PlayBackend {
+//class BackendHost;
+//}
 
-namespace MusicLibrary {
-class MusicLibraryDAOHost;
-}
+//namespace MusicLibrary {
+//class MusicLibraryDAOHost;
+//}
 
-namespace OutPut {
-class OutPutHost;
-}
+//namespace OutPut {
+//class OutPutHost;
+//}
 
-class PPSettings;
-class PluginHost;
-class LIBPHOENIXPLAYER_EXPORT PluginLoader : public QObject
-{
-    Q_OBJECT
+//class PPSettings;
+//class PluginHost;
+//class LIBPHOENIXPLAYER_EXPORT PluginLoader : public QObject
+//{
+//    Q_OBJECT
 
-    friend class LibPhoenixPlayer;
-protected:
-    explicit PluginLoader(PPSettings *set, QObject *parent = Q_NULLPTR);
+//    friend class LibPhoenixPlayer;
+//protected:
+//    explicit PluginLoader(PPSettings *set, QObject *parent = Q_NULLPTR);
 
-public:
-    virtual ~PluginLoader();
+//public:
+//    virtual ~PluginLoader();
 
-    void addPluginPath(const QString &path);
+//    void addPluginPath(const QString &path);
 
-    ///
-    /// \brief getCurrentPlayBackend
-    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
-    /// \return
-    ///
-//    PlayBackend::IPlayBackend *getCurrentPlayBackend();
+//    ///
+//    /// \brief getCurrentPlayBackend
+//    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
+//    /// \return
+//    ///
+////    PlayBackend::IPlayBackend *getCurrentPlayBackend();
 
-    PlayBackend::BackendHost *curBackendHost();
-    ///
-    /// \brief getCurrentPlayListDAO
-    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
-    /// \return
-    ///
-//    MusicLibrary::IMusicLibraryDAO *getCurrentLibraryDAO();
+//    PlayBackend::BackendHost *curBackendHost();
+//    ///
+//    /// \brief getCurrentPlayListDAO
+//    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
+//    /// \return
+//    ///
+////    MusicLibrary::IMusicLibraryDAO *getCurrentLibraryDAO();
 
-//    OutPut::OutPutHost *curOutPutHost();
+////    OutPut::OutPutHost *curOutPutHost();
 
-    ///
-    /// \brief getCurrentMusicTagParser
-    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
-    /// \return
-    ///
-//    MusicLibrary::IMusicTagParser *getCurrentMusicTagParser();
+//    ///
+//    /// \brief getCurrentMusicTagParser
+//    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
+//    /// \return
+//    ///
+////    MusicLibrary::IMusicTagParser *getCurrentMusicTagParser();
 
-    MusicLibrary::MusicLibraryDAOHost *curDAOHost();
+//    MusicLibrary::MusicLibraryDAOHost *curDAOHost();
 
-    ///
-    /// \brief getCurrentMetadataLookup
-    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
-    /// \return
-    ///
-//    MetadataLookup::IMetadataLookup *getCurrentMetadataLookup();
+//    ///
+//    /// \brief getCurrentMetadataLookup
+//    /// 如果未设置有效插件名,则返回当前列表的第一个插件,否则返回设置的插件
+//    /// \return
+//    ///
+////    MetadataLookup::IMetadataLookup *getCurrentMetadataLookup();
 
 
-//    Decoder::IDecoder *getCurrentDecoder();
+////    Decoder::IDecoder *getCurrentDecoder();
 
-//    OutPut::IOutPut *getCurrentOutPut();
+////    OutPut::IOutPut *getCurrentOutPut();
 
-    ///
-    /// \brief getPluginNames 返回当前所有插件的名称列表
-    /// \param type
-    /// \return
-    ///
-//    QStringList getPluginHostHashList(Common::PluginType type);
+//    ///
+//    /// \brief getPluginNames 返回当前所有插件的名称列表
+//    /// \param type
+//    /// \return
+//    ///
+////    QStringList getPluginHostHashList(Common::PluginType type);
 
-    ///
-    /// \brief pluginLibraries
-    /// \param type
-    /// \return 某一个插件类型的所有插件文件地址
-    ///
-    QStringList pluginLibraries(PPCommon::PluginType type);
-protected:
-    void initPluginByPath(const QString &path);
-signals:
-    ///
-    /// \brief signalPluginChanged setNewPlugin后如果新插件名和当前使用的插件名不同,则发送此信号
-    /// \param type
-    ///
-//    void signalPluginChanged(Common::PluginType type);
-private:
-     PPSettings *m_settings;
-     PlayBackend::BackendHost *m_curBackendHost;
-//     OutPut::OutPutHost *m_curOutPutHost;
-     MusicLibrary::MusicLibraryDAOHost *m_curDAOHost;
+//    ///
+//    /// \brief pluginLibraries
+//    /// \param type
+//    /// \return 某一个插件类型的所有插件文件地址
+//    ///
+//    QStringList pluginLibraries(PPCommon::PluginType type);
+//protected:
+//    void initPluginByPath(const QString &path);
+//signals:
+//    ///
+//    /// \brief signalPluginChanged setNewPlugin后如果新插件名和当前使用的插件名不同,则发送此信号
+//    /// \param type
+//    ///
+////    void signalPluginChanged(Common::PluginType type);
+//private:
+//     PPSettings *m_settings;
+//     PlayBackend::BackendHost *m_curBackendHost;
+////     OutPut::OutPutHost *m_curOutPutHost;
+//     MusicLibrary::MusicLibraryDAOHost *m_curDAOHost;
 
-     QStringList m_pluginPaths;
-     QHash<PPCommon::PluginType, QString> m_libraries;
+//     QStringList m_pluginPaths;
+//     QHash<PPCommon::PluginType, QString> m_libraries;
 
-};
+//};
 
-} //PhoenixPlayer
-#endif // PLUGINLOADER_H
+//} //PhoenixPlayer
+//#endif // PLUGINLOADER_H

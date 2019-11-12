@@ -4,87 +4,178 @@
 #include <QObject>
 #include <QMutex>
 #include <QThread>
+#include <QByteArray>
+#include <QSharedPointer>
 
 #include "libphoenixplayer_global.h"
-#include "PPCommon.h"
+//#include "PPCommon.h"
 #include "AudioMetaObject.h"
-#include "MetadataLookup/IMetadataLookup.h"
+#include "PluginMgr.h"
+#include "DataProvider/IMetadataLookup.h"
 
 class QTimer;
 namespace PhoenixPlayer {
-class PluginLoader;
-class PluginHost;
-class PPSettings;
-class PPUtility;
-class AudioMetaObject;
+//    class PluginLoader;
+//    class PluginHost;
+//    class PPSettings;
+    class PPUtility;
+    class AudioMetaObject;
+//    class PluginMgrInternal;
 
-namespace MetadataLookup {
+    namespace MetadataLookup {
 
-class MetadataLookupHost;
-class LIBPHOENIXPLAYER_EXPORT MetadataLookupMgr : public QThread
+
+class LookupNode
+{
+    friend class MetadataLookupMgr;
+    friend class LookupWoker;
+public:
+    LookupNode() { }
+
+    LookupNode(const LookupNode &other)
+    {
+        this->ret = other.ret;
+        this->data = other.data;
+        this->plugin = other.plugin;
+        this->reqType = other.reqType;
+        this->errMsg = other.errMsg;
+        this->useMultiPlugin = other.useMultiPlugin;
+    }
+
+    bool operator == (const LookupNode &other) = delete;
+    bool operator != (const LookupNode &other) = delete;
+
+    LookupNode &operator = (const LookupNode &other)
+    {
+        this->ret = other.ret;
+        this->data = other.data;
+        this->plugin = other.plugin;
+        this->reqType = other.reqType;
+        this->errMsg = other.errMsg;
+        this->useMultiPlugin = other.useMultiPlugin;
+        return *this;
+    }
+
+    inline AudioMetaObject input() const
+    {
+        return data;
+    }
+
+    inline PluginMetaData usedPlugin() const
+    {
+        return plugin;
+    }
+
+    inline DataProvider::IDataProvider::SupportedType type() const
+    {
+        return reqType;
+    }
+
+    inline QByteArray output() const
+    {
+        return ret;
+    }
+    inline QString errorMsg() const
+    {
+        return errMsg;
+    }
+protected:
+    bool                    useMultiPlugin = false;
+    QByteArray              ret;
+    QString                 errMsg;
+    PluginMetaData          plugin;
+    AudioMetaObject         data;
+    DataProvider::IDataProvider::SupportedType reqType = DataProvider::IDataProvider::SupportUndefined;
+};
+
+class LookupWoker;
+//TODO use thread pool later
+class LIBPHOENIXPLAYER_EXPORT MetadataLookupMgr : public QObject
 {
     Q_OBJECT
+    friend class LookupWoker;
 public:
     explicit MetadataLookupMgr(QObject *parent = Q_NULLPTR);
-    virtual ~MetadataLookupMgr();
-    void lookup(const AudioMetaObject &data, IMetadataLookup::LookupType type);
+    virtual ~MetadataLookupMgr() override;
+
+    /*!
+     * \brief lookup
+     * \param data
+     * \param type
+     * \param useMultiPlugin True to use all supported plugin if plugin is enabled).
+     */
+    void lookup(const AudioMetaObject &data, DataProvider::IDataProvider::SupportedType type, bool useMultiPlugin = false);
 
 protected:
-    struct WorkNode {
-        AudioMetaObject data;
-        IMetadataLookup::LookupType type;
-        bool operator == (const WorkNode &other) const {
-            return data.hash () == other.data.hash ()
-                    && type == other.type;
-        }
-    };
-    struct HostNode {
-        IMetadataLookup **lookup;
-        MetadataLookupHost *host;
-    };
+    /*!
+     * \brief dequeue
+     * Use mutex to take one lookup node from work list
+     * \return Empty node if queue is empty
+     */
+    LookupNode dequeue();
+//    inline QMutex *mutex()
+//    {
+//        return &m_mutex;
+//    }
+//    struct WorkNode {
+//        AudioMetaObject data;
+//        DataProvider::IDataProvider::SupportedType type;
+//        bool operator == (const WorkNode &other) const {
+//            return data.hash () == other.data.hash ()
+//                    && type == other.type;
+//        }
+//    };
+//    struct HostNode {
+//        IMetadataLookup **lookup;
+//        MetadataLookupHost *host;
+//    };
 
-    // QThread interface
-protected:
-    void run();
+//    // QThread interface
+//protected:
+//    virtual void run() Q_DECL_OVERRIDE;
 
 signals:
 //    void lookupSucceed(const QString &songHash,
 //                       const QByteArray &result,
 //                       const IMetadataLookup::LookupType &type);
-    void lookupSucceed(const AudioMetaObject &data, const IMetadataLookup::LookupType &type);
-//    void lookupFailed(const QString &songHash, const IMetadataLookup::LookupType &type);
-    void lookupFailed(const AudioMetaObject &data, const IMetadataLookup::LookupType &type);
+//    void lookupSucceed(const AudioMetaObject &data, const IMetadataLookup::LookupType &type);
+////    void lookupFailed(const QString &songHash, const IMetadataLookup::LookupType &type);
+//    void lookupFailed(const AudioMetaObject &data, const IMetadataLookup::LookupType &type);
+    void lookupOne(const LookupNode &node);
     void queueFinished();
-public slots:
 
 private slots:
 //    void nextLookupPlugin();
-    void doLookupSucceed(const QByteArray &result);
-    void doLookupFailed();
+//    void doLookupSucceed(const QByteArray &result);
+//    void doLookupFailed();
 //    void destructor();
 private:
     //在destructorState里面使用一个事件循环，来判断是否处在卸载插件的状态
 //    bool destructorState();
-    void initPluginObject();
+//    void initPluginObject();
 //    void processNext();
 //    void doLookup();
     void emitFinish();
 private:
-    PluginLoader        *m_pluginLoader;
-    PPSettings          *m_settings;
-    PPUtility           *m_util;
+    LookupWoker                         *m_worker = Q_NULLPTR;
+//    PPUtility           *m_util = Q_NULLPTR;
 
-    QList<WorkNode>     m_workQueue;
-    WorkNode            m_currentWork;
+    QList<LookupNode>                   m_workQueue;
+//    LookupNode                          m_curNode;
+//    PluginLoader        *m_pluginLoader;
+//    PPSettings          *m_settings;
 
-    QList<HostNode>     m_hostList;
-    HostNode            m_currentHost;
+//    QList<WorkNode>     m_workQueue;
+//    WorkNode            m_currentWork;
+
+//    QList<HostNode>     m_hostList;
+//    HostNode            m_currentHost;
 
     QMutex      m_mutex;
-    QMutex      m_lookupMutex;
-    bool        m_finish;
-//    bool        m_doInternalLoop;
-    bool        m_useNextHost;
+//    QMutex      m_lookupMutex;
+//    bool        m_finish;
+////    bool        m_doInternalLoop;
+//    bool        m_useNextHost;
 };
 
 } //MetadataLookup

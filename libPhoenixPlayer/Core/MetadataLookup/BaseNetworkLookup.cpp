@@ -24,7 +24,7 @@ BaseNetworkLookup::BaseNetworkLookup(QObject *parent) : QObject(parent)
     m_timer = new QTimer(this);
     m_timer->setSingleShot (true);
     connect (m_timer, &QTimer::timeout,
-             this, &BaseNetworkLookup::doTimeout);
+             this, &BaseNetworkLookup::doAbort);
 }
 
 BaseNetworkLookup::~BaseNetworkLookup()
@@ -72,8 +72,9 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
         return false;
 
     if (m_reply) {
-        m_reply->abort ();
-        m_requestAborted = true;
+//        m_reply->abort ();
+//        m_requestAborted = true;
+        doAbort();
     }
     m_failEmitted = false;
     if (!cookieFile().isEmpty()) {
@@ -144,11 +145,16 @@ bool BaseNetworkLookup::startLookup(bool watchTimeout)
     return true;
 }
 
-void BaseNetworkLookup::doTimeout()
+void BaseNetworkLookup::doAbort()
 {
     m_requestAborted = true;
-    if (m_reply)
-        m_reply->abort ();
+    if (m_reply) {
+        const QUrl url = m_reply->request().url();
+        m_reply->abort();
+        m_reply->deleteLater();
+        m_reply = Q_NULLPTR;
+        emit failed(url, "request timeout, aborted!");
+    }
 }
 } //Lyrics
 } //PhoenixPlayer

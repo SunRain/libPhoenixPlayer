@@ -2,97 +2,79 @@
 
 #include <QDebug>
 
-#include "PPSettings.h"
 #include "LibPhoenixPlayerMain.h"
+#include "private/EqualizerMgrInternal.h"
+#include "private/SingletonObjectFactory.h"
 
 namespace PhoenixPlayer {
-
-const static int BANDS_NUM = 10;
 
 EqualizerMgr::EqualizerMgr(QObject *parent)
     : QObject(parent)
 {
-    m_settings = phoenixPlayerLib->settings ();//Settings::instance ();
-
-    reload ();
+    m_internal = SingletonObjectFactory::instance()->eqMgrInternal();
+    connect(m_internal.data(), &EqualizerMgrInternal::changed,
+            this, &EqualizerMgr::changed);
 }
 
-EqualizerMgr *EqualizerMgr::createInstance()
-{
-    return new EqualizerMgr();
-}
-
-EqualizerMgr *EqualizerMgr::instance()
-{
-     return Singleton<EqualizerMgr>::instance(EqualizerMgr::createInstance);
-}
 
 EqualizerMgr::~EqualizerMgr()
 {
-    save ();
+    m_internal->disconnect(this);
+}
+
+void EqualizerMgr::setGlobalEnabled(bool enable)
+{
+    SingletonObjectFactory::instance()->eqMgrInternal()->setEnabled(enable);
+}
+
+bool EqualizerMgr::globalEnabled()
+{
+    return SingletonObjectFactory::instance()->eqMgrInternal()->enabled();
 }
 
 void EqualizerMgr::setEnabled(bool enable)
 {
-    m_enabled = enable;
+    m_internal->setEnabled(enable);
 }
 
 bool EqualizerMgr::enabled() const
 {
-    return m_enabled;
+    return m_internal->enabled();
 }
 
 void EqualizerMgr::setPreamp(double preamp)
 {
-    m_preamp = preamp;
+    m_internal->setPreamp(preamp);
 }
 
-double EqualizerMgr::preamp()
+double EqualizerMgr::preamp() const
 {
-    return m_preamp;
+    return m_internal->preamp();
 }
 
 void EqualizerMgr::setValue(int band, double value)
 {
-    m_values.insert (band, value);
+    m_internal->setValue(band, value);
 }
 
-double EqualizerMgr::value(int band)
+double EqualizerMgr::value(int band) const
 {
-    return m_values.value (band);
+    return m_internal->value(band);
 }
 
 int EqualizerMgr::bands() const
 {
-    return BANDS_NUM;
+    return m_internal->bands();
 }
 
 void EqualizerMgr::reload()
 {
-    for (int i=0; i<BANDS_NUM; ++i) {
-        m_values.insert (i, m_settings->getConfig (QString("Equalizer/Band_%1").arg (i), QString::number (0)).toDouble ());
-    }
-    m_preamp = m_settings->getConfig ("Equalizer/Preamp", QString::number (0).toDouble ());
-    m_enabled = m_settings->getConfig ("Equalizer/Enable", false);
-    emit changed();
+    m_internal->reload();
 }
 
 void EqualizerMgr::sync()
 {
-    save ();
-    reload ();
-}
-
-void EqualizerMgr::save()
-{
-    QHash<int, double>::const_iterator i = m_values.constBegin ();
-    while (i != m_values.constEnd ()) {
-        m_settings->setConfig (QString("Equalizer/Band_%1").arg (i.key ()),
-                               QString::number (i.value ()));
-        ++i;
-    }
-    m_settings->setConfig ("Equalizer/Preamp", QString::number (m_preamp));
-    m_settings->setConfig ("Equalizer/Enable", m_enabled);
+    m_internal->sync();
 }
 
 } //PhoenixPlayer

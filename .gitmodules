@@ -1,14 +1,10 @@
-[submodule "ThirdParty/CuteLogger/CuteLogger"]
-	path = ThirdParty/CuteLogger/CuteLogger
+[submodule "libPhoenixPlayer/Core/3rdparty/CuteLogger"]
+	path = libPhoenixPlayer/Core/3rdparty/CuteLogger
 	url = https://github.com/SunRain/CuteLogger.git
-	branch = master
-[submodule "ThirdParty/Taglib/src"]
-	path = ThirdParty/Taglib/src
+[submodule "libPhoenixPlayer/Core/3rdparty/QCurl"]
+	path = libPhoenixPlayer/Core/3rdparty/QCurl
+	url = https://github.com/SunRain/QCurl.git
+[submodule "Plugins/DataProvider/TagParserPro/Taglib/src"]
+	path = Plugins/DataProvider/TagParserPro/Taglib/src
 	url = https://github.com/SunRain/taglib.git
 	branch = phoenixplayer
-[submodule "ThirdParty/QCurl"]
-	path = ThirdParty/QCurl
-	url = https://github.com/SunRain/QCurl.git
-[submodule "Plugins/MusicLibrary/SpectrumGeneratorFFmpeg/qt-spek"]
-	path = Plugins/MusicLibrary/SpectrumGeneratorFFmpeg/qt-spek
-	url = https://github.com/SunRain/qt-spek.git

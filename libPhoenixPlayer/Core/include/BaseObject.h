@@ -26,21 +26,21 @@ class BaseObject : public QObject
 {
     Q_OBJECT
 public:
-    BaseObject(QObject *parent = 0) : QObject(parent) {}
+    BaseObject(QObject *parent = Q_NULLPTR) : QObject(parent) {}
     virtual ~BaseObject() {}
 
-    QString enumToStr(const QString &enumName, int enumValue) {
-        int index  = metaObject ()->indexOfEnumerator (enumName.toLocal8Bit ());
-        QMetaEnum m = metaObject ()->enumerator (index);
-        return m.valueToKey (enumValue);
+    QString enumToStr(const QString &enumName, int enumValue) const {
+        int index  = metaObject()->indexOfEnumerator(enumName.toUtf8());
+        QMetaEnum m = metaObject()->enumerator(index);
+        return m.valueToKey(enumValue);
     }
     QStringList propertyList() const {
         QStringList list;
-        int count = metaObject ()->propertyCount ();
+        int count = metaObject()->propertyCount();
         for (int i=0; i<count; ++i) {
-            QMetaProperty prop = metaObject ()->property (i);
-            const char *name = prop.name ();
-            list.append (name);
+            QMetaProperty prop = metaObject()->property(i);
+            const char *name = prop.name();
+            list.append(name);
         }
         return list;
     }

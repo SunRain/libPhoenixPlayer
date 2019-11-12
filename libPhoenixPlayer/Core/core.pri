@@ -1,15 +1,31 @@
 
-INCLUDEPATH += $$PWD/include
-DEPENDPATH += $$PWD/include
+include(3rdparty/QCurl/src/qcurl.pri)
+
+INCLUDEPATH += \
+    $$PWD \
+    $$PWD/include \
+    $$PWD/3rdparty/CuteLogger/include
+
+DEPENDPATH += \
+    $$PWD \
+    $$PWD/include \
+    $$PWD/3rdparty/CuteLogger/include
 
 QT += network core
-##Enable c++11
-#CONFIG += c++11
 
 HEADERS += \
+    $$PWD/3rdparty/CuteLogger/include/AbstractAppender.h \
+    $$PWD/3rdparty/CuteLogger/include/AbstractStringAppender.h \
+    $$PWD/3rdparty/CuteLogger/include/ConsoleAppender.h \
+    $$PWD/3rdparty/CuteLogger/include/CuteLogger_global.h \
+    $$PWD/3rdparty/CuteLogger/include/FileAppender.h \
+    $$PWD/3rdparty/CuteLogger/include/Logger.h \
+    $$PWD/3rdparty/CuteLogger/include/RollingFileAppender.h \
+    $$PWD/include/BasePlugin.h \
     $$PWD/include/DataProvider/IDataProvider.h \
-    $$PWD/include/MusicLibrary/ISpectrumGenerator.h \
-    $$PWD/include/MusicLibrary/SpectrumGeneratorHost.h \
+    $$PWD/include/DataProvider/TinySpectrumDataProvider.h \
+    $$PWD/include/LogManager.h \
+    $$PWD/include/DataProvider/ISpectrumGenerator.h \
     $$PWD/include/PPCommon.h \
     $$PWD/include/PPUtility.h \
     $$PWD/include/PlayerCore/PlayListMeta.h \
@@ -18,49 +34,34 @@ HEADERS += \
     $$PWD/include/PlayerCore/RecentPlayedQueue.h \
     $$PWD/include/PluginLoader.h \
     $$PWD/include/PPSettings.h \
+    $$PWD/include/PluginMgr.h \
     $$PWD/include/SingletonPointer_p.h \
     $$PWD/include/SingletonPointer_sf.h \
     $$PWD/include/SingletonPointer.h \
     $$PWD/include/Backend/BaseMediaObject.h \
     $$PWD/include/Backend/IPlayBackend.h \
     $$PWD/include/MetadataLookup/BaseNetworkLookup.h \
-    $$PWD/include/MetadataLookup/IMetadataLookup.h \
+    $$PWD/include/DataProvider/IMetadataLookup.h \
     $$PWD/include/MetadataLookup/LyricsParser.h \
-    $$PWD/include/MusicLibrary/IMusicTagParser.h \
+    $$PWD/include/DataProvider/IMusicTagParser.h \
     $$PWD/include/MusicLibrary/IMusicLibraryDAO.h \
     $$PWD/include/MusicLibrary/MusicLibraryManager.h \
     $$PWD/include/PlayerCore/PlayerCore.h \
-#    $$PWD/MusicLibrary/DiskLookup.h \
-#    $$PWD/MusicLibrary/TagParserManager.h \
-    $$PWD/include/PluginHost.h \
     $$PWD/include/AddonMgr.h \
-#    $$PWD/MusicLibrary/AsyncDiskLookup.h \
-#    $$PWD/MusicLibrary/AsyncTagParserMgrWrapper.h \
     $$PWD/include/MusicLibrary/LocalMusicScanner.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgr.h \
     $$PWD/include/MetadataLookup/MetadataLookupMgrWrapper.h \
-#    $$PWD/include/Decoder/IDecoder.h \
-#    $$PWD/include/Buffer.h \
-#    $$PWD/include/AudioParameters.h \
-#    $$PWD/include/OutPut/IOutPut.h \
     $$PWD/include/Backend/BaseVolume.h \
     $$PWD/include/PlayerCore/VolumeControl.h \
-#    $$PWD/include/Backend/SoftVolume.h \
     $$PWD/include/BaseObject.h \
     $$PWD/include/Backend/BaseVisual.h \
     $$PWD/include/EqualizerMgr.h \
-    $$PWD/PlayerCore/PlayListFormat.h \
+    $$PWD/include/PlayerCore/PlayListFormat.h \
     $$PWD/PlayerCore/M3uPlayListFormat.h \
-#    $$PWD/include/PlayerCore/PlayQueueMgr.h \
-    $$PWD/include/Backend/BackendHost.h \
-#    $$PWD/include/Decoder/DecoderHost.h \
-    $$PWD/include/MetadataLookup/MetadataLookupHost.h \
-    $$PWD/include/MusicLibrary/MusicLibraryDAOHost.h \
-    $$PWD/include/MusicLibrary/MusicTagParserHost.h \
-#    $$PWD/include/OutPut/OutPutHost.h \
     $$PWD/MusicLibrary/LocalMusicScannerThread.h \
     $$PWD/include/AudioMetaObject.h \
-#    $$PWD/include/channelmap.h \
+    $$PWD/include/UserInterface/IUserInterface.h \
+    $$PWD/include/UserInterface/UserInterfaceMgr.h \
     $$PWD/include/libphoenixplayer_global.h \
     $$PWD/AudioMetaObject_p.h \
     $$PWD/include/LibPhoenixPlayerMain.h \
@@ -68,20 +69,38 @@ HEADERS += \
     $$PWD/include/AudioMetaGroupObject.h \
     $$PWD/include/PlayerCore/MusicQueue.h \
     $$PWD/include/MediaResource.h \
-    $$PWD/include/LocalFileMediaResource.h
+    $$PWD/include/LocalFileMediaResource.h \
+    $$PWD/private/EqualizerMgrInternal.h \
+    $$PWD/private/InternalSingletonObjectBase.h \
+    $$PWD/private/LocalMusicScannerInternal.h \
+    $$PWD/private/MusicLibraryManagerInternal.h \
+    $$PWD/private/PPSettingsInternal.h \
+    $$PWD/private/PlayListMetaMgrInternal.h \
+    $$PWD/private/PlayerCoreInternal.h \
+    $$PWD/private/PluginMgrInternal.h \
+    $$PWD/private/SingletonObjectFactory.h \
+    $$PWD/private/UserInterfaceMgrInternal.h \
+    $$PWD/private/VolumeControlInternal.h
 
 SOURCES += \
+    $$PWD/3rdparty/CuteLogger/src/AbstractAppender.cpp \
+    $$PWD/3rdparty/CuteLogger/src/AbstractStringAppender.cpp \
+    $$PWD/3rdparty/CuteLogger/src/ConsoleAppender.cpp \
+    $$PWD/3rdparty/CuteLogger/src/FileAppender.cpp \
+    $$PWD/3rdparty/CuteLogger/src/Logger.cpp \
+    $$PWD/3rdparty/CuteLogger/src/RollingFileAppender.cpp \
+    $$PWD/BasePlugin.cpp \
     $$PWD/DataProvider/IDataProvider.cpp \
+    $$PWD/DataProvider/TinySpectrumDataProvider.cpp \
+    $$PWD/LogManager.cpp \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
-    $$PWD/MetadataLookup/IMetadataLookup.cpp \
+    $$PWD/DataProvider/IMetadataLookup.cpp \
     $$PWD/MetadataLookup/LyricsParser.cpp \
-#    $$PWD/MusicLibrary/DiskLookup.cpp \
     $$PWD/MusicLibrary/MusicLibraryManager.cpp \
-#    $$PWD/MusicLibrary/TagParserManager.cpp \
     $$PWD/PPSettings.cpp \
     $$PWD/PPUtility.cpp \
     $$PWD/PlayerCore/PlayListMeta.cpp \
-    $$PWD/PlayerCore/PlayListMetatMgr.cpp \
+    $$PWD/PlayerCore/PlayListMetaMgr.cpp \
     $$PWD/PlayerCore/PlayListObject.cpp \
     $$PWD/PlayerCore/PlayerCore.cpp \
     $$PWD/BaseMediaObject.cpp \
@@ -90,22 +109,17 @@ SOURCES += \
     $$PWD/PluginLoader.cpp \
     $$PWD/PluginHost.cpp \
     $$PWD/AddonMgr.cpp \
-#    $$PWD/MusicLibrary/AsyncDiskLookup.cpp \
-#    $$PWD/MusicLibrary/AsyncTagParserMgrWrapper.cpp \
     $$PWD/MusicLibrary/LocalMusicScanner.cpp \
     $$PWD/MetadataLookup/MetadataLookupMgr.cpp \
     $$PWD/MetadataLookup/MetadataLookupMgrWrapper.cpp \
-#    $$PWD/Decoder/IDecoder.cpp \
-#    $$PWD/AudioParameters.cpp \
-#    $$PWD/OutPut/IOutPut.cpp \
-#    $$PWD/channelmap.cpp \
+    $$PWD/PluginMgr.cpp \
+    $$PWD/UserInterface/IUserInterface.cpp \
+    $$PWD/UserInterface/UserInterfaceMgr.cpp \
     $$PWD/include/Backend/BaseVolume.cpp \
     $$PWD/PlayerCore/VolumeControl.cpp \
-#    $$PWD/include/Backend/SoftVolume.cpp \
     $$PWD/EqualizerMgr.cpp \
     $$PWD/PlayerCore/PlayListFormat.cpp \
     $$PWD/PlayerCore/M3uPlayListFormat.cpp \
-#    $$PWD/PlayerCore/PlayQueueMgr.cpp \
     $$PWD/MusicLibrary/LocalMusicScannerThread.cpp \
     $$PWD/AudioMetaObject.cpp \
     $$PWD/AudioMetaObject_p.cpp \
@@ -114,7 +128,18 @@ SOURCES += \
     $$PWD/AudioMetaGroupObject.cpp \
     $$PWD/PlayerCore/MusicQueue.cpp \
     $$PWD/MediaResource.cpp \
-    $$PWD/LocalFileMediaResource.cpp
+    $$PWD/LocalFileMediaResource.cpp \
+    $$PWD/private/EqualizerMgrInternal.cpp \
+    $$PWD/private/InternalSingletonObjectBase.cpp \
+    $$PWD/private/LocalMusicScannerInternal.cpp \
+    $$PWD/private/MusicLibraryManagerInternal.cpp \
+    $$PWD/private/PPSettingsInternal.cpp \
+    $$PWD/private/PlayListMetaMgrInternal.cpp \
+    $$PWD/private/PlayerCoreInternal.cpp \
+    $$PWD/private/PluginMgrInternal.cpp \
+    $$PWD/private/SingletonObjectFactory.cpp \
+    $$PWD/private/UserInterfaceMgrInternal.cpp \
+    $$PWD/private/VolumeControlInternal.cpp
 
 
 

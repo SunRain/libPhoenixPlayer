@@ -1,471 +1,264 @@
-#include <QSettings>
-#include <QDir>
-#include <QStandardPaths>
-#include <QCoreApplication>
-#include <QStringList>
-#include <QDebug>
-#include <QMutex>
-#include <QScopedPointer>
-
 #include "PPSettings.h"
+
+#include <QSettings>
+//#include <QDir>
+//#include <QStandardPaths>
+//#include <QCoreApplication>
+//#include <QStringList>
+//#include <QDebug>
+//#include <QMutex>
+//#include <QScopedPointer>
+
 #include "AudioMetaObject.h"
+#include "private/SingletonObjectFactory.h"
+#include "private/PPSettingsInternal.h"
 
 namespace PhoenixPlayer {
 
-const static char *KEY_MUSIC_DIR = "MusicDir";
-const static char *KEY_LAST_SONG = "LastPlayedSongHash";
-const static char *KEY_PLAY_LIST = "CurrentPlayList";
-const static char *KEY_PLUGIN_PLAY_BACKEND = "Plugin/CurrentPlayBackend";
-const static char *KEY_PLUGIN_MUSIC_LIBRARY_DAO = "Plugin/CurrentMusicLibraryDAO";
-const static char *KEY_PLUGIN_OUTPUT = "Plugin/CurrentOutPut";
-const static char *KEY_PLUGIN_DECODERS = "Plugin/Decoders";
-const static char *KEY_PLUGIN_METADATA_LOOKUP = "Plugin/MetadataLookup";
-const static char *KEY_PLUGIN_TAG_PARSER = "Plugin/TagPaser";
-const static char *KEY_PLUGIN_SPECTTUM_PARSER = "Plugin/SpectrumGenerator";
-const static char *KEY_MUSIC_IMAGE_CACHE = "MusicImageCache";
-const static char *KEY_TRACE_LOG = "TraceLog";
-const static char *KEY_AUTO_FETCH_METADATA = "autoFetchMetaData";
-const static char *KEY_FETCH_METADATA_MOBILE_NETWORK = "fetchMetaDataMobileNetwork";
-const static char *KEY_PLAY_LIST_DIR = "PlayListDir";
 
-PPSettings::PPSettings(QObject *parent) : QObject(parent)
+PPSettings::PPSettings(QObject *parent)
+    : QObject(parent)
 {
-    m_settings = new QSettings(qApp->organizationName(), qApp->applicationName(), parent);
+    m_internal = SingletonObjectFactory::instance()->settingsInternal();
 
+    connect(m_internal.data(), &PPSettingsInternal::autoFetchMetaDataChanged,
+            this, &PPSettings::autoFetchMetaDataChanged, Qt::QueuedConnection);
 
-    QString dataPath = QStandardPaths::writableLocation (QStandardPaths::DataLocation);
-#ifdef UBUNTU_TOUCH
-    mDefaultMusicDir = QString("%1/Music").arg (dataPath);
-#else
-    m_defaultMusicDir = QString("%1/%2").arg (QDir::homePath ())
-            .arg(QStandardPaths::displayName (QStandardPaths::MusicLocation));
-#endif
-    m_defaultMusicImageDir = QString("%1/Images").arg (dataPath);
-//            .arg (QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
+    connect(m_internal.data(), &PPSettingsInternal::fetchMetaDataMobileNetworkChanged,
+            this, &PPSettings::fetchMetaDataMobileNetworkChanged, Qt::QueuedConnection);
 
-    m_defaultPlayListDir = QString("%1/PlayList").arg (dataPath);
-    m_playListDBPath = m_defaultPlayListDir;
+    connect(m_internal.data(), &PPSettingsInternal::playListDirChanged,
+            this, &PPSettings::playListDirChanged, Qt::QueuedConnection);
 
-    QDir dir(m_defaultMusicImageDir);
-    if (!dir.exists ()) {
-        if (!dir.mkpath (m_defaultMusicImageDir)) {
-            qDebug()<<Q_FUNC_INFO<<"make music image dir fail";
-        }
-    }
-    dir.setPath(m_defaultMusicDir);
-    if (!dir.exists()) {
-        if (!dir.mkpath(m_defaultMusicDir))
-            qDebug()<<Q_FUNC_INFO<<"make music default dir fail";
-    }
+    connect(m_internal.data(), &PPSettingsInternal::curPlayBackendChanged,
+            this, &PPSettings::curPlayBackendChanged, Qt::QueuedConnection);
 
-    dir.setPath (m_defaultPlayListDir);
-    if (!dir.exists ()) {
-        if (!dir.mkpath (m_defaultPlayListDir))
-            qDebug()<<Q_FUNC_INFO<<"make playlist dir fail";
-    }
+    connect(m_internal.data(), &PPSettingsInternal::curMusicLibraryDAOChanged,
+            this, &PPSettings::curMusicLibraryDAOChanged, Qt::QueuedConnection);
 
-    m_autoFetchMetadata = false;
-    m_fetchMetaDataMobileNetwork = false;
-    checkInit ();
+    connect(m_internal.data(), &PPSettingsInternal::curOutPutChanged,
+            this, &PPSettings::curOutPutChanged, Qt::QueuedConnection);
+
 }
-
 
 PPSettings::~PPSettings()
 {
-    m_settings->sync ();
-    m_settings->deleteLater ();
+    m_internal->disconnect(this);
 }
 
-QSettings *PPSettings::settings() const
+QSettings *PPSettings::internalSettings() const
 {
-    return m_settings;
+    return m_internal->internalSettings();
 }
 
 bool PPSettings::setMusicDir(const QStringList &dirList)
 {
-    if (dirList.isEmpty ())
-        return false;
-
-    QStringList list = dirList;
-    list.removeDuplicates ();
-//    QString last = list.takeLast ();
-//    //Only one dir in the list
-//    if (list.isEmpty ()) {
-//        m_settings->setValue (KEY_MUSIC_DIR, last);
-//        return true;
-//    }
-//    QString tmp;
-//    foreach (QString s, list) {
-//        tmp += QString("%1||").arg (s);
-//    }
-//    m_settings->setValue (KEY_MUSIC_DIR, QString("%1%2").arg (tmp).arg (last));
-//    m_settings->sync ();
-    m_settings->setValue (KEY_MUSIC_DIR, list.join ("||"));
-    m_settings->sync ();
-    return true;
+    return m_internal->setMusicDir(dirList);
 }
 
 bool PPSettings::addMusicDir(const QString &dir)
 {
-    if (dir.isEmpty ())
-        return false;
-    QStringList list = musicDirs ();
-    if (list.contains (dir))
-        return false;
-    list.append (dir);
-    return setMusicDir (list);
+    return m_internal->addMusicDir(dir);
 }
-
 
 bool PPSettings::deleteMusicDir(const QString &target)
 {
-    if (target.isEmpty ())
-        return false;
-    QStringList list = musicDirs ();
-    if (list.contains (target))
-        list.removeOne (target);
-    return setMusicDir (list);
-
+    return m_internal->deleteMusicDir(target);
 }
 
 const QString PPSettings::defaultMusicDir() const
 {
-    return m_defaultMusicDir;
+    return m_internal->defaultMusicDir();
 }
 
 QStringList PPSettings::musicDirs()
 {
-    return m_settings->value (KEY_MUSIC_DIR, QString()).toString ().split ("||");
+    return m_internal->musicDirs();
 }
-
 
 void PPSettings::setLastPlayedSong(const AudioMetaObject &data)
 {
-//    if (!data)
-//        return;
-//    QStringList list;
-//    list.append ((*data)->path ());
-//    list.append ((*data)->name ());
-//    list.append (QString::number ((*data)->size ()));
-//    m_settings->setValue (KEY_LAST_SONG, list.join ("||"));
-//    m_settings->sync ();
-    if (data.isEmpty ())
-        return;
-    m_settings->setValue (KEY_LAST_SONG, data.toJson ());
-    m_settings->sync ();
+    m_internal->setLastPlayedSong(data);
 }
 
 AudioMetaObject PPSettings::lastPlayedSong() const
 {
-//    AudioMetaObject *data = nullptr;
-//    QStringList list = m_settings->value (KEY_LAST_SONG, QString()).toString ().split ("||");
-//    if (!list.isEmpty () && list.size () == 3)
-//        data = new AudioMetaObject(list.at (0), list.at (1), list.at (2).toInt ());
-//    return data;
-    QByteArray ba = m_settings->value (KEY_LAST_SONG).toByteArray ();
-    if (ba.isEmpty () || ba.isNull ())
-        return AudioMetaObject();
-    return AudioMetaObject::fromJson (ba);
+    return m_internal->lastPlayedSong();
 }
 
 bool PPSettings::setCurrentPlayListHash(const QString &hash)
 {
-    m_settings->setValue (KEY_PLAY_LIST, hash);
-    m_settings->sync ();
-    return true;
+    return m_internal->setCurrentPlayListHash(hash);
 }
 
 QString PPSettings::getPlayListHash()
 {
-    return m_settings->value (KEY_PLAY_LIST, QString()).toString ();
+    return m_internal->getPlayListHash();
 }
-
-//bool Settings::setPlayBackend(const QString &backendName)
-//{
-//    m_settings->setValue (KEY_PLAY_BACKEND, backendName);
-//    m_settings->sync ();
-//    return true;
-//}
-
-//QString Settings::getCurrentPlayBackend()
-//{
-//    return m_settings->value (KEY_PLAY_BACKEND, QString()).toString ();
-//}
 
 bool PPSettings::setMusicImageCachePath(const QString &absolutePath)
 {
-    QDir dir(absolutePath);
-    if (!dir.exists ())
-        dir.mkpath (absolutePath);
-
-    m_settings->setValue (KEY_MUSIC_IMAGE_CACHE, absolutePath);
-    m_settings->sync ();
-    return true;
+    return m_internal->setMusicImageCachePath(absolutePath);
 }
 
 QString PPSettings::musicImageCachePath()
 {
-    return m_settings->value (KEY_MUSIC_IMAGE_CACHE, m_defaultMusicImageDir).toString ();
+    return m_internal->musicImageCachePath();
 }
 
-bool PPSettings::setTraceLog(bool trace)
+void PPSettings::setTraceLog(bool trace)
 {
-    m_settings->setValue(KEY_TRACE_LOG, trace);
-    m_settings->sync();
-    return true;
+    m_internal->setTraceLog(trace);
 }
 
 bool PPSettings::traceLog()
 {
-    return m_settings->value(KEY_TRACE_LOG, false).toBool();
+    return m_internal->traceLog();
 }
 
 void PPSettings::setConfig(const QString &key, const QString &value)
 {
-    if (key.isEmpty () || value.isEmpty ())
-        return;
-    m_settings->setValue (key, value);
-    m_settings->sync ();
+    m_internal->setConfig(key, value);
 }
 
 QString PPSettings::getConfig(const QString &key, const QString &defaultValue)
 {
-    if (key.isEmpty ())
-        return defaultValue;
-    return m_settings->value (key, defaultValue).toString ();
+    return m_internal->getConfig(key, defaultValue);
 }
 
 void PPSettings::setConfig(const QString &key, bool value)
 {
-    if (key.isEmpty ())
-        return;
-    m_settings->setValue (key, value);
-    m_settings->sync ();
+    m_internal->setConfig(key, value);
 }
 
 bool PPSettings::getConfig(const QString &key, bool defaultValue)
 {
-    if (key.isEmpty ())
-        return defaultValue;
-    return m_settings->value (key, defaultValue).toBool ();
+    return m_internal->getConfig(key, defaultValue);
 }
 
 bool PPSettings::autoFetchMetaData()
 {
-    return m_autoFetchMetadata;
+    return m_internal->autoFetchMetaData();
 }
 
 void PPSettings::setAutoFetchMetaData(bool autoFetch)
 {
-    if (m_autoFetchMetadata == autoFetch)
-        return;
-    m_autoFetchMetadata = autoFetch;
-    m_settings->setValue (KEY_AUTO_FETCH_METADATA, autoFetch);
-    m_settings->sync ();
-    emit autoFetchMetaDataChanged ();
+    m_internal->setAutoFetchMetaData(autoFetch);
 }
 
 bool PPSettings::fetchMetadataOnMobileNetwork()
 {
-    return m_fetchMetaDataMobileNetwork;
+    return m_internal->fetchMetadataOnMobileNetwork();
 }
 
 void PPSettings::setFetchMetadataOnMobileNetwork(bool fetch)
 {
-    if (m_fetchMetaDataMobileNetwork == fetch)
-        return;
-    m_fetchMetaDataMobileNetwork = fetch;
-    m_settings->setValue (KEY_FETCH_METADATA_MOBILE_NETWORK, m_fetchMetaDataMobileNetwork);
-    m_settings->sync ();
-    emit fetchMetaDataMobileNetworkChanged ();
+    m_internal->setFetchMetadataOnMobileNetwork(fetch);
 }
 
 QString PPSettings::playListDir() const
 {
-    return m_settings->value (KEY_PLAY_LIST_DIR, m_defaultPlayListDir).toString ();
+    return m_internal->playListDir();
 }
 
 QString PPSettings::playListDBPath() const
 {
-    return m_playListDBPath;
+    return m_internal->playListDBPath();
 }
 
 QString PPSettings::curPlayBackend() const
 {
-    return m_settings->value (KEY_PLUGIN_PLAY_BACKEND, QString()).toString ();
+    return m_internal->curPlayBackend();
 }
 
 QString PPSettings::curMusicLibraryDAO() const
 {
-    return m_settings->value (KEY_PLUGIN_MUSIC_LIBRARY_DAO, QString()).toString ();
+    return m_internal->curMusicLibraryDAO();
 }
 
 QString PPSettings::curOutPut() const
 {
-    return m_settings->value (KEY_PLUGIN_OUTPUT, QString()).toString ();
+    return m_internal->curOutPut();
 }
 
 void PPSettings::enableDecoder(const QString &libraryFile)
 {
-    QStringList decoders = decoderLibraries ();
-    if (!decoders.contains (libraryFile)) {
-        decoders.append (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_DECODERS, decoders.join ("||"));
-        m_settings->sync ();
-    }
+    m_internal->enableDecoder(libraryFile);
 }
 
 void PPSettings::disableDecoder(const QString &libraryFile)
 {
-    QStringList decoders = decoderLibraries ();
-    if (decoders.contains (libraryFile)) {
-        decoders.removeOne (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_DECODERS, decoders.join ("||"));
-        m_settings->sync ();
-    }
+    m_internal->disableDecoder(libraryFile);
 }
 
 QStringList PPSettings::decoderLibraries() const
 {
-    QString v = m_settings->value (KEY_PLUGIN_DECODERS, QString()).toString ();
-    if (v.isEmpty ())
-        return QStringList();
-    else
-        return v.split ("||");
+    return  m_internal->decoderLibraries();
 }
 
 void PPSettings::enableMetadataLookup(const QString &libraryFile)
 {
-    QStringList list = metadataLookupLibraries ();
-    if (!list.contains (libraryFile)) {
-        list.append (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_METADATA_LOOKUP, list.join ("||"));
-        m_settings->sync ();
-    }
+    m_internal->enableMetadataLookup(libraryFile);
 }
 
 void PPSettings::disableMetadataLookup(const QString &libraryFile)
 {
-    QStringList list = metadataLookupLibraries ();
-    if (list.contains (libraryFile)) {
-        list.removeOne (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_METADATA_LOOKUP, list.join ("||"));
-        m_settings->sync ();
-    }
+    m_internal->disableMetadataLookup(libraryFile);
 }
 
 QStringList PPSettings::metadataLookupLibraries() const
 {
-    QString v = m_settings->value (KEY_PLUGIN_METADATA_LOOKUP, QString()).toString ();
-    if (v.isEmpty ())
-        return QStringList();
-    else
-        return v.split ("||");
+    return m_internal->metadataLookupLibraries();
 }
 
 void PPSettings::enableTagParser(const QString &libraryFile)
 {
-    QStringList list = tagParserLibraries ();
-    if (!list.contains (libraryFile)) {
-        list.append (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_TAG_PARSER, list.join ("||"));
-        m_settings->sync ();
-    }
+    m_internal->enableTagParser(libraryFile);
 }
 
 void PPSettings::disableTagParser(const QString &libraryFile)
 {
-    QStringList list = tagParserLibraries ();
-    if (list.contains (libraryFile)) {
-        list.removeOne (libraryFile);
-        m_settings->setValue (KEY_PLUGIN_TAG_PARSER, list.join ("||"));
-        m_settings->sync ();
-    }
+    m_internal->disableTagParser(libraryFile);
 }
 
 QStringList PPSettings::tagParserLibraries() const
 {
-    QString v = m_settings->value (KEY_PLUGIN_TAG_PARSER, QString()).toString ();
-    if (v.isEmpty ())
-        return QStringList();
-    else
-        return v.split ("||");
+    return m_internal->tagParserLibraries();
 }
 
 void PPSettings::enableSpectrumGenerator(const QString &lib)
 {
-    QStringList list = spectrumGeneratorLibraries();
-    if (!list.contains(lib)) {
-        list.append(lib);
-        m_settings->setValue(KEY_PLUGIN_SPECTTUM_PARSER, list.join("||"));
-        m_settings->sync();
-    }
+    m_internal->enableSpectrumGenerator(lib);
 }
 
 void PPSettings::disableSpectrumGenerator(const QString &lib)
 {
-    QStringList list = spectrumGeneratorLibraries();
-    if (list.contains(lib)) {
-        list.removeOne(lib);
-        m_settings->setValue(KEY_PLUGIN_SPECTTUM_PARSER, list.join("||"));
-        m_settings->sync();
-    }
+    m_internal->disableSpectrumGenerator(lib);
 }
 
 QStringList PPSettings::spectrumGeneratorLibraries() const
 {
-    QString str = m_settings->value(KEY_PLUGIN_SPECTTUM_PARSER, QString()).toString();
-    if (str.isEmpty()) {
-        return QStringList();
-    }
-    return str.split("||");
+    return m_internal->spectrumGeneratorLibraries();
 }
 
 void PPSettings::setPlayListDir(QString arg)
 {
-    if (m_defaultPlayListDir != arg) {
-        m_defaultPlayListDir = arg;
-        m_settings->setValue (KEY_PLAY_LIST_DIR, m_defaultPlayListDir);
-        m_settings->sync ();
-        emit playListDirChanged(arg);
-    }
+    m_internal->setPlayListDir(arg);
 }
 
 void PPSettings::setCurPlayBackend(const QString &libraryFile)
 {
-    if (curPlayBackend () != libraryFile) {
-        m_settings->setValue (KEY_PLUGIN_PLAY_BACKEND, libraryFile);
-        m_settings->sync ();
-        emit curPlayBackendChanged(libraryFile);
-    }
+    m_internal->setCurPlayBackend(libraryFile);
 }
 
 void PPSettings::setCurMusicLibraryDAO(const QString &libraryFile)
 {
-    if (curMusicLibraryDAO () != libraryFile) {
-        m_settings->setValue (KEY_PLUGIN_MUSIC_LIBRARY_DAO, libraryFile);
-        m_settings->sync ();
-        emit curMusicLibraryDAOChanged(libraryFile);
-    }
+    m_internal->setCurMusicLibraryDAO(libraryFile);
 }
 
 void PPSettings::setCurOutPut(const QString &libraryFile)
 {
-    if (curOutPut ()!= libraryFile) {
-        m_settings->setValue (KEY_PLUGIN_OUTPUT, libraryFile);
-        m_settings->sync ();
-        emit curOutPutChanged(libraryFile);
-    }
+    m_internal->setCurOutPut(libraryFile);
 }
 
-void PPSettings::checkInit()
-{
-    QStringList list = m_settings->allKeys ();
-    if (!list.contains (KEY_MUSIC_DIR))
-        m_settings->setValue (KEY_MUSIC_DIR, m_defaultMusicDir);
-    if (!list.contains (KEY_MUSIC_IMAGE_CACHE))
-        m_settings->setValue (KEY_MUSIC_IMAGE_CACHE, m_defaultMusicImageDir);
-
-    m_settings->sync ();
-}
 } //PhoenixPlayer

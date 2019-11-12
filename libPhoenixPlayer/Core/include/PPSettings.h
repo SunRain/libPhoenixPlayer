@@ -3,16 +3,21 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QSharedPointer>
 
 #include "libphoenixplayer_global.h"
-#include "SingletonPointer.h"
 
 class QSettings;
 
 namespace PhoenixPlayer {
 
 class AudioMetaObject;
+class PPSettingsInternal;
 
+/*!
+ * \brief The PPSettings class
+ * Internal Singleton class
+ */
 class PPSettings : public QObject
 {
     Q_OBJECT
@@ -24,14 +29,11 @@ class PPSettings : public QObject
     Q_PROPERTY(QString curMusicLibraryDAO READ curMusicLibraryDAO WRITE setCurMusicLibraryDAO NOTIFY curMusicLibraryDAOChanged)
     Q_PROPERTY(QString curOutPut READ curOutPut WRITE setCurOutPut NOTIFY curOutPutChanged)
 
-    friend class LibPhoenixPlayer;
-    friend class PlayListMetaMgr;
-protected:
-    explicit PPSettings(QObject *parent = Q_NULLPTR);
 public:
+    explicit PPSettings(QObject *parent = Q_NULLPTR);
     virtual ~PPSettings();
 
-    QSettings *settings() const;
+    QSettings *internalSettings() const;
 
     Q_INVOKABLE bool setMusicDir(const QStringList &dirList);
     Q_INVOKABLE bool addMusicDir(const QString &dir);
@@ -39,22 +41,16 @@ public:
     Q_INVOKABLE const QString defaultMusicDir() const;
     Q_INVOKABLE QStringList musicDirs();
 
-//    Q_INVOKABLE bool setLastPlayedSong(const QString &songHash);
-//    Q_INVOKABLE QString lastPlayedSong();
     void setLastPlayedSong(const AudioMetaObject &data);
     AudioMetaObject lastPlayedSong() const;
 
     Q_INVOKABLE bool setCurrentPlayListHash(const QString &hash);
     Q_INVOKABLE QString getPlayListHash();
 
-//    Q_INVOKABLE bool setPlayBackend(const QString &backendName);
-//    Q_INVOKABLE QString getCurrentPlayBackend();
-
-
     Q_INVOKABLE bool setMusicImageCachePath(const QString &absolutePath);
     Q_INVOKABLE QString musicImageCachePath();
 
-    Q_INVOKABLE bool setTraceLog(bool trace);
+    Q_INVOKABLE void setTraceLog(bool trace);
     Q_INVOKABLE bool traceLog();
 
     Q_INVOKABLE void setConfig(const QString &key, const QString &value);
@@ -110,10 +106,10 @@ public:
 signals:
     void autoFetchMetaDataChanged();
     void fetchMetaDataMobileNetworkChanged();
-    void playListDirChanged(QString arg);
-    void curPlayBackendChanged(QString libraryFile);
-    void curMusicLibraryDAOChanged(QString libraryFile);
-    void curOutPutChanged(QString libraryFile);
+    void playListDirChanged(const QString &arg);
+    void curPlayBackendChanged(const QString &libraryFile);
+    void curMusicLibraryDAOChanged(const QString &libraryFile);
+    void curOutPutChanged(const QString &libraryFile);
 
 public slots:
     void setPlayListDir(QString arg);
@@ -122,19 +118,8 @@ public slots:
     void setCurOutPut(const QString &libraryFile);
 
 private:
-    void checkInit();
-private:
-    QSettings *m_settings;
+    QSharedPointer<PPSettingsInternal> m_internal;
 
-    QString m_defaultMusicDir;
-    QString m_defaultMusicImageDir;
-    bool m_autoFetchMetadata;
-    bool m_fetchMetaDataMobileNetwork;
-    QString m_defaultPlayListDir;
-    QString m_playListDBPath;
-    //    QString m_curPlayBackend;
-    //    QString m_curMusicLibraryDAO;
-//    QString m_curOutPut;
 };
 } //PhoenixPlayer
 #endif // PPSETTINGS_H

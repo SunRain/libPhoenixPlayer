@@ -95,6 +95,15 @@ bool PhoenixPlayBackend::event(QEvent *e)
     return true;
 }
 
+PluginProperty PhoenixPlayBackend::property() const
+{
+    return PluginProperty("PhoenixBackend",
+                          "1.0",
+                          "PlayBackend based on ffmpeg and Qt QAudioOutput",
+                          false,
+                          false);
+}
+
 PPCommon::PlayBackendState PhoenixPlayBackend::playBackendState()
 {
 //    PlayBackendStopped = 0x0,  //播放停止
@@ -173,7 +182,7 @@ void PhoenixPlayBackend::initialize()
     m_outputThread->setMuted(m_muted);
 
     if (!m_volumeControl) {
-        m_volumeControl = phoenixPlayerLib->volumeCtrl();
+        m_volumeControl = new VolumeControl(this);
 
         connect (m_volumeControl, &VolumeControl::mutedChanged,
                 [&] (bool muted) {
@@ -191,15 +200,15 @@ BaseVolume *PhoenixPlayBackend::baseVolume()
     return m_volume;
 }
 
-bool PhoenixPlayBackend::useExternalDecoder()
-{
-    return false;
-}
+//bool PhoenixPlayBackend::useExternalDecoder()
+//{
+//    return false;
+//}
 
-bool PhoenixPlayBackend::useExternalOutPut()
-{
-    return false;
-}
+//bool PhoenixPlayBackend::useExternalOutPut()
+//{
+//    return false;
+//}
 
 qint64 PhoenixPlayBackend::durationInMS()
 {

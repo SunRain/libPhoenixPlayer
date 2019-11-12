@@ -4,16 +4,15 @@
 #include <QObject>
 
 #include "libphoenixplayer_global.h"
-#include "PlayListFormat.h"
+#include "PlayerCore/PlayListFormat.h"
 
 namespace PhoenixPlayer {
-//class AudioMetaObject;
 
 class M3uPlayListFormat : public PlayListFormat
 {
     Q_OBJECT
 public:
-    explicit M3uPlayListFormat(QObject *parent = 0);
+    explicit M3uPlayListFormat(QObject *parent = Q_NULLPTR);
 
     // PlayList interface
 public:

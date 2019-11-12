@@ -14,8 +14,8 @@
 #include "PPSettings.h"
 #include "AudioMetaObject.h"
 
-#include "PlayListFormat.h"
-#include "M3uPlayListFormat.h"
+#include "PlayerCore/PlayListFormat.h"
+#include "PlayerCore/M3uPlayListFormat.h"
 
 namespace PhoenixPlayer {
 

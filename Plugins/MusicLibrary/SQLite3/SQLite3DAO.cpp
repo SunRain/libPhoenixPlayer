@@ -839,6 +839,16 @@ bool SQLite3DAO::openDataBase()
     return initDataBase ();
 }
 
+PluginProperty SQLite3DAO::property() const
+{
+    return PluginProperty("SQLite3_backend",
+                          "1.0",
+                          "MusicLibraryDAO based on SQLite3",
+                          false,
+                          false);
+
+}
+
 //bool SQLite3DAO::deleteMetaData(PhoenixPlayer::SongMetaData *metaData)
 //{
 //    if (metaData == nullptr) {

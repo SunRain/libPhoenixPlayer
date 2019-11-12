@@ -1,10 +1,10 @@
+#include "DataProvider/IMusicTagParser.h"
 
-#include "MusicLibrary/IMusicTagParser.h"
 namespace PhoenixPlayer {
-namespace MusicLibrary {
+namespace DataProvider {
 
 IMusicTagParser::IMusicTagParser(QObject *parent)
-    : QObject(parent)
+    : IDataProvider(parent)
 {
     //http://baike.baidu.com/link?url=9Cxo9Vr6DKfnZVaZ993mkxSHmOpzgP82KNFyN0H5HTWJmZKjLUn7iinTSYi4StKLHX80ZHeuN4s3AwlHg2PSh_
     m_list<<"Blues"

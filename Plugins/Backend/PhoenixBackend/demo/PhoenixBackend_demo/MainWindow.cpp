@@ -15,6 +15,7 @@
 #include "PhoenixPlayBackend.h"
 #include "MediaResource.h"
 #include "Backend/BaseVolume.h"
+#include "PluginMgr.h"
 
 //#include "BufferQueue.h"
 //#include "StateHandler.h"
@@ -30,8 +31,8 @@ using namespace PhoenixPlayer::PlayBackend::PhoenixBackend;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-
-    m_playBackend = new PhoenixPlayBackend(this);
+    PluginMgr mgr;
+    m_playBackend =  qobject_cast<IPlayBackend*>(PluginMgr::instance(mgr.usedPlayBackend())); //new PhoenixPlayBackend(this);
     m_playBackend->initialize();
 
     MediaResource *res = MediaResource::create("/home/wangguojian/音乐/aaaa.mp3");

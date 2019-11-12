@@ -20,11 +20,15 @@ class SQLite3DAO : public IMusicLibraryDAO
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "PhoenixPlayer.MusicLibraryDAO.SQLite3DAO" FILE "playlistsqlite3plugin.json")
-    Q_INTERFACES(PhoenixPlayer::MusicLibrary::IMusicLibraryDAO)
+    Q_INTERFACES(PhoenixPlayer::BasePlugin)
 public:
     explicit SQLite3DAO(QObject *parent = Q_NULLPTR);
     virtual ~SQLite3DAO() Q_DECL_OVERRIDE;
     bool openDataBase();
+
+    // BasePlugin interface
+public:
+    PluginProperty property() const Q_DECL_OVERRIDE;
 
     // IMusicLibraryDAO interface
 public:
