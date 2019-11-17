@@ -1,3 +1,10 @@
+
+CONFIG += link_pkgconfig
+
+QMAKE_CXXFLAGS += -std=c++11
+
+PKGCONFIG += libavcodec libavformat libavutil
+
 OTHER_FILES += \
     $$PWD/SpectrumGeneratorFFmpeg.json
 

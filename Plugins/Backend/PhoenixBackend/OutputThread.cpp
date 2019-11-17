@@ -166,11 +166,11 @@ void OutputThread::stop()
     m_recycler->cond()->wakeAll();
 
     int loopOut = 3;
-    do {
+    while (this->isRunning() && loopOut > 0) {
         qDebug()<<Q_FUNC_INFO<<"thread is runnging, loop remain "<<loopOut;
         loopOut--;
         qApp->processEvents();
-    } while(this->isRunning() && loopOut > 0);
+    }
 
     if (this->isRunning()) {
         qDebug()<<Q_FUNC_INFO<<"wait thread";

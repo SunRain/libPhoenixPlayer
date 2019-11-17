@@ -66,11 +66,11 @@ public:
 private:
     AudioError          error;
 
-    AVFormatContext     *m_formatContext;
-    AVCodecContext      *m_codecContext;
-    AVFrame             *m_frame;
+    AVFormatContext     *m_formatContext    = Q_NULLPTR;
+    AVCodecContext      *m_codecContext     = Q_NULLPTR;
+    AVFrame             *m_frame            = Q_NULLPTR;
 
-    float               *m_bufferPtr;
+    float               *m_bufferPtr        = Q_NULLPTR;
 
     int                 m_audioStream;
     int                 m_requestChannel;

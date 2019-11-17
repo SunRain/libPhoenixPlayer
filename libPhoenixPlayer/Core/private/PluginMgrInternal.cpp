@@ -82,9 +82,9 @@ void PluginMgrInternal::reload()
     }
 
     foreach (const auto &data, m_metaList) {
-        LOG_DEBUG()<<" ------------- wirte "<<data.libraryFile
+        LOG_DEBUG()<<"write "<<data.libraryFile
                  <<" type "<<data.type
-                 <<" enalbe "<<data.enabled;
+                 <<" enable "<<data.enabled;
         write(data);
     }
 
@@ -257,7 +257,10 @@ void PluginMgrInternal::initPluginByPath(const QString &path)
         QPluginLoader loader(absFilePath);
         QObject *obj = loader.instance();
         if (!obj) {
-            LOG_DEBUG()<<"Library file ["<<absFilePath<<"] failed to instance, is it a plugin?";
+            LOG_DEBUG()<<"Library file ["<<absFilePath
+                      <<"] failed to instance with error ["
+                     <<loader.errorString()
+                    <<"]";
             continue;
         }
         BasePlugin *base = qobject_cast<BasePlugin*>(obj);

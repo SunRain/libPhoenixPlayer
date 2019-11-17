@@ -32,6 +32,7 @@ HEADERS += \
     $$PWD/Core/3rdparty/QCurl/src/QCNetworkRequest.h \
     $$PWD/Core/3rdparty/QCurl/src/QCNetworkSyncReply.h \
     $$PWD/Core/3rdparty/QCurl/src/QCUtility.h \
+    $$PWD/Core/include/ApplicationManager.h \
     $$PWD/Core/include/AudioMetaGroupObject.h \
     $$PWD/Core/include/AudioMetaObject.h \
     $$PWD/Core/include/AudioMetaObjectKeys.h \

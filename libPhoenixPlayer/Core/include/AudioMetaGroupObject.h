@@ -99,4 +99,7 @@ private:
 };
 
 } //PhoenixPlayer
+
+Q_DECLARE_METATYPE(PhoenixPlayer::AudioMetaGroupObject)
+
 #endif // AUDIOMETAGROUPOBJECT_H

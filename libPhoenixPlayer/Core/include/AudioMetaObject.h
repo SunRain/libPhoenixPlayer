@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QDate>
 #include <QUrl>
+#include <QMetaType>
 
 #include "libphoenixplayer_global.h"
 #include "PPCommon.h"
@@ -357,4 +358,12 @@ private:
     QSharedDataPointer<AudioMetaObjectPriv> d;
 };
 } //PhoenixPlayer
+
+Q_DECLARE_METATYPE(PhoenixPlayer::LastPlayedMeta)
+Q_DECLARE_METATYPE(PhoenixPlayer::AlbumMeta)
+Q_DECLARE_METATYPE(PhoenixPlayer::ArtistMeta)
+Q_DECLARE_METATYPE(PhoenixPlayer::CoverMeta)
+Q_DECLARE_METATYPE(PhoenixPlayer::TrackMeta)
+Q_DECLARE_METATYPE(PhoenixPlayer::AudioMetaObject)
+
 #endif // AUDIOMETAOBJECT_H

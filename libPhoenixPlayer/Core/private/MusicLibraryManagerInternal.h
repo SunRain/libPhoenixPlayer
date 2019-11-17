@@ -96,6 +96,8 @@ public:
 
     void setPlayedCount(const AudioMetaObject &obj, int count);
 
+    void saveToDB();
+
 signals:
     void libraryListSizeChanged();
 

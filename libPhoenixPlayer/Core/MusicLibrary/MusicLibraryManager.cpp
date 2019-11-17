@@ -36,7 +36,7 @@ MusicLibraryManager::~MusicLibraryManager()
 {
     qDebug()<<">>>>>>>> "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
 
-    saveToDB();
+//    saveToDB();
 
     m_internal->disconnect(this);
 
@@ -58,7 +58,7 @@ AudioMetaObject MusicLibraryManager::trackFromHash(const QString &hash) const
 
 bool MusicLibraryManager::empty() const
 {
-    return m_internal->trackList()->isEmpty ();
+    return m_internal->trackList()->isEmpty();
 }
 
 void MusicLibraryManager::deleteObject(const AudioMetaObject &obj, bool deleteFromLocalDisk)
@@ -278,31 +278,7 @@ QStringList MusicLibraryManager::trackHashListByLastPlayedTime(bool orderByDesc)
 
 void MusicLibraryManager::saveToDB()
 {
-    if (m_internal->daoValid()) {
-        m_internal->dao()->beginTransaction();
-        {
-            auto i = m_internal->playCntMap()->constBegin();
-            while (i != m_internal->playCntMap()->constEnd()) {
-                m_internal->dao()->setPlayedCount(i.key(), i.value());
-                ++i;
-            }
-        }
-        {
-            auto i = m_internal->likeMap()->constBegin();
-            while (i != m_internal->likeMap()->constEnd()) {
-                m_internal->dao()->setLike(i.key(), i.value());
-                ++i;
-            }
-        }
-        {
-            auto i = m_internal->lastPlayedMap()->constBegin();
-            while (i != m_internal->lastPlayedMap()->constEnd()) {
-                m_internal->dao()->setLastPlayedTime(i.value());
-                ++i;
-            }
-        }
-        m_internal->dao()->commitTransaction();
-    }
+    m_internal->saveToDB();
 }
 
 QList<QList<qreal> > MusicLibraryManager::loadSpectrumData(const AudioMetaObject &obj)

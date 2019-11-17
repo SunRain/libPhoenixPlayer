@@ -25,6 +25,7 @@ MusicLibraryManagerInternal::MusicLibraryManagerInternal(QSharedPointer<PPSettin
 
 MusicLibraryManagerInternal::~MusicLibraryManagerInternal()
 {
+    this->saveToDB();
     if (m_dao && PluginMetaData::isValid(m_usedPluginMeta)) {
         PluginMgr::unload(m_usedPluginMeta);
     }
@@ -85,6 +86,67 @@ void MusicLibraryManagerInternal::setPlayedCount(const QString &hash, int count)
 void MusicLibraryManagerInternal::setPlayedCount(const AudioMetaObject &obj, int count)
 {
     setPlayedCount(obj.hash(), count);
+}
+
+void MusicLibraryManagerInternal::saveToDB()
+{
+//    if (PluginMetaData::isValid(m_usedPluginMeta)) {
+//        QObject *obj = PluginMgr::instance(m_usedPluginMeta);
+//        if (obj) {
+//            MusicLibrary::IMusicLibraryDAO *dd = qobject_cast<MusicLibrary::IMusicLibraryDAO*>(obj);
+//            if (dd) {
+//                dd->beginTransaction();
+//                {
+//                    auto i = m_playCntMap.constBegin();
+//                    while (i != m_playCntMap.constEnd()) {
+//                        dd->setPlayedCount(i.key(), i.value());
+//                        ++i;
+//                    }
+//                }
+//                {
+//                    auto i = m_likeMap.constBegin();
+//                    while (i != m_likeMap.constEnd()) {
+//                        dd->setLike(i.key(), i.value());
+//                        ++i;
+//                    }
+//                }
+//                {
+//                    auto i = m_lastPlayedMap.constBegin();
+//                    while (i != m_lastPlayedMap.constEnd()) {
+//                        dd->setLastPlayedTime(i.value());
+//                        ++i;
+//                    }
+//                }
+//                dd->commitTransaction();
+//                PluginMgr::unload(m_usedPluginMeta);
+//            }
+//        }
+//    }
+    if (m_dao) {
+        m_dao->beginTransaction();
+        {
+            auto i = m_playCntMap.constBegin();
+            while (i != m_playCntMap.constEnd()) {
+                m_dao->setPlayedCount(i.key(), i.value());
+                ++i;
+            }
+        }
+        {
+            auto i = m_likeMap.constBegin();
+            while (i != m_likeMap.constEnd()) {
+                m_dao->setLike(i.key(), i.value());
+                ++i;
+            }
+        }
+        {
+            auto i = m_lastPlayedMap.constBegin();
+            while (i != m_lastPlayedMap.constEnd()) {
+                m_dao->setLastPlayedTime(i.value());
+                ++i;
+            }
+        }
+        m_dao->commitTransaction();
+    }
 }
 
 void MusicLibraryManagerInternal::initDAO()

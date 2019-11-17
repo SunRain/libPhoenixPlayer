@@ -1,5 +1,25 @@
 
+QT += network core widgets
+
 include(3rdparty/QCurl/src/qcurl.pri)
+
+win32 {
+    COPY = copy /y
+} else {
+    COPY = cp -f
+}
+
+CHK_DTK_PLATFORM = \
+    pkg-config --exists dtkwidget && \
+    if [ $? -eq 0 ]; then \
+        $$COPY $$PWD/BuildConfigDeepin.enable $$PWD/BuildConfigDeepin.pri; \
+    else \
+        $$COPY $$PWD/BuildConfigDeepin.disable $$PWD/BuildConfigDeepin.pri; \
+    fi;
+
+system($$CHK_DTK_PLATFORM)
+
+include($$PWD/BuildConfigDeepin.pri)
 
 INCLUDEPATH += \
     $$PWD \
@@ -11,7 +31,9 @@ DEPENDPATH += \
     $$PWD/include \
     $$PWD/3rdparty/CuteLogger/include
 
-QT += network core
+DISTFILES += \
+    $$PWD/BuildConfigDeepin.disable \
+    $$PWD/BuildConfigDeepin.enable
 
 HEADERS += \
     $$PWD/3rdparty/CuteLogger/include/AbstractAppender.h \
@@ -21,6 +43,7 @@ HEADERS += \
     $$PWD/3rdparty/CuteLogger/include/FileAppender.h \
     $$PWD/3rdparty/CuteLogger/include/Logger.h \
     $$PWD/3rdparty/CuteLogger/include/RollingFileAppender.h \
+    $$PWD/include/ApplicationManager.h \
     $$PWD/include/BasePlugin.h \
     $$PWD/include/DataProvider/IDataProvider.h \
     $$PWD/include/DataProvider/TinySpectrumDataProvider.h \
@@ -89,6 +112,7 @@ SOURCES += \
     $$PWD/3rdparty/CuteLogger/src/FileAppender.cpp \
     $$PWD/3rdparty/CuteLogger/src/Logger.cpp \
     $$PWD/3rdparty/CuteLogger/src/RollingFileAppender.cpp \
+    $$PWD/ApplicationManager.cpp \
     $$PWD/BasePlugin.cpp \
     $$PWD/DataProvider/IDataProvider.cpp \
     $$PWD/DataProvider/TinySpectrumDataProvider.cpp \
