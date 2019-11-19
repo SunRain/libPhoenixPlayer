@@ -21,11 +21,11 @@ ApplicationManager::ApplicationManager(int &argc, char **argv[])
 #ifdef PLATFORM_DEEPIN
     DApplication::loadDXcbPlugin();
 #endif
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
 
 #ifdef PLATFORM_DEEPIN
         m_app = new DApplication(argc, *argv);
         qobject_cast<DApplication*>(m_app)->loadTranslator();
-        qobject_cast<DApplication*>(m_app)->setAttribute(Qt::AA_EnableHighDpiScaling, true);
         qobject_cast<DApplication*>(m_app)->setTheme("light");
     #ifdef Q_OS_UNIX
         qobject_cast<DApplication*>(m_app)->setOOMScoreAdj(500);
