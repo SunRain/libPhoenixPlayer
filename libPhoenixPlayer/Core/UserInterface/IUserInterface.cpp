@@ -51,7 +51,7 @@ QStringList IUserInterface::convertToSnapshots(const QByteArray &extraData)
     return list;
 }
 
-QByteArray IUserInterface::convertToExtraData(const QStringList &snapshots)
+QVariant IUserInterface::convertToExtraData(const QStringList &snapshots)
 {
     if (snapshots.isEmpty()) {
         return QByteArray();

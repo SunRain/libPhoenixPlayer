@@ -24,7 +24,7 @@ public:
     BasePlugin::PluginType  type            = BasePlugin::PluginType::PluginTypeUndefined;
     QString                 libraryFile;    // abs path of library file
     QString                 checksum;       // checksum to identify if plugin library file changed
-    QByteArray              extraData;      // any extra data you want to insert into
+    QVariant                extraData;      // any extra data you want to insert into
     PluginProperty          property;
 
     /*!

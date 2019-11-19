@@ -34,7 +34,7 @@ public:
 
     static QStringList convertToSnapshots(const QByteArray &extraData);
 
-    static QByteArray convertToExtraData(const QStringList &snapshots);
+    static QVariant convertToExtraData(const QStringList &snapshots);
 
     // BasePlugin interface
 public:

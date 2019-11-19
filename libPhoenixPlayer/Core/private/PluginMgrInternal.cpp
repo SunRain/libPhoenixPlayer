@@ -247,7 +247,7 @@ void PluginMgrInternal::initPluginByPath(const QString &path)
                 meta.type = (BasePlugin::PluginType)innerSettins->value(GENERATE_KEY(group, KEY_TYPE)).toInt();
                 meta.libraryFile = absFilePath;
                 meta.checksum = checksum;
-                meta.extraData = innerSettins->value(GENERATE_KEY(group, KEY_EXTRA_DATA)).toByteArray();
+                meta.extraData = innerSettins->value(GENERATE_KEY(group, KEY_EXTRA_DATA));
                 if (meta.type == BasePlugin::PluginDataProvider) {
                     m_dataProviderList.append(meta);
                 }
@@ -287,8 +287,8 @@ void PluginMgrInternal::initPluginByPath(const QString &path)
                 loader.unload();
                 continue;
             }
-            int idx = dt->metaObject()->indexOfEnumerator("SupportedType");
-            if (idx <= 0) {
+            const int idx = dt->metaObject()->indexOfEnumerator("SupportedTypes");
+            if (idx == -1) {
                  LOG_WARNING()<<"Invalid of indexOfEnumerator";
             } else {
                 QMetaEnum m = dt->metaObject()->enumerator(idx);
@@ -302,7 +302,7 @@ void PluginMgrInternal::initPluginByPath(const QString &path)
                     }
                 }
                 LOG_DEBUG()<<"Final hints "<<hints;
-                meta.extraData = QByteArray::number(hints);
+                meta.extraData = hints;
             }
             m_dataProviderList.append(meta);
         } else if (meta.type == BasePlugin::PluginUserInterface) {
