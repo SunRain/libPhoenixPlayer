@@ -1,12 +1,11 @@
 #include "MusicLibrary/LocalMusicScanner.h"
 
-#include <QDebug>
+#include "Logger.h"
+#include "MusicLibrary/IMusicLibraryDAO.h"
 
 #include "private/SingletonObjectFactory.h"
 #include "private/LocalMusicScannerInternal.h"
 #include "private/PluginMgrInternal.h"
-
-#include "MusicLibrary/IMusicLibraryDAO.h"
 
 namespace PhoenixPlayer {
 namespace MusicLibrary {
@@ -23,20 +22,22 @@ LocalMusicScanner::LocalMusicScanner(QObject *parent)
 
     connect(m_fileListScanner.data(), &FileListScanner::findFiles,
             this, [&](const QStringList &list) {
-                m_audioParser->addFiles(list);
-                if (!m_audioParser->isRunning()) {
-                    m_audioParser->start(QThread::HighPriority);
-                }
-                emit newFileListAdded(list);
-            });
+        qDebug()<<"Find files "<<list;
+        m_audioParser->addFiles(list);
+        if (!m_audioParser->isRunning()) {
+            m_audioParser->start(QThread::HighPriority);
+        }
+        emit newFileListAdded(list);
+    });
 
     connect(m_audioParser.data(), &AudioParser::parsingFile,
             this, &LocalMusicScanner::parsingFile, Qt::QueuedConnection);
 
     connect(m_audioParser.data(), &AudioParser::parsed,
             this, [&](const AudioMetaObject &obj) {
-                m_audioList.append(obj);
-        }, Qt::QueuedConnection);
+        qDebug()<<"parsed file "<<obj.toJson();
+        m_audioList.append(obj);
+    }, Qt::QueuedConnection);
 
     connect(m_audioParser.data(), &AudioParser::parsingFinished,
             this, &LocalMusicScanner::insert, Qt::QueuedConnection);
@@ -94,7 +95,6 @@ void LocalMusicScanner::insert()
             }
             dao->commitTransaction();
             PluginMgr::unload(md);
-//            emit searchingFinished();
         }
     }
      emit searchingFinished();

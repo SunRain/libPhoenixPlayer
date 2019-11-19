@@ -67,11 +67,11 @@ void FileListScanner::run()
 
         QDir dir(path);
         if (!dir.exists()) {
-            qDebug()<<Q_FUNC_INFO<<"dir "<<path<<" not exists";
+            qDebug()<<"dir "<<path<<" not exists";
             continue;
         }
         QString canonicalPath = dir.canonicalPath();
-        qDebug()<<Q_FUNC_INFO<<" path ["<<path<<"] canonicalPath "<<canonicalPath;
+        qDebug()<<"path ["<<path<<"] canonicalPath "<<canonicalPath;
         if (canonicalPath.isEmpty()) {
             continue;
         }
@@ -153,7 +153,6 @@ void AudioParser::run()
         emit parsingFile(file, size);
 
         AudioMetaObject obj(file);
-
         foreach (const auto &it, m_pluginMgrInner->pluginMetaDataList(DataProvider::IDataProvider::SupportMusicTagParser)) {
             if (!it.enabled) {
                 continue;
@@ -161,11 +160,17 @@ void AudioParser::run()
             DataProvider::IMusicTagParser *parser =
                 qobject_cast<DataProvider::IMusicTagParser*>(PluginMgr::instance(it));
             if (!parser) {
+                qDebug()<<"Disable invalid plugin "<<it.libraryFile;
                 PluginMetaData data = it;
                 data.enabled = false;
                 m_pluginMgrInner->update(data);
                 continue;
             }
+            qDebug()<<"try to use parser ["
+                   <<parser->property().name
+                  <<"] to parse file ["
+                 <<obj.uri()<<"]";
+
             if (parser->parserTag(&obj)) {
                 break;
             }
@@ -189,7 +194,7 @@ LocalMusicScannerInternal::LocalMusicScannerInternal(QSharedPointer<PluginMgrInt
     m_pluginMgrInner(pluginMgr)
 {
     m_fileListScanner = QSharedPointer<FileListScanner>(new FileListScanner, [](FileListScanner *obj) {
-        qDebug()<<Q_FUNC_INFO<<"--- Delete FileListScanner";
+        qDebug()<<"--- Delete FileListScanner";
         if (obj->isRunning()) {
             obj->stop();
             obj->quit();
@@ -199,7 +204,7 @@ LocalMusicScannerInternal::LocalMusicScannerInternal(QSharedPointer<PluginMgrInt
     });
 
     m_audioParser = QSharedPointer<AudioParser>(new AudioParser(pluginMgr), [](AudioParser *obj) {
-        qDebug()<<Q_FUNC_INFO<<"--- Delete AudioParser";
+        qDebug()<<"--- Delete AudioParser";
         if (obj->isRunning()) {
             obj->stop();
             obj->quit();

@@ -1,9 +1,9 @@
+#include "TagParserPro.h"
 
 #include <QFile>
 #include <QImage>
-#include <QDebug>
 
-#include "TagParserPro.h"
+#include "Logger.h"
 #include "AudioMetaObject.h"
 #include "PPSettings.h"
 #include "SingletonPointer.h"
@@ -22,7 +22,7 @@ TagParserPro::TagParserPro(QObject *parent)
 
 TagParserPro::~TagParserPro()
 {
-    qDebug()<<Q_FUNC_INFO;
+    qDebug()<<"============";
     if (m_tagRef) {
         delete m_tagRef;
         m_tagRef = Q_NULLPTR;

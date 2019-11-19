@@ -87,17 +87,17 @@ SQLite3DAO::SQLite3DAO(QObject *parent)
 
 SQLite3DAO::~SQLite3DAO()
 {
-    qDebug()<<Q_FUNC_INFO;
+    qDebug()<<"--------------";
 
     if (m_database.isOpen ()) {
         m_database.close ();
     }
-    qDebug()<<"after "<<Q_FUNC_INFO;
+    qDebug()<<"------------ after ";
 }
 
 bool SQLite3DAO::initDataBase()
 {
-    qDebug()<<">>>>>>>>>>>>>> "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<";
+    qDebug()<<">>>>>>>>>>>>>> ------------ <<<<<<<<<<<<<<<<<<<<<<";
 
     QString dbPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     QString dbFile = QString("%1/%2").arg(dbPath).arg(DATABASE_NAME);
@@ -158,7 +158,7 @@ bool SQLite3DAO::initDataBase()
         str += "id integer primary key, ";
 
         QJsonObject obj = AudioMetaObject().toObject ();
-        foreach (QString key, obj.keys ()) {
+        foreach (const QString &key, obj.keys ()) {
             str += QString("%1 TEXT, ").arg (key);
         }
         str = str.simplified ();
@@ -166,12 +166,12 @@ bool SQLite3DAO::initDataBase()
         str += ")";
 
 
-        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        qDebug()<<"run sql "<<str;
         /*
          * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
          */
         if (!q.exec (str)) {
-            qDebug()<<Q_FUNC_INFO<<QString("Create library tab error [ %1 ]").arg (q.lastError ().text ());
+            qDebug()<<QString("Create library tab error [ %1 ]").arg (q.lastError ().text ());
             m_database.removeDatabase (DATABASE_NAME);
             return false;
         }
@@ -187,12 +187,12 @@ bool SQLite3DAO::initDataBase()
                 .arg(UTILITY_KEY_CNT)
                 .arg(UTILITY_KEY_LIKE);
 
-        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        qDebug()<<"run sql "<<str;
         /*
          * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
          */
         if (!q.exec (str)) {
-            qDebug()<<Q_FUNC_INFO<<QString("Create utility tab error [ %1 ]").arg (q.lastError ().text ());
+            qDebug()<<QString("Create utility tab error [ %1 ]").arg (q.lastError ().text ());
             m_database.removeDatabase (DATABASE_NAME);
             return false;
         }
@@ -212,12 +212,12 @@ bool SQLite3DAO::initDataBase()
         str += QString("%1 INTEGER").arg(LP_KEY_TIMESTAMP);
         str += ")";
 
-        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        qDebug()<<"run sql "<<str;
         /*
          * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
          */
         if (!q.exec (str)) {
-            qDebug()<<Q_FUNC_INFO<<QString("Create utility tab error [ %1 ]").arg (q.lastError ().text ());
+            qDebug()<<QString("Create utility tab error [ %1 ]").arg (q.lastError ().text ());
             m_database.removeDatabase (DATABASE_NAME);
             return false;
         }
@@ -228,12 +228,12 @@ bool SQLite3DAO::initDataBase()
                 .arg(TABLE_SPECTRUM)
                 .arg(SP_KEY_HASH)
                 .arg(SP_KEY_DATA);
-        qDebug()<<Q_FUNC_INFO<<"run sql "<<str;
+        qDebug()<<"run sql "<<str;
         /*
          * 如果数据表创建出现问题,直接删除整个数据库,防止和后面的检测冲突
          */
         if (!q.exec (str)) {
-            qDebug()<<Q_FUNC_INFO<<QString("Create spectrum tab error [ %1 ]").arg(q.lastError().text());
+            qDebug()<<QString("Create spectrum tab error [ %1 ]").arg(q.lastError().text());
             m_database.removeDatabase(DATABASE_NAME);
             return false;
         }
@@ -243,9 +243,9 @@ bool SQLite3DAO::initDataBase()
 
 bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
 {
-    qDebug()<<Q_FUNC_INFO<<"===================";
-    if (obj.isEmpty ()) {
-        qDebug()<<Q_FUNC_INFO<<"AudioMetaObject empty!!";
+    qDebug()<<"===================";
+    if (obj.isHashEmpty()) {
+        qDebug()<<"AudioMetaObject empty!!";
         return false;
     }
     if (!checkDatabase ())
@@ -253,14 +253,14 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
 
     if (skipDuplicates) {
         if (m_objMap.contains(obj.hash())) {
-            qDebug()<<Q_FUNC_INFO<<"skipDuplicates "<<obj.uri ();
+            qDebug()<<"skipDuplicates "<<obj.uri ();
             return true;
         }
     }
     QString column, value;
     QJsonObject json = obj.toObject ();
     QStringList keyList = json.keys ();
-    foreach (QString key, keyList) {
+    foreach (const QString &key, keyList) {
         column += QString("%1, ").arg (key);
         value += QString(":%1, ").arg (key);//QString("\"%1\", ").arg (json.value (key).toString ());
     }
@@ -279,12 +279,12 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
 
     QSqlQuery q;
     if (!q.prepare (str)) {
-        qDebug()<<Q_FUNC_INFO<<QString("prepare sql query [%1] error [%2]").arg (str).arg (q.lastError ().text ());
+        qDebug()<<QString("prepare sql query [%1] error [%2]").arg (str).arg (q.lastError ().text ());
         return false;
     }
-    foreach (QString str, keyList) {
+    foreach (const QString &str, keyList) {
         QString key = QString(":%1").arg (str);
-        /*QString*/QJsonValue value = json.value (str);
+        QJsonValue value = json.value (str);
         qDebug()<<"bindvalues key="<<key<<"value="<<value;
         if (value.isObject ()) {
             QJsonObject o = value.toObject ();
@@ -300,14 +300,14 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
         emit metaDataInserted(obj.hash());
         return true;
     }
-    qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
+    qDebug()<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
     return false;
 }
 
 bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
 {
-    if (obj.isEmpty ()) {
-        qDebug()<<Q_FUNC_INFO<<"AudioMetaObject is empty";
+    if (obj.isHashEmpty()) {
+        qDebug()<<"AudioMetaObject is empty";
         return false;
     }
     if (!checkDatabase ())
@@ -316,7 +316,7 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
     QString column;
     QJsonObject json = obj.toObject ();
     QStringList keyList;
-    foreach (QString key, json.keys ()) {
+    foreach (const QString &key, json.keys ()) {
         QString v = json.value (key).toString ();
         if (v.isEmpty () && skipEmptyValue)
             continue;
@@ -338,10 +338,10 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
 
     QSqlQuery q;
     if (!q.prepare (str)) {
-        qDebug()<<Q_FUNC_INFO<<QString("prepare sql query [%1] error [%2]").arg (str).arg (q.lastError ().text ());
+        qDebug()<<QString("prepare sql query [%1] error [%2]").arg (str).arg (q.lastError ().text ());
         return false;
     }
-    foreach (QString str, keyList) {
+    foreach (const QString &str, keyList) {
         QString key = QString(":%1").arg (str);
         QString value = json.value (str).toString ();
         qDebug()<<QString("bindvalues key=[%1], value=[%2]").arg (key).arg (value);
@@ -352,7 +352,7 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
         m_objMap.insert(obj.hash(), obj);
         return true;
     }
-    qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
+    qDebug()<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
     return false;
 }
 
@@ -375,7 +375,7 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
 
 bool SQLite3DAO::deleteMetaData(const AudioMetaObject &obj)
 {
-    if (obj.isEmpty ())
+    if (obj.isHashEmpty())
         return false;
     return deleteByHash (obj.hash ());
 }
@@ -386,7 +386,7 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
         return false;
 
     if (hash.isEmpty ()) {
-        qDebug()<<Q_FUNC_INFO<<"hash is empty";
+        qDebug()<<"hash is empty";
         return false;
     }
 
@@ -401,14 +401,14 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
         emit metaDataDeleted (hash);
         return true;
     }
-    qDebug()<<Q_FUNC_INFO<<"deleteMetaData error "<<q.lastError ().text ();
+    qDebug()<<"deleteMetaData error "<<q.lastError ().text ();
     return false;
 }
 
 AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
 {
     if (hash.isEmpty ()) {
-        qDebug()<<Q_FUNC_INFO<<"Invalid hash";
+        qDebug()<<"Invalid hash";
         return AudioMetaObject();
     }
     if (m_objMap.contains(hash)) {
@@ -433,7 +433,7 @@ AudioMetaObject SQLite3DAO::trackFromHash(const QString &hash) const
         QJsonDocument doc(json);
         return AudioMetaObject::fromJson(doc.toJson());
     }
-    qDebug()<<Q_FUNC_INFO<<"Current hash ["<<hash<<"] not found in database";
+    qDebug()<<"Current hash ["<<hash<<"] not found in database";
     return AudioMetaObject();
 }
 
@@ -444,7 +444,7 @@ QStringList SQLite3DAO::trackHashList() const
 
 bool SQLite3DAO::setLike(const QString &hash, bool like)
 {
-    if (/*m_likeMap.keys().contains(hash)*/m_utilityMap.contains(hash)) {
+    if (m_utilityMap.contains(hash)) {
         QString str = "update ";
         str += TABLE_UTILITY_TAG;
         str += " set ";
@@ -452,13 +452,12 @@ bool SQLite3DAO::setLike(const QString &hash, bool like)
         str += QString(" where %1 = '%2'").arg(AudioMetaObject::Object_Internal_Key_Name_Hash()).arg(hash);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-//            m_likeMap.insert(hash, like);
             InnerNode node = m_utilityMap.value(hash);
             node.d.data()->like = like;
             m_utilityMap.insert(hash, node);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     } else {
         QString str = "insert into ";
         str += TABLE_UTILITY_TAG;
@@ -470,27 +469,24 @@ bool SQLite3DAO::setLike(const QString &hash, bool like)
         str += QString("('%1', '%2', '%3' ) ").arg(hash).arg(0).arg(like);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-//            m_likeMap.insert(hash, like);
-//            m_playedCntMap.insert(hash, 0);
             InnerNode node;
             node.d.data()->like = like;
             m_utilityMap.insert(hash, node);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     }
     return false;
 }
 
 bool SQLite3DAO::isLike(const QString &hash) const
 {
-//    return m_likeMap.value(hash, false);
     return m_utilityMap.value(hash).d.data()->like;
 }
 
 bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
 {
-    if (/*m_playedCntMap.keys().contains(hash)*/m_utilityMap.contains(hash)) {
+    if (m_utilityMap.contains(hash)) {
         QString str = "update ";
         str += TABLE_UTILITY_TAG;
         str += " set ";
@@ -498,13 +494,12 @@ bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
         str += QString(" where %1 = '%2'").arg(AudioMetaObject::Object_Internal_Key_Name_Hash()).arg(hash);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-//            m_playedCntMap.insert(hash, count);
             InnerNode node = m_utilityMap.value(hash);
             node.d.data()->cnt = count;
             m_utilityMap.insert(hash, node);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     } else {
         QString str = "insert into ";
         str += TABLE_UTILITY_TAG;
@@ -516,21 +511,18 @@ bool SQLite3DAO::setPlayedCount(const QString &hash, int count)
         str += QString("('%1', '%2', '%3' ) ").arg(hash).arg(count).arg(false);
         QSqlQuery q(str, m_database);
         if (q.exec()) {
-//            m_likeMap.insert(hash, false);
-//            m_playedCntMap.insert(hash, count);
             InnerNode node;
             node.d.data()->cnt = count;
             m_utilityMap.insert(hash, node);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     }
     return false;
 }
 
 int SQLite3DAO::playedCount(const QString &hash) const
 {
-//    return m_playedCntMap.value(hash, 0);
     return m_utilityMap.value(hash).d.data()->cnt;
 }
 
@@ -549,10 +541,10 @@ bool SQLite3DAO::setLastPlayedTime(const QString &hash, qint64 secs)
             m_lastPlayedMap.insert(hash, obj);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     } else {
         AudioMetaObject obj = trackFromHash(hash);
-        if (obj.isEmpty()) {
+        if (obj.isHashEmpty()) {
             return false;
         }
         QString str = "insert into ";
@@ -577,7 +569,7 @@ bool SQLite3DAO::setLastPlayedTime(const QString &hash, qint64 secs)
             m_lastPlayedMap.insert(hash, meta);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     }
     return false;
 }
@@ -601,7 +593,7 @@ bool SQLite3DAO::setLastPlayedTime(const LastPlayedMeta &meta)
             m_lastPlayedMap.insert(hash, meta);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     } else {
         QString str = "insert into ";
         str += TABLE_LAST_PLAYED;
@@ -623,7 +615,7 @@ bool SQLite3DAO::setLastPlayedTime(const LastPlayedMeta &meta)
             m_lastPlayedMap.insert(hash, meta);
             return true;
         }
-        qDebug()<<Q_FUNC_INFO<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
+        qDebug()<<QString("run sql [%1] error [%2]").arg(str).arg(q.lastError().text());
     }
     return false;
 }
@@ -759,11 +751,11 @@ QStringList SQLite3DAO::trackHashListByLastPlayedTime(bool orderByDesc) const
 void SQLite3DAO::insertSpectrumData(const AudioMetaObject &obj, const QList<QList<qreal> > &list)
 {
     if (obj.isHashEmpty()) {
-        qWarning()<<Q_FUNC_INFO<<"Ignore insert empty hash object";
+        qWarning()<<"Ignore insert empty hash object";
         return;
     }
     if (!checkDatabase()) {
-        qWarning()<<Q_FUNC_INFO<<"Database not open !!";
+        qWarning()<<"Database not open !!";
     }
     const QString hash = obj.hash();
     QByteArray ba;
@@ -788,11 +780,11 @@ void SQLite3DAO::insertSpectrumData(const AudioMetaObject &obj, const QList<QLis
                 .arg(obj.hash());
         QSqlQuery q(m_database);
         if (!q.prepare(str)) {
-            qDebug()<<Q_FUNC_INFO<<" prepare sql "<<str<<" error "<<q.lastError().text();
+            qDebug()<<"prepare sql "<<str<<" error "<<q.lastError().text();
         }
         q.bindValue(":vaData", ba);
         if (!q.exec()) {
-            qDebug()<<Q_FUNC_INFO<<" run sql "<<str<<" error "<<q.lastError().text();
+            qDebug()<<"run sql "<<str<<" error "<<q.lastError().text();
         }
     } else {
         const QString str = QString("insert into %1 (%2, %3) values (:va1, :va2)")
@@ -805,7 +797,7 @@ void SQLite3DAO::insertSpectrumData(const AudioMetaObject &obj, const QList<QLis
         q.bindValue(":va1", obj.hash());
         q.bindValue(":va2", ba);
         if (!q.exec()) {
-            qDebug()<<Q_FUNC_INFO<<" run sql "<<str<<" error "<<q.lastError().text();
+            qDebug()<<"run sql "<<str<<" error "<<q.lastError().text();
         }
     }
 }
@@ -822,7 +814,7 @@ QList<QList<qreal> > SQLite3DAO::getSpectrumData(const AudioMetaObject &obj) con
             .arg(obj.hash());
     QSqlQuery q(str, m_database);
     if (!q.exec()) {
-        qDebug()<<Q_FUNC_INFO<<" run sql "<<str<<" error "<<q.lastError().text();
+        qDebug()<<"run sql "<<str<<" error "<<q.lastError().text();
     }
     while (q.next()) {
         QByteArray ba = q.value(SP_KEY_DATA).toByteArray();
@@ -931,7 +923,7 @@ PluginProperty SQLite3DAO::property() const
 bool SQLite3DAO::beginTransaction()
 {
 
-    qDebug()<<Q_FUNC_INFO<<"====";
+    qDebug()<<"===============";
     if (m_transaction) {
         qWarning()<<"Current in transaction state, will ignore this call";
         return true;
@@ -939,7 +931,7 @@ bool SQLite3DAO::beginTransaction()
     if (!checkDatabase ())
         return false;
 
-    qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<";
+    qDebug()<<">>>>>>>>>>>>>> SQLite3 <<<<<<<<<<<<<<<<<<<<<<";
 
     calcExistSongs();
     calcUtilityTable();
@@ -954,7 +946,7 @@ bool SQLite3DAO::commitTransaction()
     if (!checkDatabase ())
         return false;
 
-    qDebug()<<">>>>>>>>>>>>>> SQLite3 "<<Q_FUNC_INFO<<" <<<<<<<<<<<<<<<<<<<<<<";
+    qDebug()<<">>>>>>>>>>>>>> SQLite3  <<<<<<<<<<<<<<<<<<<<<<";
 
     if (m_database.commit ()) {
         calcExistSongs();
@@ -1349,7 +1341,7 @@ void SQLite3DAO::calcExistSongs()
         QJsonDocument doc(json);
         audio = AudioMetaObject::fromJson(doc.toJson());
         if (audio.hash() != hash) {
-            qWarning()<<Q_FUNC_INFO<<"bibibibibi, why hash not same!!!!!!";
+            qWarning()<<"bibibibibi, why hash not same!!!!!!";
         }
         m_objMap.insert(hash, audio);
     }
@@ -1357,19 +1349,12 @@ void SQLite3DAO::calcExistSongs()
 
 void SQLite3DAO::calcUtilityTable()
 {
-//    m_likeMap.clear();
-//    m_playedCntMap.clear();
     m_utilityMap.clear();
     if (!checkDatabase ())
         return;
     QString str = QString("select * from %1").arg(TABLE_UTILITY_TAG);
     QSqlQuery q(str, m_database);
     while (q.next ()) {
-//        const QString hash = q.value(AudioMetaObject::keyHash()).toString();
-//        const int cnt = q.value(UTILITY_KEY_CNT).toInt();
-//        const bool like = q.value(UTILITY_KEY_LIKE).toBool();
-//        m_playedCntMap.insert(hash, cnt);
-//        m_likeMap.insert(hash, like);
         InnerNode node;
         node.d.data()->hash = q.value(AudioMetaObject::Object_Internal_Key_Name_Hash()).toString();;
         node.d.data()->cnt = q.value(UTILITY_KEY_CNT).toInt();
@@ -1416,7 +1401,7 @@ inline bool SQLite3DAO::checkDatabase()
 {
     if (!m_database.isOpen ()) {
         if (!openDataBase ()) {
-            qDebug()<<">>> "<<Q_FUNC_INFO<<" <<< Open Database error";
+            qDebug()<<">>>>>>> Open Database error <<<<<<<<<<<<";
             return false;
         }
     }
