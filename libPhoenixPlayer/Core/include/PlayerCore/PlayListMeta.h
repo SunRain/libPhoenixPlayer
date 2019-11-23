@@ -9,7 +9,6 @@
 
 namespace PhoenixPlayer {
 
-
 class PlayListMetaPriv;
 class LIBPHOENIXPLAYER_EXPORT PlayListMeta
 {
@@ -73,10 +72,8 @@ private:
 };
 
 
-
-
-
 } //namespace PhoenixPlayer
 
+Q_DECLARE_METATYPE(PhoenixPlayer::PlayListMeta)
 
 #endif // PLAYLISTMETA_H

@@ -20,7 +20,7 @@ PlayListMeta::PlayListMeta(const PlayListMeta &other)
 
 bool PlayListMeta::operator ==(const PlayListMeta &other)
 {
-    qWarning()<<Q_FUNC_INFO<<"This compares all inner strings, "
+    qWarning()<<"Bibibibi ------- This compares all inner strings, "
              <<" be aware of the differences of timeStamp between two objects !!!!";
     return other.d.data()->dir == d.data()->dir &&
             other.d.data()->tag == d.data()->tag &&
