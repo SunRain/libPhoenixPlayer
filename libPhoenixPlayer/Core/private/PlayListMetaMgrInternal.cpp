@@ -40,6 +40,8 @@ PlayListMetaMgrInternal::PlayListMetaMgrInternal(QSharedPointer<PPSettingsIntern
 
 PlayListMetaMgrInternal::~PlayListMetaMgrInternal()
 {
+    qDebug()<<"-------------------------";
+
     saveToDatabase();
 }
 
@@ -170,7 +172,7 @@ void PlayListMetaMgrInternal::readDatabase()
         LOG_DEBUG()<<"database file not exist, first run this program??";
         return;
     }
-    if (!file.open(QFile::ReadOnly | QFile::Truncate)) {
+    if (!file.open(QFile::ReadOnly /*| QFile::Truncate*/)) {
         LOG_DEBUG()<<" open file error "<<file.errorString();
         return;
     }
