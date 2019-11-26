@@ -134,6 +134,7 @@ void SingletonObjectFactory::initPlayListMetaMgrInternal()
         m_plsMgr = QSharedPointer<PlayListMetaMgrInternal>(new PlayListMetaMgrInternal(SINGLETON->settingsInternal()),
                                                            [](PlayListMetaMgrInternal *obj) {
                                                               qDebug()<<Q_FUNC_INFO<<"--- Delete PlayListMetaMgrInternal";
+                                                              obj->saveToDatabase();
                                                               obj->deleteLater();
                                                            });
     }
