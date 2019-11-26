@@ -33,6 +33,17 @@ ApplicationManager::ApplicationManager(int &argc, char **argv[])
 #else
     m_app = new QApplication(argc, *argv);
 #endif
+//    m_app->setQuitOnLastWindowClosed(false);
+
+
+    QObject::connect(m_app, &QApplication::aboutToQuit, [&]() {
+        qDebug()<<"--------- about to quit";
+        if (PluginMetaData::isValid(m_usedUIMetaData) && m_userInterface) {
+            m_userInterface->close();
+            PluginMgr::unload(m_usedUIMetaData);
+            m_userInterface = Q_NULLPTR;
+        }
+    });
 
     for (int i = 1; i < argc; ++i) {
         if (!qstrcmp(*argv[i], "-no-gui")) {
