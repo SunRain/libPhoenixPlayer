@@ -23,6 +23,8 @@ PlayListMetaMgr::PlayListMetaMgr(QObject *parent)
 
 PlayListMetaMgr::~PlayListMetaMgr()
 {
+    qDebug()<<" ---------------- ";
+
     m_internal->disconnect(this);
 }
 

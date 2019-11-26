@@ -137,8 +137,6 @@ PlayListMeta PlayListMetaMgrInternal::create()
 
 void PlayListMetaMgrInternal::saveToDatabase()
 {
-    LOG_DEBUG()<<"-------------------------";
-
     QFile file(QString("%1/%2").arg(m_dbPath).arg(DB_NAME));
     if (file.exists()) {
         if (!file.remove()) {
@@ -157,8 +155,6 @@ void PlayListMetaMgrInternal::saveToDatabase()
     }
     QJsonDocument doc(array);
     QByteArray qba = doc.toJson();
-    LOG_DEBUG()<<qba;
-
     file.write(qba);
     file.flush();
     file.close();
