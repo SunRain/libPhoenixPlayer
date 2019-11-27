@@ -92,6 +92,14 @@ PluginProperty SpectrumGeneratorFFmpeg::property() const
                           false);
 }
 
+bool SpectrumGeneratorFFmpeg::support(IDataProvider::SupportedTypes type) const
+{
+    if ((type & SupportSpectrumGenerator) == SupportSpectrumGenerator) {
+        return true;
+    }
+    return false;
+}
+
 void SpectrumGeneratorFFmpeg::stop()
 {
     m_internal->stop = true;

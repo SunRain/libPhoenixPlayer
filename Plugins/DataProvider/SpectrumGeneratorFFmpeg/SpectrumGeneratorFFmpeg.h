@@ -26,11 +26,12 @@ public:
 
     // IDataProvider interface
 public:
+    bool support(SupportedTypes type) const Q_DECL_OVERRIDE;
     void stop() Q_DECL_OVERRIDE;
 
     // ISpectrumGenerator interface
 public:
-    QList<QList<qreal> > generate(const AudioMetaObject &obj) const Q_DECL_OVERRIDE;
+    SpectrumDataList generate(const AudioMetaObject &obj) const Q_DECL_OVERRIDE;
 
 private:
     void readSpekAudio() const;
