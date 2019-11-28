@@ -31,16 +31,13 @@ public:
     explicit TinySpectrumDataProvider(QObject *parent = Q_NULLPTR);
     virtual ~TinySpectrumDataProvider();
 
-    void generate(const AudioMetaObject &obj, bool insertIntoDatabase = true);
+    void generate(const AudioMetaObject &obj);
 
 signals:
-    void generated(const QList<QList<qreal>> &data);
+    void generated(const AudioMetaObject &obj, const QList<QList<qreal>> &data);
 
 private:
     WorkerThread                        *m_workerThread = Q_NULLPTR;
-    MusicLibrary::IMusicLibraryDAO      *m_dao = Q_NULLPTR;
-    QSharedPointer<PluginMgrInternal>   m_pluginMgr;
-    PluginMetaData                      m_usedDAO;
 };
 
 } // namespace DataProvider

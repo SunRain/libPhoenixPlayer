@@ -4,6 +4,11 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QStandardPaths>
+#include <QDir>
+#include <QFile>
+#include <QDataStream>
+#include <qcompilerdetection.h>
 
 #include "Logger.h"
 #include "PluginMgr.h"
@@ -15,6 +20,24 @@
 
 namespace PhoenixPlayer {
 namespace DataProvider {
+
+static QString s_cacheDir;
+inline QString cacheDir()
+{
+    if (Q_UNLIKELY(s_cacheDir.isEmpty())) {
+        QString cache = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+        if (cache.endsWith("/")) {
+            s_cacheDir = QString("%1SpekData").arg(cache);
+        } else {
+            s_cacheDir = QString("%1/SpekData").arg(cache);
+        }
+        QDir dir(s_cacheDir);
+        if (!dir.exists()) {
+            dir.mkpath(s_cacheDir);
+        }
+    }
+    return s_cacheDir;
+}
 
 class WorkerThread : public QThread
 {
@@ -38,10 +61,6 @@ public:
                 }
             }
         }
-        m_usedDAO = m_pluginMgr->usedMusicLibraryDAO();
-        if (PluginMetaData::isValid(m_usedDAO)) {
-            m_dao = qobject_cast<MusicLibrary::IMusicLibraryDAO*>(PluginMgr::instance(m_usedDAO));
-        }
     }
     virtual ~WorkerThread() override
     {
@@ -55,10 +74,6 @@ public:
             PluginMgr::unload(m_usedGenerator);
             m_generator = Q_NULLPTR;
         }
-        if (m_dao) {
-            PluginMgr::unload(m_usedDAO);
-            m_dao = Q_NULLPTR;
-        }
     }
 
     inline void stopWokerThread()
@@ -68,10 +83,9 @@ public:
         m_wait.wakeAll();
     }
 
-    inline void setObject(const AudioMetaObject &obj, bool insertIntoDatabase)
+    inline void setObject(const AudioMetaObject &obj)
     {
         m_obj = obj;
-        m_insert = insertIntoDatabase;
         if (!m_obj.isHashEmpty() && this->isRunning()) {
             stopGenerator();
         }
@@ -110,34 +124,38 @@ protected:
             }
 
             m_cancelWork = false;
-
             SpectrumDataList list = m_generator->generate(m_obj);
-
             if (m_cancelWork) {
+                qDebug()<<"request cancel work";
                 m_cancelWork = false;
+                m_obj = AudioMetaObject();
                 continue;
             }
-            if (m_insert && m_dao) {
-                m_dao->insertSpectrumData(m_obj, list);
+
+            QFile file(QString("%1/%2.spek").arg(cacheDir()).arg(m_obj.hash()));
+            if (file.exists()) {
+                file.remove();
             }
-            emit generated(list);
+            file.open(QIODevice::WriteOnly);
+            QDataStream ds(&file);
+            ds << list;
+            file.flush();
+            file.close();
+
+            emit generated(m_obj, list);
+            m_obj = AudioMetaObject();
         }
     }
 signals:
-    void generated(const QList<QList<qreal>> &data);
+    void generated(const AudioMetaObject &obj, const QList<QList<qreal>> &data);
 
 private:
-    bool                                m_insert = false;
     bool                                m_stop = false;
     bool                                m_cancelWork = false;
     DataProvider::ISpectrumGenerator    *m_generator = Q_NULLPTR;
-    MusicLibrary::IMusicLibraryDAO      *m_dao = Q_NULLPTR;
-
     QSharedPointer<PluginMgrInternal>   m_pluginMgr;
 
     PluginMetaData                      m_usedGenerator;
-    PluginMetaData                      m_usedDAO;
-
     AudioMetaObject                     m_obj;
 
     QMutex                              m_locker;
@@ -149,11 +167,7 @@ private:
 TinySpectrumDataProvider::TinySpectrumDataProvider(QObject *parent)
     : QObject(parent)
 {
-    m_pluginMgr = SingletonObjectFactory::instance()->pluginMgrInternal();
-    m_usedDAO = m_pluginMgr->usedMusicLibraryDAO();
-    if (PluginMetaData::isValid(m_usedDAO)) {
-        m_dao = qobject_cast<MusicLibrary::IMusicLibraryDAO*>(PluginMgr::instance(m_usedDAO));
-    }
+
 }
 
 TinySpectrumDataProvider::~TinySpectrumDataProvider()
@@ -165,35 +179,36 @@ TinySpectrumDataProvider::~TinySpectrumDataProvider()
         m_workerThread->deleteLater();
         m_workerThread = Q_NULLPTR;
     }
-    if (m_dao) {
-        PluginMgr::unload(m_usedDAO);
-        m_dao = Q_NULLPTR;
-    }
 }
 
-void TinySpectrumDataProvider::generate(const AudioMetaObject &obj, bool insertIntoDatabase)
+void TinySpectrumDataProvider::generate(const AudioMetaObject &obj)
 {
     if (obj.isHashEmpty()) {
         LOG_WARNING()<<"Current object is not valid, ignore !";
         return;
     }
-    if (m_dao) {
-        SpectrumDataList list = m_dao->getSpectrumData(obj);
-        if (!list.isEmpty()) {
-            emit generated(list);
-            return;
-        }
+    QFile file(QString("%1/%2.spek").arg(cacheDir()).arg(obj.hash()));
+    if (file.exists()) {
+        file.open(QIODevice::ReadOnly);
+        QDataStream ds(&file);
+        SpectrumDataList list;
+        ds >> list;
+        file.close();
+        emit generated(obj, list);
+        return;
     }
+
     if (!m_workerThread) {
         m_workerThread = new WorkerThread(this);
         connect(m_workerThread, &WorkerThread::generated,
-                this, &TinySpectrumDataProvider::generated, Qt::QueuedConnection);
+                this, &TinySpectrumDataProvider::generated,
+                Qt::QueuedConnection);
     }
     if (obj.isHashEmpty()) {
         LOG_WARNING()<<"AudioMetaObject is hash empty, ignore !";
         return;
     }
-    m_workerThread->setObject(obj, insertIntoDatabase);
+    m_workerThread->setObject(obj);
     if (!m_workerThread->isRunning()) {
         m_workerThread->start();
     }
