@@ -15,12 +15,12 @@ SpekAudio::SpekAudio()
 {
     av_register_all();
 
-    av_init_packet(&m_packet);
+//    av_init_packet(&m_packet);
 
     m_packet.data = Q_NULLPTR;
     m_packet.size = 0;
     m_offset      = 0;
-    m_frame       = av_frame_alloc();
+//    m_frame       = av_frame_alloc();
     m_bufferLen   = 0;
     m_bufferPtr   = Q_NULLPTR;
 
@@ -56,46 +56,78 @@ SpekAudio::~SpekAudio()
 
 SpekAudio::AudioError SpekAudio::open(const QString &fileName, int stream)
 {
-    AudioError error = AudioError::OK;
+    m_error = AudioError::OK;
+    if (m_bufferPtr) {
+        av_freep(&m_bufferPtr);
+        m_bufferPtr = Q_NULLPTR;
+    }
+    m_bufferLen = 0;
 
-    AVFormatContext *formatContext = Q_NULLPTR;
-    if (avformat_open_input(&formatContext, fileName.toUtf8(), Q_NULLPTR, Q_NULLPTR) != 0) {
-        error = AudioError::CANNOT_OPEN_FILE;
+    if (m_frame) {
+        av_frame_free(&m_frame);
+        m_frame = Q_NULLPTR;
+    }
+    m_frame = av_frame_alloc();
+
+    if (m_packet.data) {
+        m_packet.data -= m_offset;
+        m_packet.size += m_offset;
+        m_offset = 0;
+        av_packet_unref(&m_packet);
+    }
+    av_init_packet(&m_packet);
+    m_packet.data = Q_NULLPTR;
+    m_packet.size = 0;
+    m_offset      = 0;
+
+    if (m_codecContext) {
+        avcodec_free_context(&m_codecContext);
+        m_codecContext = Q_NULLPTR;
+    }
+    if (m_formatContext) {
+        avformat_close_input(&m_formatContext);
+        m_formatContext = Q_NULLPTR;
+    }
+    m_framesPerInterval   = 0;
+    m_errorPerInterval    = 0;
+    m_errorBase           = 0;
+
+    if (avformat_open_input(&m_formatContext, fileName.toUtf8(), Q_NULLPTR, Q_NULLPTR) != 0) {
+        m_error = AudioError::CANNOT_OPEN_FILE;
     }
 
-    if (!error && avformat_find_stream_info(formatContext, Q_NULLPTR) < 0) {
+    if (!m_error && avformat_find_stream_info(m_formatContext, Q_NULLPTR) < 0) {
         // 24-bit APE returns an error but parses the stream info just fine.
         // TODO: old comment, verify
-        if (formatContext->nb_streams <= 0) {
-            error = AudioError::NO_STREAMS;
+        if (m_formatContext->nb_streams <= 0) {
+            m_error = AudioError::NO_STREAMS;
         }
     }
 
-    int audioStream = -1;
-    int streams     = 0;
-    if (!error) {
-        for (unsigned int i = 0; i < formatContext->nb_streams; ++i) {
-            if (formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+    int streams = 0;
+    if (!m_error) {
+        for (unsigned int i = 0; i < m_formatContext->nb_streams; ++i) {
+            if (m_formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
                 if (stream == streams) {
-                    audioStream = i;
+                    m_audioStream = i;
                 }
                 streams++;
             }
         }
-        if (audioStream == -1) {
-            error = AudioError::NO_AUDIO;
+        if (m_audioStream == -1) {
+            m_error = AudioError::NO_AUDIO;
         }
     }
 
     AVStream *avstream          = Q_NULLPTR;
     AVCodec *codec              = Q_NULLPTR;
     AVCodecParameters *codecpar = Q_NULLPTR;
-    if (!error) {
-        avstream = formatContext->streams[audioStream];
+    if (!m_error) {
+        avstream = m_formatContext->streams[m_audioStream];
         codecpar = avstream->codecpar;
         codec = avcodec_find_decoder(codecpar->codec_id);
         if (!codec) {
-            error = AudioError::NO_DECODER;
+            m_error = AudioError::NO_DECODER;
         }
     }
 
@@ -105,7 +137,7 @@ SpekAudio::AudioError SpekAudio::open(const QString &fileName, int stream)
 //    int bits_per_sample = 0;
 //    int channels = 0;
 //    double duration = 0;
-    if (!error) {
+    if (!m_error) {
         // We can already fill in the stream info even if the codec won't be able to open it.
 //        codec_name = codec->long_name;
 //        bit_rate = codecpar->bit_rate;
@@ -129,44 +161,43 @@ SpekAudio::AudioError SpekAudio::open(const QString &fileName, int stream)
 
         if (avstream->duration != AV_NOPTS_VALUE) {
             m_duration = avstream->duration * av_q2d(avstream->time_base);
-        } else if (formatContext->duration != AV_NOPTS_VALUE) {
-            m_duration = formatContext->duration / (double) AV_TIME_BASE;
+        } else if (m_formatContext->duration != AV_NOPTS_VALUE) {
+            m_duration = m_formatContext->duration / (double) AV_TIME_BASE;
         } else {
-            error = AudioError::NO_DURATION;
+            m_error = AudioError::NO_DURATION;
         }
 
-        if (!error && m_channels <= 0) {
-            error = AudioError::NO_CHANNELS;
+        if (!m_error && m_channels <= 0) {
+            m_error = AudioError::NO_CHANNELS;
         }
     }
 
-    AVCodecContext *codecContext = Q_NULLPTR;
-    if (!error) {
-        error = AudioError::CANNOT_OPEN_DECODER;
+    if (!m_error) {
+        m_error = AudioError::CANNOT_OPEN_DECODER;
         // Allocate a codec context for the decoder.
-        codecContext = avcodec_alloc_context3(codec);
-        if (codecContext) {
+        m_codecContext = avcodec_alloc_context3(codec);
+        if (m_codecContext) {
             // Copy codec parameters from input stream to output codec context.
-            if (avcodec_parameters_to_context(codecContext, codecpar) == 0) {
+            if (avcodec_parameters_to_context(m_codecContext, codecpar) == 0) {
                 // Finally, init the decoder.
-                if (avcodec_open2(codecContext, codec, Q_NULLPTR) == 0) {
-                    error = AudioError::OK;
+                if (avcodec_open2(m_codecContext, codec, Q_NULLPTR) == 0) {
+                    m_error = AudioError::OK;
                 }
             }
         }
     }
 
-    if (!error) {
+    if (!m_error) {
         AVSampleFormat fmt = (AVSampleFormat)codecpar->format;
         if (fmt != AV_SAMPLE_FMT_S16 && fmt != AV_SAMPLE_FMT_S16P &&
             fmt != AV_SAMPLE_FMT_S32 && fmt != AV_SAMPLE_FMT_S32P &&
             fmt != AV_SAMPLE_FMT_FLT && fmt != AV_SAMPLE_FMT_FLTP &&
             fmt != AV_SAMPLE_FMT_DBL && fmt != AV_SAMPLE_FMT_DBLP ) {
-            error = AudioError::BAD_SAMPLE_FORMAT;
+            m_error = AudioError::BAD_SAMPLE_FORMAT;
         }
     }
 
-    return error;
+    return m_error;
 }
 
 SpekAudio::AudioError SpekAudio::start(int channel, int samples)
@@ -174,8 +205,8 @@ SpekAudio::AudioError SpekAudio::start(int channel, int samples)
     m_requestChannel = channel;
     if (channel < 0 || channel >= m_channels) {
         assert(false);
-        error = AudioError::NO_CHANNELS;
-        return error;
+        m_error = AudioError::NO_CHANNELS;
+        return m_error;
     }
 
     AVStream *stream = m_formatContext->streams[m_audioStream];
@@ -190,7 +221,7 @@ SpekAudio::AudioError SpekAudio::start(int channel, int samples)
 
 int SpekAudio::read()
 {
-    if (!!error) {
+    if (!!m_error) {
         return -1;
     }
 
@@ -280,6 +311,7 @@ int SpekAudio::read()
         }
     }
 }
+
 
 } //SpectrumGeneratorFFmpeg
 } //DataProvider

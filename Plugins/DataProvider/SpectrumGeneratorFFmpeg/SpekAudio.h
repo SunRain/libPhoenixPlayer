@@ -27,7 +27,7 @@ public:
         NO_DURATION,
         NO_CHANNELS,
         CANNOT_OPEN_DECODER,
-        BAD_SAMPLE_FORMAT,
+        BAD_SAMPLE_FORMAT
     };
 
     explicit SpekAudio();
@@ -41,7 +41,7 @@ public:
 
     inline AudioError getError() const
     {
-        return error;
+        return m_error;
     }
 
     inline const float *getBuffer() const
@@ -63,8 +63,9 @@ public:
     {
         return m_errorPerInterval;
     }
+
 private:
-    AudioError          error;
+    AudioError          m_error               = AudioError::OK;
 
     AVFormatContext     *m_formatContext    = Q_NULLPTR;
     AVCodecContext      *m_codecContext     = Q_NULLPTR;
@@ -72,7 +73,7 @@ private:
 
     float               *m_bufferPtr        = Q_NULLPTR;
 
-    int                 m_audioStream;
+    int                 m_audioStream       = -1;
     int                 m_requestChannel;
     int                 m_offset;
     int                 m_bufferLen;

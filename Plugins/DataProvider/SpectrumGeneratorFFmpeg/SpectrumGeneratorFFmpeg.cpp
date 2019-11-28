@@ -23,7 +23,7 @@ const static int NFFT = 64;
 //FIXME what is this?
 const static int URANGE             = 0;
 const static int LRANGE             = -120;
-const static int SAMPLE_LENGTH      =  500;
+const static int SAMPLE_LENGTH      = 150;
 
 enum window_function
 {
@@ -59,7 +59,7 @@ public:
     float *output;
     int stream;
     int channel;
-    int samples;
+    int samples = SAMPLE_LENGTH;
     int nfft = 0; // Size of the FFT transform.
     int input_size;
     int input_pos;
@@ -108,6 +108,7 @@ void SpectrumGeneratorFFmpeg::stop()
 QList<QList<qreal> > SpectrumGeneratorFFmpeg::generate(const AudioMetaObject &obj) const
 {
     if (obj.isHashEmpty()) {
+        qDebug()<<"Hash empty, ignore !!!";
         return SpekVauleList();
     }
 
@@ -119,10 +120,12 @@ QList<QList<qreal> > SpectrumGeneratorFFmpeg::generate(const AudioMetaObject &ob
 
     SpekAudio::AudioError error = m_spekAudio->open(uri, 0);
     if (error != SpekAudio::AudioError::OK) {
+        qDebug()<<"open audio file error "<<(int)error;
         return SpekVauleList();
     }
 
     if (m_spekAudio->getError() != SpekAudio::AudioError::OK) {
+        qDebug()<<"get error error "<<(int)m_spekAudio->getError();
         return SpekVauleList();
     }
 
@@ -138,7 +141,8 @@ QList<QList<qreal> > SpectrumGeneratorFFmpeg::generate(const AudioMetaObject &ob
 
     error = m_spekAudio->start(0, SAMPLE_LENGTH);
 
-    if (error  != SpekAudio::AudioError::OK) {
+    if (error != SpekAudio::AudioError::OK) {
+        qDebug()<<"start spek audio error "<<(int)error;
         return SpekVauleList();
     }
 
@@ -160,6 +164,7 @@ void SpectrumGeneratorFFmpeg::readSpekAudio() const
         qApp->processEvents();
 
         if (m_internal->stop) {
+            qDebug()<<" -- stop";
             break;
         }
         const float *buffer = m_spekAudio->getBuffer();
