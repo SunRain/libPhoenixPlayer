@@ -750,6 +750,7 @@ QStringList SQLite3DAO::trackHashListByLastPlayedTime(bool orderByDesc) const
 
 void SQLite3DAO::insertSpectrumData(const AudioMetaObject &obj, const QList<QList<qreal> > &list)
 {
+#if 0
     if (obj.isHashEmpty()) {
         qWarning()<<"Ignore insert empty hash object";
         return;
@@ -773,7 +774,7 @@ void SQLite3DAO::insertSpectrumData(const AudioMetaObject &obj, const QList<QLis
         }
     }
     if (isExists) { //update
-        const QString str = QString("update %1 set %2 = ':vaData' where %3 = '%4")
+        const QString str = QString("update %1 set %2 = ':vaData' where %3 = '%4'")
                 .arg(TABLE_SPECTRUM)
                 .arg(SP_KEY_DATA)
                 .arg(SP_KEY_HASH)
@@ -800,10 +801,12 @@ void SQLite3DAO::insertSpectrumData(const AudioMetaObject &obj, const QList<QLis
             qDebug()<<"run sql "<<str<<" error "<<q.lastError().text();
         }
     }
+#endif
 }
 
 QList<QList<qreal> > SQLite3DAO::getSpectrumData(const AudioMetaObject &obj) const
 {
+#if 0
     if (obj.isHashEmpty()) {
         return QList<QList<qreal> >();
     }
@@ -823,6 +826,8 @@ QList<QList<qreal> > SQLite3DAO::getSpectrumData(const AudioMetaObject &obj) con
         ds >> list;
         return list;
     }
+    return QList<QList<qreal> >();
+#endif
     return QList<QList<qreal> >();
 }
 
