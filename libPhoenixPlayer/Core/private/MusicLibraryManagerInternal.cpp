@@ -272,6 +272,7 @@ void MusicLibraryManagerInternal::insertToAlbumGroupMap(const AudioMetaObject &d
             imgs.append(iu);
             gb.setImageUri(imgs);
         }
+        m_albumGroupMap.insert(albumName, gb);
     } else {
         AudioMetaGroupObject gb;
         gb.setName(albumName);
@@ -302,6 +303,7 @@ void MusicLibraryManagerInternal::insertToArtistGroupMap(const AudioMetaObject &
             imgs.append(iu);
             gb.setImageUri(imgs);
         }
+        m_artistGroupMap.insert(artistName, gb);
     } else {
         AudioMetaGroupObject gb;
         gb.setName(artistName);
@@ -332,6 +334,7 @@ void MusicLibraryManagerInternal::insertToGenreGroupMap(const AudioMetaObject &d
             imgs.append(iu);
             gb.setImageUri(imgs);
         }
+        m_genreGroupMap.insert(genreName, gb);
     } else {
         AudioMetaGroupObject gb;
         gb.setName(genreName);
