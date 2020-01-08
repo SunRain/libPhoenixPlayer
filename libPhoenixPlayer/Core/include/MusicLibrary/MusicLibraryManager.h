@@ -56,7 +56,7 @@ public:
     /*!
      * \brief artistTracks 显示某个artist下的曲目
      * \param artistName artist名
-     * \param limitNum 显示个数
+     * \param limitNum 显示个数. <=0, no limit
      * \return 空列表如果没有曲目
      */
     AudioMetaList artistTracks(const QString &artistName,int limitNum = 0);
