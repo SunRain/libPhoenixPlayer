@@ -33,10 +33,13 @@ public:
     // IMusicLibraryDAO interface
 public:
     bool initDataBase() Q_DECL_OVERRIDE;
-    bool insertMetaData(const AudioMetaObject &obj, bool skipDuplicates) Q_DECL_OVERRIDE;
-    bool updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue) Q_DECL_OVERRIDE;
-    bool deleteMetaData(const AudioMetaObject &obj) Q_DECL_OVERRIDE;
-    bool deleteByHash(const QString &hash) Q_DECL_OVERRIDE;
+
+protected:
+    bool doInsertMetaData(const AudioMetaObject &obj, bool skipDuplicates) Q_DECL_OVERRIDE ;
+    bool doUpdateMetaData(const AudioMetaObject &obj, bool skipEmptyValue) Q_DECL_OVERRIDE;
+    bool doDeleteByHash(const QString &hash) Q_DECL_OVERRIDE;
+
+public:
     AudioMetaObject trackFromHash(const QString &hash) const Q_DECL_OVERRIDE;
     QStringList trackHashList() const Q_DECL_OVERRIDE;
     bool setLike(const QString &hash, bool like) Q_DECL_OVERRIDE;

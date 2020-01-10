@@ -120,6 +120,7 @@ SOURCES += \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
     $$PWD/DataProvider/IMetadataLookup.cpp \
     $$PWD/MetadataLookup/LyricsParser.cpp \
+    $$PWD/MusicLibrary/IMusicLibraryDAO.cpp \
     $$PWD/MusicLibrary/MusicLibraryManager.cpp \
     $$PWD/PPSettings.cpp \
     $$PWD/PPUtility.cpp \

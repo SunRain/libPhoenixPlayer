@@ -241,7 +241,7 @@ bool SQLite3DAO::initDataBase()
     return true;
 }
 
-bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
+bool SQLite3DAO::doInsertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
 {
     qDebug()<<"===================";
     if (obj.isHashEmpty()) {
@@ -297,14 +297,13 @@ bool SQLite3DAO::insertMetaData(const AudioMetaObject &obj, bool skipDuplicates)
     }
     if (q.exec()) {
         m_objMap.insert(obj.hash(), obj);
-        emit metaDataInserted(obj.hash());
         return true;
     }
     qDebug()<<QString("run sql [%1] error [%2]").arg (str).arg (q.lastError ().text ());
     return false;
 }
 
-bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
+bool SQLite3DAO::doUpdateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
 {
     if (obj.isHashEmpty()) {
         qDebug()<<"AudioMetaObject is empty";
@@ -373,14 +372,14 @@ bool SQLite3DAO::updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue)
 //    return true;
 //}
 
-bool SQLite3DAO::deleteMetaData(const AudioMetaObject &obj)
-{
-    if (obj.isHashEmpty())
-        return false;
-    return deleteByHash (obj.hash ());
-}
+//bool SQLite3DAO::deleteMetaData(const AudioMetaObject &obj)
+//{
+//    if (obj.isHashEmpty())
+//        return false;
+//    return doDeleteByHash (obj.hash ());
+//}
 
-bool SQLite3DAO::deleteByHash(const QString &hash)
+bool SQLite3DAO::doDeleteByHash(const QString &hash)
 {
     if (!checkDatabase ())
         return false;
@@ -398,7 +397,8 @@ bool SQLite3DAO::deleteByHash(const QString &hash)
     if (q.exec (str)) {
 //        calcExistSongs ();
         m_objMap.remove(hash);
-        emit metaDataDeleted (hash);
+        m_utilityMap.remove(hash);
+        m_lastPlayedMap.remove(hash);
         return true;
     }
     qDebug()<<"deleteMetaData error "<<q.lastError ().text ();

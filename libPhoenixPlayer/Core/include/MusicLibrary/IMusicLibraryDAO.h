@@ -15,8 +15,8 @@ class IMusicLibraryDAO : public BasePlugin
 {
     Q_OBJECT
 public:
-    explicit IMusicLibraryDAO(QObject *parent = Q_NULLPTR) : BasePlugin(parent) {}
-    virtual ~IMusicLibraryDAO() override {}
+    explicit IMusicLibraryDAO(QObject *parent = Q_NULLPTR);
+    virtual ~IMusicLibraryDAO() override;
 
     virtual bool initDataBase() = 0;
 
@@ -26,16 +26,16 @@ public:
     /// \param skipDuplicates skip if track already exists in database
     /// \return
     ///
-    virtual bool insertMetaData(const AudioMetaObject &obj, bool skipDuplicates = true) = 0;
+    bool insertMetaData(const AudioMetaObject &obj, bool skipDuplicates = true);
     ///
     /// \brief updateMetaData update track meta
     /// \param metaData the track
     /// \param skipEmptyValue use origin value if new track has some empty values
     /// \return
     ///
-    virtual bool updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue = true) = 0;
-    virtual bool deleteMetaData(const AudioMetaObject &obj) = 0;
-    virtual bool deleteByHash(const QString &hash) = 0;
+    bool updateMetaData(const AudioMetaObject &obj, bool skipEmptyValue = true);
+    bool deleteMetaData(const AudioMetaObject &obj);
+    bool deleteByHash(const QString &hash);
 
     virtual AudioMetaObject trackFromHash(const QString &hash) const = 0;
 
@@ -95,6 +95,10 @@ public:
 
     virtual QList<QList<qreal>> getSpectrumData(const AudioMetaObject &obj) const = 0;
 
+    // QObject interface
+public:
+    bool event(QEvent *event) Q_DECL_OVERRIDE;
+
     // BasePlugin interface
 public:
     virtual PluginProperty property() const Q_DECL_OVERRIDE
@@ -107,9 +111,15 @@ public:
         return PluginMusicLibraryDAO;
     }
 
+protected:
+    virtual bool doInsertMetaData(const AudioMetaObject &obj, bool skipDuplicates = true) = 0;
+    virtual bool doUpdateMetaData(const AudioMetaObject &obj, bool skipEmptyValue = true) = 0;
+    virtual bool doDeleteByHash(const QString &hash) = 0;
+
 signals:
     void metaDataInserted(const QString &hash);
     void metaDataDeleted(const QString &hash);
+    void metaDataChanged(const QString &hash);
 
 public slots:
     ///
@@ -127,7 +137,5 @@ public slots:
 
 } //IMUSICLIBRARYDAO_H
 } //PhoenixPlayer
-
-//Q_DECLARE_INTERFACE(PhoenixPlayer::MusicLibrary::IMusicLibraryDAO, "SunRain.PhoenixPlayer.IMusicLibraryDAO/1.0")
 
 #endif // IPLAYLISTDAO_H

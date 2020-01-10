@@ -12,6 +12,19 @@ namespace PhoenixPlayer {
 
 using namespace MusicLibrary;
 
+
+inline int loop(const AudioMetaList &list, const QString &hash)
+{
+    int pos = -1;
+    for (int i=0; i<list.size(); ++i) {
+        if (list.value(i).hash() == hash) {
+            pos = i;
+            break;
+        }
+    }
+    return pos;
+};
+
 MusicLibraryManagerInternal::MusicLibraryManagerInternal(QSharedPointer<PPSettingsInternal> set,
                                                                         QSharedPointer<PluginMgrInternal> loader,
                                                                         QObject *parent)
@@ -90,38 +103,6 @@ void MusicLibraryManagerInternal::setPlayedCount(const AudioMetaObject &obj, int
 
 void MusicLibraryManagerInternal::saveToDB()
 {
-//    if (PluginMetaData::isValid(m_usedPluginMeta)) {
-//        QObject *obj = PluginMgr::instance(m_usedPluginMeta);
-//        if (obj) {
-//            MusicLibrary::IMusicLibraryDAO *dd = qobject_cast<MusicLibrary::IMusicLibraryDAO*>(obj);
-//            if (dd) {
-//                dd->beginTransaction();
-//                {
-//                    auto i = m_playCntMap.constBegin();
-//                    while (i != m_playCntMap.constEnd()) {
-//                        dd->setPlayedCount(i.key(), i.value());
-//                        ++i;
-//                    }
-//                }
-//                {
-//                    auto i = m_likeMap.constBegin();
-//                    while (i != m_likeMap.constEnd()) {
-//                        dd->setLike(i.key(), i.value());
-//                        ++i;
-//                    }
-//                }
-//                {
-//                    auto i = m_lastPlayedMap.constBegin();
-//                    while (i != m_lastPlayedMap.constEnd()) {
-//                        dd->setLastPlayedTime(i.value());
-//                        ++i;
-//                    }
-//                }
-//                dd->commitTransaction();
-//                PluginMgr::unload(m_usedPluginMeta);
-//            }
-//        }
-//    }
     if (m_dao) {
         m_dao->beginTransaction();
         {
@@ -180,16 +161,6 @@ void MusicLibraryManagerInternal::initDAO()
         emit this->libraryListSizeChanged();
     });
     connect (m_dao, &IMusicLibraryDAO::metaDataDeleted, this, [&](const QString &hash) {
-        static auto loop = [](const AudioMetaList &list, const QString &hash) -> int {
-            int pos = -1;
-            for (int i=0; i<list.size(); ++i) {
-                if (list.value(i).hash() == hash) {
-                    pos = i;
-                    break;
-                }
-            }
-            return pos;
-        };
         int pos = loop(m_trackList, hash);
         if (pos > 0) {
             //                m_trackList.removeAt(pos);
@@ -231,6 +202,26 @@ void MusicLibraryManagerInternal::initDAO()
         emit this->libraryListSizeChanged();
     });
 
+    connect(m_dao, &IMusicLibraryDAO::metaDataChanged,
+            this, [&](const QString &hash) {
+        int pos = loop(m_trackList, hash);
+        if (pos > 0) {
+            const AudioMetaObject obj = m_dao->trackFromHash(hash);
+            if (obj.isHashEmpty()) {
+                qWarning()<<"Invalid AudioMetaObject hash "<<hash;
+                return;
+            }
+            m_trackList.replace(pos, obj);
+            m_likeMap.insert(hash, m_dao->isLike(hash));
+            m_playCntMap.insert(hash, m_dao->playedCount(hash));
+            m_lastPlayedMap.insert(hash, m_dao->getLastPlayedMeta(hash));
+            insertToAlbumGroupMap(obj);
+            insertToArtistGroupMap(obj);
+            insertToGenreGroupMap(obj);
+        }
+    });
+
+
 
 }
 
@@ -264,7 +255,12 @@ void MusicLibraryManagerInternal::insertToAlbumGroupMap(const AudioMetaObject &d
     if (m_albumGroupMap.contains(albumName)) {
         AudioMetaGroupObject gb = m_albumGroupMap.value(albumName);
         AudioMetaList l = gb.list();
-        l.append(d);
+        int pos = loop(l, d.hash());
+        if (pos > 0) {
+            l.replace(pos, d);
+        } else {
+            l.append(d);
+        }
         gb.setList(l);
         const QUrl iu = d.albumMeta().imgUri();
         if (iu.isValid()) {
@@ -295,7 +291,12 @@ void MusicLibraryManagerInternal::insertToArtistGroupMap(const AudioMetaObject &
     if (m_artistGroupMap.contains(artistName)) {
         AudioMetaGroupObject gb = m_artistGroupMap.value(artistName);
         AudioMetaList l = gb.list();
-        l.append(d);
+        int pos = loop(l, d.hash());
+        if (pos > 0) {
+            l.replace(pos, d);
+        } else {
+            l.append(d);
+        }
         gb.setList(l);
         const QUrl iu = d.artistMeta().imgUri();
         if (iu.isValid()) {
@@ -326,7 +327,12 @@ void MusicLibraryManagerInternal::insertToGenreGroupMap(const AudioMetaObject &d
     if (m_genreGroupMap.contains(genreName)) {
         AudioMetaGroupObject gb = m_genreGroupMap.value(genreName);
         AudioMetaList l = gb.list();
-        l.append(d);
+        int pos = loop(l, d.hash());
+        if (pos > 0) {
+            l.replace(pos, d);
+        } else {
+            l.append(d);
+        }
         gb.setList(l);
         const QUrl iu = d.queryImgUri();
         if (iu.isValid()) {
