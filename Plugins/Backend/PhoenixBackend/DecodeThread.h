@@ -77,9 +77,9 @@ private:
 private:
     StateHandler                            *m_handler          = Q_NULLPTR;
     Recycler                                *m_recycler         = Q_NULLPTR;
-    ReplayGain                              *m_replayGain       = Q_NULLPTR;
+//    ReplayGain                              *m_replayGain       = Q_NULLPTR;
     AudioConverter                          *m_converter        = Q_NULLPTR;
-    Dithering                               *m_dithering        = Q_NULLPTR;
+//    Dithering                               *m_dithering        = Q_NULLPTR;
     ChannelConverter                        *m_channelConverter = Q_NULLPTR;
 
     unsigned char                           *m_output_buf       = Q_NULLPTR;

@@ -46,8 +46,8 @@ DecodeThread::DecodeThread(StateHandler *handle, Recycler *recycler, QObject *pa
     m_sample_size = 0;
     //TODO use plugin later
     m_decoder = Q_NULLPTR;// new FFmpeg(this);
-    m_replayGain = Q_NULLPTR;
-    m_dithering = Q_NULLPTR;
+//    m_replayGain = Q_NULLPTR;
+//    m_dithering = Q_NULLPTR;
     m_converter = new AudioConverter;
 
     reset();
@@ -183,7 +183,7 @@ void DecodeThread::stop()
     qDeleteAll(m_effects);
     m_effects.clear();
 
-    m_replayGain = Q_NULLPTR;
+//    m_replayGain = Q_NULLPTR;
 }
 
 AudioParameters DecodeThread::audioParameters() const
@@ -458,13 +458,10 @@ void DecodeThread::prepareEffects(Decoder::IDecoder *d)
     }
 #endif
     //dithering
-    {
-        if (!m_dithering) {
-            m_dithering = new Dithering();
-        }
-        m_dithering->initialization(m_ap.sampleRate(), m_ap.channelMap());
-        m_effects << m_dithering;
-    }
+    Dithering  *dithering= new Dithering();
+    dithering->initialization(m_ap.sampleRate(), m_ap.channelMap());
+    m_effects << dithering;
+
     //channel order converter
     if(m_ap.channelMap() != m_ap.channelMap().remaped())
     {
@@ -507,7 +504,7 @@ void DecodeThread::prepareEffects(Decoder::IDecoder *d)
     }
 #endif
 
-    m_dithering->setFormats(d->audioParameters().format(), m_ap.format());
+    dithering->setFormats(d->audioParameters().format(), m_ap.format());
 
 }
 
