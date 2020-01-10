@@ -27,7 +27,6 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
     : BaseObject(parent)
 {
     m_internal = SingletonObjectFactory::instance()->musicLibraryManagerInternal();
-
     connect(m_internal.data(), &MusicLibraryManagerInternal::libraryListSizeChanged,
             this, &MusicLibraryManager::libraryListSizeChanged);
 }
@@ -38,7 +37,7 @@ MusicLibraryManager::~MusicLibraryManager()
 
 //    saveToDB();
 
-    m_internal->disconnect(this);
+    SingletonObjectFactory::instance()->musicLibraryManagerInternal()->disconnect(this);
 
     qDebug()<<">>>>>>>> after "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
 }
@@ -63,7 +62,7 @@ bool MusicLibraryManager::empty() const
 
 void MusicLibraryManager::deleteObject(const AudioMetaObject &obj, bool deleteFromLocalDisk)
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return;
     }
     if (m_internal->dao()->deleteMetaData(obj) && deleteFromLocalDisk) {
@@ -149,7 +148,7 @@ AudioMetaGroupList MusicLibraryManager::genreList() const
 
 void MusicLibraryManager::setLike(const QString &hash, bool like)
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         qWarning()<<Q_FUNC_INFO<<"Can't find database, this data will lost if app exit!!!";
     }
     m_internal->likeMap()->insert(hash, like);
@@ -222,7 +221,7 @@ int MusicLibraryManager::playedCount(const AudioMetaObject &obj) const
 
 LastPlayedMeta MusicLibraryManager::getLastPlayedMeta(const QString &hash) const
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return LastPlayedMeta();
     }
     return m_internal->dao()->getLastPlayedMeta(hash);
@@ -230,7 +229,7 @@ LastPlayedMeta MusicLibraryManager::getLastPlayedMeta(const QString &hash) const
 
 QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedMeta(int limit, bool orderByDesc) const
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return QList<LastPlayedMeta>();
     }
     return m_internal->dao()->getLastPlayedMeta(limit, orderByDesc);
@@ -238,7 +237,7 @@ QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedMeta(int limit, bool ord
 
 QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByAlbum(int limit, bool orderByDesc) const
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return QList<LastPlayedMeta>();
     }
     return m_internal->dao()->getLastPlayedByAlbum(limit, orderByDesc);
@@ -246,7 +245,7 @@ QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByAlbum(int limit, bool 
 
 QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByArtist(int limit, bool orderByDesc) const
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return QList<LastPlayedMeta>();
     }
     return m_internal->dao()->getLastPlayedByArtist(limit, orderByDesc);
@@ -254,7 +253,7 @@ QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByArtist(int limit, bool
 
 QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByGenres(int limit, bool orderByDesc) const
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return QList<LastPlayedMeta>();
     }
     return m_internal->dao()->getLastPlayedByGenres(limit, orderByDesc);
@@ -262,7 +261,7 @@ QList<LastPlayedMeta> MusicLibraryManager::getLastPlayedByGenres(int limit, bool
 
 QStringList MusicLibraryManager::trackHashListByPlayedCount(bool orderByDesc) const
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return QStringList();
     }
     return m_internal->dao()->trackHashListByPlayedCount(orderByDesc);
@@ -270,7 +269,7 @@ QStringList MusicLibraryManager::trackHashListByPlayedCount(bool orderByDesc) co
 
 QStringList MusicLibraryManager::trackHashListByLastPlayedTime(bool orderByDesc) const
 {
-    if (m_internal->daoValid()) {
+    if (!m_internal->daoValid()) {
         return QStringList();
     }
     return m_internal->dao()->trackHashListByLastPlayedTime(orderByDesc);
@@ -283,7 +282,7 @@ void MusicLibraryManager::saveToDB()
 
 QList<QList<qreal> > MusicLibraryManager::loadSpectrumData(const AudioMetaObject &obj)
 {
-    if (obj.isHashEmpty() || m_internal->daoValid()) {
+    if (obj.isHashEmpty() || !m_internal->daoValid()) {
         return QList<QList<qreal>>();
     }
     return m_internal->dao()->getSpectrumData(obj);
