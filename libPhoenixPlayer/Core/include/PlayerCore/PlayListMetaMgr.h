@@ -27,6 +27,8 @@ public:
         OK = 0x0,
         NameConflict
     };
+    Q_ENUM(UpdateMetaRet)
+
     explicit PlayListMetaMgr(QObject *parent = Q_NULLPTR);
 
     virtual ~PlayListMetaMgr();
