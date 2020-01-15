@@ -63,6 +63,11 @@ void PlayListMetaMgr::saveToDatabase()
     m_internal->saveToDatabase();
 }
 
+QString PlayListMetaMgr::formatTimeStamp(const PlayListMeta &meta, QStringView format)
+{
+    return PlayListMetaMgrInternal::formatTimeStamp(meta, format);
+}
+
 
 
 } // namespace PhoenixPlayer

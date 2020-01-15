@@ -160,6 +160,13 @@ void PlayListMetaMgrInternal::saveToDatabase()
     file.close();
 }
 
+QString PlayListMetaMgrInternal::formatTimeStamp(const PlayListMeta &meta, QStringView format)
+{
+    qint64 t = meta.getTimeStamp().toLongLong();
+    QDateTime dt = QDateTime::fromSecsSinceEpoch(t);
+    return dt.toString(format);
+}
+
 void PlayListMetaMgrInternal::readDatabase()
 {
     m_metaList.clear();

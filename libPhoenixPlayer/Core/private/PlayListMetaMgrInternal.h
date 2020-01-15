@@ -35,6 +35,8 @@ public:
 
     void saveToDatabase();
 
+    static QString formatTimeStamp(const PlayListMeta &meta, QStringView format);
+
 signals:
    void metaDataChanged(PlayListMetaMgr::UpdateMetaRet ret, const PlayListMeta &old, const PlayListMeta &newMeta);
 

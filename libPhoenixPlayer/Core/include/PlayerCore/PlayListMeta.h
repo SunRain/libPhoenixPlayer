@@ -12,6 +12,7 @@ namespace PhoenixPlayer {
 class PlayListMetaPriv;
 class LIBPHOENIXPLAYER_EXPORT PlayListMeta
 {
+    friend class PlayListMetaMgrInternal;
 public:
     PlayListMeta();
     PlayListMeta(const PlayListMeta &other);
@@ -33,10 +34,8 @@ public:
     void setFileName(const QString &value);
 
     QString getFileSuffix() const;
-    void setFileSuffix(const QString &value);
 
     QString getTimeStamp() const;
-    void setTimeStamp(const QString &value);
 
     QString getTag() const;
     void setTag(const QString &value);
@@ -47,6 +46,10 @@ public:
     QVariantMap toMap() const;
 
     static PlayListMeta fromMap(const QVariantMap &map);
+
+protected:
+    void setTimeStamp(const QString &value);
+    void setFileSuffix(const QString &value);
 
 private:
     class PlayListMetaPriv : public QSharedData
