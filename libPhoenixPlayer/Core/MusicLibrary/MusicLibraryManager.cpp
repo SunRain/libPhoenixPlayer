@@ -33,13 +33,7 @@ MusicLibraryManager::MusicLibraryManager(QObject *parent)
 
 MusicLibraryManager::~MusicLibraryManager()
 {
-    qDebug()<<">>>>>>>> "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
-
-//    saveToDB();
-
-    SingletonObjectFactory::instance()->musicLibraryManagerInternal()->disconnect(this);
-
-    qDebug()<<">>>>>>>> after "<< Q_FUNC_INFO <<" <<<<<<<<<<<<<<<<";
+    m_internal->disconnect(this);
 }
 
 AudioMetaList MusicLibraryManager::allTracks() const
