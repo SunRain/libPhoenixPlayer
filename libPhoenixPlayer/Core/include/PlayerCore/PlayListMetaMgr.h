@@ -57,7 +57,13 @@ public:
      */
     void deleteMeta(const PlayListMeta &meta);
 
-    void updateMeta(const PlayListMeta &old,  const PlayListMeta &newMeta);
+    /*!
+     * \brief updateMeta
+     * \param old
+     * \param newMeta
+     * \param ignoreNameConflict set to True if only update meta content(eg. tag, annotation)
+     */
+    void updateMeta(const PlayListMeta &old,  const PlayListMeta &newMeta, bool ignoreNameConflict = false);
 
     PlayListMeta create();
 

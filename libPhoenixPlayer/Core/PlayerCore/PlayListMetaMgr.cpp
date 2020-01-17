@@ -23,8 +23,7 @@ PlayListMetaMgr::PlayListMetaMgr(QObject *parent)
 
 PlayListMetaMgr::~PlayListMetaMgr()
 {
-    qDebug()<<" ---------------- ";
-
+    m_internal->saveToDatabase();
     m_internal->disconnect(this);
 }
 
@@ -48,9 +47,9 @@ void PlayListMetaMgr::deleteMeta(const PlayListMeta &meta)
     m_internal->deleteMeta(meta);
 }
 
-void PlayListMetaMgr::updateMeta(const PlayListMeta &old, const PlayListMeta &newMeta)
+void PlayListMetaMgr::updateMeta(const PlayListMeta &old, const PlayListMeta &newMeta, bool ignoreNameConflict)
 {
-    m_internal->updateMeta(old, newMeta);
+    m_internal->updateMeta(old, newMeta, ignoreNameConflict);
 }
 
 PlayListMeta PlayListMetaMgr::create()

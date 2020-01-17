@@ -40,8 +40,6 @@ PlayListMetaMgrInternal::PlayListMetaMgrInternal(QSharedPointer<PPSettingsIntern
 
 PlayListMetaMgrInternal::~PlayListMetaMgrInternal()
 {
-    qDebug()<<"-------------------------";
-
     saveToDatabase();
 }
 
@@ -83,24 +81,26 @@ void PlayListMetaMgrInternal::deleteMeta(const PlayListMeta &meta)
     }
 }
 
-void PlayListMetaMgrInternal::updateMeta(const PlayListMeta &old, const PlayListMeta &newMeta)
+void PlayListMetaMgrInternal::updateMeta(const PlayListMeta &old, const PlayListMeta &newMeta, bool ignoreNameConflict)
 {
     const int idx = m_metaList.indexOf(old);
     if (idx < 0) {
         LOG_DEBUG()<<"can't find meta "<<old.getFileName();
         return;
     }
-    LOG_DEBUG()<<" old "<<old.getFileName()<<" new "<<newMeta.getFileName();
-    bool conflicted = false;
-    foreach(const PlayListMeta &meta, m_metaList) {
-        if (nameConflict(meta, newMeta)) {
-            conflicted = true;
-            break;
+    if (!ignoreNameConflict) {
+        LOG_DEBUG()<<" old "<<old.getFileName()<<" new "<<newMeta.getFileName();
+        bool conflicted = false;
+        foreach(const PlayListMeta &meta, m_metaList) {
+            if (nameConflict(meta, newMeta)) {
+                conflicted = true;
+                break;
+            }
         }
-    }
-    if (conflicted) {
-        emit metaDataChanged(PlayListMetaMgr::NameConflict, old, newMeta);
-        return;
+        if (conflicted) {
+            emit metaDataChanged(PlayListMetaMgr::NameConflict, old, newMeta);
+            return;
+        }
     }
     m_metaList.removeAt(idx);
     m_metaList.insert(idx, newMeta);
