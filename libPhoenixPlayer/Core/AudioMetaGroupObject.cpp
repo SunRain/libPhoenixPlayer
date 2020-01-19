@@ -159,9 +159,6 @@ QList<QUrl> AudioMetaGroupObject::sortAndTrimImgs(const AudioMetaGroupObject &ob
     foreach(const SortNode &node, list) {
         ll.append(node.d->uri);
     }
-    if (ll.isEmpty()) {
-        ll.append(QUrl());
-    }
     return ll;
 }
 
