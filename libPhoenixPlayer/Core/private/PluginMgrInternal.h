@@ -25,7 +25,8 @@ public:
 
     QList<PluginMetaData> pluginMetaDataList(BasePlugin::PluginType type) const;
 
-    QList<PluginMetaData> pluginMetaDataList(DataProvider::IDataProvider::SupportedTypes type) const;
+//    QList<PluginMetaData> pluginMetaDataList(DataProvider::IDataProvider::SupportedTypes type) const;
+    QList<PluginMetaData> dataProviderList(DataProvider::IDataProvider::SupportedTypes type) const;
 
     inline QList<PluginMetaData> metaDataList() const
     {

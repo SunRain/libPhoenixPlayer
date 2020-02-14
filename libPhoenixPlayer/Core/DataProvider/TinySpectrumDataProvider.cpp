@@ -48,7 +48,7 @@ public:
     {
         m_pluginMgr = SingletonObjectFactory::instance()->pluginMgrInternal();
 
-        QList<PluginMetaData> list = m_pluginMgr->pluginMetaDataList(DataProvider::IDataProvider::SupportSpectrumGenerator);
+        QList<PluginMetaData> list = m_pluginMgr->dataProviderList(DataProvider::IDataProvider::SupportSpectrumGenerator);
         if (!list.isEmpty()) {
             //TODO only use first one enabled plugin atm
             foreach (const auto &it, list) {

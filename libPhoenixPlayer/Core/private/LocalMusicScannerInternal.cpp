@@ -111,7 +111,7 @@ AudioParser::AudioParser(QSharedPointer<PluginMgrInternal> pluginMgr, QObject *p
 
 AudioParser::~AudioParser()
 {
-    foreach (const auto &it, m_pluginMgrInner->pluginMetaDataList(DataProvider::IDataProvider::SupportMusicTagParser)) {
+    foreach (const auto &it, m_pluginMgrInner->dataProviderList(DataProvider::IDataProvider::SupportMusicTagParser)) {
         PluginMgr::unload(it);
     }
 }
@@ -153,7 +153,7 @@ void AudioParser::run()
         emit parsingFile(file, size);
 
         AudioMetaObject obj(file);
-        foreach (const auto &it, m_pluginMgrInner->pluginMetaDataList(DataProvider::IDataProvider::SupportMusicTagParser)) {
+        foreach (const auto &it, m_pluginMgrInner->dataProviderList(DataProvider::IDataProvider::SupportMusicTagParser)) {
             if (!it.enabled) {
                 continue;
             }

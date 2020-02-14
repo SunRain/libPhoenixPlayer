@@ -46,7 +46,9 @@ HEADERS += \
     $$PWD/include/ApplicationManager.h \
     $$PWD/include/BasePlugin.h \
     $$PWD/include/DataProvider/IDataProvider.h \
+    $$PWD/include/DataProvider/ITrackSearch.h \
     $$PWD/include/DataProvider/TinySpectrumDataProvider.h \
+    $$PWD/include/DataProvider/TrackSearchProvider.h \
     $$PWD/include/LogManager.h \
     $$PWD/include/DataProvider/ISpectrumGenerator.h \
     $$PWD/include/PPCommon.h \
@@ -115,7 +117,9 @@ SOURCES += \
     $$PWD/ApplicationManager.cpp \
     $$PWD/BasePlugin.cpp \
     $$PWD/DataProvider/IDataProvider.cpp \
+    $$PWD/DataProvider/ITrackSearch.cpp \
     $$PWD/DataProvider/TinySpectrumDataProvider.cpp \
+    $$PWD/DataProvider/TrackSearchProvider.cpp \
     $$PWD/LogManager.cpp \
     $$PWD/MetadataLookup/BaseNetworkLookup.cpp \
     $$PWD/DataProvider/IMetadataLookup.cpp \

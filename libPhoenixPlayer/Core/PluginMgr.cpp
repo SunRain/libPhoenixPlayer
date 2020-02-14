@@ -106,10 +106,15 @@ QList<PluginMetaData> PluginMgr::pluginMetaDataList(BasePlugin::PluginType type)
     return m_internal->pluginMetaDataList(type);
 }
 
-QList<PluginMetaData> PluginMgr::pluginMetaDataList(DataProvider::IDataProvider::SupportedTypes type) const
+QList<PluginMetaData> PluginMgr::dataProviderList(DataProvider::IDataProvider::SupportedTypes type) const
 {
-    return m_internal->pluginMetaDataList(type);
+    return m_internal->dataProviderList(type);
 }
+
+//QList<PluginMetaData> PluginMgr::pluginMetaDataList(DataProvider::IDataProvider::SupportedTypes type) const
+//{
+//    return m_internal->pluginMetaDataList(type);
+//}
 
 QList<PluginMetaData> PluginMgr::metaDataList() const
 {

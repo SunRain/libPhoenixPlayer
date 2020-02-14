@@ -108,7 +108,7 @@ QList<PluginMetaData> PluginMgrInternal::pluginMetaDataList(BasePlugin::PluginTy
     return list;
 }
 
-QList<PluginMetaData> PluginMgrInternal::pluginMetaDataList(DataProvider::IDataProvider::SupportedTypes type) const
+QList<PluginMetaData> PluginMgrInternal::dataProviderList(DataProvider::IDataProvider::SupportedTypes type) const
 {
     QList<PluginMetaData> list;
     foreach (const auto &it, m_dataProviderList) {
@@ -118,6 +118,17 @@ QList<PluginMetaData> PluginMgrInternal::pluginMetaDataList(DataProvider::IDataP
     }
     return list;
 }
+
+//QList<PluginMetaData> PluginMgrInternal::pluginMetaDataList(DataProvider::IDataProvider::SupportedTypes type) const
+//{
+//    QList<PluginMetaData> list;
+//    foreach (const auto &it, m_dataProviderList) {
+//        if ((it.extraData.toUInt() & type) == type) {
+//            list.append(it);
+//        }
+//    }
+//    return list;
+//}
 
 void PluginMgrInternal::update(const PluginMetaData &data)
 {

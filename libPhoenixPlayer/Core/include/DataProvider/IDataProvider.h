@@ -26,7 +26,8 @@ public:
         SupportLookupAlbumDate          = 0x20,     //
         SupportLookupArtistImage        = 0x40,     //艺术家封面
         SupportLookupArtistDescription  = 0x80,     //艺术家信息
-        SupportLookupTrackDescription   = 0x100     //歌曲信息
+        SupportLookupTrackDescription   = 0x100,    //歌曲信息
+        SupportTrackSearch              = 0x200     //Music search
     };
     Q_DECLARE_FLAGS(SupportedTypes, SupportedType)
     Q_FLAG(SupportedTypes)
