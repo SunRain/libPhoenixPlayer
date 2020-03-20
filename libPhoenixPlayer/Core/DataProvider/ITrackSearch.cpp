@@ -3,19 +3,6 @@
 namespace PhoenixPlayer {
 namespace DataProvider {
 
-//class MatchObjectPriv : public QSharedData
-//{
-//public:
-//    MatchObjectPriv() {}
-//    ~MatchObjectPriv() {}
-
-//    MatchObject::ObjectType objectType = MatchObject::TypeUndefined;
-//    ITrackSearch::MatchType matchType = ITrackSearch::MatchType::MatchUndefined;
-//    QString uri = QString();
-//    QString matchedStr = QString();
-//    PluginProperty pluginProperty;
-//};
-
 ITrackSearch::ITrackSearch(QObject *parent)
     : IDataProvider(parent)
 {
@@ -128,6 +115,16 @@ ITrackSearch::MatchType MatchObject::matchType() const
 void MatchObject::setMatchType(ITrackSearch::MatchType type)
 {
     d.data()->matchType = type;
+}
+
+AudioMetaObject MatchObject::audioMetaObject() const
+{
+    return d.data()->audioMetaObj;
+}
+
+void MatchObject::setAudioMetaObject(const AudioMetaObject &obj)
+{
+    d.data()->audioMetaObj = obj;
 }
 
 MatchObject::MatchObjectPriv::MatchObjectPriv()

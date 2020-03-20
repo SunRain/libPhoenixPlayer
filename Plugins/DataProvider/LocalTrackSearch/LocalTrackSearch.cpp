@@ -54,7 +54,7 @@ QList<MatchObject> LocalTrackSearch::match(const QString &pattern, ITrackSearch:
 
     QList<MatchObject> objList;
 
-#define DO_REG_EXP(reg_pattern, str, path, matchType, list) \
+#define DO_REG_EXP(reg_pattern, str, path, matchType, list, audiometa) \
     QRegExp rx(reg_pattern); \
     int pos = 0; \
     while ((pos = rx.indexIn(str, pos)) != -1) { \
@@ -68,6 +68,7 @@ QList<MatchObject> LocalTrackSearch::match(const QString &pattern, ITrackSearch:
         obj.setMatchedIndex(pos); \
         obj.setMatchedLength(rx.matchedLength()); \
         obj.setMatchedStr(str); \
+        obj.setAudioMetaObject(audiometa); \
         list.append(obj); \
     }
 
@@ -78,7 +79,7 @@ QList<MatchObject> LocalTrackSearch::match(const QString &pattern, ITrackSearch:
         if ((type & ITrackSearch::MatchTrackName) == ITrackSearch::MatchTrackName) {
             const QString path = it.uri().toLocalFile();
             const QString str = it.trackMeta().title();
-            DO_REG_EXP(pattern, str, path, ITrackSearch::MatchTrackName, tmpList)
+            DO_REG_EXP(pattern, str, path, ITrackSearch::MatchTrackName, tmpList, it)
         }
 
         if ((type & ITrackSearch::MatchFilePath) == ITrackSearch::MatchFilePath) {
@@ -95,18 +96,18 @@ QList<MatchObject> LocalTrackSearch::match(const QString &pattern, ITrackSearch:
                 }
             }
             if (!skip) {
-                DO_REG_EXP(pattern, path, path, ITrackSearch::MatchFilePath, tmpList)
+                DO_REG_EXP(pattern, path, path, ITrackSearch::MatchFilePath, tmpList, it)
             }
         }
         if ((type & ITrackSearch::MatchAlbumName) == ITrackSearch::MatchAlbumName) {
             const QString path = it.uri().toLocalFile();
             const QString str = it.albumMeta().name();
-            DO_REG_EXP(pattern, str, path, ITrackSearch::MatchAlbumName, tmpList)
+            DO_REG_EXP(pattern, str, path, ITrackSearch::MatchAlbumName, tmpList, it)
         }
         if ((type & ITrackSearch::MatchArtistName) == ITrackSearch::MatchArtistName) {
             const QString path = it.uri().toLocalFile();
             const QString str = it.artistMeta().name();
-            DO_REG_EXP(pattern, str, path, ITrackSearch::MatchArtistName, tmpList)
+            DO_REG_EXP(pattern, str, path, ITrackSearch::MatchArtistName, tmpList, it)
         }
         objList.append(tmpList);
     }

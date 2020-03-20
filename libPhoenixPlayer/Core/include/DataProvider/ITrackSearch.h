@@ -7,6 +7,7 @@
 #include <QSharedDataPointer>
 
 #include "libphoenixplayer_global.h"
+#include "AudioMetaObject.h"
 #include "DataProvider/IDataProvider.h"
 
 namespace PhoenixPlayer {
@@ -78,11 +79,24 @@ public:
         }
         return *this;
     }
+
+    /*!
+     * \brief operator !=
+     * NOTE this will not compare AudioMetaObject
+     * \param other
+     * \return
+     */
     inline bool operator != (const MatchObject &other)
     {
         return !operator == (other);
     }
 
+    /*!
+     * \brief operator ==
+     * NOTE this will not compare AudioMetaObject
+     * \param other
+     * \return
+     */
     bool operator == (const MatchObject &other);
 
     PluginProperty pluginProperty() const;
@@ -133,6 +147,15 @@ public:
 
     void setMatchType(ITrackSearch::MatchType type);
 
+    /*!
+     * \brief audioMetaObject
+     * NOTE: operation == will not compare AudioMetaObject
+     * \return
+     */
+    AudioMetaObject audioMetaObject() const;
+
+    void setAudioMetaObject(const AudioMetaObject &obj);
+
 private:
     class MatchObjectPriv : public QSharedData
     {
@@ -148,6 +171,7 @@ private:
         QString matchedStr = QString();
         QString queryStr = QString();
         PluginProperty pluginProperty;
+        AudioMetaObject audioMetaObj;
     };
 
 private:
