@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QMutex>
 #include <QDateTime>
+#include <QFile>
 
 #include "MusicLibrary/IMusicLibraryDAO.h"
 #include "MusicLibrary/LocalMusicScanner.h"
