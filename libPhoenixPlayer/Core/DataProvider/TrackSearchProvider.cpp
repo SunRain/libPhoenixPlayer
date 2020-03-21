@@ -103,6 +103,23 @@ void TrackSearchProvider::searchBy(const QString &pattern, ITrackSearch::MatchTy
     m_threadPool->start(work);
 }
 
+QMap<QString, QList<MatchObject> > TrackSearchProvider::trim(const QList<MatchObject> &objList)
+{
+    QMap<QString, QList<MatchObject>> map;
+    foreach (const auto &it, objList) {
+        if (map.contains(it.uri())) {
+            auto list = map.value(it.uri());
+            list.append(it);
+            map.insert(it.uri(), list);
+        } else {
+            QList<MatchObject> list;
+            list.append(it);
+            map.insert(it.uri(), list);
+        }
+    }
+    return map;
+}
+
 
 } // namespace DataProvider
 } // namespace PhoenixPlayer
